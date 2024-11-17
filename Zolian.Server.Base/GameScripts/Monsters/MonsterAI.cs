@@ -1,7 +1,6 @@
 ﻿using Darkages.Common;
 using Darkages.Enums;
 using Darkages.Network.Client;
-using Darkages.Network.Client.Abstractions;
 using Darkages.Network.Server;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;
@@ -93,7 +92,7 @@ public class BaseMonsterIntelligence : MonsterScript
             halfHp = $"{{=b{Monster.CurrentHp}{{=s";
         }
 
-        if (Monster.Template.Level >= client.Aisling.Level + 30)
+        if (Monster.Template.Level >= client.Aisling.Level + client.Aisling.AbpLevel  + 30)
         {
             client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=c{Monster.Template.BaseName}: {{=aLv: {colorLvl} {{=aHP: {halfHp}/{Monster.MaximumHp}");
             client.SendServerMessage(ServerMessageType.PersistentMessage, $"{{=c{Monster.Template.BaseName}: {{=aLv: {colorLvl}");
@@ -216,17 +215,17 @@ public class BaseMonsterIntelligence : MonsterScript
 
     private string LevelColor(WorldClient client)
     {
-        if (Monster.Template.Level >= client.Aisling.Level + 30)
+        if (Monster.Template.Level >= client.Aisling.Level + client.Aisling.AbpLevel + 30)
             return "{=n???{=s";
-        if (Monster.Template.Level >= client.Aisling.Level + 15)
+        if (Monster.Template.Level >= client.Aisling.Level + client.Aisling.AbpLevel + 15)
             return $"{{=b{Monster.Template.Level}{{=s";
-        if (Monster.Template.Level >= client.Aisling.Level + 10)
+        if (Monster.Template.Level >= client.Aisling.Level + client.Aisling.AbpLevel + 10)
             return $"{{=c{Monster.Template.Level}{{=s";
-        if (Monster.Template.Level <= client.Aisling.Level - 30)
+        if (Monster.Template.Level <= client.Aisling.Level + client.Aisling.AbpLevel - 30)
             return $"{{=k{Monster.Template.Level}{{=s";
-        if (Monster.Template.Level <= client.Aisling.Level - 15)
+        if (Monster.Template.Level <= client.Aisling.Level + client.Aisling.AbpLevel - 15)
             return $"{{=j{Monster.Template.Level}{{=s";
-        return Monster.Template.Level <= client.Aisling.Level - 10 ? $"{{=i{Monster.Template.Level}{{=s" : $"{{=q{Monster.Template.Level}{{=s";
+        return Monster.Template.Level <= client.Aisling.Level + client.Aisling.AbpLevel - 10 ? $"{{=i{Monster.Template.Level}{{=s" : $"{{=q{Monster.Template.Level}{{=s";
     }
 
     #region Actions
@@ -367,7 +366,7 @@ public class WeakCommon : MonsterScript
             halfHp = $"{{=b{Monster.CurrentHp}{{=s";
         }
 
-        if (Monster.Template.Level >= client.Aisling.Level + 30)
+        if (Monster.Template.Level >= client.Aisling.Level + client.Aisling.AbpLevel + 30)
         {
             client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=c{Monster.Template.BaseName}: {{=aLv: {colorLvl} {{=aHP: {halfHp}/{Monster.MaximumHp}");
             client.SendServerMessage(ServerMessageType.PersistentMessage, $"{{=c{Monster.Template.BaseName}: {{=aLv: {colorLvl}");
@@ -490,17 +489,17 @@ public class WeakCommon : MonsterScript
 
     private string LevelColor(WorldClient client)
     {
-        if (Monster.Template.Level >= client.Aisling.Level + 30)
+        if (Monster.Template.Level >= client.Aisling.Level + client.Aisling.AbpLevel + 30)
             return "{=n???{=s";
-        if (Monster.Template.Level >= client.Aisling.Level + 15)
+        if (Monster.Template.Level >= client.Aisling.Level + client.Aisling.AbpLevel + 15)
             return $"{{=b{Monster.Template.Level}{{=s";
-        if (Monster.Template.Level >= client.Aisling.Level + 10)
+        if (Monster.Template.Level >= client.Aisling.Level + client.Aisling.AbpLevel + 10)
             return $"{{=c{Monster.Template.Level}{{=s";
-        if (Monster.Template.Level <= client.Aisling.Level - 30)
+        if (Monster.Template.Level <= client.Aisling.Level + client.Aisling.AbpLevel - 30)
             return $"{{=k{Monster.Template.Level}{{=s";
-        if (Monster.Template.Level <= client.Aisling.Level - 15)
+        if (Monster.Template.Level <= client.Aisling.Level + client.Aisling.AbpLevel - 15)
             return $"{{=j{Monster.Template.Level}{{=s";
-        return Monster.Template.Level <= client.Aisling.Level - 10 ? $"{{=i{Monster.Template.Level}{{=s" : $"{{=q{Monster.Template.Level}{{=s";
+        return Monster.Template.Level <= client.Aisling.Level + client.Aisling.AbpLevel - 10 ? $"{{=i{Monster.Template.Level}{{=s" : $"{{=q{Monster.Template.Level}{{=s";
     }
 
     #region Actions
@@ -817,7 +816,7 @@ public class ShadowSight : MonsterScript
             halfHp = $"{{=b{Monster.CurrentHp}{{=s";
         }
 
-        if (Monster.Template.Level >= client.Aisling.Level + 30)
+        if (Monster.Template.Level >= client.Aisling.Level + client.Aisling.AbpLevel + 30)
         {
             client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=c{Monster.Template.BaseName}: {{=aLv: {colorLvl} {{=aHP: {halfHp}/{Monster.MaximumHp}");
             client.SendServerMessage(ServerMessageType.PersistentMessage, $"{{=c{Monster.Template.BaseName}: {{=aLv: {colorLvl}");
@@ -940,17 +939,17 @@ public class ShadowSight : MonsterScript
 
     private string LevelColor(WorldClient client)
     {
-        if (Monster.Template.Level >= client.Aisling.Level + 30)
+        if (Monster.Template.Level >= client.Aisling.Level + client.Aisling.AbpLevel + 30)
             return "{=n???{=s";
-        if (Monster.Template.Level >= client.Aisling.Level + 15)
+        if (Monster.Template.Level >= client.Aisling.Level + client.Aisling.AbpLevel + 15)
             return $"{{=b{Monster.Template.Level}{{=s";
-        if (Monster.Template.Level >= client.Aisling.Level + 10)
+        if (Monster.Template.Level >= client.Aisling.Level + client.Aisling.AbpLevel + 10)
             return $"{{=c{Monster.Template.Level}{{=s";
-        if (Monster.Template.Level <= client.Aisling.Level - 30)
+        if (Monster.Template.Level <= client.Aisling.Level + client.Aisling.AbpLevel - 30)
             return $"{{=k{Monster.Template.Level}{{=s";
-        if (Monster.Template.Level <= client.Aisling.Level - 15)
+        if (Monster.Template.Level <= client.Aisling.Level + client.Aisling.AbpLevel - 15)
             return $"{{=j{Monster.Template.Level}{{=s";
-        return Monster.Template.Level <= client.Aisling.Level - 10 ? $"{{=i{Monster.Template.Level}{{=s" : $"{{=q{Monster.Template.Level}{{=s";
+        return Monster.Template.Level <= client.Aisling.Level + client.Aisling.AbpLevel - 10 ? $"{{=i{Monster.Template.Level}{{=s" : $"{{=q{Monster.Template.Level}{{=s";
     }
 
     #region Actions
@@ -1091,7 +1090,7 @@ public class WeakShadowSight : MonsterScript
             halfHp = $"{{=b{Monster.CurrentHp}{{=s";
         }
 
-        if (Monster.Template.Level >= client.Aisling.Level + 30)
+        if (Monster.Template.Level >= client.Aisling.Level + client.Aisling.AbpLevel + 30)
         {
             client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=c{Monster.Template.BaseName}: {{=aLv: {colorLvl} {{=aHP: {halfHp}/{Monster.MaximumHp}");
             client.SendServerMessage(ServerMessageType.PersistentMessage, $"{{=c{Monster.Template.BaseName}: {{=aLv: {colorLvl}");
@@ -1214,17 +1213,17 @@ public class WeakShadowSight : MonsterScript
 
     private string LevelColor(WorldClient client)
     {
-        if (Monster.Template.Level >= client.Aisling.Level + 30)
+        if (Monster.Template.Level >= client.Aisling.Level + client.Aisling.AbpLevel + 30)
             return "{=n???{=s";
-        if (Monster.Template.Level >= client.Aisling.Level + 15)
+        if (Monster.Template.Level >= client.Aisling.Level + client.Aisling.AbpLevel + 15)
             return $"{{=b{Monster.Template.Level}{{=s";
-        if (Monster.Template.Level >= client.Aisling.Level + 10)
+        if (Monster.Template.Level >= client.Aisling.Level + client.Aisling.AbpLevel + 10)
             return $"{{=c{Monster.Template.Level}{{=s";
-        if (Monster.Template.Level <= client.Aisling.Level - 30)
+        if (Monster.Template.Level <= client.Aisling.Level + client.Aisling.AbpLevel - 30)
             return $"{{=k{Monster.Template.Level}{{=s";
-        if (Monster.Template.Level <= client.Aisling.Level - 15)
+        if (Monster.Template.Level <= client.Aisling.Level + client.Aisling.AbpLevel - 15)
             return $"{{=j{Monster.Template.Level}{{=s";
-        return Monster.Template.Level <= client.Aisling.Level - 10 ? $"{{=i{Monster.Template.Level}{{=s" : $"{{=q{Monster.Template.Level}{{=s";
+        return Monster.Template.Level <= client.Aisling.Level + client.Aisling.AbpLevel - 10 ? $"{{=i{Monster.Template.Level}{{=s" : $"{{=q{Monster.Template.Level}{{=s";
     }
 
     #region Actions

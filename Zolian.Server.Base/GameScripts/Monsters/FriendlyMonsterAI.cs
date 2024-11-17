@@ -215,17 +215,17 @@ public class BaseFriendlyMonster : MonsterScript
 
     private string LevelColor(IWorldClient client)
     {
-        if (Monster.Template.Level >= client.Aisling.Level + 30)
+        if (Monster.Template.Level >= client.Aisling.Level + client.Aisling.AbpLevel + 30)
             return $"{{=n{Monster.Level}{{=s";
-        if (Monster.Template.Level >= client.Aisling.Level + 15)
+        if (Monster.Template.Level >= client.Aisling.Level + client.Aisling.AbpLevel + 15)
             return $"{{=b{Monster.Level}{{=s";
-        if (Monster.Template.Level >= client.Aisling.Level + 10)
+        if (Monster.Template.Level >= client.Aisling.Level + client.Aisling.AbpLevel + 10)
             return $"{{=c{Monster.Level}{{=s";
-        if (Monster.Template.Level <= client.Aisling.Level - 30)
+        if (Monster.Template.Level <= client.Aisling.Level + client.Aisling.AbpLevel - 30)
             return $"{{=k{Monster.Level}{{=s";
-        if (Monster.Template.Level <= client.Aisling.Level - 15)
+        if (Monster.Template.Level <= client.Aisling.Level + client.Aisling.AbpLevel - 15)
             return $"{{=j{Monster.Level}{{=s";
-        return Monster.Template.Level <= client.Aisling.Level - 10 ? $"{{=i{Monster.Level}{{=s" : $"{{=q{Monster.Level}{{=s";
+        return Monster.Template.Level <= client.Aisling.Level + client.Aisling.AbpLevel - 10 ? $"{{=i{Monster.Level}{{=s" : $"{{=q{Monster.Level}{{=s";
     }
 
     private void UpdateTarget()

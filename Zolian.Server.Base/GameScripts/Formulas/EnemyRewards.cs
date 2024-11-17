@@ -276,7 +276,7 @@ public class EnemyRewards : RewardScript
             }
         }
 
-        var difference = player.ExpLevel - _monster.Template.Level;
+        var difference = player.ExpLevel + player.AbpLevel - _monster.Template.Level;
         var soloExp = LevelRestrictionsOnExpAp(exp, difference);
 
         // Enqueue experience event
@@ -291,7 +291,7 @@ public class EnemyRewards : RewardScript
             if (party.Map != _monster.Map) continue;
             if (!party.WithinRangeOf(_monster, 16)) continue;
 
-            var partyDiff = party.ExpLevel - _monster.Template.Level;
+            var partyDiff = party.ExpLevel + player.AbpLevel - _monster.Template.Level;
             var partyExp = LevelRestrictionsOnExpAp(exp, partyDiff);
 
             party.Client.EnqueueExperienceEvent(party, partyExp, true);
@@ -313,7 +313,7 @@ public class EnemyRewards : RewardScript
             }
         }
 
-        var difference = player.ExpLevel - _monster.Template.Level;
+        var difference = player.ExpLevel + player.AbpLevel - _monster.Template.Level;
         var soloAp = LevelRestrictionsOnExpAp(ap, difference);
 
         // Enqueue experience event
@@ -334,7 +334,7 @@ public class EnemyRewards : RewardScript
             if (party.Map != player.Map) continue;
             if (!party.WithinRangeOf(_monster, 16)) continue;
 
-            var partyDiff = party.ExpLevel - _monster.Template.Level;
+            var partyDiff = party.ExpLevel + player.AbpLevel - _monster.Template.Level;
             var partyExp = LevelRestrictionsOnExpAp(ap, partyDiff);
             
             party.Client.EnqueueAbilityEvent(party, (int)partyExp, true);
