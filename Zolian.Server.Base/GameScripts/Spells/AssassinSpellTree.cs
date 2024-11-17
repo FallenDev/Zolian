@@ -441,7 +441,7 @@ public class Hiraishin(Spell spell) : SpellScript(spell)
 
             if (aisling.Map.Flags.MapFlagIsSet(MapFlags.PlayerKill))
             {
-                var sprites = aisling.SpritesNearby();
+                var sprites = aisling.DamageableNearby();
                 var nearestSpriteList = new SortedDictionary<int, Sprite>();
 
                 foreach (var targetSprite in sprites)

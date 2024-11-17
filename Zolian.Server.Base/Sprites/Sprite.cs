@@ -29,6 +29,7 @@ public abstract class Sprite : INotifyPropertyChanged
     private readonly Lock _monstersOnMapLock = new();
     private readonly Lock _mundanesNearbyLock = new();
     private readonly Lock _spritesNearbyLock = new();
+    private readonly Lock _spritesWithinRangeLock = new();
     private readonly Lock _getSpritesLock = new();
     private readonly Lock _getAislingDamageLock = new();
     private readonly Lock _getMonsterDamageLock = new();
@@ -406,7 +407,7 @@ public abstract class Sprite : INotifyPropertyChanged
         }
     }
 
-    private List<Sprite> UnSafeSpritesNearby()
+    private List<Sprite> UnSafeDamageableNearby()
     {
         var result = new List<Sprite>();
         var listA = ObjectManager.GetObjects<Monster>(Map, i => i != null && i.WithinRangeOf(this, ServerSetup.Instance.Config.WithinRangeProximity)).ToList();
@@ -416,11 +417,29 @@ public abstract class Sprite : INotifyPropertyChanged
         return result;
     }
 
-    public List<Sprite> SpritesNearby()
+    public List<Sprite> DamageableNearby()
     {
         lock (_spritesNearbyLock)
         {
-            return UnSafeSpritesNearby();
+            return UnSafeDamageableNearby();
+        }
+    }
+
+    private List<Sprite> UnSafeDamageableWithinRange(Sprite target, int range)
+    {
+        var result = new List<Sprite>();
+        var listA = ObjectManager.GetObjects<Monster>(Map, i => i != null && i.WithinRangeOf(target, range)).ToList();
+        var listB = ObjectManager.GetObjects<Aisling>(Map, i => i != null && i.WithinRangeOf(target, range)).ToList();
+        result.AddRange(listA);
+        result.AddRange(listB);
+        return result;
+    }
+
+    public List<Sprite> DamageableWithinRange(Sprite target, int range)
+    {
+        lock (_spritesWithinRangeLock)
+        {
+            return UnSafeDamageableWithinRange(target, range);
         }
     }
 

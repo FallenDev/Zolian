@@ -103,7 +103,7 @@ public class IronSprint(Skill skill) : SkillScript(skill)
     {
         if (sprite is not Aisling aisling) return;
 
-        _enemyList = GetObjects(aisling.Map, i => i != null && i.WithinRangeOf(aisling, 8), Get.Monsters);
+        _enemyList = aisling.DamageableWithinRange(aisling, 8);
         _enemyList = _enemyList.OrderBy(i => i.DistanceFrom(aisling.X, aisling.Y)).ToList();
         _target = _enemyList.FirstOrDefault();
         _target = Skill.Reflect(_target, sprite, Skill);

@@ -337,7 +337,7 @@ public class Volley(Skill skill) : SkillScript(skill)
         }
         else
         {
-            targets = GetObjects(aisling.Map, i => i != null && i.WithinRangeOf(enemy, 4), Get.AislingDamage).ToList();
+            targets = aisling.DamageableWithinRange(enemy, 4).ToList();
             targets.Add(enemy);
         }
 

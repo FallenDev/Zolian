@@ -76,7 +76,8 @@ public class Chill_Touch(Spell spell) : SpellScript(spell)
             return;
         }
 
-        var targets = GetObjects(playerAction.Map, i => i != null && i.WithinRangeOf(target, 4), Get.AislingDamage).ToList();
+        var targets = playerAction.DamageableWithinRange(target, 4);
+
         foreach (var enemy in targets.Where(enemy => enemy != null && enemy.Serial != playerAction.Serial && enemy.Attackable))
         {
             if (enemy is not Damageable damageable) continue;
@@ -329,7 +330,7 @@ public class Corpse_Burst(Spell spell) : SpellScript(spell)
 
         foreach (var corpse in corpsesNearby)
         {
-            var targets = GetObjects(aisling.Map, i => i != null && i.WithinRangeOf(corpse, 4), Get.AislingDamage).ToList();
+            var targets = aisling.DamageableWithinRange(corpse, 4);
             foreach (var enemy in targets.Where(enemy => enemy != null && enemy.Serial != aisling.Serial && enemy.Attackable))
             {
                 if (enemy is not Damageable damageable) continue;
@@ -543,7 +544,7 @@ public class Circle_of_Death(Spell spell) : SpellScript(spell)
         aisling.CurrentMp -= manaSap;
         ServerSetup.Instance.GlobalMonsterTemplateCache.TryGetValue("RaisedSkel", out var skel);
 
-        foreach (var nearby in aisling.SpritesNearby())
+        foreach (var nearby in aisling.DamageableNearby())
         {
             if (nearby is not Damageable damageable) continue;
             if (nearby.Serial == aisling.Serial) continue;

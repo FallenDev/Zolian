@@ -25,7 +25,7 @@ public class FlashBang(Spell spell) : SpellScript(spell)
         if (sprite is not Aisling aisling) return;
         if (target == null) return;
 
-        var targets = GetObjects(aisling.Map, i => i != null && i.WithinRangeOf(target, 6), Get.AislingDamage).ToList();
+        var targets = aisling.DamageableWithinRange(target, 6);
 
         if (aisling.CurrentMp - Spell.Template.ManaCost > 0)
         {
@@ -34,25 +34,31 @@ public class FlashBang(Spell spell) : SpellScript(spell)
         }
         else
         {
-            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
+            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1,
+                $"{ServerSetup.Instance.Config.NoManaMessage}");
             return;
         }
 
-        foreach (var enemy in targets.Where(enemy => enemy != null && enemy.Serial != aisling.Serial && enemy.Attackable))
+        foreach (var enemy in targets.Where(enemy =>
+                     enemy != null && enemy.Serial != aisling.Serial && enemy.Attackable))
         {
-            if (enemy is Aisling target2Aisling && !target2Aisling.Map.Flags.MapFlagIsSet(MapFlags.PlayerKill)) continue;
+            if (enemy is Aisling target2Aisling &&
+                !target2Aisling.Map.Flags.MapFlagIsSet(MapFlags.PlayerKill)) continue;
 
             if (enemy.SpellNegate)
             {
                 if (sprite is Aisling caster)
                 {
-                    caster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(64, null, enemy.Serial));
+                    caster.SendTargetedClientMethod(PlayerScope.NearbyAislings,
+                        c => c.SendAnimation(64, null, enemy.Serial));
                     caster.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been deflected!");
                 }
 
                 if (enemy is not Aisling targetPlayer) continue;
-                targetPlayer.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(64, null, enemy.Serial));
-                targetPlayer.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You deflected {Spell.Template.Name}");
+                targetPlayer.SendTargetedClientMethod(PlayerScope.NearbyAislings,
+                    c => c.SendAnimation(64, null, enemy.Serial));
+                targetPlayer.Client.SendServerMessage(ServerMessageType.OrangeBar1,
+                    $"You deflected {Spell.Template.Name}");
                 continue;
             }
 
