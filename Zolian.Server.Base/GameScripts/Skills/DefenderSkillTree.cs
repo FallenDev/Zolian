@@ -3,6 +3,7 @@
 using Darkages.Common;
 using Darkages.Enums;
 using Darkages.GameScripts.Affects;
+using Darkages.Network.Server;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Sprites.Entity;
@@ -31,51 +32,63 @@ public class Rescue(Skill skill) : SkillScript(skill)
             SourceId = sprite.Serial
         };
 
-        var enemy = client.Aisling.DamageableGetInFront();
-
-        if (enemy.Count == 0)
+        try
         {
-            GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
-            OnFailed(aisling);
-            return;
-        }
+            var enemy = client.Aisling.DamageableGetInFront();
 
-        foreach (var i in enemy.Where(i => i.Attackable))
-        {
-            _target = Skill.Reflect(i, sprite, Skill);
-            if (_target is not Damageable damageable) continue;
-
-            switch (_target)
+            if (enemy.Count == 0)
             {
-                case Aisling reviveAisling:
-                    {
-                        if (reviveAisling.Skulled)
-                        {
-                            reviveAisling.Debuffs.TryGetValue("Skulled", out var debuff);
-                            if (debuff != null)
-                            {
-                                debuff.Cancelled = true;
-                                debuff.OnEnded(reviveAisling, debuff);
-                                reviveAisling.Client.Revive();
-                            }
-                        }
-
-                        if (reviveAisling.HasDebuff("Beag Suain"))
-                            reviveAisling.Debuffs.TryRemove("Beag Suain", out _);
-
-                        damageable.ApplyDamage(aisling, 0, Skill);
-                        reviveAisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.TargetAnimation, null, _target.Serial));
-                        break;
-                    }
-                case Monster _:
-                    damageable.ApplyDamage(aisling, 3 * aisling.Int, Skill);
-                    aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.TargetAnimation, null, _target.Serial));
-                    break;
+                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
+                OnFailed(aisling);
+                return;
             }
-        }
-        GlobalSkillMethods.Train(client, Skill);
 
-        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
+            foreach (var i in enemy)
+            {
+                _target = Skill.Reflect(i, sprite, Skill);
+                if (_target is not Damageable damageable) continue;
+
+                switch (_target)
+                {
+                    case Aisling reviveAisling:
+                        {
+                            if (reviveAisling.Skulled)
+                            {
+                                reviveAisling.Debuffs.TryGetValue("Skulled", out var debuff);
+                                if (debuff != null)
+                                {
+                                    debuff.Cancelled = true;
+                                    debuff.OnEnded(reviveAisling, debuff);
+                                    reviveAisling.Client.Revive();
+                                }
+                            }
+
+                            if (reviveAisling.HasDebuff("Beag Suain"))
+                                reviveAisling.Debuffs.TryRemove("Beag Suain", out _);
+
+                            damageable.ApplyDamage(aisling, 0, Skill);
+                            reviveAisling.SendTargetedClientMethod(PlayerScope.NearbyAislings,
+                                c => c.SendAnimation(Skill.Template.TargetAnimation, null, _target.Serial));
+                            break;
+                        }
+                    case Monster _:
+                        damageable.ApplyDamage(aisling, 3 * aisling.Int, Skill);
+                        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings,
+                            c => c.SendAnimation(Skill.Template.TargetAnimation, null, _target.Serial));
+                        break;
+                }
+            }
+
+            GlobalSkillMethods.Train(client, Skill);
+
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings,
+                c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
+        }
+        catch (Exception)
+        {
+            ServerSetup.EventsLogger($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}");
+            SentrySdk.CaptureMessage($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
+        }
     }
 
     public override void OnUse(Sprite sprite)
@@ -118,23 +131,32 @@ public class Wind_Blade(Skill skill) : SkillScript(skill)
             SourceId = sprite.Serial
         };
 
-        var enemy = aisling.DamageableGetInFront(3);
-
-        if (enemy.Count == 0)
+        try
         {
-            GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
-            OnFailed(aisling);
-            return;
-        }
+            var enemy = aisling.DamageableGetInFront(3);
 
-        foreach (var i in enemy.Where(i => aisling.Serial != i.Serial).Where(i => i.Attackable))
+            if (enemy.Count == 0)
+            {
+                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
+                OnFailed(aisling);
+                return;
+            }
+
+            foreach (var i in enemy.Where(i => aisling.Serial != i.Serial))
+            {
+                _target = i;
+                var dmgCalc = DamageCalc(sprite);
+                GlobalSkillMethods.OnSuccessWithoutAction(_target, aisling, Skill, dmgCalc, _crit);
+            }
+
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings,
+                c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
+        }
+        catch (Exception)
         {
-            _target = i;
-            var dmgCalc = DamageCalc(sprite);
-            GlobalSkillMethods.OnSuccessWithoutAction(_target, aisling, Skill, dmgCalc, _crit);
+            ServerSetup.EventsLogger($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}");
+            SentrySdk.CaptureMessage($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
         }
-
-        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
     }
 
     public override void OnUse(Sprite sprite)
@@ -156,32 +178,42 @@ public class Wind_Blade(Skill skill) : SkillScript(skill)
         }
         else
         {
-            if (sprite is not Identifiable identifiable) return;
-            var enemy = identifiable.MonsterGetInFront(4);
-
-            var action = new BodyAnimationArgs
+            try
             {
-                AnimationSpeed = 40,
-                BodyAnimation = BodyAnimation.Assail,
-                Sound = null,
-                SourceId = sprite.Serial
-            };
+                if (sprite is not Damageable identifiable) return;
+                var enemy = identifiable.DamageableGetInFront(4);
 
-            if (enemy.Count == 0) return;
+                var action = new BodyAnimationArgs
+                {
+                    AnimationSpeed = 40,
+                    BodyAnimation = BodyAnimation.Assail,
+                    Sound = null,
+                    SourceId = sprite.Serial
+                };
 
-            foreach (var i in enemy.Where(i => i != null && sprite.Serial != i.Serial && i.Attackable))
+                if (enemy.Count == 0) return;
+
+                foreach (var i in enemy.Where(i => i != null && sprite.Serial != i.Serial))
+                {
+                    _target = Skill.Reflect(i, sprite, Skill);
+                    if (_target is not Damageable damageable) continue;
+                    var dmgCalc = DamageCalc(sprite);
+
+                    damageable.ApplyDamage(sprite, dmgCalc, Skill);
+
+                    damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings,
+                        c => c.SendAnimation(Skill.Template.TargetAnimation, null, _target.Serial, 170));
+                    damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings,
+                        c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
+
+                    if (!_crit) return;
+                    damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings,
+                        c => c.SendAnimation(387, null, sprite.Serial));
+                }
+            }
+            catch
             {
-                _target = Skill.Reflect(i, sprite, Skill);
-                if (_target is not Damageable damageable) continue;
-                var dmgCalc = DamageCalc(sprite);
-
-                damageable.ApplyDamage(sprite, dmgCalc, Skill);
-
-                damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.TargetAnimation, null, _target.Serial, 170));
-                damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
-
-                if (!_crit) return;
-                damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(387, null, sprite.Serial));
+                // ignored
             }
         }
     }
@@ -236,25 +268,33 @@ public class Beag_Suain(Skill skill) : SkillScript(skill)
             SourceId = sprite.Serial
         };
 
-        var enemy = aisling.DamageableGetInFront().FirstOrDefault();
-        _target = enemy;
-
-        if (_target == null || _target.Serial == aisling.Serial || !_target.Attackable)
+        try
         {
-            GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
-            OnFailed(aisling);
-            return;
-        }
+            var enemy = aisling.DamageableGetInFront().FirstOrDefault();
+            _target = enemy;
 
-        var debuff = new DebuffBeagsuain();
+            if (_target == null || _target.Serial == aisling.Serial)
+            {
+                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
+                OnFailed(aisling);
+                return;
+            }
+
+            var debuff = new DebuffBeagsuain();
+            {
+                if (_target.HasDebuff(debuff.Name))
+                    _target.RemoveDebuff(debuff.Name);
+
+                GlobalSkillMethods.ApplyPhysicalDebuff(aisling.Client, debuff, _target, Skill);
+            }
+
+            GlobalSkillMethods.OnSuccess(_target, aisling, Skill, 0, false, action);
+        }
+        catch (Exception)
         {
-            if (_target.HasDebuff(debuff.Name))
-                _target.RemoveDebuff(debuff.Name);
-
-            GlobalSkillMethods.ApplyPhysicalDebuff(aisling.Client, debuff, _target, Skill);
+            ServerSetup.EventsLogger($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}");
+            SentrySdk.CaptureMessage($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
         }
-
-        GlobalSkillMethods.OnSuccess(_target, aisling, Skill, 0, false, action);
     }
 
     public override void OnUse(Sprite sprite)
@@ -318,24 +358,33 @@ public class Vampiric_Slash(Skill skill) : SkillScript(skill)
             SourceId = sprite.Serial
         };
 
-        var enemy = aisling.DamageableGetInFront(2);
-
-        if (enemy.Count == 0)
+        try
         {
-            GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
-            OnFailed(aisling);
-            return;
-        }
+            var enemy = aisling.DamageableGetInFront(2);
 
-        foreach (var i in enemy.Where(i => aisling.Serial != i.Serial).Where(i => i.Attackable))
+            if (enemy.Count == 0)
+            {
+                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
+                OnFailed(aisling);
+                return;
+            }
+
+            foreach (var i in enemy.Where(i => aisling.Serial != i.Serial))
+            {
+                _target = i;
+                var dmgCalc = DamageCalc(sprite);
+                aisling.CurrentHp += (int)dmgCalc;
+                GlobalSkillMethods.OnSuccessWithoutAction(_target, aisling, Skill, dmgCalc, _crit);
+            }
+
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings,
+                c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
+        }
+        catch (Exception)
         {
-            _target = i;
-            var dmgCalc = DamageCalc(sprite);
-            aisling.CurrentHp += (int)dmgCalc;
-            GlobalSkillMethods.OnSuccessWithoutAction(_target, aisling, Skill, dmgCalc, _crit);
+            ServerSetup.EventsLogger($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}");
+            SentrySdk.CaptureMessage($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
         }
-
-        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
     }
 
     public override void OnUse(Sprite sprite)
@@ -357,34 +406,44 @@ public class Vampiric_Slash(Skill skill) : SkillScript(skill)
         }
         else
         {
-            if (sprite is not Identifiable identifiable) return;
-            var enemy = identifiable.MonsterGetInFront(2);
-
-            var action = new BodyAnimationArgs
+            try
             {
-                AnimationSpeed = 40,
-                BodyAnimation = BodyAnimation.Assail,
-                Sound = null,
-                SourceId = sprite.Serial
-            };
+                if (sprite is not Damageable identifiable) return;
+                var enemy = identifiable.DamageableGetInFront(2);
 
-            if (enemy.Count == 0) return;
+                var action = new BodyAnimationArgs
+                {
+                    AnimationSpeed = 40,
+                    BodyAnimation = BodyAnimation.Assail,
+                    Sound = null,
+                    SourceId = sprite.Serial
+                };
 
-            foreach (var i in enemy.Where(i => i != null && sprite.Serial != i.Serial && i.Attackable))
+                if (enemy.Count == 0) return;
+
+                foreach (var i in enemy.Where(i => i != null && sprite.Serial != i.Serial))
+                {
+                    _target = Skill.Reflect(i, sprite, Skill);
+                    if (_target is not Damageable damageable) continue;
+                    var dmgCalc = DamageCalc(sprite);
+                    var healthAbsorb = dmgCalc * 5;
+                    sprite.CurrentHp += (int)healthAbsorb;
+
+                    damageable.ApplyDamage(sprite, dmgCalc, Skill);
+
+                    damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings,
+                        c => c.SendAnimation(Skill.Template.TargetAnimation, null, _target.Serial, 170));
+                    damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings,
+                        c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
+
+                    if (!_crit) return;
+                    damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings,
+                        c => c.SendAnimation(387, null, sprite.Serial));
+                }
+            }
+            catch
             {
-                _target = Skill.Reflect(i, sprite, Skill);
-                if (_target is not Damageable damageable) continue;
-                var dmgCalc = DamageCalc(sprite);
-                var healthAbsorb = dmgCalc * 5;
-                sprite.CurrentHp += (int)healthAbsorb;
-
-                damageable.ApplyDamage(sprite, dmgCalc, Skill);
-
-                damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.TargetAnimation, null, _target.Serial, 170));
-                damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
-
-                if (!_crit) return;
-                damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(387, null, sprite.Serial));
+                // ignored
             }
         }
     }
@@ -418,8 +477,7 @@ public class Charge(Skill skill) : SkillScript(skill)
 {
     private Sprite _target;
     private bool _crit;
-    private IList<Sprite> _enemyList;
-    private bool _success;
+    private List<Sprite> _enemyList;
 
     public override void OnFailed(Sprite sprite)
     {
@@ -440,53 +498,64 @@ public class Charge(Skill skill) : SkillScript(skill)
             return;
         }
 
-        var dmgCalc = DamageCalc(aisling);
-        var position = _target.Position;
-        var mapCheck = aisling.Map.ID;
-        var wallPosition = aisling.GetPendingChargePosition(7, aisling);
-        var targetPos = GlobalSkillMethods.DistanceTo(aisling.Position, position);
-        var wallPos = GlobalSkillMethods.DistanceTo(aisling.Position, wallPosition);
-
-        if (mapCheck != aisling.Map.ID) return;
-
-        if (targetPos <= wallPos)
+        try
         {
-            switch (aisling.Direction)
+            var dmgCalc = DamageCalc(aisling);
+            var position = _target.Position;
+            var mapCheck = aisling.Map.ID;
+            var wallPosition = aisling.GetPendingChargePosition(7, aisling);
+            var targetPos = GlobalSkillMethods.DistanceTo(aisling.Position, position);
+            var wallPos = GlobalSkillMethods.DistanceTo(aisling.Position, wallPosition);
+
+            if (mapCheck != aisling.Map.ID) return;
+
+            if (targetPos <= wallPos)
             {
-                case 0:
-                    position.Y++;
-                    break;
-                case 1:
-                    position.X--;
-                    break;
-                case 2:
-                    position.Y--;
-                    break;
-                case 3:
-                    position.X++;
-                    break;
-            }
+                switch (aisling.Direction)
+                {
+                    case 0:
+                        position.Y++;
+                        break;
+                    case 1:
+                        position.X--;
+                        break;
+                    case 2:
+                        position.Y--;
+                        break;
+                    case 3:
+                        position.X++;
+                        break;
+                }
 
-            if (aisling.Position != position)
+                if (aisling.Position != position)
+                {
+                    GlobalSkillMethods.Step(aisling, position.X, position.Y);
+                }
+
+                if (_target is not Damageable damageable) return;
+                damageable.ApplyDamage(aisling, dmgCalc, Skill);
+                GlobalSkillMethods.Train(client, Skill);
+                aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings,
+                    c => c.SendAnimation(Skill.Template.TargetAnimation, null, _target.Serial));
+
+                if (!_crit) return;
+                aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings,
+                    c => c.SendAnimation(387, null, sprite.Serial));
+            }
+            else
             {
-                GlobalSkillMethods.Step(aisling, position.X, position.Y);
+                GlobalSkillMethods.Step(aisling, wallPosition.X, wallPosition.Y);
+
+                var stunned = new DebuffBeagsuain();
+                aisling.Client.EnqueueDebuffAppliedEvent(aisling, stunned);
+                aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings,
+                    c => c.SendAnimation(208, null, aisling.Serial));
             }
-
-            if (_target is not Damageable damageable) return;
-            damageable.ApplyDamage(aisling, dmgCalc, Skill);
-            GlobalSkillMethods.Train(client, Skill);
-            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.TargetAnimation, null, _target.Serial));
-
-            if (!_crit) return;
-            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(387, null, sprite.Serial));
         }
-        else
+        catch (Exception)
         {
-            GlobalSkillMethods.Step(aisling, wallPosition.X, wallPosition.Y);
-
-            var stunned = new DebuffBeagsuain();
-            aisling.Client.EnqueueDebuffAppliedEvent(aisling, stunned);
-            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(208, null, aisling.Serial));
+            ServerSetup.EventsLogger($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}");
+            SentrySdk.CaptureMessage($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
         }
     }
 
@@ -533,45 +602,44 @@ public class Charge(Skill skill) : SkillScript(skill)
         if (sprite is not Aisling aisling) return;
         var client = aisling.Client;
 
-        _enemyList = client.Aisling.DamageableGetInFront(7);
-        _target = _enemyList.FirstOrDefault();
-        _target = Skill.Reflect(_target, sprite, Skill);
-
-        if (_target == null)
+        try
         {
-            var mapCheck = aisling.Map.ID;
-            var wallPosition = aisling.GetPendingChargePositionNoTarget(7, aisling);
-            var wallPos = GlobalSkillMethods.DistanceTo(aisling.Position, wallPosition);
+            _enemyList = client.Aisling.DamageableGetInFront(7);
+            _target = _enemyList.FirstOrDefault();
 
-            if (mapCheck != aisling.Map.ID) return;
-            if (!(wallPos > 0)) OnFailed(aisling);
-
-            if (aisling.Position != wallPosition)
+            if (_target == null)
             {
-                GlobalSkillMethods.Step(aisling, wallPosition.X, wallPosition.Y);
-            }
+                var mapCheck = aisling.Map.ID;
+                var wallPosition = aisling.GetPendingChargePositionNoTarget(7, aisling);
+                var wallPos = GlobalSkillMethods.DistanceTo(aisling.Position, wallPosition);
 
-            if (wallPos <= 6)
-            {
-                var stunned = new DebuffBeagsuain();
-                aisling.Client.EnqueueDebuffAppliedEvent(aisling, stunned);
-                aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(208, null, aisling.Serial));
-            }
+                if (mapCheck != aisling.Map.ID) return;
+                if (!(wallPos > 0)) OnFailed(aisling);
 
-            aisling.UsedSkill(Skill);
-        }
-        else
-        {
-            _success = GlobalSkillMethods.OnUse(aisling, Skill);
+                if (aisling.Position != wallPosition)
+                {
+                    GlobalSkillMethods.Step(aisling, wallPosition.X, wallPosition.Y);
+                }
 
-            if (_success)
-            {
-                OnSuccess(aisling);
+                if (wallPos <= 6)
+                {
+                    var stunned = new DebuffBeagsuain();
+                    aisling.Client.EnqueueDebuffAppliedEvent(aisling, stunned);
+                    aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings,
+                        c => c.SendAnimation(208, null, aisling.Serial));
+                }
+
+                aisling.UsedSkill(Skill);
             }
             else
             {
-                OnFailed(aisling);
+                OnSuccess(aisling);
             }
+        }
+        catch (Exception)
+        {
+            ServerSetup.EventsLogger($"Issue with {Skill.Name} within Target called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}");
+            SentrySdk.CaptureMessage($"Issue with {Skill.Name} within Target called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
         }
     }
 }
@@ -594,26 +662,34 @@ public class Beag_Suain_Ia_Gar(Skill skill) : SkillScript(skill)
         var client = aisling.Client;
         aisling.ActionUsed = "Beag Suain Ia Gar";
 
-        var list = sprite.MonstersNearby().ToList();
-
-        if (list.Count == 0)
+        try
         {
-            OnFailed(aisling);
-            return;
-        }
+            var list = sprite.MonstersNearby();
 
-        foreach (var target in list.Where(i => i.Attackable))
-        {
-            var debuff = new DebuffBeagsuaingar();
+            if (list.Count == 0)
             {
-                if (target.HasDebuff(debuff.Name))
-                    target.RemoveDebuff(debuff.Name);
-
-                GlobalSkillMethods.ApplyPhysicalDebuff(client, debuff, target, Skill);
+                OnFailed(aisling);
+                return;
             }
-        }
 
-        GlobalSkillMethods.Train(client, Skill);
+            foreach (var target in list)
+            {
+                var debuff = new DebuffBeagsuaingar();
+                {
+                    if (target.HasDebuff(debuff.Name))
+                        target.RemoveDebuff(debuff.Name);
+
+                    GlobalSkillMethods.ApplyPhysicalDebuff(client, debuff, target, Skill);
+                }
+            }
+
+            GlobalSkillMethods.Train(client, Skill);
+        }
+        catch (Exception)
+        {
+            ServerSetup.EventsLogger($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}");
+            SentrySdk.CaptureMessage($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
+        }
     }
 
     public override void OnUse(Sprite sprite)
@@ -681,17 +757,26 @@ public class Raise_Threat(Skill skill) : SkillScript(skill)
             SourceId = sprite.Serial
         };
 
-        aisling.ThreatMeter *= 4;
-
-        var enemies = aisling.MonstersNearby();
-        foreach (var monster in enemies.Where(e => e is { IsAlive: true }))
+        try
         {
-            monster.Target = aisling;
+            aisling.ThreatMeter *= 4;
+
+            var enemies = aisling.MonstersNearby();
+            foreach (var monster in enemies.Where(e => e is { IsAlive: true }))
+            {
+                monster.Target = aisling;
+            }
+
+            GlobalSkillMethods.Train(client, Skill);
+
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings,
+                c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
         }
-
-        GlobalSkillMethods.Train(client, Skill);
-
-        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
+        catch (Exception)
+        {
+            ServerSetup.EventsLogger($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}");
+            SentrySdk.CaptureMessage($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
+        }
     }
 
     public override void OnUse(Sprite sprite)
@@ -736,28 +821,41 @@ public class Draconic_Leash(Skill skill) : SkillScript(skill)
             SourceId = sprite.Serial
         };
 
-        var monstersNearby = aisling.MonstersNearby();
-        var monsters = monstersNearby.Where(mSprite => !mSprite.Template.MonsterType.MonsterTypeIsSet(MonsterType.Boss)).Where(mSprite => !mSprite.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Dummy)).ToList();
-
-        if (monsters.Count == 0)
+        try
         {
-            OnFailed(aisling);
+            var monstersNearby = aisling.MonstersNearby();
+            var monsters = monstersNearby
+                .Where(mSprite => !mSprite.Template.MonsterType.MonsterTypeIsSet(MonsterType.Boss)).Where(mSprite =>
+                    !mSprite.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Dummy)).ToList();
+
+            if (monsters.Count == 0)
+            {
+                OnFailed(aisling);
+                GlobalSkillMethods.Train(client, Skill);
+                return;
+            }
+
+            var monster = monsters.RandomIEnum();
+
+            if (monster != null)
+            {
+                aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings,
+                    c => c.SendAnimation(Skill.Template.TargetAnimation, monster.Position));
+                monster.Pos = aisling.Pos;
+                monster.UpdateAddAndRemove();
+            }
+
             GlobalSkillMethods.Train(client, Skill);
-            return;
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings,
+                c => c.SendAnimation(139, null, aisling.Serial));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings,
+                c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
         }
-
-        var monster = monsters.RandomIEnum();
-
-        if (monster != null)
+        catch (Exception)
         {
-            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.TargetAnimation, monster.Position));
-            monster.Pos = aisling.Pos;
-            monster.UpdateAddAndRemove();
+            ServerSetup.EventsLogger($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}");
+            SentrySdk.CaptureMessage($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
         }
-
-        GlobalSkillMethods.Train(client, Skill);
-        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(139, null, aisling.Serial));
-        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
     }
 
     public override void OnUse(Sprite sprite)
@@ -792,28 +890,40 @@ public class Taunt(Skill skill) : SkillScript(skill)
             SourceId = sprite.Serial
         };
 
-        var targets = aisling.GetInFrontToSide();
-
-        if (targets.Count == 0)
+        try
         {
-            OnFailed(aisling);
-            return;
-        }
+            var targets = aisling.GetInFrontToSide();
 
-        foreach (var target in targets)
-        {
-            if (target is not Monster monster) continue;
-            lock (monster.TaggedAislingsLock)
+            if (targets.Count == 0)
             {
-                monster.TargetRecord.TaggedAislings.Clear();
-                monster.TargetRecord.TaggedAislings.TryAdd(client.Aisling.Serial, (4500000, aisling));
+                OnFailed(aisling);
+                return;
             }
-            monster.Target = aisling;
-            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.TargetAnimation, monster.Position));
-        }
 
-        GlobalSkillMethods.Train(client, Skill);
-        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
+            foreach (var target in targets)
+            {
+                if (target is not Monster monster) continue;
+                lock (monster.TaggedAislingsLock)
+                {
+                    monster.TargetRecord.TaggedAislings.Clear();
+                    aisling.ThreatMeter += 45000000;
+                    monster.TryAddPlayerAndHisGroup(client.Aisling);
+                }
+
+                monster.Target = aisling;
+                aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings,
+                    c => c.SendAnimation(Skill.Template.TargetAnimation, monster.Position));
+            }
+
+            GlobalSkillMethods.Train(client, Skill);
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings,
+                c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
+        }
+        catch (Exception)
+        {
+            ServerSetup.EventsLogger($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}");
+            SentrySdk.CaptureMessage($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
+        }
     }
 
     public override void OnUse(Sprite sprite)
@@ -917,28 +1027,37 @@ public class ShieldBash(Skill skill) : SkillScript(skill)
             SourceId = aisling.Serial
         };
 
-        var enemy = aisling.DamageableGetInFront(2);
-
-        if (enemy.Count == 0)
+        try
         {
-            GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
-            OnFailed(aisling);
-            return;
+            var enemy = aisling.DamageableGetInFront(2);
+
+            if (enemy.Count == 0)
+            {
+                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
+                OnFailed(aisling);
+                return;
+            }
+
+            aisling.ActionUsed = "Shield Bash";
+
+            foreach (var i in enemy.Where(i => aisling.Serial != i.Serial))
+            {
+                _target = i;
+                var dmgCalc = DamageCalc(sprite);
+                if (aisling.BlessedShield)
+                    dmgCalc *= 2;
+                GlobalSkillMethods.OnSuccessWithoutAction(_target, aisling, Skill, dmgCalc, _crit);
+            }
+
+            aisling.BlessedShield = false;
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings,
+                c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
         }
-
-        aisling.ActionUsed = "Shield Bash";
-
-        foreach (var i in enemy.Where(i => aisling.Serial != i.Serial).Where(i => i.Attackable))
+        catch (Exception)
         {
-            _target = i;
-            var dmgCalc = DamageCalc(sprite);
-            if (aisling.BlessedShield)
-                dmgCalc *= 2;
-            GlobalSkillMethods.OnSuccessWithoutAction(_target, aisling, Skill, dmgCalc, _crit);
+            ServerSetup.EventsLogger($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}");
+            SentrySdk.CaptureMessage($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
         }
-
-        aisling.BlessedShield = false;
-        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
     }
 
     public override void OnUse(Sprite sprite)
@@ -1041,30 +1160,38 @@ public class WrathBlow(Skill skill) : SkillScript(skill)
             SourceId = sprite.Serial
         };
 
-        var enemy = aisling.DamageableGetInFront().FirstOrDefault();
-        _target = enemy;
-        if (_target is not Damageable damageable) return;
-
-        if (_target == null || _target.Serial == aisling.Serial || !_target.Attackable)
+        try
         {
-            GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
-            OnFailed(aisling);
-            return;
-        }
+            var enemy = aisling.DamageableGetInFront().FirstOrDefault();
+            _target = enemy;
+            if (_target is not Damageable damageable) return;
 
-        var debuff = new DebuffWrathConsequences();
+            if (_target == null || _target.Serial == aisling.Serial)
+            {
+                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
+                OnFailed(aisling);
+                return;
+            }
+
+            var debuff = new DebuffWrathConsequences();
+            {
+                if (_target.HasDebuff(debuff.Name))
+                    _target.RemoveDebuff(debuff.Name);
+
+                GlobalSkillMethods.ApplyPhysicalDebuff(aisling.Client, debuff, _target, Skill);
+            }
+
+            _target.Target = aisling;
+            var dmgCalc = DamageCalc(sprite);
+            damageable.ApplyDamage(aisling, dmgCalc, Skill);
+            aisling.ThreatMeter += 15000000000;
+            GlobalSkillMethods.OnSuccess(_target, aisling, Skill, 0, false, action);
+        }
+        catch (Exception)
         {
-            if (_target.HasDebuff(debuff.Name))
-                _target.RemoveDebuff(debuff.Name);
-
-            GlobalSkillMethods.ApplyPhysicalDebuff(aisling.Client, debuff, _target, Skill);
+            ServerSetup.EventsLogger($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}");
+            SentrySdk.CaptureMessage($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
         }
-
-        _target.Target = aisling;
-        var dmgCalc = DamageCalc(sprite);
-        damageable.ApplyDamage(aisling, dmgCalc, Skill);
-        aisling.ThreatMeter += 15000000000;
-        GlobalSkillMethods.OnSuccess(_target, aisling, Skill, 0, false, action);
     }
 
     public override void OnUse(Sprite sprite)

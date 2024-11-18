@@ -45,11 +45,11 @@ public class Aerith(WorldServer server, Mundane mundane) : MundaneScript(server,
             case 0x01:
                 {
                     var options = new List<Dialog.OptionsDataItem>
-                {
-                    new(0x03, "{=qMeditate x1"),
-                    new(0x04, "{=qMeditate x10"),
-                    new(0x00, "{=bSecond thought")
-                };
+                    {
+                        new(0x03, "{=qMeditate x1"),
+                        new(0x04, "{=qMeditate x10"),
+                        new(0x00, "{=bSecond thought")
+                    };
 
                     client.SendOptionsDialog(Mundane, "Close your eyes, focus, now let's attempt the conversion.", options.ToArray());
                     break;
@@ -57,9 +57,9 @@ public class Aerith(WorldServer server, Mundane mundane) : MundaneScript(server,
             case 0x02:
                 {
                     var options = new List<Dialog.OptionsDataItem>
-                {
-                    new(0x00, "{=bSecond thought")
-                };
+                    {
+                        new(0x00, "{=bSecond thought")
+                    };
 
                     client.SendOptionsDialog(Mundane, "Close your eyes, focus, now let's attempt the conversion.", options.ToArray());
                     break;
@@ -68,7 +68,12 @@ public class Aerith(WorldServer server, Mundane mundane) : MundaneScript(server,
                 {
                     var baseMp = client.Aisling.BaseMp;
                     var baseExp = client.Aisling.ExpTotal;
-                    var i = baseMp * 500;
+                    long i;
+
+                    if (client.Aisling.BaseMp >= 500000)
+                        i = baseMp * 2000;
+                    else
+                        i = baseMp * 500;
 
                     if (baseExp - i >= 0)
                     {
@@ -85,11 +90,11 @@ public class Aerith(WorldServer server, Mundane mundane) : MundaneScript(server,
                     }
 
                     var options = new List<Dialog.OptionsDataItem>
-                {
-                    new(0x03, "{=qMeditate x1"),
-                    new(0x04, "{=qMeditate x10"),
-                    new(0x00, "{=bSecond thought")
-                };
+                    {
+                        new(0x03, "{=qMeditate x1"),
+                        new(0x04, "{=qMeditate x10"),
+                        new(0x00, "{=bSecond thought")
+                    };
 
                     client.SendOptionsDialog(Mundane, $"{client.Aisling.ExpTotal} left\nBase Mana: {client.Aisling.BaseMp}", options.ToArray());
                     break;
@@ -98,7 +103,12 @@ public class Aerith(WorldServer server, Mundane mundane) : MundaneScript(server,
                 {
                     var baseMp = client.Aisling.BaseMp;
                     var baseExp = client.Aisling.ExpTotal;
-                    var i = baseMp * 5000;
+                    long i;
+
+                    if (client.Aisling.BaseMp >= 500000)
+                        i = baseMp * 20000;
+                    else
+                        i = baseMp * 5000;
 
                     if (baseExp - i >= 0)
                     {
@@ -115,11 +125,11 @@ public class Aerith(WorldServer server, Mundane mundane) : MundaneScript(server,
                     }
 
                     var options = new List<Dialog.OptionsDataItem>
-                {
-                    new(0x03, "{=qMeditate x1"),
-                    new(0x04, "{=qMeditate x10"),
-                    new(0x00, "{=bSecond thought")
-                };
+                    {
+                        new(0x03, "{=qMeditate x1"),
+                        new(0x04, "{=qMeditate x10"),
+                        new(0x00, "{=bSecond thought")
+                    };
 
                     client.SendOptionsDialog(Mundane, $"{client.Aisling.ExpTotal} left\nBase Mana: {client.Aisling.BaseMp}", options.ToArray());
                     break;

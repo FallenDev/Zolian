@@ -81,7 +81,6 @@ public class Damageable : Movable
     public void ApplyDamage(Sprite damageDealingSprite, long dmg, Skill skill, bool forceTarget = false)
     {
         if (!WithinRangeOf(damageDealingSprite)) return;
-        if (!Attackable) return;
         if (!CanBeAttackedHere(damageDealingSprite)) return;
 
         dmg = DamageTypeBasedOnElement(damageDealingSprite, dmg);
@@ -161,8 +160,6 @@ public class Damageable : Movable
 
     public void ApplyTrapDamage(Sprite damageDealingSprite, long dmg, byte sound)
     {
-        if (!Attackable) return;
-
         if (Immunity)
         {
             SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendHealthBar(this, sound));
@@ -173,7 +170,7 @@ public class Damageable : Movable
         {
             dmg = CraneStance();
             dmg = ApplyPvpMod();
-            dmg = PainBane();
+            dmg = PainBaneFunc();
         }
 
         if (IsAited && dmg > 100)
@@ -219,7 +216,7 @@ public class Damageable : Movable
             return dmg;
         }
 
-        long PainBane()
+        long PainBaneFunc()
         {
             if (damageDealingSprite is not Aisling aisling2) return dmg;
             if (aisling2.PainBane)
@@ -239,7 +236,6 @@ public class Damageable : Movable
     private void MagicApplyDamage(Sprite damageDealingSprite, long dmg, Spell spell, bool forceTarget = false)
     {
         if (!WithinRangeOf(damageDealingSprite)) return;
-        if (!Attackable) return;
         if (!CanBeAttackedHere(damageDealingSprite)) return;
 
         dmg = DamageTypeBasedOnElement(damageDealingSprite, dmg);

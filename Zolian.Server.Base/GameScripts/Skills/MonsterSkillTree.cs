@@ -39,19 +39,26 @@ public class Bite(Skill skill) : SkillScript(skill)
             SourceId = sprite.Serial
         };
 
-        if (sprite is not Identifiable identified) return;
-        var enemy = identified.MonsterGetInFront().FirstOrDefault();
-        _target = enemy;
-
-        if (_target == null || _target.Serial == sprite.Serial || !_target.Attackable)
+        try
         {
-            GlobalSkillMethods.FailedAttemptBodyAnimation(sprite, action);
-            OnFailed(sprite);
-            return;
-        }
+            if (sprite is not Damageable identified) return;
+            var enemy = identified.DamageableGetInFront().FirstOrDefault();
+            _target = enemy;
 
-        var dmgCalc = DamageCalc(sprite);
-        GlobalSkillMethods.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
+            if (_target == null || _target.Serial == sprite.Serial)
+            {
+                GlobalSkillMethods.FailedAttemptBodyAnimation(sprite, action);
+                OnFailed(sprite);
+                return;
+            }
+
+            var dmgCalc = DamageCalc(sprite);
+            GlobalSkillMethods.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
+        }
+        catch
+        {
+            // ignored
+        }
     }
 
     private long DamageCalc(Sprite sprite)
@@ -90,26 +97,33 @@ public class Gatling(Skill skill) : SkillScript(skill)
             SourceId = sprite.Serial
         };
 
-        var nearby = sprite.AislingsNearby();
-
-        foreach (var player in nearby)
+        try
         {
-            if (player == null) continue;
-            var rand = Generator.RandNumGen100();
-            if (rand >= 60) continue;
-            _target = player;
+            var nearby = sprite.AislingsNearby();
+
+            foreach (var player in nearby)
+            {
+                if (player == null) continue;
+                var rand = Generator.RandNumGen100();
+                if (rand >= 60) continue;
+                _target = player;
+            }
+
+
+            if (_target == null || _target.Serial == sprite.Serial)
+            {
+                GlobalSkillMethods.FailedAttemptBodyAnimation(sprite, action);
+                OnFailed(sprite);
+                return;
+            }
+
+            var dmgCalc = DamageCalc(sprite);
+            GlobalSkillMethods.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
         }
-
-
-        if (_target == null || _target.Serial == sprite.Serial || !_target.Attackable)
+        catch
         {
-            GlobalSkillMethods.FailedAttemptBodyAnimation(sprite, action);
-            OnFailed(sprite);
-            return;
+            // ignored
         }
-
-        var dmgCalc = DamageCalc(sprite);
-        GlobalSkillMethods.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
     }
 
     private long DamageCalc(Sprite sprite)
@@ -148,34 +162,41 @@ public class BiteAndShake(Skill skill) : SkillScript(skill)
             SourceId = sprite.Serial
         };
 
-        if (sprite is not Identifiable identified) return;
-        var enemy = identified.MonsterGetInFront().FirstOrDefault();
-        _target = enemy;
-
-        if (_target == null || _target.Serial == sprite.Serial || !_target.Attackable)
+        try
         {
-            GlobalSkillMethods.FailedAttemptBodyAnimation(sprite, action);
-            OnFailed(sprite);
-            return;
-        }
+            if (sprite is not Damageable identified) return;
+            var enemy = identified.DamageableGetInFront().FirstOrDefault();
+            _target = enemy;
 
-        var debuff = new DebuffBeagsuain();
-
-        if (_target is Aisling targetPlayer)
-        {
-            if (!_target.HasDebuff(debuff.Name))
+            if (_target == null || _target.Serial == sprite.Serial)
             {
-                targetPlayer.Client.EnqueueDebuffAppliedEvent(_target, debuff);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(sprite, action);
+                OnFailed(sprite);
+                return;
             }
-        }
-        else
-        {
-            if (!_target.HasDebuff(debuff.Name))
-                debuff.OnApplied(_target, debuff);
-        }
 
-        var dmgCalc = DamageCalc(sprite);
-        GlobalSkillMethods.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
+            var debuff = new DebuffBeagsuain();
+
+            if (_target is Aisling targetPlayer)
+            {
+                if (!_target.HasDebuff(debuff.Name))
+                {
+                    targetPlayer.Client.EnqueueDebuffAppliedEvent(_target, debuff);
+                }
+            }
+            else
+            {
+                if (!_target.HasDebuff(debuff.Name))
+                    debuff.OnApplied(_target, debuff);
+            }
+
+            var dmgCalc = DamageCalc(sprite);
+            GlobalSkillMethods.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
+        }
+        catch
+        {
+            // ignored
+        }
     }
 
     private long DamageCalc(Sprite sprite)
@@ -214,35 +235,42 @@ public class CorrosiveTouch(Skill skill) : SkillScript(skill)
             SourceId = sprite.Serial
         };
 
-        if (sprite is not Identifiable identified) return;
-        var enemy = identified.MonsterGetInFront().FirstOrDefault();
-        _target = enemy;
-
-        if (_target == null || _target.Serial == sprite.Serial || !_target.Attackable)
+        try
         {
-            GlobalSkillMethods.FailedAttemptBodyAnimation(sprite, action);
-            OnFailed(sprite);
-            return;
-        }
+            if (sprite is not Damageable identified) return;
+            var enemy = identified.DamageableGetInFront().FirstOrDefault();
+            _target = enemy;
 
-        var debuff = new DebuffCorrosiveTouch();
-
-        if (_target is Aisling targetPlayer)
-        {
-            if (!_target.HasDebuff(debuff.Name))
+            if (_target == null || _target.Serial == sprite.Serial)
             {
-                targetPlayer.Client.EnqueueDebuffAppliedEvent(_target, debuff);
-                targetPlayer.Client.SendAttributes(StatUpdateType.Secondary);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(sprite, action);
+                OnFailed(sprite);
+                return;
             }
-        }
-        else
-        {
-            if (!_target.HasDebuff(debuff.Name))
-                debuff.OnApplied(_target, debuff);
-        }
 
-        var dmgCalc = DamageCalc(sprite);
-        GlobalSkillMethods.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
+            var debuff = new DebuffCorrosiveTouch();
+
+            if (_target is Aisling targetPlayer)
+            {
+                if (!_target.HasDebuff(debuff.Name))
+                {
+                    targetPlayer.Client.EnqueueDebuffAppliedEvent(_target, debuff);
+                    targetPlayer.Client.SendAttributes(StatUpdateType.Secondary);
+                }
+            }
+            else
+            {
+                if (!_target.HasDebuff(debuff.Name))
+                    debuff.OnApplied(_target, debuff);
+            }
+
+            var dmgCalc = DamageCalc(sprite);
+            GlobalSkillMethods.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
+        }
+        catch
+        {
+            // ignored
+        }
     }
 
     private long DamageCalc(Sprite sprite)
@@ -281,19 +309,26 @@ public class Stomp(Skill skill) : SkillScript(skill)
             SourceId = sprite.Serial
         };
 
-        if (sprite is not Identifiable identified) return;
-        var enemy = identified.MonsterGetInFront().FirstOrDefault();
-        _target = enemy;
-
-        if (_target == null || _target.Serial == sprite.Serial || !_target.Attackable)
+        try
         {
-            GlobalSkillMethods.FailedAttemptBodyAnimation(sprite, action);
-            OnFailed(sprite);
-            return;
-        }
+            if (sprite is not Damageable identified) return;
+            var enemy = identified.DamageableGetInFront().FirstOrDefault();
+            _target = enemy;
 
-        var dmgCalc = DamageCalc(sprite);
-        GlobalSkillMethods.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
+            if (_target == null || _target.Serial == sprite.Serial)
+            {
+                GlobalSkillMethods.FailedAttemptBodyAnimation(sprite, action);
+                OnFailed(sprite);
+                return;
+            }
+
+            var dmgCalc = DamageCalc(sprite);
+            GlobalSkillMethods.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
+        }
+        catch
+        {
+            // ignored
+        }
     }
 
     private long DamageCalc(Sprite sprite)
@@ -332,19 +367,26 @@ public class HeadButt(Skill skill) : SkillScript(skill)
             SourceId = sprite.Serial
         };
 
-        if (sprite is not Identifiable identified) return;
-        var enemy = identified.MonsterGetInFront().FirstOrDefault();
-        _target = enemy;
-
-        if (_target == null || _target.Serial == sprite.Serial || !_target.Attackable)
+        try
         {
-            GlobalSkillMethods.FailedAttemptBodyAnimation(sprite, action);
-            OnFailed(sprite);
-            return;
-        }
+            if (sprite is not Damageable identified) return;
+            var enemy = identified.DamageableGetInFront().FirstOrDefault();
+            _target = enemy;
 
-        var dmgCalc = DamageCalc(sprite);
-        GlobalSkillMethods.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
+            if (_target == null || _target.Serial == sprite.Serial)
+            {
+                GlobalSkillMethods.FailedAttemptBodyAnimation(sprite, action);
+                OnFailed(sprite);
+                return;
+            }
+
+            var dmgCalc = DamageCalc(sprite);
+            GlobalSkillMethods.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
+        }
+        catch
+        {
+            // ignored
+        }
     }
 
     private long DamageCalc(Sprite sprite)
@@ -383,19 +425,26 @@ public class Claw(Skill skill) : SkillScript(skill)
             SourceId = sprite.Serial
         };
 
-        if (sprite is not Identifiable identified) return;
-        var enemy = identified.MonsterGetInFront().FirstOrDefault();
-        _target = enemy;
-
-        if (_target == null || _target.Serial == sprite.Serial || !_target.Attackable)
+        try
         {
-            GlobalSkillMethods.FailedAttemptBodyAnimation(sprite, action);
-            OnFailed(sprite);
-            return;
-        }
+            if (sprite is not Damageable identified) return;
+            var enemy = identified.DamageableGetInFront().FirstOrDefault();
+            _target = enemy;
 
-        var dmgCalc = DamageCalc(sprite);
-        GlobalSkillMethods.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
+            if (_target == null || _target.Serial == sprite.Serial)
+            {
+                GlobalSkillMethods.FailedAttemptBodyAnimation(sprite, action);
+                OnFailed(sprite);
+                return;
+            }
+
+            var dmgCalc = DamageCalc(sprite);
+            GlobalSkillMethods.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
+        }
+        catch
+        {
+            // ignored
+        }
     }
 
     private long DamageCalc(Sprite sprite)
@@ -434,19 +483,26 @@ public class MuleKick(Skill skill) : SkillScript(skill)
             SourceId = sprite.Serial
         };
 
-        if (sprite is not Identifiable identified) return;
-        var enemy = identified.MonsterGetInFront().FirstOrDefault();
-        _target = enemy;
-
-        if (_target == null || _target.Serial == sprite.Serial || !_target.Attackable)
+        try
         {
-            GlobalSkillMethods.FailedAttemptBodyAnimation(sprite, action);
-            OnFailed(sprite);
-            return;
-        }
+            if (sprite is not Damageable identified) return;
+            var enemy = identified.DamageableGetInFront().FirstOrDefault();
+            _target = enemy;
 
-        var dmgCalc = DamageCalc(sprite);
-        GlobalSkillMethods.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
+            if (_target == null || _target.Serial == sprite.Serial)
+            {
+                GlobalSkillMethods.FailedAttemptBodyAnimation(sprite, action);
+                OnFailed(sprite);
+                return;
+            }
+
+            var dmgCalc = DamageCalc(sprite);
+            GlobalSkillMethods.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
+        }
+        catch
+        {
+            // ignored
+        }
     }
 
     private long DamageCalc(Sprite sprite)
@@ -485,23 +541,31 @@ public class TailSlap(Skill skill) : SkillScript(skill)
             SourceId = sprite.Serial
         };
 
-        if (sprite is not Damageable damageable) return;
-        var enemy = damageable.MonsterGetInFrontToSide();
-
-        if (enemy.Count == 0)
+        try
         {
-            OnFailed(sprite);
-            return;
-        }
+            if (sprite is not Damageable damageable) return;
+            var enemy = damageable.GetInFrontToSide();
 
-        foreach (var i in enemy.Where(i => i.Attackable))
+            if (enemy.Count == 0)
+            {
+                OnFailed(sprite);
+                return;
+            }
+
+            foreach (var i in enemy)
+            {
+                _target = i;
+                var dmgCalc = DamageCalc(sprite);
+                GlobalSkillMethods.OnSuccessWithoutAction(_target, sprite, Skill, dmgCalc, _crit);
+            }
+
+            damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings,
+                c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
+        }
+        catch
         {
-            _target = i;
-            var dmgCalc = DamageCalc(sprite);
-            GlobalSkillMethods.OnSuccessWithoutAction(_target, sprite, Skill, dmgCalc, _crit);
+            // ignored
         }
-
-        damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
     }
 
     private long DamageCalc(Sprite sprite)
@@ -540,34 +604,41 @@ public class RollOver(Skill skill) : SkillScript(skill)
             SourceId = sprite.Serial
         };
 
-        if (sprite is not Identifiable identified) return;
-        var enemy = identified.MonsterGetInFront().FirstOrDefault();
-        _target = enemy;
-
-        if (_target == null || _target.Serial == sprite.Serial || !_target.Attackable)
+        try
         {
-            GlobalSkillMethods.FailedAttemptBodyAnimation(sprite, action);
-            OnFailed(sprite);
-            return;
-        }
+            if (sprite is not Damageable identified) return;
+            var enemy = identified.DamageableGetInFront().FirstOrDefault();
+            _target = enemy;
 
-        var debuff = new DebuffBleeding();
-
-        if (_target is Aisling targetPlayer)
-        {
-            if (!_target.HasDebuff(debuff.Name))
+            if (_target == null || _target.Serial == sprite.Serial)
             {
-                targetPlayer.Client.EnqueueDebuffAppliedEvent(_target, debuff);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(sprite, action);
+                OnFailed(sprite);
+                return;
             }
-        }
-        else
-        {
-            if (!_target.HasDebuff(debuff.Name))
-                debuff.OnApplied(_target, debuff);
-        }
 
-        var dmgCalc = DamageCalc(sprite);
-        GlobalSkillMethods.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
+            var debuff = new DebuffBleeding();
+
+            if (_target is Aisling targetPlayer)
+            {
+                if (!_target.HasDebuff(debuff.Name))
+                {
+                    targetPlayer.Client.EnqueueDebuffAppliedEvent(_target, debuff);
+                }
+            }
+            else
+            {
+                if (!_target.HasDebuff(debuff.Name))
+                    debuff.OnApplied(_target, debuff);
+            }
+
+            var dmgCalc = DamageCalc(sprite);
+            GlobalSkillMethods.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
+        }
+        catch
+        {
+            // ignored
+        }
     }
 
     private long DamageCalc(Sprite sprite)
@@ -606,34 +677,41 @@ public class TantalizingGaze(Skill skill) : SkillScript(skill)
             SourceId = sprite.Serial
         };
 
-        if (sprite is not Identifiable identified) return;
-        var enemy = identified.MonsterGetInFront().FirstOrDefault();
-        _target = enemy;
-
-        if (_target == null || _target.Serial == sprite.Serial || !_target.Attackable)
+        try
         {
-            GlobalSkillMethods.FailedAttemptBodyAnimation(sprite, action);
-            OnFailed(sprite);
-            return;
-        }
+            if (sprite is not Damageable identified) return;
+            var enemy = identified.DamageableGetInFront().FirstOrDefault();
+            _target = enemy;
 
-        var debuff = new DebuffCharmed();
-
-        if (_target is Aisling targetPlayer)
-        {
-            if (!_target.HasDebuff(debuff.Name))
+            if (_target == null || _target.Serial == sprite.Serial)
             {
-                targetPlayer.Client.EnqueueDebuffAppliedEvent(_target, debuff);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(sprite, action);
+                OnFailed(sprite);
+                return;
             }
-        }
-        else
-        {
-            if (!_target.HasDebuff(debuff.Name))
-                debuff.OnApplied(_target, debuff);
-        }
 
-        var dmgCalc = DamageCalc(sprite);
-        GlobalSkillMethods.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
+            var debuff = new DebuffCharmed();
+
+            if (_target is Aisling targetPlayer)
+            {
+                if (!_target.HasDebuff(debuff.Name))
+                {
+                    targetPlayer.Client.EnqueueDebuffAppliedEvent(_target, debuff);
+                }
+            }
+            else
+            {
+                if (!_target.HasDebuff(debuff.Name))
+                    debuff.OnApplied(_target, debuff);
+            }
+
+            var dmgCalc = DamageCalc(sprite);
+            GlobalSkillMethods.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
+        }
+        catch
+        {
+            // ignored
+        }
     }
 
     private long DamageCalc(Sprite sprite)
@@ -672,34 +750,41 @@ public class SwallowWhole(Skill skill) : SkillScript(skill)
             SourceId = sprite.Serial
         };
 
-        if (sprite is not Identifiable identified) return;
-        var enemy = identified.MonsterGetInFront().FirstOrDefault();
-        _target = enemy;
-
-        if (_target == null || _target.Serial == sprite.Serial || !_target.Attackable)
+        try
         {
-            GlobalSkillMethods.FailedAttemptBodyAnimation(sprite, action);
-            OnFailed(sprite);
-            return;
-        }
+            if (sprite is not Damageable identified) return;
+            var enemy = identified.DamageableGetInFront().FirstOrDefault();
+            _target = enemy;
 
-        var debuff = new DebuffBleeding();
-
-        if (_target is Aisling targetPlayer)
-        {
-            if (!_target.HasDebuff(debuff.Name))
+            if (_target == null || _target.Serial == sprite.Serial)
             {
-                targetPlayer.Client.EnqueueDebuffAppliedEvent(_target, debuff);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(sprite, action);
+                OnFailed(sprite);
+                return;
             }
-        }
-        else
-        {
-            if (!_target.HasDebuff(debuff.Name))
-                debuff.OnApplied(_target, debuff);
-        }
 
-        var dmgCalc = DamageCalc(sprite);
-        GlobalSkillMethods.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
+            var debuff = new DebuffBleeding();
+
+            if (_target is Aisling targetPlayer)
+            {
+                if (!_target.HasDebuff(debuff.Name))
+                {
+                    targetPlayer.Client.EnqueueDebuffAppliedEvent(_target, debuff);
+                }
+            }
+            else
+            {
+                if (!_target.HasDebuff(debuff.Name))
+                    debuff.OnApplied(_target, debuff);
+            }
+
+            var dmgCalc = DamageCalc(sprite);
+            GlobalSkillMethods.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
+        }
+        catch
+        {
+            // ignored
+        }
     }
 
     private long DamageCalc(Sprite sprite)
@@ -737,39 +822,37 @@ public class HowlAndCall(Skill skill) : SkillScript(skill)
             SourceId = sprite.Serial
         };
 
-        if (casterMonster.Target is not { CurrentHp: > 1 })
+        try
         {
-            if (casterMonster.Target is not Aisling aisling) return;
-            lock (casterMonster.TaggedAislingsLock)
+            if (!(Generator.RandomNumPercentGen() >= 0.70)) return;
+
+            var monstersNearby = casterMonster.MonstersOnMap();
+
+            foreach (var monster in monstersNearby)
             {
-                casterMonster.TargetRecord.TaggedAislings.TryGetValue(aisling.Serial, out var playerTuple);
-                casterMonster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling), playerTuple);
-            }
-            return;
-        }
+                if (monster.WithinRangeOf(casterMonster)) continue;
 
-        if (!(Generator.RandomNumPercentGen() >= 0.70)) return;
+                var readyTime = DateTime.UtcNow;
+                monster.Pos = new Vector2(casterMonster.Pos.X, casterMonster.Pos.Y);
 
-        var monstersNearby = casterMonster.MonstersOnMap();
+                foreach (var player in casterMonster.AislingsNearby())
+                {
+                    player.Client.SendCreatureWalk(monster.Serial, new Point(casterMonster.X, casterMonster.Y),
+                        (Direction)casterMonster.Direction);
+                }
 
-        foreach (var monster in monstersNearby)
-        {
-            if (monster.WithinRangeOf(casterMonster)) continue;
-
-            var readyTime = DateTime.UtcNow;
-            monster.Pos = new Vector2(casterMonster.Pos.X, casterMonster.Pos.Y);
-
-            foreach (var player in casterMonster.AislingsNearby())
-            {
-                player.Client.SendCreatureWalk(monster.Serial, new Point(casterMonster.X, casterMonster.Y), (Direction)casterMonster.Direction);
+                monster.LastMovementChanged = readyTime;
+                monster.LastPosition = new Position(casterMonster.X, casterMonster.Y);
+                break;
             }
 
-            monster.LastMovementChanged = readyTime;
-            monster.LastPosition = new Position(casterMonster.X, casterMonster.Y);
-            break;
+            casterMonster.SendTargetedClientMethod(PlayerScope.NearbyAislings,
+                c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
         }
-
-        casterMonster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
+        catch
+        {
+            // ignored
+        }
     }
 }
 
@@ -798,19 +881,26 @@ public class DeathFromAbove(Skill skill) : SkillScript(skill)
             SourceId = sprite.Serial
         };
 
-        if (sprite is not Identifiable identified) return;
-        var enemy = identified.MonsterGetInFront(3).FirstOrDefault();
-        _target = enemy;
-
-        if (_target == null || _target.Serial == sprite.Serial || !_target.Attackable)
+        try
         {
-            GlobalSkillMethods.FailedAttemptBodyAnimation(sprite, action);
-            OnFailed(sprite);
-            return;
-        }
+            if (sprite is not Damageable identified) return;
+            var enemy = identified.DamageableGetInFront(3).FirstOrDefault();
+            _target = enemy;
 
-        var dmgCalc = DamageCalc(sprite);
-        GlobalSkillMethods.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
+            if (_target == null || _target.Serial == sprite.Serial)
+            {
+                GlobalSkillMethods.FailedAttemptBodyAnimation(sprite, action);
+                OnFailed(sprite);
+                return;
+            }
+
+            var dmgCalc = DamageCalc(sprite);
+            GlobalSkillMethods.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
+        }
+        catch
+        {
+            // ignored
+        }
     }
 
     private long DamageCalc(Sprite sprite)
@@ -849,19 +939,26 @@ public class Pounce(Skill skill) : SkillScript(skill)
             SourceId = sprite.Serial
         };
 
-        if (sprite is not Identifiable identified) return;
-        var enemy = identified.MonsterGetInFront(6).FirstOrDefault();
-        _target = enemy;
-
-        if (_target == null || _target.Serial == sprite.Serial || !_target.Attackable)
+        try
         {
-            GlobalSkillMethods.FailedAttemptBodyAnimation(sprite, action);
-            OnFailed(sprite);
-            return;
-        }
+            if (sprite is not Damageable identified) return;
+            var enemy = identified.DamageableGetInFront(6).FirstOrDefault();
+            _target = enemy;
 
-        var dmgCalc = DamageCalc(sprite);
-        GlobalSkillMethods.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
+            if (_target == null || _target.Serial == sprite.Serial)
+            {
+                GlobalSkillMethods.FailedAttemptBodyAnimation(sprite, action);
+                OnFailed(sprite);
+                return;
+            }
+
+            var dmgCalc = DamageCalc(sprite);
+            GlobalSkillMethods.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
+        }
+        catch
+        {
+            // ignored
+        }
     }
 
     private long DamageCalc(Sprite sprite)
@@ -900,35 +997,42 @@ public class Tentacle(Skill skill) : SkillScript(skill)
             SourceId = sprite.Serial
         };
 
-        if (sprite is not Identifiable identified) return;
-        var enemy = identified.MonsterGetInFront().FirstOrDefault();
-        _target = enemy;
-
-        if (_target == null || _target.Serial == sprite.Serial || !_target.Attackable)
+        try
         {
-            GlobalSkillMethods.FailedAttemptBodyAnimation(sprite, action);
-            OnFailed(sprite);
-            return;
-        }
+            if (sprite is not Damageable identified) return;
+            var enemy = identified.DamageableGetInFront().FirstOrDefault();
+            _target = enemy;
 
-        var debuff = new DebuffBeagsuain();
-
-        if (_target is Aisling targetPlayer)
-        {
-            if (!_target.HasDebuff(debuff.Name))
+            if (_target == null || _target.Serial == sprite.Serial)
             {
-                targetPlayer.Client.EnqueueDebuffAppliedEvent(_target, debuff);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(sprite, action);
+                OnFailed(sprite);
+                return;
             }
-        }
-        else
-        {
-            if (!_target.HasDebuff(debuff.Name))
-                debuff.OnApplied(_target, debuff);
-        }
 
-        var dmgCalc = DamageCalc(sprite);
-        GlobalSkillMethods.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
-        GlobalSkillMethods.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
+            var debuff = new DebuffBeagsuain();
+
+            if (_target is Aisling targetPlayer)
+            {
+                if (!_target.HasDebuff(debuff.Name))
+                {
+                    targetPlayer.Client.EnqueueDebuffAppliedEvent(_target, debuff);
+                }
+            }
+            else
+            {
+                if (!_target.HasDebuff(debuff.Name))
+                    debuff.OnApplied(_target, debuff);
+            }
+
+            var dmgCalc = DamageCalc(sprite);
+            GlobalSkillMethods.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
+            GlobalSkillMethods.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
+        }
+        catch
+        {
+            // ignored
+        }
     }
 
     private long DamageCalc(Sprite sprite)
@@ -989,27 +1093,34 @@ public class OmegaSlash(Skill skill) : SkillScript(skill)
             SourceId = sprite.Serial
         };
 
-        if (sprite is not Identifiable identified) return;
-        var enemyList = identified.MonsterGetInFrontToSide();
-        if (enemyList.Count == 0)
+        try
         {
-            OnFailed(sprite);
-            return;
-        }
-
-        foreach (var enemy in enemyList)
-        {
-            _target = enemy;
-
-            if (_target == null || _target.Serial == sprite.Serial || !_target.Attackable)
+            if (sprite is not Damageable identified) return;
+            var enemyList = identified.GetInFrontToSide();
+            if (enemyList.Count == 0)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(sprite, action);
                 OnFailed(sprite);
-                continue;
+                return;
             }
 
-            var dmgCalc = DamageCalc(sprite);
-            GlobalSkillMethods.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
+            foreach (var enemy in enemyList)
+            {
+                _target = enemy;
+
+                if (_target == null || _target.Serial == sprite.Serial)
+                {
+                    GlobalSkillMethods.FailedAttemptBodyAnimation(sprite, action);
+                    OnFailed(sprite);
+                    continue;
+                }
+
+                var dmgCalc = DamageCalc(sprite);
+                GlobalSkillMethods.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
+            }
+        }
+        catch
+        {
+            // ignored
         }
     }
 
@@ -1049,34 +1160,43 @@ public class FireWheel(Skill skill) : SkillScript(skill)
             SourceId = sprite.Serial
         };
 
-        if (sprite is not Damageable damageable) return;
-        var enemyList = damageable.MonsterGetFiveByFourRectInFront();
-        if (enemyList.Count == 0)
+        try
         {
-            OnFailed(sprite);
-            return;
-        }
-
-        foreach (var enemy in enemyList)
-        {
-            _target = enemy;
-
-            if (_target == null || _target.Serial == sprite.Serial || !_target.Attackable)
+            if (sprite is not Damageable damageable) return;
+            var enemyList = damageable.GetFiveByFourRectInFront();
+            if (enemyList.Count == 0)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(sprite, action);
                 OnFailed(sprite);
-                continue;
+                return;
             }
 
-            if (_target is not Aisling aisling) continue;
-            var dmgCalc = DamageCalc(sprite);
-            var fireCalc = FireDamageCalc(sprite);
-            aisling.ApplyElementalSkillDamage(sprite, fireCalc, ElementManager.Element.Fire, Skill);
-            GlobalSkillMethods.OnSuccessWithoutAction(aisling, sprite, Skill, dmgCalc, _crit);
-            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(223, aisling.Position));
-        }
+            foreach (var enemy in enemyList)
+            {
+                _target = enemy;
 
-        damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
+                if (_target == null || _target.Serial == sprite.Serial)
+                {
+                    GlobalSkillMethods.FailedAttemptBodyAnimation(sprite, action);
+                    OnFailed(sprite);
+                    continue;
+                }
+
+                if (_target is not Aisling aisling) continue;
+                var dmgCalc = DamageCalc(sprite);
+                var fireCalc = FireDamageCalc(sprite);
+                aisling.ApplyElementalSkillDamage(sprite, fireCalc, ElementManager.Element.Fire, Skill);
+                GlobalSkillMethods.OnSuccessWithoutAction(aisling, sprite, Skill, dmgCalc, _crit);
+                aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings,
+                    c => c.SendAnimation(223, aisling.Position));
+            }
+
+            damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings,
+                c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
+        }
+        catch
+        {
+            // ignored
+        }
     }
 
     private long FireDamageCalc(Sprite sprite)
@@ -1124,32 +1244,42 @@ public class Megaflare(Skill skill) : SkillScript(skill)
             SourceId = sprite.Serial
         };
 
-        var nearby = GetObjects<Aisling>(sprite.Map, i => i != null && i.WithinRangeOf(sprite, 6)).ToArray();
-
-        foreach (var player in nearby)
+        try
         {
-            if (player == null) continue;
-            var rand = Generator.RandomNumPercentGen();
-            if (rand >= .60) continue;
-            _targets.Add(player);
-        }
+            var nearby = GetObjects<Aisling>(sprite.Map, i => i != null && i.WithinRangeOf(sprite, 6)).ToArray();
 
-        if (_targets.Count == 0)
+            foreach (var player in nearby)
+            {
+                if (player == null) continue;
+                var rand = Generator.RandomNumPercentGen();
+                if (rand >= .60) continue;
+                _targets.Add(player);
+            }
+
+            if (_targets.Count == 0)
+            {
+                OnFailed(sprite);
+                return;
+            }
+
+            foreach (var enemy in _targets.Where(enemy =>
+                         enemy != null && enemy.Serial != sprite.Serial))
+            {
+                if (enemy is not Aisling aisling) continue;
+                var dmgCalc = DamageCalc(sprite);
+                aisling.ApplyElementalSkillDamage(sprite, dmgCalc, ElementManager.Element.Fire, Skill);
+                aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings,
+                    c => c.SendAnimation(217, aisling.Position));
+            }
+
+            if (sprite is not Damageable damageable) return;
+            damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings,
+                c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
+        }
+        catch
         {
-            OnFailed(sprite);
-            return;
+            // ignored
         }
-
-        foreach (var enemy in _targets.Where(enemy => enemy != null && enemy.Serial != sprite.Serial && enemy.Attackable))
-        {
-            if (enemy is not Aisling aisling) continue;
-            var dmgCalc = DamageCalc(sprite);
-            aisling.ApplyElementalSkillDamage(sprite, dmgCalc, ElementManager.Element.Fire, Skill);
-            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(217, aisling.Position));
-        }
-
-        if (sprite is not Damageable damageable) return;
-        damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
     }
 
     private long DamageCalc(Sprite sprite)

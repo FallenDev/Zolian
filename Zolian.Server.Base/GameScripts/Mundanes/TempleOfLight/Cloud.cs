@@ -45,11 +45,11 @@ public class Cloud(WorldServer server, Mundane mundane) : MundaneScript(server, 
             case 0x01:
                 {
                     var options = new List<Dialog.OptionsDataItem>
-                {
-                    new(0x03, "{=qMeditate x1"),
-                    new(0x04, "{=qMeditate x10"),
-                    new(0x00, "{=bSecond thought")
-                };
+                    {
+                        new(0x03, "{=qMeditate x1"),
+                        new(0x04, "{=qMeditate x10"),
+                        new(0x00, "{=bSecond thought")
+                    };
 
                     client.SendOptionsDialog(Mundane, "Ready? Mediate and we'll convert experience to health.", options.ToArray());
                     break;
@@ -57,9 +57,9 @@ public class Cloud(WorldServer server, Mundane mundane) : MundaneScript(server, 
             case 0x02:
                 {
                     var options = new List<Dialog.OptionsDataItem>
-                {
-                    new(0x00, "{=bSecond thought")
-                };
+                    {
+                        new(0x00, "{=bSecond thought")
+                    };
 
                     client.SendOptionsDialog(Mundane, "Close your eyes, focus, now let's attempt the conversion.", options.ToArray());
                     break;
@@ -68,7 +68,12 @@ public class Cloud(WorldServer server, Mundane mundane) : MundaneScript(server, 
                 {
                     var baseHp = client.Aisling.BaseHp;
                     var baseExp = client.Aisling.ExpTotal;
-                    var i = baseHp * 500;
+                    long i;
+
+                    if (client.Aisling.BaseHp >= 1000000)
+                        i = baseHp * 2000;
+                    else
+                        i = baseHp * 500;
 
                     if (baseExp - i >= 0)
                     {
@@ -85,11 +90,11 @@ public class Cloud(WorldServer server, Mundane mundane) : MundaneScript(server, 
                     }
 
                     var options = new List<Dialog.OptionsDataItem>
-                {
-                    new(0x03, "{=qMeditate x1"),
-                    new(0x04, "{=qMeditate x10"),
-                    new(0x00, "{=bSecond thought")
-                };
+                    {
+                        new(0x03, "{=qMeditate x1"),
+                        new(0x04, "{=qMeditate x10"),
+                        new(0x00, "{=bSecond thought")
+                    };
 
                     client.SendOptionsDialog(Mundane, $"{client.Aisling.ExpTotal} left\nBase Health: {client.Aisling.BaseHp}", options.ToArray());
                     break;
@@ -98,7 +103,12 @@ public class Cloud(WorldServer server, Mundane mundane) : MundaneScript(server, 
                 {
                     var baseHp = client.Aisling.BaseHp;
                     var baseExp = client.Aisling.ExpTotal;
-                    var i = baseHp * 5000;
+                    long i;
+
+                    if (client.Aisling.BaseHp >= 1000000)
+                        i = baseHp * 20000;
+                    else
+                        i = baseHp * 5000;
 
                     if (baseExp - i >= 0)
                     {
@@ -115,11 +125,11 @@ public class Cloud(WorldServer server, Mundane mundane) : MundaneScript(server, 
                     }
 
                     var options = new List<Dialog.OptionsDataItem>
-                {
-                    new(0x03, "{=qMeditate x1"),
-                    new(0x04, "{=qMeditate x10"),
-                    new(0x00, "{=bSecond thought")
-                };
+                    {
+                        new(0x03, "{=qMeditate x1"),
+                        new(0x04, "{=qMeditate x10"),
+                        new(0x00, "{=bSecond thought")
+                    };
 
                     client.SendOptionsDialog(Mundane, $"{client.Aisling.ExpTotal} left\nBase Health: {client.Aisling.BaseHp}", options.ToArray());
                     break;

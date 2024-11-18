@@ -78,7 +78,7 @@ public class Chill_Touch(Spell spell) : SpellScript(spell)
 
         var targets = playerAction.DamageableWithinRange(target, 4);
 
-        foreach (var enemy in targets.Where(enemy => enemy != null && enemy.Serial != playerAction.Serial && enemy.Attackable))
+        foreach (var enemy in targets.Where(enemy => enemy != null && enemy.Serial != playerAction.Serial))
         {
             if (enemy is not Damageable damageable) continue;
             if (enemy is Aisling aisling && !aisling.Map.Flags.MapFlagIsSet(MapFlags.PlayerKill)) continue;
@@ -331,7 +331,7 @@ public class Corpse_Burst(Spell spell) : SpellScript(spell)
         foreach (var corpse in corpsesNearby)
         {
             var targets = aisling.DamageableWithinRange(corpse, 4);
-            foreach (var enemy in targets.Where(enemy => enemy != null && enemy.Serial != aisling.Serial && enemy.Attackable))
+            foreach (var enemy in targets.Where(enemy => enemy != null && enemy.Serial != aisling.Serial))
             {
                 if (enemy is not Damageable damageable) continue;
                 var dmgCalc = DamageCalc(aisling);

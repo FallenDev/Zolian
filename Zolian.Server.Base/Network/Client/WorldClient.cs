@@ -3991,20 +3991,18 @@ public class WorldClient : WorldClientBase, IWorldClient
         return this;
     }
 
-    public void Port(int i, int x = 0, int y = 0)
+    private void Port(int i, int x = 0, int y = 0)
     {
         TransitionToMap(i, new Position(x, y));
     }
 
-    public void ResetLocation(WorldClient client)
+    public static void ResetLocation(WorldClient client)
     {
         var reset = 0;
 
         while (reset == 0)
         {
-            client.Aisling.Abyss = true;
             client.Port(ServerSetup.Instance.Config.TransitionZone, ServerSetup.Instance.Config.TransitionPointX, ServerSetup.Instance.Config.TransitionPointY);
-            client.Aisling.Abyss = false;
             reset++;
         }
     }
@@ -4012,15 +4010,6 @@ public class WorldClient : WorldClientBase, IWorldClient
     public void Recover()
     {
         Revive();
-    }
-
-    public void RevivePlayer(string u)
-    {
-        if (u is null) return;
-        var user = ObjectManager.GetObject<Aisling>(null, i => i.Username.Equals(u, StringComparison.OrdinalIgnoreCase));
-
-        if (user is { LoggedIn: true })
-            user.Client.Revive();
     }
 
     public void GiveScar()
@@ -4086,7 +4075,7 @@ public class WorldClient : WorldClientBase, IWorldClient
         return Aisling.Position.IsNextTo(sprite.Position) && delta == 0;
     }
 
-    public void KillPlayer(Area map, string u)
+    public static void KillPlayer(Area map, string u)
     {
         if (u is null) return;
         var user = ObjectManager.GetObject<Aisling>(map, i => i.Username.Equals(u, StringComparison.OrdinalIgnoreCase));
@@ -4100,58 +4089,8 @@ public class WorldClient : WorldClientBase, IWorldClient
 
     #endregion
 
-    #region Give Base Stats
-
-    public void GiveHp(int v = 1)
-    {
-        Aisling.BaseHp += v;
-
-        if (Aisling.BaseHp > ServerSetup.Instance.Config.MaxHP)
-            Aisling.BaseHp = ServerSetup.Instance.Config.MaxHP;
-
-        SendAttributes(StatUpdateType.Primary);
-    }
-
-    public void GiveMp(int v = 1)
-    {
-        Aisling.BaseMp += v;
-
-        if (Aisling.BaseMp > ServerSetup.Instance.Config.MaxHP)
-            Aisling.BaseMp = ServerSetup.Instance.Config.MaxHP;
-
-        SendAttributes(StatUpdateType.Primary);
-    }
-
-    public void GiveStr(byte v = 1)
-    {
-        Aisling._Str += v;
-        SendAttributes(StatUpdateType.Primary);
-    }
-
-    public void GiveInt(byte v = 1)
-    {
-        Aisling._Int += v;
-        SendAttributes(StatUpdateType.Primary);
-    }
-
-    public void GiveWis(byte v = 1)
-    {
-        Aisling._Wis += v;
-        SendAttributes(StatUpdateType.Primary);
-    }
-
-    public void GiveCon(byte v = 1)
-    {
-        Aisling._Con += v;
-        SendAttributes(StatUpdateType.Primary);
-    }
-
-    public void GiveDex(byte v = 1)
-    {
-        Aisling._Dex += v;
-        SendAttributes(StatUpdateType.Primary);
-    }
-
+    #region Events & Experience
+    
     public void EnqueueExperienceEvent(Aisling player, long exp, bool hunting) => _expQueue.TryAdd(EphemeralRandomIdGenerator<uint>.Shared.NextId, new ExperienceEvent(player, exp, hunting));
     public void EnqueueAbilityEvent(Aisling player, int exp, bool hunting) => _apQueue.TryAdd(EphemeralRandomIdGenerator<uint>.Shared.NextId, new AbilityEvent(player, exp, hunting));
     public void EnqueueDebuffAppliedEvent(Sprite affected, Debuff debuff) => _debuffApplyQueue.TryAdd(EphemeralRandomIdGenerator<uint>.Shared.NextId, new DebuffEvent(affected, debuff));
@@ -4240,7 +4179,7 @@ public class WorldClient : WorldClientBase, IWorldClient
         }
     }
 
-    public void LevelUp(Aisling player, long extraExp)
+    private void LevelUp(Aisling player, long extraExp)
     {
         // Set next level
         player.ExpLevel++;
@@ -4351,7 +4290,7 @@ public class WorldClient : WorldClientBase, IWorldClient
                 var expToTotal = exp - extraExp;
                 player.AbpTotal += expToTotal;
                 player.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"Received {expToTotal:n0} ability points!");
-                player.Client.DarkRankUp(player, extraExp);
+                player.Client.JobRankUp(player, extraExp);
             }
             else
             {
@@ -4367,7 +4306,7 @@ public class WorldClient : WorldClientBase, IWorldClient
         }
     }
 
-    public void DarkRankUp(Aisling player, int extraExp)
+    private void JobRankUp(Aisling player, int extraExp)
     {
         player.AbpLevel++;
 
@@ -4404,7 +4343,7 @@ public class WorldClient : WorldClientBase, IWorldClient
 
     #region Warping & Maps
 
-    public WorldClient RefreshMap(bool updateView = false)
+    private WorldClient RefreshMap(bool updateView = false)
     {
         MapUpdating = true;
 
@@ -4483,7 +4422,7 @@ public class WorldClient : WorldClientBase, IWorldClient
         return this;
     }
 
-    public void WarpToAdjacentMap(WarpTemplate warps)
+    private void WarpToAdjacentMap(WarpTemplate warps)
     {
         if (warps.WarpType == WarpType.World) return;
 
@@ -4602,7 +4541,7 @@ public class WorldClient : WorldClientBase, IWorldClient
         }
     }
 
-    public void ReapplyKillCount()
+    private void ReapplyKillCount()
     {
         var hasKills = ServerSetup.Instance.GlobalKillRecordCache.TryGetValue(Aisling.Serial, out var killRecords);
         if (hasKills)
@@ -4637,7 +4576,7 @@ public class WorldClient : WorldClientBase, IWorldClient
         return this;
     }
 
-    public void CompleteMapTransition()
+    private void CompleteMapTransition()
     {
         foreach (var (_, area) in ServerSetup.Instance.GlobalMapCache)
         {

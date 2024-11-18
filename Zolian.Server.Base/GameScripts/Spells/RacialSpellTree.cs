@@ -38,8 +38,6 @@ public class Tail_Flip(Spell spell) : SpellScript(spell)
 [Script("Caltrops")]
 public class Caltrops(Spell spell) : SpellScript(spell)
 {
-    private readonly GlobalSpellMethods _spellMethod = new();
-
     public override void OnActivated(Sprite sprite) { }
 
     public override void OnFailed(Sprite sprite, Sprite target) { }
@@ -85,8 +83,6 @@ public class Caltrops(Spell spell) : SpellScript(spell)
 [Script("Calming Voice")]
 public class Calming_Voice(Spell spell) : SpellScript(spell)
 {
-    private readonly GlobalSpellMethods _spellMethod = new();
-
     public override void OnFailed(Sprite sprite, Sprite target) { }
 
     public override void OnSuccess(Sprite sprite, Sprite target) { }
@@ -152,7 +148,6 @@ public class Calming_Voice(Spell spell) : SpellScript(spell)
 public class Stone_Skin(Spell spell) : SpellScript(spell)
 {
     private readonly Buff _buff = new buff_StoneSkin();
-    private readonly GlobalSpellMethods _spellMethod = new();
 
     public override void OnFailed(Sprite sprite, Sprite target) { }
 
@@ -178,8 +173,7 @@ public class Stone_Skin(Spell spell) : SpellScript(spell)
 [Script("Destructive Force")]
 public class DestructiveForce(Spell spell) : SpellScript(spell)
 {
-    private IEnumerable<Sprite> _enemyList;
-    private readonly GlobalSpellMethods _spellMethod = new();
+    private List<Monster> _enemyList;
 
     public override void OnFailed(Sprite sprite, Sprite target) { }
 
@@ -248,8 +242,7 @@ public class DestructiveForce(Spell spell) : SpellScript(spell)
         foreach (var targetSprite in enemyList.Where(targetSprite => targetSprite is not null))
         {
             if (targetSprite.Position.DistanceFrom((ushort)damageDealingSprite.Pos.X, (ushort)damageDealingSprite.Pos.Y) >= 5) continue;
-            if (targetSprite is Monster monster)
-                if (monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Dummy)) continue;
+            if (targetSprite.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Dummy)) continue;
 
             var success = GlobalSpellMethods.Execute(damageDealingSprite.Client, Spell);
 
@@ -294,8 +287,6 @@ public class DestructiveForce(Spell spell) : SpellScript(spell)
 [Script("Elemental Bolt")]
 public class Elemental_Bolt(Spell spell) : SpellScript(spell)
 {
-    private readonly GlobalSpellMethods _spellMethod = new();
-
     public override void OnFailed(Sprite sprite, Sprite target) { }
 
     public override void OnSuccess(Sprite sprite, Sprite target)

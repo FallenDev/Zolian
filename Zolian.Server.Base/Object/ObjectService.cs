@@ -103,9 +103,9 @@ public class SpriteCollection<T> : IEnumerable<T> where T : Sprite
         _values.TryRemove(obj.Serial, out _);
     }
 
-    [CanBeNull] public T Query(Predicate<T> predicate) => _values.Values.FirstOrDefault(item => predicate(item) && !item.Abyss);
+    [CanBeNull] public T Query(Predicate<T> predicate) => _values.Values.FirstOrDefault(item => predicate(item));
 
-    public IEnumerable<T> QueryAll(Predicate<T> predicate) => _values.Values.Where(item => predicate(item) && !item.Abyss);
+    public IEnumerable<T> QueryAll(Predicate<T> predicate) => _values.Values.Where(item => predicate(item));
 
     public IEnumerator<T> GetEnumerator() => _values.Values.GetEnumerator();
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();

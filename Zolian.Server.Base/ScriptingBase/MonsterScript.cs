@@ -29,8 +29,7 @@ public abstract class MonsterScript(Monster monster, Area map) : ObjectManager
         {
             lock (Monster.TaggedAislingsLock)
             {
-                Monster.TargetRecord.TaggedAislings.TryGetValue(client.Aisling.Serial, out var player);
-                Monster.TargetRecord.TaggedAislings.TryUpdate(client.Aisling.Serial, (player.dmg, player.player), player);
+                Monster.TargetRecord.TaggedAislings.TryRemove(client.Aisling.Serial, out _);
                 if (Monster.Target == client.Aisling && Monster.TargetRecord.TaggedAislings.IsEmpty) Monster.ClearTarget();
             }
         }
@@ -50,9 +49,9 @@ public abstract class MonsterScript(Monster monster, Area map) : ObjectManager
                 var tagged = Monster.TargetRecord.TaggedAislings.TryGetValue(client.Aisling.Serial, out var player);
 
                 if (!tagged)
-                    Monster.TargetRecord.TaggedAislings.TryAdd(client.Aisling.Serial, (dmg, client.Aisling));
+                    Monster.TryAddPlayerAndHisGroup(client.Aisling);
                 else
-                    Monster.TargetRecord.TaggedAislings.TryUpdate(client.Aisling.Serial, (++dmg, player.player), player);
+                    Monster.TargetRecord.TaggedAislings.TryUpdate(client.Aisling.Serial, client.Aisling, client.Aisling);
             
                 Monster.Aggressive = true;
             }

@@ -16,7 +16,6 @@ namespace Darkages.Sprites;
 
 public abstract class Sprite : INotifyPropertyChanged
 {
-    public bool Abyss;
     public Position LastPosition;
     public List<List<TileGrid>> MasterGrid = [];
     public event PropertyChangedEventHandler PropertyChanged;
@@ -35,7 +34,6 @@ public abstract class Sprite : INotifyPropertyChanged
     private readonly Lock _getMonsterDamageLock = new();
 
     public bool Alive => CurrentHp > 1;
-    public bool Attackable => this is Monster || this is Aisling;
     public bool Summoned;
 
     #region Buffs Debuffs
@@ -286,7 +284,7 @@ public abstract class Sprite : INotifyPropertyChanged
                 monster.TargetRecord.TaggedAislings.TryGetValue(player.Serial, out var playerRecord);
 
                 // If nearby player is found, deny a record flush
-                if (playerRecord.player != null)
+                if (playerRecord != null)
                     flushTargetRecord++;
             }
 
@@ -306,6 +304,8 @@ public abstract class Sprite : INotifyPropertyChanged
         return true;
     }
 
+    #region GetObjects All
+
     private IEnumerable<Sprite> UnSafeGetSprites(int x, int y) => ObjectManager.GetObjects(Map, i => (int)i.Pos.X == x && (int)i.Pos.Y == y, ObjectManager.Get.All);
 
     protected List<Sprite> GetSprites(int x, int y)
@@ -316,36 +316,43 @@ public abstract class Sprite : INotifyPropertyChanged
         }
     }
 
-    private IEnumerable<Sprite> UnSafeAislingGetDamageableSprites(int x, int y) => ObjectManager.GetObjects(Map, i => (int)i.Pos.X == x && (int)i.Pos.Y == y, ObjectManager.Get.AislingDamage);
+    #endregion
 
-    protected List<Sprite> AislingGetDamageableSprites(int x, int y)
+    #region GetObjects Damageable
+
+    private IEnumerable<Sprite> UnSafeGetDamageableSpritesInPosition(int x, int y) => ObjectManager.GetObjects(Map, i => i != null && (int)i.Pos.X == x && (int)i.Pos.Y == y, ObjectManager.Get.Damageable);
+
+    protected List<Sprite> GetDamageableSpritesInPosition(int x, int y)
     {
         lock (_getAislingDamageLock)
         {
-            return UnSafeAislingGetDamageableSprites(x, y).ToList();
+            return UnSafeGetDamageableSpritesInPosition(x, y).ToList();
         }
     }
 
-    private IEnumerable<Sprite> UnSafeMonsterGetDamageableSprites(int x, int y) => ObjectManager.GetObjects(Map, i => (int)i.Pos.X == x && (int)i.Pos.Y == y, ObjectManager.Get.Monsters | ObjectManager.Get.Aislings);
+    private IEnumerable<Sprite> UnSafeDamageableNearby() => ObjectManager.GetObjects(Map, i => i != null && i.WithinRangeOf(this, ServerSetup.Instance.Config.WithinRangeProximity), ObjectManager.Get.Damageable);
 
-    protected List<Sprite> MonsterGetDamageableSprites(int x, int y)
+    public List<Sprite> DamageableNearby()
     {
-        lock (_getMonsterDamageLock)
+        lock (_spritesNearbyLock)
         {
-            return UnSafeMonsterGetDamageableSprites(x, y).ToList();
+            return UnSafeDamageableNearby().ToList();
         }
     }
 
-    public bool WithinRangeOf(Sprite other) => other != null && WithinRangeOf(other, ServerSetup.Instance.Config.WithinRangeProximity);
-    public bool WithinEarShotOf(Sprite other) => other != null && WithinRangeOf(other, 14);
-    public bool WithinMonsterSpellRangeOf(Sprite other) => other != null && WithinRangeOf(other, 10);
-    public bool WithinRangeOf(Sprite other, int distance)
+    private IEnumerable<Sprite> UnSafeDamageableWithinRange(Sprite target, int range) => ObjectManager.GetObjects(Map, i => i != null && i.WithinRangeOf(target, range), ObjectManager.Get.Damageable);
+
+    public List<Sprite> DamageableWithinRange(Sprite target, int range)
     {
-        if (other == null) return false;
-        return CurrentMapId == other.CurrentMapId && WithinDistanceOf((int)other.Pos.X, (int)other.Pos.Y, distance);
+        lock (_spritesWithinRangeLock)
+        {
+            return UnSafeDamageableWithinRange(target, range).ToList();
+        }
     }
-    public bool WithinRangeOfTile(Position pos, int distance) => pos != null && WithinDistanceOf(pos.X, pos.Y, distance);
-    private bool WithinDistanceOf(int x, int y, int subjectLength) => DistanceFrom(x, y) < subjectLength;
+
+    #endregion
+
+    #region GetObjects Aislings
 
     private IEnumerable<Aisling> UnSafeAislingsNearby() => ObjectManager.GetObjects<Aisling>(Map, i => i != null && i.WithinRangeOf(this, ServerSetup.Instance.Config.WithinRangeProximity));
 
@@ -377,6 +384,10 @@ public abstract class Sprite : INotifyPropertyChanged
         }
     }
 
+    #endregion
+
+    #region GetObjects Npcs
+
     private IEnumerable<Monster> UnSafeMonstersNearby() => ObjectManager.GetObjects<Monster>(Map, i => i != null && i.WithinRangeOf(this, ServerSetup.Instance.Config.WithinRangeProximity));
 
     public List<Monster> MonstersNearby()
@@ -407,47 +418,27 @@ public abstract class Sprite : INotifyPropertyChanged
         }
     }
 
-    private List<Sprite> UnSafeDamageableNearby()
-    {
-        var result = new List<Sprite>();
-        var listA = ObjectManager.GetObjects<Monster>(Map, i => i != null && i.WithinRangeOf(this, ServerSetup.Instance.Config.WithinRangeProximity)).ToList();
-        var listB = ObjectManager.GetObjects<Aisling>(Map, i => i != null && i.WithinRangeOf(this, ServerSetup.Instance.Config.WithinRangeProximity)).ToList();
-        result.AddRange(listA);
-        result.AddRange(listB);
-        return result;
-    }
+    #endregion
 
-    public List<Sprite> DamageableNearby()
-    {
-        lock (_spritesNearbyLock)
-        {
-            return UnSafeDamageableNearby();
-        }
-    }
+    #region Within Range & Distance
 
-    private List<Sprite> UnSafeDamageableWithinRange(Sprite target, int range)
+    public bool WithinRangeOf(Sprite other) => other != null && WithinRangeOf(other, ServerSetup.Instance.Config.WithinRangeProximity);
+    public bool WithinEarShotOf(Sprite other) => other != null && WithinRangeOf(other, 14);
+    public bool WithinMonsterSpellRangeOf(Sprite other) => other != null && WithinRangeOf(other, 10);
+    public bool WithinRangeOf(Sprite other, int distance)
     {
-        var result = new List<Sprite>();
-        var listA = ObjectManager.GetObjects<Monster>(Map, i => i != null && i.WithinRangeOf(target, range)).ToList();
-        var listB = ObjectManager.GetObjects<Aisling>(Map, i => i != null && i.WithinRangeOf(target, range)).ToList();
-        result.AddRange(listA);
-        result.AddRange(listB);
-        return result;
+        if (other == null) return false;
+        return CurrentMapId == other.CurrentMapId && WithinDistanceOf((int)other.Pos.X, (int)other.Pos.Y, distance);
     }
-
-    public List<Sprite> DamageableWithinRange(Sprite target, int range)
-    {
-        lock (_spritesWithinRangeLock)
-        {
-            return UnSafeDamageableWithinRange(target, range);
-        }
-    }
-
+    public bool WithinRangeOfTile(Position pos, int distance) => pos != null && WithinDistanceOf(pos.X, pos.Y, distance);
+    private bool WithinDistanceOf(int x, int y, int subjectLength) => DistanceFrom(x, y) < subjectLength;
     public int DistanceFrom(int x, int y)
     {
         // Manhattan Distance
         return Math.Abs(X - x) + Math.Abs(Y - y);
     }
+
+    #endregion
 
     #region Status
 

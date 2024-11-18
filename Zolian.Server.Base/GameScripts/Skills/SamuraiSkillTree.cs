@@ -1,5 +1,6 @@
 ﻿using Darkages.Enums;
 using Darkages.GameScripts.Affects;
+using Darkages.Network.Server;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Sprites.Entity;
@@ -36,54 +37,66 @@ public class Iaido(Skill skill) : SkillScript(skill)
             return;
         }
 
-        var position = _enemyList.Last()?.Position;
-        if (position == null)
+        try
         {
-            OnFailed(aisling);
-            return;
-        }
+            var position = _enemyList.Last()?.Position;
+            if (position == null)
+            {
+                OnFailed(aisling);
+                return;
+            }
 
-        var mapCheck = aisling.Map.ID;
-        var wallPosition = aisling.GetPendingChargePositionNoTarget(6, aisling);
-        var wallPos = GlobalSkillMethods.DistanceTo(aisling.Position, wallPosition);
+            var mapCheck = aisling.Map.ID;
+            var wallPosition = aisling.GetPendingChargePositionNoTarget(6, aisling);
+            var wallPos = GlobalSkillMethods.DistanceTo(aisling.Position, wallPosition);
 
-        if (mapCheck != aisling.Map.ID) return;
-        if (!(wallPos > 0)) OnFailed(aisling);
+            if (mapCheck != aisling.Map.ID) return;
+            if (!(wallPos > 0)) OnFailed(aisling);
 
-        if (aisling.Position != wallPosition)
-        {
-            GlobalSkillMethods.Step(aisling, wallPosition.X, wallPosition.Y);
-        }
+            if (aisling.Position != wallPosition)
+            {
+                GlobalSkillMethods.Step(aisling, wallPosition.X, wallPosition.Y);
+            }
 
-        foreach (var enemy in _enemyList)
-        {
-            if (enemy is not Damageable damageable) continue;
-            var dmgCalc = DamageCalc(aisling);
+            foreach (var enemy in _enemyList)
+            {
+                if (enemy is not Damageable damageable) continue;
+                var dmgCalc = DamageCalc(aisling);
 
-            damageable.ApplyDamage(aisling, dmgCalc, Skill);
-            GlobalSkillMethods.Train(client, Skill);
+                damageable.ApplyDamage(aisling, dmgCalc, Skill);
+                GlobalSkillMethods.Train(client, Skill);
+                Task.Delay(300).ContinueWith(c =>
+                {
+                    aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings,
+                        c => c.SendAnimation(119, enemy.Position));
+                });
+
+                if (!_crit) continue;
+                Task.Delay(300).ContinueWith(c =>
+                {
+                    aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings,
+                        c => c.SendAnimation(387, null, sprite.Serial));
+                });
+            }
+
             Task.Delay(300).ContinueWith(c =>
             {
-                aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(119, enemy.Position));
+                aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings,
+                    c => c.SendAnimation(Skill.Template.TargetAnimation, aisling.Position));
             });
 
-            if (!_crit) continue;
-            Task.Delay(300).ContinueWith(c =>
-            {
-                aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(387, null, sprite.Serial));
-            });
+            if (wallPos > 5) return;
+
+            var stunned = new DebuffBeagsuain();
+            aisling.Client.EnqueueDebuffAppliedEvent(aisling, stunned);
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings,
+                c => c.SendAnimation(208, null, aisling.Serial));
         }
-
-        Task.Delay(300).ContinueWith(c =>
+        catch (Exception)
         {
-            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.TargetAnimation, aisling.Position));
-        });
-
-        if (wallPos > 5) return;
-
-        var stunned = new DebuffBeagsuain();
-        aisling.Client.EnqueueDebuffAppliedEvent(aisling, stunned);
-        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(208, null, aisling.Serial));
+            ServerSetup.EventsLogger($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}");
+            SentrySdk.CaptureMessage($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
+        }
     }
 
     public override void OnUse(Sprite sprite)
@@ -137,43 +150,52 @@ public class Iaido(Skill skill) : SkillScript(skill)
         if (sprite is not Aisling aisling) return;
         var client = aisling.Client;
 
-        _enemyList = client.Aisling.DamageableGetInFrontColumn(6);
-
-        if (_enemyList.Count == 0)
+        try
         {
-            var mapCheck = aisling.Map.ID;
-            var wallPosition = aisling.GetPendingChargePositionNoTarget(6, aisling);
-            var wallPos = GlobalSkillMethods.DistanceTo(aisling.Position, wallPosition);
+            _enemyList = client.Aisling.DamageableGetInFrontColumn(6);
 
-            if (mapCheck != aisling.Map.ID) return;
-            if (!(wallPos > 0)) OnFailed(aisling);
-
-            if (aisling.Position != wallPosition)
+            if (_enemyList.Count == 0)
             {
-                GlobalSkillMethods.Step(aisling, wallPosition.X, wallPosition.Y);
-            }
+                var mapCheck = aisling.Map.ID;
+                var wallPosition = aisling.GetPendingChargePositionNoTarget(6, aisling);
+                var wallPos = GlobalSkillMethods.DistanceTo(aisling.Position, wallPosition);
 
-            if (wallPos <= 5)
-            {
-                var stunned = new DebuffBeagsuain();
-                aisling.Client.EnqueueDebuffAppliedEvent(aisling, stunned);
-                aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(208, null, aisling.Serial));
-            }
+                if (mapCheck != aisling.Map.ID) return;
+                if (!(wallPos > 0)) OnFailed(aisling);
 
-            aisling.UsedSkill(Skill);
-        }
-        else
-        {
-            _success = GlobalSkillMethods.OnUse(aisling, Skill);
+                if (aisling.Position != wallPosition)
+                {
+                    GlobalSkillMethods.Step(aisling, wallPosition.X, wallPosition.Y);
+                }
 
-            if (_success)
-            {
-                OnSuccess(aisling);
+                if (wallPos <= 5)
+                {
+                    var stunned = new DebuffBeagsuain();
+                    aisling.Client.EnqueueDebuffAppliedEvent(aisling, stunned);
+                    aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings,
+                        c => c.SendAnimation(208, null, aisling.Serial));
+                }
+
+                aisling.UsedSkill(Skill);
             }
             else
             {
-                OnFailed(aisling);
+                _success = GlobalSkillMethods.OnUse(aisling, Skill);
+
+                if (_success)
+                {
+                    OnSuccess(aisling);
+                }
+                else
+                {
+                    OnFailed(aisling);
+                }
             }
+        }
+        catch (Exception)
+        {
+            ServerSetup.EventsLogger($"Issue with {Skill.Name} within Target called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}");
+            SentrySdk.CaptureMessage($"Issue with {Skill.Name} within Target called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
         }
     }
 }
@@ -185,7 +207,6 @@ public class MugaiRyu(Skill skill) : SkillScript(skill)
     private Sprite _target;
     private bool _crit;
     private bool _success;
-    private readonly GlobalSkillMethods _skillMethod = new();
 
     public override void OnFailed(Sprite sprite) { }
 
@@ -212,7 +233,6 @@ public class NitenIchiRyu(Skill skill) : SkillScript(skill)
     private Sprite _target;
     private bool _crit;
     private bool _success;
-    private readonly GlobalSkillMethods _skillMethod = new();
 
     public override void OnFailed(Sprite sprite) { }
 
@@ -238,7 +258,6 @@ public class ShintoRyu(Skill skill) : SkillScript(skill)
     private Sprite _target;
     private bool _crit;
     private bool _success;
-    private readonly GlobalSkillMethods _skillMethod = new();
 
     public override void OnFailed(Sprite sprite) { }
 
@@ -262,7 +281,6 @@ public class IttoRu(Skill skill) : SkillScript(skill)
     private Sprite _target;
     private bool _crit;
     private bool _success;
-    private readonly GlobalSkillMethods _skillMethod = new();
 
     public override void OnFailed(Sprite sprite) { }
 
@@ -286,7 +304,6 @@ public class TamiyaRyu(Skill skill) : SkillScript(skill)
     private Sprite _target;
     private bool _crit;
     private bool _success;
-    private readonly GlobalSkillMethods _skillMethod = new();
 
     public override void OnFailed(Sprite sprite) { }
 

@@ -10,7 +10,7 @@ public class PortalSession
         var readyTime = DateTime.UtcNow;
         client.LastWarp = readyTime.AddMilliseconds(100);
         client.LeaveArea(destinationMap, true, true);
-        client.ResetLocation(client);
+        WorldClient.ResetLocation(client);
 
         if (destinationMap != 0) return;
         ShowFieldMap(client);

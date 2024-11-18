@@ -327,7 +327,7 @@ public static class Commander
         if (string.IsNullOrEmpty(who)) return;
         var players = ServerSetup.Instance.Game.Aislings;
         var player = players.FirstOrDefault(i => i != null && string.Equals(i.Username, who, StringComparison.CurrentCultureIgnoreCase));
-        client.KillPlayer(client.Aisling.Map, player?.Username);
+        WorldClient.KillPlayer(client.Aisling.Map, player?.Username);
         ServerSetup.EventsLogger($"{client.RemoteIp} used GM Command -Kill- on character: {client.Aisling.Username}");
     }
 

@@ -32,58 +32,69 @@ public class Grief_Eruption(Skill skill) : SkillScript(skill)
             SourceId = aisling.Serial
         };
 
-        if (aisling.CurrentMp - 1500 > 0)
+        try
         {
-            aisling.CurrentMp -= 1500;
+            if (aisling.CurrentMp - 1500 > 0)
+            {
+                aisling.CurrentMp -= 1500;
+            }
+            else
+            {
+                client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
+                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
+                OnFailed(aisling);
+                return;
+            }
+
+            var enemy = client.Aisling.DamageableGetInFront(6);
+
+            if (enemy.Count == 0)
+            {
+                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
+                OnFailed(aisling);
+                return;
+            }
+
+            await SendAnimations(aisling, enemy);
+
+            // enemy.Count = 0 verified that there is an enemy
+            _target = enemy.FirstOrDefault();
+
+            if (_target is null || _target.Serial == aisling.Serial)
+            {
+                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
+                OnFailed(aisling);
+                return;
+            }
+
+            if (_target is not Damageable damageable) return;
+
+            if (_target.SpellReflect)
+            {
+                aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings,
+                    c => c.SendAnimation(184, null, _target.Serial));
+                aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1,
+                    "Your elemental ability has been reflected!");
+                _target = Spell.SpellReflect(_target, aisling);
+            }
+
+            if (_target.SpellNegate)
+            {
+                aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings,
+                    c => c.SendAnimation(64, null, _target.Serial));
+                client.SendServerMessage(ServerMessageType.OrangeBar1, "Your elemental ability has been deflected!");
+                return;
+            }
+
+            var dmgCalc = DamageCalc(aisling);
+            damageable.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Sorrow, Skill);
+            GlobalSkillMethods.OnSuccess(_target, aisling, Skill, 0, false, action);
         }
-        else
+        catch (Exception)
         {
-            client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
-            GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
-            OnFailed(aisling);
-            return;
+            ServerSetup.EventsLogger($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}");
+            SentrySdk.CaptureMessage($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
         }
-
-        var enemy = client.Aisling.DamageableGetInFront(6);
-
-        if (enemy.Count == 0)
-        {
-            GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
-            OnFailed(aisling);
-            return;
-        }
-
-        await SendAnimations(aisling, enemy);
-
-        // enemy.Count = 0 verified that there is an enemy
-        _target = enemy.FirstOrDefault();
-
-        if (_target is null || _target.Serial == aisling.Serial || !_target.Attackable)
-        {
-            GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
-            OnFailed(aisling);
-            return;
-        }
-
-        if (_target is not Damageable damageable) return;
-
-        if (_target.SpellReflect)
-        {
-            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(184, null, _target.Serial));
-            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your elemental ability has been reflected!");
-            _target = Spell.SpellReflect(_target, aisling);
-        }
-
-        if (_target.SpellNegate)
-        {
-            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(64, null, _target.Serial));
-            client.SendServerMessage(ServerMessageType.OrangeBar1, "Your elemental ability has been deflected!");
-            return;
-        }
-
-        var dmgCalc = DamageCalc(aisling);
-        damageable.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Sorrow, Skill);
-        GlobalSkillMethods.OnSuccess(_target, aisling, Skill, 0, false, action);
     }
 
     public override async void OnUse(Sprite sprite)
@@ -110,35 +121,47 @@ public class Grief_Eruption(Skill skill) : SkillScript(skill)
         }
         else
         {
-            if (sprite is not Identifiable identifiable) return;
-            var enemy = identifiable.MonsterGetInFront(6);
-
-            if (enemy.Count == 0) return;
-            await SendAnimations(sprite, enemy);
-
-            foreach (var i in enemy.Where(i => i != null && sprite.Serial != i.Serial && i.Attackable))
+            try
             {
-                _target = i;
-                if (_target is not Damageable damageable) continue;
+                if (sprite is not Damageable identifiable) return;
+                var enemy = identifiable.DamageableGetInFront(6);
 
-                if (_target.SpellReflect)
+                if (enemy.Count == 0) return;
+                await SendAnimations(sprite, enemy);
+
+                foreach (var i in enemy.Where(i => i != null && sprite.Serial != i.Serial))
                 {
-                    damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(184, null, _target.Serial));
-                    _target = Spell.SpellReflect(_target, sprite);
-                }
+                    _target = i;
+                    if (_target is not Damageable damageable) continue;
 
-                if (_target.SpellNegate)
-                {
-                    damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(64, null, _target.Serial));
-                    continue;
-                }
+                    if (_target.SpellReflect)
+                    {
+                        damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings,
+                            c => c.SendAnimation(184, null, _target.Serial));
+                        _target = Spell.SpellReflect(_target, sprite);
+                    }
 
-                var dmgCalc = DamageCalc(sprite);
-                damageable.ApplyElementalSkillDamage(sprite, dmgCalc, ElementManager.Element.Fire, Skill);
-                damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.TargetAnimation, null, _target.Serial, 170));
-                damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(sprite.Serial, BodyAnimation.Assail, 30));
-                if (!_crit) return;
-                damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(387, null, sprite.Serial));
+                    if (_target.SpellNegate)
+                    {
+                        damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings,
+                            c => c.SendAnimation(64, null, _target.Serial));
+                        continue;
+                    }
+
+                    var dmgCalc = DamageCalc(sprite);
+                    damageable.ApplyElementalSkillDamage(sprite, dmgCalc, ElementManager.Element.Fire, Skill);
+                    damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings,
+                        c => c.SendAnimation(Skill.Template.TargetAnimation, null, _target.Serial, 170));
+                    damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings,
+                        c => c.SendBodyAnimation(sprite.Serial, BodyAnimation.Assail, 30));
+                    if (!_crit) return;
+                    damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings,
+                        c => c.SendAnimation(387, null, sprite.Serial));
+                }
+            }
+            catch
+            {
+                // ignored
             }
         }
     }

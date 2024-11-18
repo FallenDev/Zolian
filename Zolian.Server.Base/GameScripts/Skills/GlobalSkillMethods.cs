@@ -189,8 +189,8 @@ public class GlobalSkillMethods
         }
         catch
         {
-            ServerSetup.EventsLogger($"Issue with {skill.Name} within OnUse called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}");
-            SentrySdk.CaptureMessage($"Issue with {skill.Name} within OnUse called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
+            ServerSetup.EventsLogger($"Issue with {skill.Name} within GlobalSkillOnUse called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}");
+            SentrySdk.CaptureMessage($"Issue with {skill.Name} within GlobalSkillOnUse called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
         }
 
         return Attempt(client, skill);
@@ -225,8 +225,8 @@ public class GlobalSkillMethods
         }
         catch
         {
-            ServerSetup.EventsLogger($"Issue with {skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}");
-            SentrySdk.CaptureMessage($"Issue with {skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
+            ServerSetup.EventsLogger($"Issue with {skill.Name} within GlobalSkillOnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}");
+            SentrySdk.CaptureMessage($"Issue with {skill.Name} within GlobalSkillOnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
         }
     }
 
@@ -258,8 +258,8 @@ public class GlobalSkillMethods
         }
         catch
         {
-            ServerSetup.EventsLogger($"Issue with {skill.Name} within OnSuccessWithoutAction called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}");
-            SentrySdk.CaptureMessage($"Issue with {skill.Name} within OnSuccessWithoutAction called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
+            ServerSetup.EventsLogger($"Issue with {skill.Name} within GlobalSkillOnSuccessWithoutAction called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}");
+            SentrySdk.CaptureMessage($"Issue with {skill.Name} within GlobalSkillOnSuccessWithoutAction called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
         }
     }
 
@@ -289,8 +289,8 @@ public class GlobalSkillMethods
         }
         catch
         {
-            ServerSetup.EventsLogger($"Issue with {skill.Name} within OnSuccessWithoutActionAnimation called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}");
-            SentrySdk.CaptureMessage($"Issue with {skill.Name} within OnSuccessWithoutActionAnimation called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
+            ServerSetup.EventsLogger($"Issue with {skill.Name} within GlobalSkillOnSuccessWithoutActionAnimation called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}");
+            SentrySdk.CaptureMessage($"Issue with {skill.Name} within GlobalSkillOnSuccessWithoutActionAnimation called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
         }
     }
 
@@ -345,8 +345,8 @@ public class GlobalSkillMethods
         }
         catch
         {
-            ServerSetup.EventsLogger($"Issue with {skill.Name} within OnFailed called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}");
-            SentrySdk.CaptureMessage($"Issue with {skill.Name} within OnFailed called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
+            ServerSetup.EventsLogger($"Issue with {skill.Name} within GlobalSkillOnFailed called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}");
+            SentrySdk.CaptureMessage($"Issue with {skill.Name} within GlobalSkillOnFailed called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
         }
     }
 

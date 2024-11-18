@@ -125,8 +125,8 @@ public class ShapeShifter : MonsterScript
 
         if (Monster.Target is null)
         {
-            var recordTuple = Monster.TargetRecord.TaggedAislings.Values.FirstOrDefault(p => p.player.Map == Monster.Map);
-            Monster.Target = recordTuple.player;
+            var recordTuple = Monster.TargetRecord.TaggedAislings.Values.FirstOrDefault(p => p.Map == Monster.Map);
+            Monster.Target = recordTuple;
         }
 
         if (Monster.Target is Aisling aisling)
@@ -482,8 +482,8 @@ public class SelfDestruct : MonsterScript
 
         if (Monster.Target is null)
         {
-            var recordTuple = Monster.TargetRecord.TaggedAislings.Values.FirstOrDefault(p => p.player.Map == Monster.Map);
-            Monster.Target = recordTuple.player;
+            var recordTuple = Monster.TargetRecord.TaggedAislings.Values.FirstOrDefault(p => p.Map == Monster.Map);
+            Monster.Target = recordTuple;
         }
 
         if (Monster.Target is Aisling aisling)
@@ -593,7 +593,7 @@ public class SelfDestruct : MonsterScript
         {
             if (Monster.Target is not Aisling aisling) return;
             Monster.TargetRecord.TaggedAislings.TryGetValue(aisling.Serial, out var playerTuple);
-            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, (0, aisling), playerTuple);
+            Monster.TargetRecord.TaggedAislings.TryUpdate(aisling.Serial, aisling, playerTuple);
             return;
         }
 
@@ -720,8 +720,8 @@ public class AlertSummon : MonsterScript
 
         if (Monster.Target is null)
         {
-            var recordTuple = Monster.TargetRecord.TaggedAislings.Values.FirstOrDefault(p => p.player.Map == Monster.Map);
-            Monster.Target = recordTuple.player;
+            var recordTuple = Monster.TargetRecord.TaggedAislings.Values.FirstOrDefault(p => p.Map == Monster.Map);
+            Monster.Target = recordTuple;
         }
 
         if (Monster.Target is Aisling aisling)
@@ -1008,8 +1008,8 @@ public class Turret : MonsterScript
 
         if (Monster.Target is null)
         {
-            var recordTuple = Monster.TargetRecord.TaggedAislings.Values.FirstOrDefault(p => p.player.Map == Monster.Map);
-            Monster.Target = recordTuple.player;
+            var recordTuple = Monster.TargetRecord.TaggedAislings.Values.FirstOrDefault(p => p.Map == Monster.Map);
+            Monster.Target = recordTuple;
         }
 
         if (Monster.Target is Aisling aisling)
@@ -1249,8 +1249,8 @@ public class GeneralPirate : MonsterScript
 
         if (Monster.Target is null)
         {
-            var recordTuple = Monster.TargetRecord.TaggedAislings.Values.FirstOrDefault(p => p.player.Map == Monster.Map);
-            Monster.Target = recordTuple.player;
+            var recordTuple = Monster.TargetRecord.TaggedAislings.Values.FirstOrDefault(p => p.Map == Monster.Map);
+            Monster.Target = recordTuple;
         }
 
         if (Monster.Target is Aisling aisling)
@@ -1538,8 +1538,8 @@ public class PirateOfficer : MonsterScript
 
         if (Monster.Target is null)
         {
-            var recordTuple = Monster.TargetRecord.TaggedAislings.Values.FirstOrDefault(p => p.player.Map == Monster.Map);
-            Monster.Target = recordTuple.player;
+            var recordTuple = Monster.TargetRecord.TaggedAislings.Values.FirstOrDefault(p => p.Map == Monster.Map);
+            Monster.Target = recordTuple;
         }
 
         if (Monster.Target is Aisling aisling)
@@ -1844,8 +1844,8 @@ public class AosdaRemnant : MonsterScript
 
         if (Monster.Target is null)
         {
-            var recordTuple = Monster.TargetRecord.TaggedAislings.Values.FirstOrDefault(p => p.player.Map == Monster.Map);
-            Monster.Target = recordTuple.player;
+            var recordTuple = Monster.TargetRecord.TaggedAislings.Values.FirstOrDefault(p => p.Map == Monster.Map);
+            Monster.Target = recordTuple;
         }
 
         if (Monster.Target is Aisling aisling)
@@ -2144,8 +2144,8 @@ public class AosdaHero : MonsterScript
 
         if (Monster.Target is null)
         {
-            var recordTuple = Monster.TargetRecord.TaggedAislings.Values.FirstOrDefault(p => p.player.Map == Monster.Map);
-            Monster.Target = recordTuple.player;
+            var recordTuple = Monster.TargetRecord.TaggedAislings.Values.FirstOrDefault(p => p.Map == Monster.Map);
+            Monster.Target = recordTuple;
         }
 
         if (Monster.Target is Aisling aisling)
@@ -2441,8 +2441,8 @@ public class AncientDragon : MonsterScript
 
         if (Monster.Target is null)
         {
-            var recordTuple = Monster.TargetRecord.TaggedAislings.Values.FirstOrDefault(p => p.player.Map == Monster.Map);
-            Monster.Target = recordTuple.player;
+            var recordTuple = Monster.TargetRecord.TaggedAislings.Values.FirstOrDefault(p => p.Map == Monster.Map);
+            Monster.Target = recordTuple;
         }
 
         if (Monster.Target is Aisling aisling)
@@ -2719,8 +2719,8 @@ public class Swarm : MonsterScript
 
         if (Monster.Target is null)
         {
-            var recordTuple = Monster.TargetRecord.TaggedAislings.Values.FirstOrDefault(p => p.player.Map == Monster.Map);
-            Monster.Target = recordTuple.player;
+            var recordTuple = Monster.TargetRecord.TaggedAislings.Values.FirstOrDefault(p => p.Map == Monster.Map);
+            Monster.Target = recordTuple;
         }
 
         if (Monster.Target is Aisling aisling)

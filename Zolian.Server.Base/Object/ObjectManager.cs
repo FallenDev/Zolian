@@ -11,7 +11,7 @@ public class ObjectManager
     {
         Aislings = 1,
         Monsters = 2,
-        AislingDamage = Monsters | Aislings,
+        Damageable = Monsters | Aislings,
         Mundanes = 4,
         UpdateNonPlayerSprites = Monsters | Mundanes,
         Items = 8,
@@ -46,7 +46,7 @@ public class ObjectManager
                 case Get.Monsters:
                     bucket.AddRange(GetObjects<Monster>(map, p));
                     break;
-                case Get.AislingDamage:
+                case Get.Damageable:
                     bucket.AddRange(GetObjects<Monster>(map, p));
                     bucket.AddRange(GetObjects<Aisling>(map, p));
                     break;

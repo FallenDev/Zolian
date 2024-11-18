@@ -1,16 +1,11 @@
 ﻿using Darkages.Common;
 using Darkages.Enums;
 using Darkages.Network.Client;
-using Darkages.Network.Client.Abstractions;
 using Darkages.Network.Server;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Sprites.Entity;
 using Darkages.Types;
-
-using ServiceStack;
-
-using System.Numerics;
 using System.Security.Cryptography;
 
 namespace Darkages.GameScripts.Monsters;
@@ -143,8 +138,8 @@ public class DraconicOmega : MonsterScript
 
         if (Monster.Target is null)
         {
-            var recordTuple = Monster.TargetRecord.TaggedAislings.Values.FirstOrDefault(p => p.player.Map == Monster.Map);
-            Monster.Target = recordTuple.player;
+            var recordTuple = Monster.TargetRecord.TaggedAislings.Values.FirstOrDefault(p => p.Map == Monster.Map);
+            Monster.Target = recordTuple;
         }
 
         if (Monster.Target is Aisling aisling)
@@ -440,8 +435,8 @@ public class JackFrost : MonsterScript
 
         if (Monster.Target is null)
         {
-            var recordTuple = Monster.TargetRecord.TaggedAislings.Values.FirstOrDefault(p => p.player.Map == Monster.Map);
-            Monster.Target = recordTuple.player;
+            var recordTuple = Monster.TargetRecord.TaggedAislings.Values.FirstOrDefault(p => p.Map == Monster.Map);
+            Monster.Target = recordTuple;
         }
 
         if (Monster.Target is Aisling aisling)
@@ -798,8 +793,8 @@ public class Yeti : MonsterScript
 
         if (Monster.Target is null)
         {
-            var recordTuple = Monster.TargetRecord.TaggedAislings.Values.FirstOrDefault(p => p.player.Map == Monster.Map);
-            Monster.Target = recordTuple.player;
+            var recordTuple = Monster.TargetRecord.TaggedAislings.Values.FirstOrDefault(p => p.Map == Monster.Map);
+            Monster.Target = recordTuple;
         }
 
         if (Monster.Target is Aisling aisling)
@@ -1096,8 +1091,8 @@ public class WorldBossBahamut : MonsterScript
 
         if (Monster.Target is null)
         {
-            var recordTuple = Monster.TargetRecord.TaggedAislings.Values.FirstOrDefault(p => p.player.Map == Monster.Map);
-            Monster.Target = recordTuple.player;
+            var recordTuple = Monster.TargetRecord.TaggedAislings.Values.FirstOrDefault(p => p.Map == Monster.Map);
+            Monster.Target = recordTuple;
         }
 
         if (Monster.Target is Aisling aisling)
@@ -1322,7 +1317,7 @@ public class WorldBossBahamut : MonsterScript
                 return;
             }
 
-            if (Monster.MonsterGetFiveByFourRectInFront().Contains(Monster.Target))
+            if (Monster.GetFiveByFourRectInFront().Contains(Monster.Target))
             {
                 Monster.BashEnabled = true;
                 Monster.AbilityEnabled = true;
@@ -1483,8 +1478,8 @@ public class BBShade : MonsterScript
 
         if (Monster.Target is null)
         {
-            var recordTuple = Monster.TargetRecord.TaggedAislings.Values.FirstOrDefault(p => p.player.Map == Monster.Map);
-            Monster.Target = recordTuple.player;
+            var recordTuple = Monster.TargetRecord.TaggedAislings.Values.FirstOrDefault(p => p.Map == Monster.Map);
+            Monster.Target = recordTuple;
         }
 
         if (Monster.Target is Aisling aisling)

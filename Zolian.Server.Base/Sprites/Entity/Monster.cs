@@ -19,7 +19,7 @@ public record TargetRecord
     /// <summary>
     /// Serial, Damage, Player, Nearby
     /// </summary>
-    public ConcurrentDictionary<long, (long dmg, Aisling player)> TaggedAislings { get; init; }
+    public ConcurrentDictionary<long, Aisling> TaggedAislings { get; init; }
 }
 
 public sealed class Monster : Damageable
@@ -115,7 +115,7 @@ public sealed class Monster : Damageable
         Target = aisling;
         lock (TaggedAislingsLock)
         {
-            TargetRecord.TaggedAislings.TryAdd(aisling.Serial, (0, aisling));
+            TargetRecord.TaggedAislings.TryAdd(aisling.Serial, aisling);
         }
 
         if (aisling.GroupId == 0 || aisling.GroupParty == null) return;
@@ -131,7 +131,7 @@ public sealed class Monster : Damageable
                 var playersNearby = AislingsEarShotNearby().Contains(member);
 
                 if (!memberTagged)
-                    TargetRecord.TaggedAislings.TryAdd(member.Serial, (0, member));
+                    TargetRecord.TaggedAislings.TryAdd(member.Serial, member);
             }
         }
     }
@@ -142,7 +142,7 @@ public sealed class Monster : Damageable
         if (Summoned) return true;
 
         // Check if the Aisling is already tagged and belongs to the same group.
-        if (TargetRecord.TaggedAislings.TryGetValue(aisling.Serial, out var existingTag) && existingTag.player.GroupId == aisling.GroupId)
+        if (TargetRecord.TaggedAislings.TryGetValue(aisling.Serial, out var existingTag) && existingTag.GroupId == aisling.GroupId)
         {
             return true; // The player is already tagged, no need to add again.
         }
@@ -153,12 +153,12 @@ public sealed class Monster : Damageable
             // TryAdd will only add the entry if it does not already exist
             if (!TargetRecord.TaggedAislings.ContainsKey(aisling.Serial))
             {
-                TargetRecord.TaggedAislings.TryAdd(aisling.Serial, (0, aisling));
+                TargetRecord.TaggedAislings.TryAdd(aisling.Serial, aisling);
             }
             else
             {
                 // If the entry exists, update it (this should be atomic because we're locking)
-                TargetRecord.TaggedAislings[aisling.Serial] = (0, aisling);
+                TargetRecord.TaggedAislings[aisling.Serial] = aisling;
             }
         }
 
@@ -393,15 +393,17 @@ public sealed class Monster : Damageable
             }
         }
 
+        AddNewlyGroupedPlayers();
+
         if (Aggressive)
         {
-            var tagged = TargetRecord.TaggedAislings.Values.ToList();
+            var tagged = TargetRecord.TaggedAislings.Values;
 
             if (!tagged.IsEmpty())
             {
-                IOrderedEnumerable<(long, Aisling)> groupAttacking = ascending ? tagged.OrderBy(c => c.player.ThreatMeter) : tagged.OrderByDescending(c => c.player.ThreatMeter);
+                var groupAttacking = ascending ? tagged.OrderBy(c => c.ThreatMeter) : tagged.OrderByDescending(c => c.ThreatMeter);
 
-                foreach (var (_, player) in groupAttacking)
+                foreach (var player in groupAttacking)
                 {
                     if (player.Skulled || !player.LoggedIn) continue;
                     if (!shadowSight && player.IsInvisible) continue;
@@ -428,6 +430,21 @@ public sealed class Monster : Damageable
         else
         {
             ClearTarget();
+        }
+    }
+
+    private void AddNewlyGroupedPlayers()
+    {
+        if (TargetRecord.TaggedAislings.IsEmpty) return;
+        var group = TargetRecord.TaggedAislings.FirstOrDefault()!.Value?.GroupParty?.PartyMembers;
+        if (group == null) return;
+        foreach (var (_, player) in group)
+        {
+            if (TargetRecord.TaggedAislings.Values.Contains(player)) continue;
+            lock (TaggedAislingsLock)
+            {
+                TargetRecord.TaggedAislings.TryAdd(player.Serial, player);
+            }
         }
     }
 

@@ -120,8 +120,8 @@ public class BaseMonsterIntelligence : MonsterScript
 
         if (Monster.Target is null)
         {
-            var recordTuple = Monster.TargetRecord.TaggedAislings.Values.FirstOrDefault(p => p.player.Map == Monster.Map);
-            Monster.Target = recordTuple.player;
+            var recordTuple = Monster.TargetRecord.TaggedAislings.Values.FirstOrDefault(p => p.Map == Monster.Map);
+            Monster.Target = recordTuple;
         }
 
         if (Monster.Target is Aisling aisling)
@@ -394,8 +394,8 @@ public class WeakCommon : MonsterScript
 
         if (Monster.Target is null)
         {
-            var recordTuple = Monster.TargetRecord.TaggedAislings.Values.FirstOrDefault(p => p.player.Map == Monster.Map);
-            Monster.Target = recordTuple.player;
+            var recordTuple = Monster.TargetRecord.TaggedAislings.Values.FirstOrDefault(p => p.Map == Monster.Map);
+            Monster.Target = recordTuple;
         }
 
         if (Monster.Target is Aisling aisling)
@@ -586,8 +586,8 @@ public class Inanimate : MonsterScript
 
         if (Monster.Target is null)
         {
-            var recordTuple = Monster.TargetRecord.TaggedAislings.Values.FirstOrDefault(p => p.player.Map == Monster.Map);
-            Monster.Target = recordTuple.player;
+            var recordTuple = Monster.TargetRecord.TaggedAislings.Values.FirstOrDefault(p => p.Map == Monster.Map);
+            Monster.Target = recordTuple;
         }
 
         if (Monster.Target is Aisling aisling)
@@ -617,10 +617,11 @@ public class Inanimate : MonsterScript
             lock (Monster.TaggedAislingsLock)
             {
                 var tagged = Monster.TargetRecord.TaggedAislings.TryGetValue(client.Aisling.Serial, out var player);
+
                 if (!tagged)
-                    Monster.TargetRecord.TaggedAislings.TryAdd(client.Aisling.Serial, (dmg, client.Aisling));
+                    Monster.TryAddPlayerAndHisGroup(client.Aisling);
                 else
-                    Monster.TargetRecord.TaggedAislings.TryUpdate(client.Aisling.Serial, (++dmg, player.player), player);
+                    Monster.TargetRecord.TaggedAislings.TryUpdate(client.Aisling.Serial, client.Aisling, client.Aisling);
             }
         }
         catch (Exception ex)
@@ -686,8 +687,8 @@ public class LootGoblin : MonsterScript
 
         if (Monster.Target is null)
         {
-            var recordTuple = Monster.TargetRecord.TaggedAislings.Values.FirstOrDefault(p => p.player.Map == Monster.Map);
-            Monster.Target = recordTuple.player;
+            var recordTuple = Monster.TargetRecord.TaggedAislings.Values.FirstOrDefault(p => p.Map == Monster.Map);
+            Monster.Target = recordTuple;
         }
 
         if (Monster.Target is Aisling aisling)
@@ -844,8 +845,8 @@ public class ShadowSight : MonsterScript
 
         if (Monster.Target is null)
         {
-            var recordTuple = Monster.TargetRecord.TaggedAislings.Values.FirstOrDefault(p => p.player.Map == Monster.Map);
-            Monster.Target = recordTuple.player;
+            var recordTuple = Monster.TargetRecord.TaggedAislings.Values.FirstOrDefault(p => p.Map == Monster.Map);
+            Monster.Target = recordTuple;
         }
 
         if (Monster.Target is Aisling aisling)
@@ -1118,8 +1119,8 @@ public class WeakShadowSight : MonsterScript
 
         if (Monster.Target is null)
         {
-            var recordTuple = Monster.TargetRecord.TaggedAislings.Values.FirstOrDefault(p => p.player.Map == Monster.Map);
-            Monster.Target = recordTuple.player;
+            var recordTuple = Monster.TargetRecord.TaggedAislings.Values.FirstOrDefault(p => p.Map == Monster.Map);
+            Monster.Target = recordTuple;
         }
 
         if (Monster.Target is Aisling aisling)
