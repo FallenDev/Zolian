@@ -99,6 +99,11 @@ public class Iaido(Skill skill) : SkillScript(skill)
         }
     }
 
+    public override void OnCleanup()
+    {
+        _enemyList.Clear();
+    }
+
     public override void OnUse(Sprite sprite)
     {
         if (!Skill.CanUse()) return;
@@ -218,6 +223,8 @@ public class MugaiRyu(Skill skill) : SkillScript(skill)
 
     }
 
+    public override void OnCleanup() { }
+
     public override void OnUse(Sprite sprite)
     {
         if (!Skill.CanUse()) return;
@@ -244,6 +251,8 @@ public class NitenIchiRyu(Skill skill) : SkillScript(skill)
 
     }
 
+    public override void OnCleanup() { }
+
     public override void OnUse(Sprite sprite)
     {
         if (!Skill.CanUse()) return;
@@ -268,6 +277,8 @@ public class ShintoRyu(Skill skill) : SkillScript(skill)
         aisling.ActionUsed = "Iaido";
     }
 
+    public override void OnCleanup() { }
+
     public override void OnUse(Sprite sprite)
     {
 
@@ -291,6 +302,8 @@ public class IttoRu(Skill skill) : SkillScript(skill)
         aisling.ActionUsed = "Itto-ru";
     }
 
+    public override void OnCleanup() { }
+
     public override void OnUse(Sprite sprite)
     {
 
@@ -313,6 +326,8 @@ public class TamiyaRyu(Skill skill) : SkillScript(skill)
         var client = aisling.Client;
         aisling.ActionUsed = "Tamiya-ryu";
     }
+
+    public override void OnCleanup() { }
 
     public override void OnUse(Sprite sprite)
     {

@@ -139,7 +139,6 @@ public class BaseFriendlyMonster : MonsterScript
         }
 
         Monster.Remove();
-        DelObject(Monster);
     }
 
     public override void MonsterState(TimeSpan elapsedTime)
@@ -273,6 +272,7 @@ public class BaseFriendlyMonster : MonsterScript
                 readyTime = readyTime.AddMilliseconds(Monster.Template.AttackSpeed);
                 s.Skill.NextAvailableUse = readyTime;
             }
+            s.OnCleanup();
             s.Skill.InUse = false;
         });
     }
@@ -287,6 +287,7 @@ public class BaseFriendlyMonster : MonsterScript
         var abilityIdx = RandomNumberGenerator.GetInt32(Monster.AbilityScripts.Count);
         if (Monster.AbilityScripts[abilityIdx] is null) return;
         Monster.AbilityScripts[abilityIdx].OnUse(Monster);
+        Monster.AbilityScripts[abilityIdx].OnCleanup();
     }
 
     private void CastSpell()

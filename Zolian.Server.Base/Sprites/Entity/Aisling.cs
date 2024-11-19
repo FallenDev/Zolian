@@ -796,6 +796,7 @@ public sealed class Aisling : Player, IAisling
 
             if (skill.Template.SkillType == SkillScope.Assail)
                 Client.LastAssail = DateTime.UtcNow;
+            script.OnCleanup();
 
             skill.InUse = false;
         }

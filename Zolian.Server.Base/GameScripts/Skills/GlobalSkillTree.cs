@@ -89,6 +89,8 @@ public class IdentifyWeapon(Skill skill) : SkillScript(skill)
         aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
     }
 
+    public override void OnCleanup() { }
+
     public override void OnUse(Sprite sprite)
     {
         if (!Skill.CanUse()) return;
@@ -156,6 +158,8 @@ public class IdentifyArmor(Skill skill) : SkillScript(skill)
         aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
     }
 
+    public override void OnCleanup() { }
+
     public override void OnUse(Sprite sprite)
     {
         if (!Skill.CanUse()) return;
@@ -222,6 +226,8 @@ public class InspectItem(Skill skill) : SkillScript(skill)
         aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.TargetAnimation, null, aisling.Serial));
         aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
     }
+
+    public override void OnCleanup() { }
 
     public override void OnUse(Sprite sprite)
     {

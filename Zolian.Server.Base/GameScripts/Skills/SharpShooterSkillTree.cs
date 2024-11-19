@@ -76,6 +76,11 @@ public class Bang(Skill skill) : SkillScript(skill)
         }
     }
 
+    public override void OnCleanup()
+    {
+        _target = null;
+    }
+
     public override void OnUse(Sprite sprite)
     {
         if (!Skill.CanUse()) return;
@@ -251,6 +256,11 @@ public class Snipe(Skill skill) : SkillScript(skill)
         }
     }
 
+    public override void OnCleanup()
+    {
+        _target = null;
+    }
+
     public override void OnUse(Sprite sprite)
     {
         if (!Skill.CanUse()) return;
@@ -421,6 +431,8 @@ public class Volley(Skill skill) : SkillScript(skill)
             SentrySdk.CaptureMessage($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
         }
     }
+
+    public override void OnCleanup() { }
 
     public override void OnUse(Sprite sprite)
     {

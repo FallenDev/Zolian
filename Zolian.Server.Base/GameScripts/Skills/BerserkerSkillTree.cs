@@ -61,6 +61,11 @@ public class Wind_Slice(Skill skill) : SkillScript(skill)
         }
     }
 
+    public override void OnCleanup()
+    {
+        _target = null;
+    }
+
     public override void OnUse(Sprite sprite)
     {
         if (!Skill.CanUse()) return;
@@ -195,6 +200,11 @@ public class Dual_Slice(Skill skill) : SkillScript(skill)
         }
     }
 
+    public override void OnCleanup()
+    {
+        _target = null;
+    }
+
     public override void OnUse(Sprite sprite)
     {
         if (!Skill.CanUse()) return;
@@ -274,7 +284,7 @@ public class Blitz(Skill skill) : SkillScript(skill)
 {
     private Sprite _target;
     private bool _crit;
-    private IList<Sprite> _enemyList;
+    private List<Sprite> _enemyList;
     private bool _success;
 
     public override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, _target);
@@ -315,6 +325,12 @@ public class Blitz(Skill skill) : SkillScript(skill)
             ServerSetup.EventsLogger($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}");
             SentrySdk.CaptureMessage($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
         }
+    }
+
+    public override void OnCleanup()
+    {
+        _target = null;
+        _enemyList.Clear();
     }
 
     public override void OnUse(Sprite sprite)
@@ -457,6 +473,11 @@ public class Aid(Skill skill) : SkillScript(skill)
         }
     }
 
+    public override void OnCleanup()
+    {
+        _target = null;
+    }
+
     public override void OnUse(Sprite sprite)
     {
         if (sprite is not Aisling aisling) return;
@@ -531,6 +552,11 @@ public class Lullaby_Strike(Skill skill) : SkillScript(skill)
             ServerSetup.EventsLogger($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}");
             SentrySdk.CaptureMessage($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
         }
+    }
+
+    public override void OnCleanup()
+    {
+        _target = null;
     }
 
     public override void OnUse(Sprite sprite)
@@ -621,6 +647,11 @@ public class Desolate(Skill skill) : SkillScript(skill)
             ServerSetup.EventsLogger($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}");
             SentrySdk.CaptureMessage($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
         }
+    }
+
+    public override void OnCleanup()
+    {
+        _target = null;
     }
 
     public override void OnUse(Sprite sprite)
@@ -755,6 +786,11 @@ public class Crasher(Skill skill) : SkillScript(skill)
         }
     }
 
+    public override void OnCleanup()
+    {
+        _target = null;
+    }
+
     public override void OnUse(Sprite sprite)
     {
         if (!Skill.CanUse()) return;
@@ -854,6 +890,11 @@ public class Sever(Skill skill) : SkillScript(skill)
             ServerSetup.EventsLogger($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}");
             SentrySdk.CaptureMessage($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
         }
+    }
+
+    public override void OnCleanup()
+    {
+        _target = null;
     }
 
     public override void OnUse(Sprite sprite)
@@ -1026,6 +1067,12 @@ public class Rush(Skill skill) : SkillScript(skill)
         }
     }
 
+    public override void OnCleanup()
+    {
+        _target = null;
+        _enemyList.Clear();
+    }
+
     public override void OnUse(Sprite sprite)
     {
         if (!Skill.CanUse()) return;
@@ -1166,6 +1213,11 @@ public class Titans_Cleave(Skill skill) : SkillScript(skill)
             ServerSetup.EventsLogger($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}");
             SentrySdk.CaptureMessage($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
         }
+    }
+
+    public override void OnCleanup()
+    {
+        _target = null;
     }
 
     public override void OnUse(Sprite sprite)
@@ -1317,6 +1369,11 @@ public class Retribution(Skill skill) : SkillScript(skill)
         }
     }
 
+    public override void OnCleanup()
+    {
+        _target = null;
+    }
+
     public override void OnUse(Sprite sprite)
     {
         if (!Skill.CanUse()) return;
@@ -1412,7 +1469,7 @@ public class Sneak_Attack(Skill skill) : SkillScript(skill)
 {
     private Sprite _target;
     private bool _crit;
-    private IList<Sprite> _enemyList;
+    private List<Sprite> _enemyList;
     private bool _success;
 
     public override void OnFailed(Sprite sprite)
@@ -1458,6 +1515,12 @@ public class Sneak_Attack(Skill skill) : SkillScript(skill)
             ServerSetup.EventsLogger($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}");
             SentrySdk.CaptureMessage($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
         }
+    }
+
+    public override void OnCleanup()
+    {
+        _target = null;
+        _enemyList.Clear();
     }
 
     public override void OnUse(Sprite sprite)
@@ -1548,6 +1611,8 @@ public class Berserk(Skill skill) : SkillScript(skill)
 
         GlobalSkillMethods.OnSuccess(aisling, aisling, Skill, 0, false, action);
     }
+
+    public override void OnCleanup() { }
 
     public override void OnUse(Sprite sprite)
     {

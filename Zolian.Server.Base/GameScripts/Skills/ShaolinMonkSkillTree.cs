@@ -71,6 +71,12 @@ public class IronSprint(Skill skill) : SkillScript(skill)
         }
     }
 
+    public override void OnCleanup()
+    {
+        _target = null;
+        _enemyList.Clear();
+    }
+
     public override void OnUse(Sprite sprite)
     {
         if (!Skill.CanUse()) return;
@@ -219,6 +225,11 @@ public class IronFang(Skill skill) : SkillScript(skill)
         }
     }
 
+    public override void OnCleanup()
+    {
+        _target = null;
+    }
+
     public override void OnUse(Sprite sprite)
     {
         if (!Skill.CanUse()) return;
@@ -350,6 +361,11 @@ public class GoldenDragonPalm(Skill skill) : SkillScript(skill)
         }
     }
 
+    public override void OnCleanup()
+    {
+        _target = null;
+    }
+
     public override void OnUse(Sprite sprite)
     {
         if (!Skill.CanUse()) return;
@@ -477,6 +493,11 @@ public class SnakeWhip(Skill skill) : SkillScript(skill)
             ServerSetup.EventsLogger($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}");
             SentrySdk.CaptureMessage($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
         }
+    }
+
+    public override void OnCleanup()
+    {
+        _target = null;
     }
 
     public override void OnUse(Sprite sprite)
@@ -651,6 +672,11 @@ public class TigerSwipe(Skill skill) : SkillScript(skill)
         }
     }
 
+    public override void OnCleanup()
+    {
+        _target = null;
+    }
+
     public override void OnUse(Sprite sprite)
     {
         if (!Skill.CanUse()) return;
@@ -778,6 +804,11 @@ public class HardenedHands(Skill skill) : SkillScript(skill)
             ServerSetup.EventsLogger($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}");
             SentrySdk.CaptureMessage($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
         }
+    }
+
+    public override void OnCleanup()
+    {
+        _target = null;
     }
 
     public override void OnUse(Sprite sprite)

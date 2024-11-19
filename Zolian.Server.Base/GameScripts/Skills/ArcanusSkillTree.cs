@@ -97,6 +97,11 @@ public class Flame_Thrower(Skill skill) : SkillScript(skill)
         }
     }
 
+    public override void OnCleanup()
+    {
+        _target = null;
+    }
+
     public override async void OnUse(Sprite sprite)
     {
         if (!Skill.CanUseZeroLineAbility) return;
@@ -291,6 +296,11 @@ public class Water_Cannon(Skill skill) : SkillScript(skill)
             ServerSetup.EventsLogger($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}");
             SentrySdk.CaptureMessage($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
         }
+    }
+
+    public override void OnCleanup()
+    {
+        _target = null;
     }
 
     public override async void OnUse(Sprite sprite)
@@ -489,6 +499,11 @@ public class Tornado_Vector(Skill skill) : SkillScript(skill)
         }
     }
 
+    public override void OnCleanup()
+    {
+        _target = null;
+    }
+
     public override async void OnUse(Sprite sprite)
     {
         if (!Skill.CanUseZeroLineAbility) return;
@@ -683,6 +698,11 @@ public class Earth_Shatter(Skill skill) : SkillScript(skill)
             ServerSetup.EventsLogger($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}");
             SentrySdk.CaptureMessage($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
         }
+    }
+
+    public override void OnCleanup()
+    {
+        _target = null;
     }
 
     public override async void OnUse(Sprite sprite)

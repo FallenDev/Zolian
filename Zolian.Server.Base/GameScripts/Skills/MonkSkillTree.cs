@@ -16,7 +16,7 @@ public class Ambush(Skill skill) : SkillScript(skill)
 {
     private Sprite _target;
     private bool _crit;
-    private IList<Sprite> _enemyList;
+    private List<Sprite> _enemyList;
     private bool _success;
 
     public override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, _target);
@@ -57,6 +57,12 @@ public class Ambush(Skill skill) : SkillScript(skill)
             ServerSetup.EventsLogger($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}");
             SentrySdk.CaptureMessage($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
         }
+    }
+
+    public override void OnCleanup()
+    {
+        _target = null;
+        _enemyList.Clear();
     }
 
     public override void OnUse(Sprite sprite)
@@ -181,6 +187,11 @@ public class WolfFangFist(Skill skill) : SkillScript(skill)
         }
     }
 
+    public override void OnCleanup()
+    {
+        _target = null;
+    }
+
     public override void OnUse(Sprite sprite)
     {
         if (!Skill.CanUse()) return;
@@ -262,6 +273,11 @@ public class KnifeHandStrike(Skill skill) : SkillScript(skill)
             ServerSetup.EventsLogger($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}");
             SentrySdk.CaptureMessage($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
         }
+    }
+
+    public override void OnCleanup()
+    {
+        _target = null;
     }
 
     public override void OnUse(Sprite sprite)
@@ -390,6 +406,11 @@ public class PalmHeelStrike(Skill skill) : SkillScript(skill)
         }
     }
 
+    public override void OnCleanup()
+    {
+        _target = null;
+    }
+
     public override void OnUse(Sprite sprite)
     {
         if (!Skill.CanUse()) return;
@@ -514,6 +535,11 @@ public class HammerTwist(Skill skill) : SkillScript(skill)
         }
     }
 
+    public override void OnCleanup()
+    {
+        _target = null;
+    }
+
     public override void OnUse(Sprite sprite)
     {
         if (!Skill.CanUse()) return;
@@ -636,6 +662,11 @@ public class CrossBodyPunch(Skill skill) : SkillScript(skill)
             ServerSetup.EventsLogger($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}");
             SentrySdk.CaptureMessage($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
         }
+    }
+
+    public override void OnCleanup()
+    {
+        _target = null;
     }
 
     public override void OnUse(Sprite sprite)
@@ -769,6 +800,11 @@ public class HurricaneKick(Skill skill) : SkillScript(skill)
             ServerSetup.EventsLogger($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}");
             SentrySdk.CaptureMessage($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
         }
+    }
+
+    public override void OnCleanup()
+    {
+        _target = null;
     }
 
     public override void OnUse(Sprite sprite)
@@ -909,6 +945,11 @@ public class Kelberoth_Strike(Skill skill) : SkillScript(skill)
         }
     }
 
+    public override void OnCleanup()
+    {
+        _target = null;
+    }
+
     public override void OnUse(Sprite sprite)
     {
         if (!Skill.CanUse()) return;
@@ -1008,6 +1049,11 @@ public class Krane_Kick(Skill skill) : SkillScript(skill)
             ServerSetup.EventsLogger($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}");
             SentrySdk.CaptureMessage($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
         }
+    }
+
+    public override void OnCleanup()
+    {
+        _target = null;
     }
 
     public override void OnUse(Sprite sprite)
@@ -1124,6 +1170,8 @@ public class Claw_Fist(Skill skill) : SkillScript(skill)
         GlobalSkillMethods.OnSuccess(aisling, aisling, Skill, 0, false, action);
     }
 
+    public override void OnCleanup() { }
+
     public override void OnUse(Sprite sprite)
     {
         if (!Skill.CanUse()) return;
@@ -1195,6 +1243,11 @@ public class EmberStrike(Skill skill) : SkillScript(skill)
             ServerSetup.EventsLogger($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}");
             SentrySdk.CaptureMessage($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
         }
+    }
+
+    public override void OnCleanup()
+    {
+        _target = null;
     }
 
     public override void OnUse(Sprite sprite)
@@ -1330,6 +1383,11 @@ public class Pummel(Skill skill) : SkillScript(skill)
             ServerSetup.EventsLogger($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}");
             SentrySdk.CaptureMessage($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
         }
+    }
+
+    public override void OnCleanup()
+    {
+        _target = null;
     }
 
     public override void OnUse(Sprite sprite)
@@ -1479,6 +1537,11 @@ public class Thump(Skill skill) : SkillScript(skill)
         }
     }
 
+    public override void OnCleanup()
+    {
+        _target = null;
+    }
+
     public override void OnUse(Sprite sprite)
     {
         if (!Skill.CanUse()) return;
@@ -1573,6 +1636,11 @@ public class EyeGouge(Skill skill) : SkillScript(skill)
         }
     }
 
+    public override void OnCleanup()
+    {
+        _target = null;
+    }
+
     public override void OnUse(Sprite sprite)
     {
         if (!Skill.CanUse()) return;
@@ -1643,6 +1711,8 @@ public class Calming_Mist(Skill skill) : SkillScript(skill)
         aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.TargetAnimation, null, aisling.Serial));
         aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
     }
+
+    public override void OnCleanup() { }
 
     public override void OnUse(Sprite sprite)
     {
@@ -1732,6 +1802,11 @@ public class HealingPalms(Skill skill) : SkillScript(skill)
         }
     }
 
+    public override void OnCleanup()
+    {
+        _target = null;
+    }
+
     public override void OnUse(Sprite sprite)
     {
         if (!Skill.CanUse()) return;
@@ -1786,6 +1861,8 @@ public class NinthGate(Skill skill) : SkillScript(skill)
         GlobalSkillMethods.OnSuccess(aisling, aisling, Skill, 0, false, action);
     }
 
+    public override void OnCleanup() { }
+
     public override void OnUse(Sprite sprite)
     {
         if (!Skill.CanUse()) return;
@@ -1819,6 +1896,8 @@ public class DrunkenFist(Skill skill) : SkillScript(skill)
 
         GlobalSkillMethods.OnSuccess(aisling, aisling, Skill, 0, false, action);
     }
+
+    public override void OnCleanup() { }
 
     public override void OnUse(Sprite sprite)
     {

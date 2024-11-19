@@ -340,7 +340,7 @@ public abstract class Sprite : INotifyPropertyChanged
         }
     }
 
-    private IEnumerable<Sprite> UnSafeDamageableWithinRange(Sprite target, int range) => ObjectManager.GetObjects(Map, i => i != null && i.WithinRangeOf(target, range), ObjectManager.Get.Damageable);
+    private IEnumerable<Sprite> UnSafeDamageableWithinRange(Sprite target, int range) => ObjectManager.GetObjects(Map, i => i != null && i.WithinRangeOf(target, range), ObjectManager.Get.Damageable).Where(i => i.Alive);
 
     public List<Sprite> DamageableWithinRange(Sprite target, int range)
     {

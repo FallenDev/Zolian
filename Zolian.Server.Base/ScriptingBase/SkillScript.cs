@@ -10,6 +10,7 @@ public abstract class SkillScript(Skill skill) : ObjectManager
 
     public abstract void OnFailed(Sprite sprite);
     public abstract void OnSuccess(Sprite sprite);
+    public abstract void OnCleanup();
     public abstract void OnUse(Sprite sprite);
     public virtual void ItemOnDropped(Sprite sprite, Position pos, Area map) { }
 }

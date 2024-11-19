@@ -91,6 +91,11 @@ public class Rescue(Skill skill) : SkillScript(skill)
         }
     }
 
+    public override void OnCleanup()
+    {
+        _target = null;
+    }
+
     public override void OnUse(Sprite sprite)
     {
         if (sprite is not Aisling aisling) return;
@@ -157,6 +162,11 @@ public class Wind_Blade(Skill skill) : SkillScript(skill)
             ServerSetup.EventsLogger($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}");
             SentrySdk.CaptureMessage($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
         }
+    }
+
+    public override void OnCleanup()
+    {
+        _target = null;
     }
 
     public override void OnUse(Sprite sprite)
@@ -297,6 +307,11 @@ public class Beag_Suain(Skill skill) : SkillScript(skill)
         }
     }
 
+    public override void OnCleanup()
+    {
+        _target = null;
+    }
+
     public override void OnUse(Sprite sprite)
     {
         if (!Skill.CanUse()) return;
@@ -385,6 +400,11 @@ public class Vampiric_Slash(Skill skill) : SkillScript(skill)
             ServerSetup.EventsLogger($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}");
             SentrySdk.CaptureMessage($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
         }
+    }
+
+    public override void OnCleanup()
+    {
+        _target = null;
     }
 
     public override void OnUse(Sprite sprite)
@@ -559,6 +579,12 @@ public class Charge(Skill skill) : SkillScript(skill)
         }
     }
 
+    public override void OnCleanup()
+    {
+        _target = null;
+        _enemyList.Clear();
+    }
+
     public override void OnUse(Sprite sprite)
     {
         if (!Skill.CanUse()) return;
@@ -692,6 +718,8 @@ public class Beag_Suain_Ia_Gar(Skill skill) : SkillScript(skill)
         }
     }
 
+    public override void OnCleanup() { }
+
     public override void OnUse(Sprite sprite)
     {
         if (!Skill.CanUse()) return;
@@ -779,6 +807,8 @@ public class Raise_Threat(Skill skill) : SkillScript(skill)
         }
     }
 
+    public override void OnCleanup() { }
+
     public override void OnUse(Sprite sprite)
     {
         if (!Skill.CanUse()) return;
@@ -858,6 +888,8 @@ public class Draconic_Leash(Skill skill) : SkillScript(skill)
         }
     }
 
+    public override void OnCleanup() { }
+
     public override void OnUse(Sprite sprite)
     {
         if (!Skill.CanUse()) return;
@@ -926,6 +958,8 @@ public class Taunt(Skill skill) : SkillScript(skill)
         }
     }
 
+    public override void OnCleanup() { }
+
     public override void OnUse(Sprite sprite)
     {
         if (!Skill.CanUse()) return;
@@ -958,6 +992,8 @@ public class Briarthorn(Skill skill) : SkillScript(skill)
         client.EnqueueBuffAppliedEvent(aisling, buff);
         GlobalSkillMethods.Train(client, Skill);
     }
+
+    public override void OnCleanup() { }
 
     public override void OnUse(Sprite sprite)
     {
@@ -997,6 +1033,8 @@ public class LawsOfAosda(Skill skill) : SkillScript(skill)
         client.EnqueueBuffAppliedEvent(aisling, buff);
         GlobalSkillMethods.Train(client, Skill);
     }
+
+    public override void OnCleanup() { }
 
     public override void OnUse(Sprite sprite)
     {
@@ -1060,6 +1098,11 @@ public class ShieldBash(Skill skill) : SkillScript(skill)
         }
     }
 
+    public override void OnCleanup()
+    {
+        _target = null;
+    }
+
     public override void OnUse(Sprite sprite)
     {
         if (!Skill.CanUse()) return;
@@ -1117,6 +1160,8 @@ public class BlessedShield(Skill skill) : SkillScript(skill)
         aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(295, null, aisling.Serial));
         aisling.BlessedShield = true;
     }
+
+    public override void OnCleanup() { }
 
     public override void OnUse(Sprite sprite)
     {
@@ -1192,6 +1237,11 @@ public class WrathBlow(Skill skill) : SkillScript(skill)
             ServerSetup.EventsLogger($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}");
             SentrySdk.CaptureMessage($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
         }
+    }
+
+    public override void OnCleanup()
+    {
+        _target = null;
     }
 
     public override void OnUse(Sprite sprite)

@@ -3000,6 +3000,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             skill.CurrentCooldown = skill.Template.Cooldown;
             localClient.SendCooldown(true, skill.Slot, skill.CurrentCooldown);
             skill.LastUsedSkill = DateTime.UtcNow;
+            script?.OnCleanup();
 
             skill.InUse = false;
             return default;

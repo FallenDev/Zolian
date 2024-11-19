@@ -140,7 +140,6 @@ public class BaseMonsterIntelligence : MonsterScript
         }
 
         Monster.Remove();
-        DelObject(Monster);
     }
 
     public override void MonsterState(TimeSpan elapsedTime)
@@ -248,6 +247,7 @@ public class BaseMonsterIntelligence : MonsterScript
                 readyTime = readyTime.AddMilliseconds(Monster.Template.AttackSpeed);
                 s.Skill.NextAvailableUse = readyTime;
             }
+            s.OnCleanup();
             s.Skill.InUse = false;
         });
     }
@@ -264,6 +264,7 @@ public class BaseMonsterIntelligence : MonsterScript
 
         if (Monster.AbilityScripts[abilityIdx] is null) return;
         Monster.AbilityScripts[abilityIdx].OnUse(Monster);
+        Monster.AbilityScripts[abilityIdx].OnCleanup();
     }
 
     private void CastSpell()
@@ -414,7 +415,6 @@ public class WeakCommon : MonsterScript
         }
 
         Monster.Remove();
-        DelObject(Monster);
     }
 
     public override void MonsterState(TimeSpan elapsedTime)
@@ -522,6 +522,7 @@ public class WeakCommon : MonsterScript
                 readyTime = readyTime.AddMilliseconds(Monster.Template.AttackSpeed);
                 s.Skill.NextAvailableUse = readyTime;
             }
+            s.OnCleanup();
             s.Skill.InUse = false;
         });
     }
@@ -538,6 +539,7 @@ public class WeakCommon : MonsterScript
 
         if (Monster.AbilityScripts[abilityIdx] is null) return;
         Monster.AbilityScripts[abilityIdx].OnUse(Monster);
+        Monster.AbilityScripts[abilityIdx].OnCleanup();
     }
 
     private void CastSpell()
@@ -606,7 +608,6 @@ public class Inanimate : MonsterScript
         }
 
         Monster.Remove();
-        DelObject(Monster);
     }
 
 
@@ -707,7 +708,6 @@ public class LootGoblin : MonsterScript
         }
 
         Monster.Remove();
-        DelObject(Monster);
     }
 
     public override void OnLeave(WorldClient client) { }
@@ -865,7 +865,6 @@ public class ShadowSight : MonsterScript
         }
 
         Monster.Remove();
-        DelObject(Monster);
     }
 
     public override void MonsterState(TimeSpan elapsedTime)
@@ -973,6 +972,7 @@ public class ShadowSight : MonsterScript
                 readyTime = readyTime.AddMilliseconds(Monster.Template.AttackSpeed);
                 s.Skill.NextAvailableUse = readyTime;
             }
+            s.OnCleanup();
             s.Skill.InUse = false;
         });
     }
@@ -989,6 +989,7 @@ public class ShadowSight : MonsterScript
 
         if (Monster.AbilityScripts[abilityIdx] is null) return;
         Monster.AbilityScripts[abilityIdx].OnUse(Monster);
+        Monster.AbilityScripts[abilityIdx].OnCleanup();
     }
 
     private void CastSpell()
@@ -1139,7 +1140,6 @@ public class WeakShadowSight : MonsterScript
         }
 
         Monster.Remove();
-        DelObject(Monster);
     }
 
     public override void MonsterState(TimeSpan elapsedTime)
@@ -1247,6 +1247,7 @@ public class WeakShadowSight : MonsterScript
                 readyTime = readyTime.AddMilliseconds(Monster.Template.AttackSpeed);
                 s.Skill.NextAvailableUse = readyTime;
             }
+            s.OnCleanup();
             s.Skill.InUse = false;
         });
     }
@@ -1263,6 +1264,7 @@ public class WeakShadowSight : MonsterScript
 
         if (Monster.AbilityScripts[abilityIdx] is null) return;
         Monster.AbilityScripts[abilityIdx].OnUse(Monster);
+        Monster.AbilityScripts[abilityIdx].OnCleanup();
     }
 
     private void CastSpell()

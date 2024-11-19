@@ -97,6 +97,11 @@ public class Grief_Eruption(Skill skill) : SkillScript(skill)
         }
     }
 
+    public override void OnCleanup()
+    {
+        _target = null;
+    }
+
     public override async void OnUse(Sprite sprite)
     {
         if (!Skill.CanUseZeroLineAbility) return;

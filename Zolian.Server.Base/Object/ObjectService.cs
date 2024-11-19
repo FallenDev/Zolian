@@ -1,10 +1,10 @@
 ﻿using Darkages.Sprites;
 using Darkages.Types;
 
-using System.Collections;
 using System.Collections.Concurrent;
 using JetBrains.Annotations;
 using Darkages.Sprites.Entity;
+using Darkages.Network.Server;
 
 namespace Darkages.Object;
 
@@ -14,19 +14,23 @@ public abstract class ObjectService
     {
         if (obj is null) return;
         if (obj.Pos.X >= byte.MaxValue || obj.Pos.Y >= byte.MaxValue) return;
+
+        // Key Generation
         var mapId = obj.CurrentMapId;
         var spriteType = typeof(T);
         var key = Tuple.Create(mapId, spriteType);
 
         if (!obj.Map.SpriteCollections.TryGetValue(key, out var objCollection)) return;
-        
+
         var spriteCollection = (SpriteCollection<T>)objCollection;
-        spriteCollection.Add(obj);
+        spriteCollection.AddOrUpdate(obj);
     }
 
     public static void RemoveGameObject<T>(T obj) where T : Sprite
     {
         if (obj is null) return;
+
+        // Key Generation
         var mapId = obj.CurrentMapId;
         var spriteType = typeof(T);
         var key = Tuple.Create(mapId, spriteType);
@@ -40,6 +44,8 @@ public abstract class ObjectService
     public static T Query<T>(Area map, Predicate<T> predicate) where T : Sprite
     {
         if (map is null) return default;
+
+        // Key Generation
         var spriteType = typeof(T);
         var key = Tuple.Create(map.ID, spriteType);
 
@@ -49,6 +55,8 @@ public abstract class ObjectService
     public static IEnumerable<T> QueryAll<T>(Area map, Predicate<T> predicate) where T : Sprite
     {
         if (map is null) return default;
+
+        // Key Generation
         var mapId = map.ID;
         var spriteType = typeof(T);
         var key = Tuple.Create(mapId, spriteType);
@@ -64,6 +72,8 @@ public abstract class ObjectService
         if (predicate is not Sprite sprite) return default;
         var map = sprite.Map;
         if (map is null) return default;
+
+        // Key Generation
         var mapId = map.ID;
         var spriteType = typeof(T);
         var key = Tuple.Create(mapId, spriteType);
@@ -75,11 +85,11 @@ public abstract class ObjectService
     }
 }
 
-public class SpriteCollection<T> : IEnumerable<T> where T : Sprite
+public class SpriteCollection<T> : ConcurrentDictionary<long, T> where T : Sprite
 {
     private readonly ConcurrentDictionary<long, T> _values = [];
 
-    public void Add(T obj)
+    public void AddOrUpdate(T obj)
     {
         if (obj is null) return;
         if (obj is Item item)
@@ -100,13 +110,12 @@ public class SpriteCollection<T> : IEnumerable<T> where T : Sprite
             return;
         }
 
-        _values.TryRemove(obj.Serial, out _);
+        var deleted = _values.TryRemove(obj.Serial, out _);
+        if (!deleted)
+            ServerSetup.EventsLogger($"Object Service could not delete sprite {obj.Serial}");
     }
 
     [CanBeNull] public T Query(Predicate<T> predicate) => _values.Values.FirstOrDefault(item => predicate(item));
 
     public IEnumerable<T> QueryAll(Predicate<T> predicate) => _values.Values.Where(item => predicate(item));
-
-    public IEnumerator<T> GetEnumerator() => _values.Values.GetEnumerator();
-    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }

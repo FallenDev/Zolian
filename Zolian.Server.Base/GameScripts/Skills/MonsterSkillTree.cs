@@ -27,6 +27,11 @@ public class Bite(Skill skill) : SkillScript(skill)
         // Monster skill
     }
 
+    public override void OnCleanup()
+    {
+        _target = null;
+    }
+
     public override void OnUse(Sprite sprite)
     {
         if (!Skill.CanUse()) return;
@@ -83,6 +88,11 @@ public class Gatling(Skill skill) : SkillScript(skill)
     public override void OnSuccess(Sprite sprite)
     {
         // Monster skill
+    }
+
+    public override void OnCleanup()
+    {
+        _target = null;
     }
 
     public override void OnUse(Sprite sprite)
@@ -148,6 +158,11 @@ public class BiteAndShake(Skill skill) : SkillScript(skill)
     public override void OnSuccess(Sprite sprite)
     {
         // Monster skill
+    }
+
+    public override void OnCleanup()
+    {
+        _target = null;
     }
 
     public override void OnUse(Sprite sprite)
@@ -221,6 +236,11 @@ public class CorrosiveTouch(Skill skill) : SkillScript(skill)
     public override void OnSuccess(Sprite sprite)
     {
         // monster skill
+    }
+
+    public override void OnCleanup()
+    {
+        _target = null;
     }
 
     public override void OnUse(Sprite sprite)
@@ -297,6 +317,11 @@ public class Stomp(Skill skill) : SkillScript(skill)
         // Monster skill
     }
 
+    public override void OnCleanup()
+    {
+        _target = null;
+    }
+
     public override void OnUse(Sprite sprite)
     {
         if (!Skill.CanUse()) return;
@@ -353,6 +378,11 @@ public class HeadButt(Skill skill) : SkillScript(skill)
     public override void OnSuccess(Sprite sprite)
     {
         // Monster skill
+    }
+
+    public override void OnCleanup()
+    {
+        _target = null;
     }
 
     public override void OnUse(Sprite sprite)
@@ -413,6 +443,11 @@ public class Claw(Skill skill) : SkillScript(skill)
         // Monster skill
     }
 
+    public override void OnCleanup()
+    {
+        _target = null;
+    }
+
     public override void OnUse(Sprite sprite)
     {
         if (!Skill.CanUse()) return;
@@ -471,6 +506,11 @@ public class MuleKick(Skill skill) : SkillScript(skill)
         // Monster skill
     }
 
+    public override void OnCleanup()
+    {
+        _target = null;
+    }
+
     public override void OnUse(Sprite sprite)
     {
         if (!Skill.CanUse()) return;
@@ -527,6 +567,11 @@ public class TailSlap(Skill skill) : SkillScript(skill)
     public override void OnSuccess(Sprite sprite)
     {
         // Monster skill
+    }
+
+    public override void OnCleanup()
+    {
+        _target = null;
     }
 
     public override void OnUse(Sprite sprite)
@@ -590,6 +635,11 @@ public class RollOver(Skill skill) : SkillScript(skill)
     public override void OnSuccess(Sprite sprite)
     {
         // Monster skill
+    }
+
+    public override void OnCleanup()
+    {
+        _target = null;
     }
 
     public override void OnUse(Sprite sprite)
@@ -665,6 +715,11 @@ public class TantalizingGaze(Skill skill) : SkillScript(skill)
         // Monster skill
     }
 
+    public override void OnCleanup()
+    {
+        _target = null;
+    }
+
     public override void OnUse(Sprite sprite)
     {
         if (!Skill.CanUse()) return;
@@ -738,6 +793,11 @@ public class SwallowWhole(Skill skill) : SkillScript(skill)
         // Monster skill
     }
 
+    public override void OnCleanup()
+    {
+        _target = null;
+    }
+
     public override void OnUse(Sprite sprite)
     {
         if (!Skill.CanUse()) return;
@@ -808,6 +868,8 @@ public class HowlAndCall(Skill skill) : SkillScript(skill)
         // Monster skill
     }
 
+    public override void OnCleanup() { }
+
     public override void OnUse(Sprite sprite)
     {
         if (!Skill.CanUse()) return;
@@ -869,6 +931,11 @@ public class DeathFromAbove(Skill skill) : SkillScript(skill)
         // Monster skill
     }
 
+    public override void OnCleanup()
+    {
+        _target = null;
+    }
+
     public override void OnUse(Sprite sprite)
     {
         if (!Skill.CanUse()) return;
@@ -927,6 +994,11 @@ public class Pounce(Skill skill) : SkillScript(skill)
         // Monster skill
     }
 
+    public override void OnCleanup()
+    {
+        _target = null;
+    }
+
     public override void OnUse(Sprite sprite)
     {
         if (!Skill.CanUse()) return;
@@ -983,6 +1055,11 @@ public class Tentacle(Skill skill) : SkillScript(skill)
     public override void OnSuccess(Sprite sprite)
     {
         // Monster skill
+    }
+
+    public override void OnCleanup()
+    {
+        _target = null;
     }
 
     public override void OnUse(Sprite sprite)
@@ -1059,6 +1136,8 @@ public class OmegaAvoid(Skill skill) : SkillScript(skill)
         // Monster skill
     }
 
+    public override void OnCleanup() { }
+
     public override void OnUse(Sprite sprite)
     {
         if (!Skill.CanUse()) return;
@@ -1079,6 +1158,11 @@ public class OmegaSlash(Skill skill) : SkillScript(skill)
     public override void OnSuccess(Sprite sprite)
     {
         // Monster skill
+    }
+
+    public override void OnCleanup()
+    {
+        _target = null;
     }
 
     public override void OnUse(Sprite sprite)
@@ -1146,6 +1230,11 @@ public class FireWheel(Skill skill) : SkillScript(skill)
     public override void OnSuccess(Sprite sprite)
     {
         // Monster skill
+    }
+
+    public override void OnCleanup()
+    {
+        _target = null;
     }
 
     public override void OnUse(Sprite sprite)
@@ -1232,6 +1321,11 @@ public class Megaflare(Skill skill) : SkillScript(skill)
         // Monster skill
     }
 
+    public override void OnCleanup()
+    {
+        _targets.Clear();
+    }
+
     public override void OnUse(Sprite sprite)
     {
         if (!Skill.CanUse()) return;
@@ -1303,6 +1397,8 @@ public class LavaArmor(Skill skill) : SkillScript(skill)
     {
         // Monster skill
     }
+
+    public override void OnCleanup() { }
 
     public override void OnUse(Sprite sprite)
     {
