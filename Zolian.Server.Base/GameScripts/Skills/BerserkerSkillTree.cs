@@ -330,7 +330,7 @@ public class Blitz(Skill skill) : SkillScript(skill)
     public override void OnCleanup()
     {
         _target = null;
-        _enemyList.Clear();
+        _enemyList?.Clear();
     }
 
     public override void OnUse(Sprite sprite)
@@ -1070,7 +1070,7 @@ public class Rush(Skill skill) : SkillScript(skill)
     public override void OnCleanup()
     {
         _target = null;
-        _enemyList.Clear();
+        _enemyList?.Clear();
     }
 
     public override void OnUse(Sprite sprite)
@@ -1520,7 +1520,7 @@ public class Sneak_Attack(Skill skill) : SkillScript(skill)
     public override void OnCleanup()
     {
         _target = null;
-        _enemyList.Clear();
+        _enemyList?.Clear();
     }
 
     public override void OnUse(Sprite sprite)

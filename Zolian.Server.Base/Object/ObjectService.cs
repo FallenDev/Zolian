@@ -52,7 +52,7 @@ public abstract class ObjectService
         return !map.SpriteCollections.TryGetValue(key, out var objCollection) ? default : ((SpriteCollection<T>)objCollection).Query(predicate);
     }
 
-    public static IEnumerable<T> QueryAll<T>(Area map, Predicate<T> predicate) where T : Sprite
+    public static ConcurrentDictionary<long, T> QueryAll<T>(Area map, Predicate<T> predicate) where T : Sprite
     {
         if (map is null) return default;
 
@@ -67,7 +67,7 @@ public abstract class ObjectService
         return spriteCollection.QueryAll(predicate);
     }
 
-    public static IEnumerable<T> QueryAll<T>(Predicate<T> predicate) where T : Sprite
+    public static ConcurrentDictionary<long, T> QueryAll<T>(Predicate<T> predicate) where T : Sprite
     {
         if (predicate is not Sprite sprite) return default;
         var map = sprite.Map;
@@ -117,5 +117,18 @@ public class SpriteCollection<T> : ConcurrentDictionary<long, T> where T : Sprit
 
     [CanBeNull] public T Query(Predicate<T> predicate) => _values.Values.FirstOrDefault(item => predicate(item));
 
-    public IEnumerable<T> QueryAll(Predicate<T> predicate) => _values.Values.Where(item => predicate(item));
+    public ConcurrentDictionary<long, T> QueryAll(Predicate<T> predicate)
+    {
+        var result = new ConcurrentDictionary<long, T>();
+
+        foreach (var (key, sprite) in _values)
+        {
+            if (sprite != null && predicate(sprite))
+            {
+                result.TryAdd(key, sprite);
+            }
+        }
+
+        return result;
+    } 
 }

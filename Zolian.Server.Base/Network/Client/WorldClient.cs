@@ -495,7 +495,7 @@ public class WorldClient : WorldClientBase, IWorldClient
     {
         if (elapsed["ItemAnimation"].TotalMilliseconds < 100) return;
         _clientStopwatches["ItemAnimation"].Restart();
-        var items = ObjectManager.GetObjects<Item>(Aisling.Map, item => item.Template.Enchantable).ToList();
+        var items = ObjectManager.GetObjects<Item>(Aisling.Map, item => item.Template.Enchantable).Values.ToList();
 
         try
         {

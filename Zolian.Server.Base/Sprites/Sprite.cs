@@ -354,7 +354,7 @@ public abstract class Sprite : INotifyPropertyChanged
 
     #region GetObjects Aislings
 
-    private IEnumerable<Aisling> UnSafeAislingsNearby() => ObjectManager.GetObjects<Aisling>(Map, i => i != null && i.WithinRangeOf(this, ServerSetup.Instance.Config.WithinRangeProximity));
+    private IEnumerable<Aisling> UnSafeAislingsNearby() => ObjectManager.GetObjects<Aisling>(Map, i => i != null && i.WithinRangeOf(this, ServerSetup.Instance.Config.WithinRangeProximity)).Values;
 
     public List<Aisling> AislingsNearby()
     {
@@ -364,7 +364,7 @@ public abstract class Sprite : INotifyPropertyChanged
         }
     }
 
-    private IEnumerable<Aisling> UnSafeAislingsEarShotNearby() => ObjectManager.GetObjects<Aisling>(Map, i => i != null && i.WithinRangeOf(this, 14));
+    private IEnumerable<Aisling> UnSafeAislingsEarShotNearby() => ObjectManager.GetObjects<Aisling>(Map, i => i != null && i.WithinRangeOf(this, 14)).Values;
 
     public List<Aisling> AislingsEarShotNearby()
     {
@@ -374,7 +374,7 @@ public abstract class Sprite : INotifyPropertyChanged
         }
     }
 
-    private IEnumerable<Aisling> UnSafeAislingsOnMap() => ObjectManager.GetObjects<Aisling>(Map, i => i != null && Map == i.Map);
+    private IEnumerable<Aisling> UnSafeAislingsOnMap() => ObjectManager.GetObjects<Aisling>(Map, i => i != null && Map == i.Map).Values;
 
     public List<Aisling> AislingsOnMap()
     {
@@ -388,7 +388,7 @@ public abstract class Sprite : INotifyPropertyChanged
 
     #region GetObjects Npcs
 
-    private IEnumerable<Monster> UnSafeMonstersNearby() => ObjectManager.GetObjects<Monster>(Map, i => i != null && i.WithinRangeOf(this, ServerSetup.Instance.Config.WithinRangeProximity));
+    private IEnumerable<Monster> UnSafeMonstersNearby() => ObjectManager.GetObjects<Monster>(Map, i => i != null && i.WithinRangeOf(this, ServerSetup.Instance.Config.WithinRangeProximity)).Values;
 
     public List<Monster> MonstersNearby()
     {
@@ -398,7 +398,7 @@ public abstract class Sprite : INotifyPropertyChanged
         }
     }
 
-    private IEnumerable<Monster> UnSafeMonstersOnMap() => ObjectManager.GetObjects<Monster>(Map, i => i != null);
+    private IEnumerable<Monster> UnSafeMonstersOnMap() => ObjectManager.GetObjects<Monster>(Map, i => i != null).Values;
 
     public List<Monster> MonstersOnMap()
     {
@@ -408,7 +408,7 @@ public abstract class Sprite : INotifyPropertyChanged
         }
     }
 
-    private IEnumerable<Mundane> UnSafeMundanesNearby() => ObjectManager.GetObjects<Mundane>(Map, i => i != null && i.WithinRangeOf(this, ServerSetup.Instance.Config.WithinRangeProximity));
+    private IEnumerable<Mundane> UnSafeMundanesNearby() => ObjectManager.GetObjects<Mundane>(Map, i => i != null && i.WithinRangeOf(this, ServerSetup.Instance.Config.WithinRangeProximity)).Values;
 
     public List<Mundane> MundanesNearby()
     {

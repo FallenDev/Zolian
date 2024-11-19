@@ -74,7 +74,7 @@ public class IronSprint(Skill skill) : SkillScript(skill)
     public override void OnCleanup()
     {
         _target = null;
-        _enemyList.Clear();
+        _enemyList?.Clear();
     }
 
     public override void OnUse(Sprite sprite)

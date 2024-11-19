@@ -1342,7 +1342,7 @@ public class Megaflare(Skill skill) : SkillScript(skill)
         {
             var nearby = GetObjects<Aisling>(sprite.Map, i => i != null && i.WithinRangeOf(sprite, 6)).ToArray();
 
-            foreach (var player in nearby)
+            foreach (var (_, player) in nearby)
             {
                 if (player == null) continue;
                 var rand = Generator.RandomNumPercentGen();

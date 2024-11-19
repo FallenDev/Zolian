@@ -45,8 +45,8 @@ public class WorldShout(WorldServer server, Mundane mundane) : MundaneScript(ser
 
         if (!string.IsNullOrEmpty(args))
         {
-            foreach (var m in GetObjects<Aisling>(null, n => n.LoggedIn))
-                m.Client.SystemMessage($"{{=s{client.Aisling}: {args}");
+            foreach (var (_, player) in GetObjects<Aisling>(null, n => n.LoggedIn))
+                player.Client.SystemMessage($"{{=s{client.Aisling}: {args}");
 
             client.CloseDialog();
             client.CloseDialog();

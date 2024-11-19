@@ -213,13 +213,13 @@ public class Movable : Identifiable
         {
             // Player, Monster, Mundane Scope
             case PlayerScope.NearbyAislings:
-                selectedPlayers.AddRange(ObjectManager.GetObjects<Aisling>(Map, otherPlayers => otherPlayers != null && WithinRangeOf(otherPlayers)).ToList());
+                selectedPlayers.AddRange(ObjectManager.GetObjects<Aisling>(Map, otherPlayers => otherPlayers != null && WithinRangeOf(otherPlayers)).Values);
                 break;
             case PlayerScope.VeryNearbyAislings:
-                selectedPlayers.AddRange(ObjectManager.GetObjects<Aisling>(Map, otherPlayers => otherPlayers != null && WithinRangeOf(otherPlayers, ServerSetup.Instance.Config.VeryNearByProximity)).ToList());
+                selectedPlayers.AddRange(ObjectManager.GetObjects<Aisling>(Map, otherPlayers => otherPlayers != null && WithinRangeOf(otherPlayers, ServerSetup.Instance.Config.VeryNearByProximity)).Values);
                 break;
             case PlayerScope.AislingsOnSameMap:
-                selectedPlayers.AddRange(ObjectManager.GetObjects<Aisling>(Map, otherPlayers => otherPlayers != null && CurrentMapId == otherPlayers.CurrentMapId).ToList());
+                selectedPlayers.AddRange(ObjectManager.GetObjects<Aisling>(Map, otherPlayers => otherPlayers != null && CurrentMapId == otherPlayers.CurrentMapId).Values);
                 break;
             case PlayerScope.DefinedAislings when definer == null:
                 return;
@@ -231,19 +231,19 @@ public class Movable : Identifiable
                 break;
             // Player only Scope
             case PlayerScope.NearbyAislingsExludingSelf when this is Aisling:
-                selectedPlayers.AddRange(ObjectManager.GetObjects<Aisling>(Map, otherPlayers => otherPlayers != null && WithinRangeOf(otherPlayers)).Where(player => player.Serial != Serial).ToList());
+                selectedPlayers.AddRange(ObjectManager.GetObjects<Aisling>(Map, otherPlayers => otherPlayers != null && WithinRangeOf(otherPlayers)).Values.Where(player => player.Serial != Serial));
                 break;
             case PlayerScope.GroupMembers when this is Aisling groupMembers:
-                selectedPlayers.AddRange(ObjectManager.GetObjects<Aisling>(Map, otherPlayers => otherPlayers != null && groupMembers.GroupParty.Has(otherPlayers)).ToList());
+                selectedPlayers.AddRange(ObjectManager.GetObjects<Aisling>(Map, otherPlayers => otherPlayers != null && groupMembers.GroupParty.Has(otherPlayers)).Values);
                 break;
             case PlayerScope.NearbyGroupMembersExcludingSelf when this is Aisling groupMembersNearbyExSelf:
-                selectedPlayers.AddRange(ObjectManager.GetObjects<Aisling>(Map, otherPlayers => otherPlayers != null && WithinRangeOf(otherPlayers) && groupMembersNearbyExSelf.GroupParty.Has(otherPlayers)).Where(player => player.Serial != Serial).ToList());
+                selectedPlayers.AddRange(ObjectManager.GetObjects<Aisling>(Map, otherPlayers => otherPlayers != null && WithinRangeOf(otherPlayers) && groupMembersNearbyExSelf.GroupParty.Has(otherPlayers)).Values.Where(player => player.Serial != Serial));
                 break;
             case PlayerScope.NearbyGroupMembers when this is Aisling groupMembersNearby:
-                selectedPlayers.AddRange(ObjectManager.GetObjects<Aisling>(Map, otherPlayers => otherPlayers != null && WithinRangeOf(otherPlayers) && groupMembersNearby.GroupParty.Has(otherPlayers)).ToList());
+                selectedPlayers.AddRange(ObjectManager.GetObjects<Aisling>(Map, otherPlayers => otherPlayers != null && WithinRangeOf(otherPlayers) && groupMembersNearby.GroupParty.Has(otherPlayers)).Values);
                 break;
             case PlayerScope.Clan when this is Aisling clan:
-                selectedPlayers.AddRange(ObjectManager.GetObjects<Aisling>(null, otherPlayers => otherPlayers != null && !string.IsNullOrEmpty(otherPlayers.Clan) && string.Equals(otherPlayers.Clan, clan.Clan, StringComparison.CurrentCultureIgnoreCase)).ToList());
+                selectedPlayers.AddRange(ObjectManager.GetObjects<Aisling>(null, otherPlayers => otherPlayers != null && !string.IsNullOrEmpty(otherPlayers.Clan) && string.Equals(otherPlayers.Clan, clan.Clan, StringComparison.CurrentCultureIgnoreCase)).Values);
                 break;
             case PlayerScope.Self when this is Aisling aisling:
                 method(aisling.Client);

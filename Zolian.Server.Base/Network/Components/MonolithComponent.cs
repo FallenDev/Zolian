@@ -35,7 +35,7 @@ public class MonolithComponent(WorldServer server) : WorldServerComponent(server
             PlaceFlower(map);
 
             // Ensure the map isn't overloaded with monsters
-            var monstersOnMap = ObjectManager.GetObjects<Monster>(map, m => m.IsAlive).ToList();
+            var monstersOnMap = ObjectManager.GetObjects<Monster>(map, m => m.IsAlive).Values.ToList();
             if (monstersOnMap.Count >= map.Height * map.Width / 100) continue;
 
             // Check each map for monster SpawnMax, and whether it's ready to spawn
