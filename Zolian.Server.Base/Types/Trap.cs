@@ -45,7 +45,7 @@ public class Trap
         if (obj is Aisling aisling)
             aisling.ActionUsed = "Trap";
 
-        var trap = item.TrapCreate(obj, itemTemplate, duration, radius, cb);
+        var trap = Item.TrapCreate(obj, itemTemplate, duration, radius, cb);
         trap.TrapItem.Release(obj, trap.TrapItem.Position);
         ServerSetup.Instance.Traps.TryAdd(trap.Serial, trap);
     }

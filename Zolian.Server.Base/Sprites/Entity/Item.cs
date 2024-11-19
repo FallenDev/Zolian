@@ -572,7 +572,7 @@ public sealed class Item : Identifiable
         return obj;
     }
 
-    public Quality QualityRestriction(Item item)
+    public static Quality QualityRestriction(Item item)
     {
         switch (item.Template.LevelRequired)
         {
@@ -599,7 +599,7 @@ public sealed class Item : Identifiable
         return item.ItemQuality;
     }
 
-    public Trap TrapCreate(Sprite owner, ItemTemplate itemTemplate, int duration, int radius = 1, Action<Sprite, Sprite> cb = null)
+    public static Trap TrapCreate(Sprite owner, ItemTemplate itemTemplate, int duration, int radius = 1, Action<Sprite, Sprite> cb = null)
     {
         if (owner == null) return null;
 
@@ -808,7 +808,7 @@ public sealed class Item : Identifiable
         client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=sAC{{=c: {{=a{ac}{{=c, {{=sRegen{{=c: {{=a{regen}");
     }
 
-    public void RemoveModifiers(WorldClient client)
+    private static void RemoveModifiers(WorldClient client)
     {
         if (client?.Aisling == null) return;
         client.Aisling.BonusAc = 0;
@@ -843,7 +843,7 @@ public sealed class Item : Identifiable
         client.Aisling.Dawn = 0;
     }
 
-    public void StatModifiersCalc(WorldClient client, Item equipment)
+    private static void StatModifiersCalc(WorldClient client, Item equipment)
     {
         client.Aisling.BonusAc += equipment.Template.AcModifer;
         client.Aisling.BonusMr += equipment.Template.MrModifer;
@@ -859,7 +859,7 @@ public sealed class Item : Identifiable
         client.Aisling.BonusDmg += equipment.Template.DmgModifer;
     }
 
-    public void SpellLines(WorldClient client)
+    private void SpellLines(WorldClient client)
     {
         for (var i = 0; i < client.Aisling.SpellBook.Spells.Count; i++)
         {
@@ -917,7 +917,7 @@ public sealed class Item : Identifiable
         }
     }
 
-    public void ArmorSmithingQualities(WorldClient client, Item equipment)
+    private static void ArmorSmithingQualities(WorldClient client, Item equipment)
     {
         Dictionary<ItemMaterials, Action<WorldClient>> materialActions = new()
         {
@@ -942,7 +942,7 @@ public sealed class Item : Identifiable
         }
     }
 
-    public void ItemVarianceCalc(WorldClient client, Item equipment)
+    private static void ItemVarianceCalc(WorldClient client, Item equipment)
     {
         Dictionary<Variance, Action<WorldClient>> varianceActions = new()
         {
@@ -967,7 +967,7 @@ public sealed class Item : Identifiable
         }
     }
 
-    public void WeaponVarianceCalc(WorldClient client, Item equipment)
+    private static void WeaponVarianceCalc(WorldClient client, Item equipment)
     {
         Dictionary<WeaponVariance, Action<WorldClient>> varianceActions = new()
         {
@@ -992,7 +992,7 @@ public sealed class Item : Identifiable
         }
     }
 
-    public void QualityVarianceCalc(WorldClient client, Item equipment)
+    private void QualityVarianceCalc(WorldClient client, Item equipment)
     {
         if (Tarnished && equipment.ItemQuality != Quality.Damaged) return;
 
@@ -1024,7 +1024,7 @@ public sealed class Item : Identifiable
         client.Aisling.BonusRegen += bonus.Regen;
     }
 
-    public void BuffDebuffCalc(WorldClient client)
+    private static void BuffDebuffCalc(WorldClient client)
     {
         Parallel.ForEach(client.Aisling.Buffs.Values, (buff) =>
         {
@@ -1037,7 +1037,7 @@ public sealed class Item : Identifiable
         });
     }
 
-    public void UpdateSpell(WorldClient client, Spell spell)
+    private static void UpdateSpell(WorldClient client, Spell spell)
     {
         client.SendRemoveSpellFromPane(spell.Slot);
         client.SendAddSpellToPane(spell);

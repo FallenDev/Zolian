@@ -78,6 +78,7 @@ public class Shield(Item item) : ItemScript(item)
         if (sprite is not Aisling aisling) return;
         var client = aisling.Client;
         if (!Item.Template.Flags.FlagIsSet(ItemFlags.Equipable)) return;
+        CalculateGearPoints(client);
 
         if (aisling.EquipmentManager.Equipment[1] == null && Item.Template.Group == "Shields")
         {
@@ -95,7 +96,6 @@ public class Shield(Item item) : ItemScript(item)
         if (!Item.Template.Flags.FlagIsSet(ItemFlags.Elemental)) return;
         aisling.SecondaryOffensiveElement = Item.Template.SecondaryOffensiveElement;
         aisling.SecondaryDefensiveElement = Item.Template.SecondaryDefensiveElement;
-        CalculateGearPoints(client);
     }
 
     public override void UnEquipped(Sprite sprite, byte slot)
@@ -105,23 +105,17 @@ public class Shield(Item item) : ItemScript(item)
         if (sprite is not Aisling aisling) return;
         var client = aisling.Client;
         if (!Item.Template.Flags.FlagIsSet(ItemFlags.Equipable)) return;
+        CalculateGearPoints(client);
 
         client.Aisling.ShieldImg = short.MinValue;
-        if (Item.Template.Flags.FlagIsSet(ItemFlags.Elemental))
-        {
-            aisling.SecondaryOffensiveElement = ElementManager.Element.None;
-            aisling.SecondaryDefensiveElement = ElementManager.Element.None;
+        if (!Item.Template.Flags.FlagIsSet(ItemFlags.Elemental)) return;
+        aisling.SecondaryOffensiveElement = ElementManager.Element.None;
+        aisling.SecondaryDefensiveElement = ElementManager.Element.None;
 
-            // If First Accessory is elemental, set it
-            if (aisling.EquipmentManager.Equipment[14]?.Item != null)
-                if (aisling.EquipmentManager.Equipment[14].Item.Template.Flags.FlagIsSet(ItemFlags.Elemental))
-                {
-                    aisling.SecondaryOffensiveElement = aisling.EquipmentManager.Equipment[14].Item.Template.SecondaryOffensiveElement;
-                    aisling.SecondaryDefensiveElement = aisling.EquipmentManager.Equipment[14].Item.Template.SecondaryDefensiveElement;
-                    return;
-                }
-        }
-        
-        CalculateGearPoints(client);
+        // If First Accessory is elemental, set it
+        if (aisling.EquipmentManager.Equipment[14]?.Item == null) return;
+        if (!aisling.EquipmentManager.Equipment[14].Item.Template.Flags.FlagIsSet(ItemFlags.Elemental)) return;
+        aisling.SecondaryOffensiveElement = aisling.EquipmentManager.Equipment[14].Item.Template.SecondaryOffensiveElement;
+        aisling.SecondaryDefensiveElement = aisling.EquipmentManager.Equipment[14].Item.Template.SecondaryDefensiveElement;
     }
 }

@@ -14,42 +14,42 @@ public abstract class ItemScript(Item item) : ObjectManager
     public abstract void UnEquipped(Sprite sprite, byte displaySlot);
     public virtual void OnDropped(Sprite sprite, Position droppedPosition, Area map) { }
     public virtual void OnPickedUp(Sprite sprite, Position pickedPosition, Area map) { }
-    
-    public void CalculateGearPoints(IWorldClient client)
+
+    protected void CalculateGearPoints(IWorldClient client)
     {
         var totalPoints = 0;
-        foreach (var slot in client.Aisling.EquipmentManager.Equipment.Values)
+        foreach (var (_, slot) in client.Aisling.EquipmentManager.Equipment)
         {
-            var itemPoints = 0;
             if (slot?.Item == null) continue;
+
             switch (slot.Item.ItemQuality)
             {
                 case Item.Quality.Damaged:
-                    itemPoints -= 100;
+                    totalPoints -= 100;
                     break;
                 case Item.Quality.Common:
                     break;
                 case Item.Quality.Uncommon:
-                    itemPoints += 50;
+                    totalPoints += 50;
                     break;
                 case Item.Quality.Rare:
-                    itemPoints += 100;
+                    totalPoints += 100;
                     break;
                 case Item.Quality.Epic:
-                    itemPoints += 200;
+                    totalPoints += 200;
                     break;
                 case Item.Quality.Legendary:
-                    itemPoints += 400;
+                    totalPoints += 400;
                     break;
                 case Item.Quality.Forsaken:
-                    itemPoints += 500;
+                    totalPoints += 500;
                     break;
                 case Item.Quality.Mythic:
-                    itemPoints += 1000;
+                    totalPoints += 1000;
                     break;
                 case Item.Quality.Primordial:
                 case Item.Quality.Transcendent:
-                    itemPoints += 2000;
+                    totalPoints += 2000;
                     break;
             }
 
@@ -58,43 +58,43 @@ public abstract class ItemScript(Item item) : ObjectManager
                 case Item.ItemMaterials.None:
                     break;
                 case Item.ItemMaterials.Copper:
-                    itemPoints += 50;
+                    totalPoints += 50;
                     break;
                 case Item.ItemMaterials.Iron:
-                    itemPoints += 100;
+                    totalPoints += 100;
                     break;
                 case Item.ItemMaterials.Steel:
-                    itemPoints += 150;
+                    totalPoints += 150;
                     break;
                 case Item.ItemMaterials.Forged:
-                    itemPoints += 200;
+                    totalPoints += 200;
                     break;
                 case Item.ItemMaterials.Elven:
-                    itemPoints += 250;
+                    totalPoints += 250;
                     break;
                 case Item.ItemMaterials.Dwarven:
-                    itemPoints += 350;
+                    totalPoints += 350;
                     break;
                 case Item.ItemMaterials.Mythril:
-                    itemPoints += 450;
+                    totalPoints += 450;
                     break;
                 case Item.ItemMaterials.Hybrasyl:
-                    itemPoints += 600;
+                    totalPoints += 600;
                     break;
                 case Item.ItemMaterials.MoonStone:
-                    itemPoints += 800;
+                    totalPoints += 800;
                     break;
                 case Item.ItemMaterials.SunStone:
-                    itemPoints += 1000;
+                    totalPoints += 1000;
                     break;
                 case Item.ItemMaterials.Ebony:
-                    itemPoints += 1500;
+                    totalPoints += 1500;
                     break;
                 case Item.ItemMaterials.Runic:
-                    itemPoints += 2500;
+                    totalPoints += 2500;
                     break;
                 case Item.ItemMaterials.Chaos:
-                    itemPoints += 4000;
+                    totalPoints += 4000;
                     break;
             }
 
@@ -103,41 +103,39 @@ public abstract class ItemScript(Item item) : ObjectManager
                 case Item.GearEnhancements.None:
                     break;
                 case Item.GearEnhancements.One:
-                    itemPoints += 50;
+                    totalPoints += 50;
                     break;
                 case Item.GearEnhancements.Two:
-                    itemPoints += 100;
+                    totalPoints += 100;
                     break;
                 case Item.GearEnhancements.Three:
-                    itemPoints += 200;
+                    totalPoints += 200;
                     break;
                 case Item.GearEnhancements.Four:
-                    itemPoints += 300;
+                    totalPoints += 300;
                     break;
                 case Item.GearEnhancements.Five:
-                    itemPoints += 400;
+                    totalPoints += 500;
                     break;
                 case Item.GearEnhancements.Six:
-                    itemPoints += 500;
+                    totalPoints += 750;
                     break;
                 case Item.GearEnhancements.Seven:
-                    itemPoints += 600;
+                    totalPoints += 1500;
                     break;
                 case Item.GearEnhancements.Eight:
-                    itemPoints += 800;
+                    totalPoints += 2500;
                     break;
                 case Item.GearEnhancements.Nine:
-                    itemPoints += 1500;
+                    totalPoints += 4000;
                     break;
             }
 
             if (slot.Item.ItemVariance != Item.Variance.None)
-                itemPoints += 200;
+                totalPoints += 200;
 
             if (slot.Item.WeapVariance != Item.WeaponVariance.None)
-                itemPoints += 500;
-
-            totalPoints += itemPoints;
+                totalPoints += 500;
         }
 
         client.Aisling.GamePoints = (uint)totalPoints;

@@ -27,9 +27,9 @@ public class OverHelmet(Item item) : ItemScript(item)
         if (sprite is not Aisling aisling) return;
         var client = aisling.Client;
         if (!Item.Template.Flags.FlagIsSet(ItemFlags.Equipable)) return;
+        CalculateGearPoints(client);
 
         client.Aisling.HeadAccessoryImg = (short)Item.Image;
-        CalculateGearPoints(client);
     }
 
     public override void UnEquipped(Sprite sprite, byte displaySlot)
@@ -39,8 +39,8 @@ public class OverHelmet(Item item) : ItemScript(item)
         if (sprite is not Aisling aisling) return;
         var client = aisling.Client;
         if (!Item.Template.Flags.FlagIsSet(ItemFlags.Equipable)) return;
+        CalculateGearPoints(client);
 
         client.Aisling.HeadAccessoryImg = 0;
-        CalculateGearPoints(client);
     }
 }

@@ -18,7 +18,7 @@ public class UasTornado(Spell spell) : SpellScript(spell)
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Uas Athar";
 
-        if (target is not Identifiable identifiable) return;
+        if (target is not Damageable identifiable) return;
         var enemies = identifiable.DamageableGetBehind();
         var toSide = identifiable.GetInFrontToSide();
         enemies.AddRange(toSide);
@@ -43,7 +43,7 @@ public class UasLandslide(Spell spell) : SpellScript(spell)
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Uas Creag";
 
-        if (target is not Identifiable identifiable) return;
+        if (target is not Damageable identifiable) return;
         var enemies = identifiable.DamageableGetBehind();
         var toSide = identifiable.GetInFrontToSide();
         enemies.AddRange(toSide);
@@ -68,7 +68,7 @@ public class UasMonsoon(Spell spell) : SpellScript(spell)
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Uas Sal";
 
-        if (target is not Identifiable identifiable) return;
+        if (target is not Damageable identifiable) return;
         var enemies = identifiable.DamageableGetBehind();
         var toSide = identifiable.GetInFrontToSide();
         enemies.AddRange(toSide);
@@ -93,7 +93,7 @@ public class UasEruption(Spell spell) : SpellScript(spell)
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Uas Srad";
 
-        if (target is not Identifiable identifiable) return;
+        if (target is not Damageable identifiable) return;
         var enemies = identifiable.DamageableGetBehind();
         var toSide = identifiable.GetInFrontToSide();
         enemies.AddRange(toSide);
@@ -118,7 +118,7 @@ public class UasTwilight(Spell spell) : SpellScript(spell)
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Uas Dorcha";
 
-        if (target is not Identifiable identifiable) return;
+        if (target is not Damageable identifiable) return;
         var enemies = identifiable.DamageableGetBehind();
         var toSide = identifiable.GetInFrontToSide();
         enemies.AddRange(toSide);
@@ -143,7 +143,7 @@ public class UasSanctified(Spell spell) : SpellScript(spell)
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Uas Eadrom";
 
-        if (target is not Identifiable identifiable) return;
+        if (target is not Damageable identifiable) return;
         var enemies = identifiable.DamageableGetBehind();
         var toSide = identifiable.GetInFrontToSide();
         enemies.AddRange(toSide);

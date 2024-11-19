@@ -66,7 +66,6 @@ public class WorldClient : WorldClientBase, IWorldClient
     private readonly Dictionary<string, Stopwatch> _clientStopwatches = new()
     {
         { "Affliction", new Stopwatch() },
-        { "AggroMessage", new Stopwatch() },
         { "Lantern", new Stopwatch() },
         { "DayDreaming", new Stopwatch() },
         { "MailMan", new Stopwatch() },
@@ -233,7 +232,6 @@ public class WorldClient : WorldClientBase, IWorldClient
         EquipLantern(elapsed);
         CheckDayDreaming(elapsed);
         CheckForMail(elapsed);
-        ShowAggro(elapsed);
         DisplayQualityPillar(elapsed);
         ApplyAffliction(elapsed);
         HandleBadTrades();
@@ -451,44 +449,6 @@ public class WorldClient : WorldClientBase, IWorldClient
 
         if (hasUnreadMail)
             SendAttributes(StatUpdateType.Secondary);
-    }
-
-    private void ShowAggro(Dictionary<string, TimeSpan> elapsed)
-    {
-        if (elapsed["AggroMessage"].TotalMilliseconds < 15000) return;
-        _clientStopwatches["AggroMessage"].Restart();
-
-        try
-        {
-            Aisling.ThreatTimer = Aisling.Camouflage
-                ? new WorldServerTimer(TimeSpan.FromSeconds(30))
-                : new WorldServerTimer(TimeSpan.FromSeconds(60));
-            var color = "a";
-            long aggro;
-            var group = Aisling.GroupParty?.PartyMembers.Values;
-
-            if (group?.Count > 0)
-            {
-                var target = group.MaxBy(dmg => dmg.ThreatMeter);
-                if (!(target.ThreatMeter > 0 & Aisling.ThreatMeter > 0)) return;
-                var percent = ((double)Aisling.ThreatMeter / target.ThreatMeter) * 100;
-                aggro = (long)Math.Clamp(percent, 0, 100);
-            }
-            else return;
-
-            foreach (var key in AggroColors.Keys.Reverse())
-            {
-                if (aggro < key) continue;
-                color = AggroColors[key];
-                break;
-            }
-
-            Aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, Aisling.ThreatMeter == 0 ? "" : $"{{=gThreat: {{={color}{aggro}%");
-        }
-        catch
-        {
-            // Ignore
-        }
     }
 
     private void DisplayQualityPillar(Dictionary<string, TimeSpan> elapsed)

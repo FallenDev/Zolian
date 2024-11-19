@@ -27,6 +27,7 @@ public class OverCoat(Item item) : ItemScript(item)
         if (sprite is not Aisling aisling) return;
         var client = aisling.Client;
         if (!Item.Template.Flags.FlagIsSet(ItemFlags.Equipable)) return;
+        CalculateGearPoints(client);
 
         if (Item.Template.Name == "Onion Knight")
         {
@@ -37,7 +38,6 @@ public class OverCoat(Item item) : ItemScript(item)
 
         client.Aisling.OverCoatImg = (short)Item.Image;
         client.Aisling.OverCoatColor = Item.Color;
-        CalculateGearPoints(client);
     }
 
     public override void UnEquipped(Sprite sprite, byte slot)
@@ -47,6 +47,7 @@ public class OverCoat(Item item) : ItemScript(item)
         if (sprite is not Aisling aisling) return;
         var client = aisling.Client;
         if (!Item.Template.Flags.FlagIsSet(ItemFlags.Equipable)) return;
+        CalculateGearPoints(client);
 
         if (Item.Template.Name == "Onion Knight")
         {
@@ -55,6 +56,5 @@ public class OverCoat(Item item) : ItemScript(item)
 
         client.Aisling.OverCoatImg = 0;
         client.Aisling.OverCoatColor = 0;
-        CalculateGearPoints(client);
     }
 }

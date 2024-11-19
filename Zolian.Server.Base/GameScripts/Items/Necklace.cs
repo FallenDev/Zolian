@@ -27,11 +27,10 @@ public class Necklace(Item item) : ItemScript(item)
         if (sprite is not Aisling aisling) return;
         var client = aisling.Client;
         if (!Item.Template.Flags.FlagIsSet(ItemFlags.Equipable)) return;
+        CalculateGearPoints(client);
 
         if (Item.Template.Flags.FlagIsSet(ItemFlags.Elemental))
             sprite.OffenseElement = Item.Template.OffenseElement;
-
-        CalculateGearPoints(client);
     }
 
     public override void UnEquipped(Sprite sprite, byte displaySlot)
@@ -41,10 +40,9 @@ public class Necklace(Item item) : ItemScript(item)
         if (sprite is not Aisling aisling) return;
         var client = aisling.Client;
         if (!Item.Template.Flags.FlagIsSet(ItemFlags.Equipable)) return;
+        CalculateGearPoints(client);
 
         if (Item.Template.Flags.FlagIsSet(ItemFlags.Elemental))
             sprite.OffenseElement = ElementManager.Element.None;
-        
-        CalculateGearPoints(client);
     }
 }

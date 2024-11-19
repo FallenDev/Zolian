@@ -384,7 +384,6 @@ public class Fas_Nadur(Spell spell) : SpellScript(spell)
 public class Fas_Spiorad(Spell spell) : SpellScript(spell)
 {
     private readonly Buff _buff = new BuffFasSpiorad();
-    private readonly GlobalSpellMethods _spellMethod = new();
 
     public override void OnFailed(Sprite sprite, Sprite target)
     {
@@ -392,53 +391,10 @@ public class Fas_Spiorad(Spell spell) : SpellScript(spell)
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"Your body is too weak.");
     }
 
-    public override void OnSuccess(Sprite sprite, Sprite target)
-    {
-        if (target == null) return;
-        if (sprite is not Aisling aisling) return;
-        var client = aisling.Client;
-
-        if (!Spell.CanUse())
-        {
-            if (sprite is Aisling aisling2)
-                aisling2.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
-            return;
-        }
-
-        if (aisling.CurrentMp - Spell.Template.ManaCost > 0)
-        {
-            aisling.CurrentMp -= Spell.Template.ManaCost;
-            GlobalSpellMethods.Train(client, Spell);
-        }
-        else
-        {
-            client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
-            return;
-        }
-
-        var success = GlobalSpellMethods.Execute(client, Spell);
-
-        if (success)
-        {
-            GlobalSpellMethods.EnhancementOnUse(sprite, target, Spell, _buff);
-        }
-        else
-        {
-            GlobalSpellMethods.SpellOnFailed(aisling, target, Spell);
-        }
-
-        client.SendAttributes(StatUpdateType.Vitality);
-    }
+    public override void OnSuccess(Sprite sprite, Sprite target) { }
 
     public override void OnUse(Sprite sprite, Sprite target)
     {
-        if (!Spell.CanUse())
-        {
-            if (sprite is Aisling aisling2)
-                aisling2.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Ability is not quite ready yet.");
-            return;
-        }
-
         if (target == null) return;
         if (target.HasBuff("Fas Spiorad"))
         {

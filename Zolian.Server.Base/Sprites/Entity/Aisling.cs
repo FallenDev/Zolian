@@ -362,7 +362,7 @@ public sealed class Aisling : Player, IAisling
 
                         spell.InUse = true;
 
-                        var target = ObjectManager.GetObject(Map, i => i.Serial == info.Target, ObjectManager.Get.Monsters | ObjectManager.Get.Aislings) ?? this;
+                        var target = ObjectManager.GetObject(Map, i => i.Serial == info.Target, ObjectManager.Get.Damageable) ?? this;
                         CastAnimation(spell);
                         var script = spell.Scripts.Values.FirstOrDefault();
                         script?.OnUse(this, target);

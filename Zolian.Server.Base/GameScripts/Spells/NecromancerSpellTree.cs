@@ -340,8 +340,8 @@ public class Corpse_Burst(Spell spell) : SpellScript(spell)
             }
 
             aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(75, corpse.Position));
-            if (corpse is not Identifiable identifiable) continue;
-            identifiable.Remove();
+            if (corpse is not Item item) continue;
+            item.Remove();
         }
     }
 

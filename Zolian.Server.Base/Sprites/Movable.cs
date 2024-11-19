@@ -1,4 +1,5 @@
-﻿using Chaos.Geometry;
+﻿using System.Collections.Concurrent;
+using Chaos.Geometry;
 using Chaos.Geometry.Abstractions.Definitions;
 using Darkages.Types;
 using System.Numerics;
@@ -6,7 +7,7 @@ using System.Security.Cryptography;
 using Darkages.Network.Server;
 using Darkages.Sprites.Entity;
 using Darkages.Enums;
-using Darkages.Network.Client.Abstractions;
+using Darkages.Network.Client;
 using Darkages.Object;
 
 namespace Darkages.Sprites;
@@ -205,54 +206,99 @@ public class Movable : Identifiable
     /// <param name="op">Scope of the method call</param>
     /// <param name="method">IWorldClient method to send</param>
     /// <param name="definer">Specific users, Scope must also be "DefinedAislings"</param>
-    public void SendTargetedClientMethod(PlayerScope op, Action<IWorldClient> method, IEnumerable<Aisling> definer = null)
+    public void SendTargetedClientMethod(PlayerScope op, Action<WorldClient> method, IEnumerable<Aisling> definer = null)
     {
-        var selectedPlayers = new List<Aisling>();
+        var selectedPlayers = new ConcurrentDictionary<long, Aisling>();
 
-        switch (op)
+        try
         {
-            // Player, Monster, Mundane Scope
-            case PlayerScope.NearbyAislings:
-                selectedPlayers.AddRange(ObjectManager.GetObjects<Aisling>(Map, otherPlayers => otherPlayers != null && WithinRangeOf(otherPlayers)).Values);
-                break;
-            case PlayerScope.VeryNearbyAislings:
-                selectedPlayers.AddRange(ObjectManager.GetObjects<Aisling>(Map, otherPlayers => otherPlayers != null && WithinRangeOf(otherPlayers, ServerSetup.Instance.Config.VeryNearByProximity)).Values);
-                break;
-            case PlayerScope.AislingsOnSameMap:
-                selectedPlayers.AddRange(ObjectManager.GetObjects<Aisling>(Map, otherPlayers => otherPlayers != null && CurrentMapId == otherPlayers.CurrentMapId).Values);
-                break;
-            case PlayerScope.DefinedAislings when definer == null:
-                return;
-            case PlayerScope.DefinedAislings:
-                selectedPlayers.AddRange(definer);
-                break;
-            case PlayerScope.All:
-                selectedPlayers.AddRange(ServerSetup.Instance.Game.Aislings);
-                break;
-            // Player only Scope
-            case PlayerScope.NearbyAislingsExludingSelf when this is Aisling:
-                selectedPlayers.AddRange(ObjectManager.GetObjects<Aisling>(Map, otherPlayers => otherPlayers != null && WithinRangeOf(otherPlayers)).Values.Where(player => player.Serial != Serial));
-                break;
-            case PlayerScope.GroupMembers when this is Aisling groupMembers:
-                selectedPlayers.AddRange(ObjectManager.GetObjects<Aisling>(Map, otherPlayers => otherPlayers != null && groupMembers.GroupParty.Has(otherPlayers)).Values);
-                break;
-            case PlayerScope.NearbyGroupMembersExcludingSelf when this is Aisling groupMembersNearbyExSelf:
-                selectedPlayers.AddRange(ObjectManager.GetObjects<Aisling>(Map, otherPlayers => otherPlayers != null && WithinRangeOf(otherPlayers) && groupMembersNearbyExSelf.GroupParty.Has(otherPlayers)).Values.Where(player => player.Serial != Serial));
-                break;
-            case PlayerScope.NearbyGroupMembers when this is Aisling groupMembersNearby:
-                selectedPlayers.AddRange(ObjectManager.GetObjects<Aisling>(Map, otherPlayers => otherPlayers != null && WithinRangeOf(otherPlayers) && groupMembersNearby.GroupParty.Has(otherPlayers)).Values);
-                break;
-            case PlayerScope.Clan when this is Aisling clan:
-                selectedPlayers.AddRange(ObjectManager.GetObjects<Aisling>(null, otherPlayers => otherPlayers != null && !string.IsNullOrEmpty(otherPlayers.Clan) && string.Equals(otherPlayers.Clan, clan.Clan, StringComparison.CurrentCultureIgnoreCase)).Values);
-                break;
-            case PlayerScope.Self when this is Aisling aisling:
-                method(aisling.Client);
-                return;
+            switch (op)
+            {
+                // Player, Monster, Mundane Scope
+                case PlayerScope.NearbyAislings:
+                    {
+                        AddPlayersToSelection(selectedPlayers, WithinRangeOf);
+                    }
+                    break;
+                case PlayerScope.VeryNearbyAislings:
+                    {
+                        AddPlayersToSelection(selectedPlayers, player => WithinRangeOf(player, ServerSetup.Instance.Config.VeryNearByProximity));
+                    }
+                    break;
+                case PlayerScope.AislingsOnSameMap:
+                    {
+                        AddPlayersToSelection(selectedPlayers, player => CurrentMapId == player.CurrentMapId);
+                    }
+                    break;
+                case PlayerScope.DefinedAislings when definer == null:
+                    return;
+                case PlayerScope.DefinedAislings:
+                    {
+                        foreach (var player in definer)
+                            selectedPlayers.TryAdd(player.Serial, player);
+                    }
+                    break;
+                case PlayerScope.All:
+                    {
+                        foreach (var player in ServerSetup.Instance.Game.Aislings)
+                            selectedPlayers.TryAdd(player.Serial, player);
+                    }
+                    break;
+                // Player only Scope
+                case PlayerScope.NearbyAislingsExludingSelf when this is Aisling:
+                    {
+                        AddPlayersToSelection(selectedPlayers, player => WithinRangeOf(player) && Serial != player.Serial);
+                    }
+                    break;
+                case PlayerScope.GroupMembers when this is Aisling aisling:
+                    {
+                        AddPlayersToSelection(selectedPlayers, player => aisling.GroupParty.Has(player));
+                    }
+                    break;
+                case PlayerScope.NearbyGroupMembersExcludingSelf when this is Aisling aisling:
+                    {
+                        AddPlayersToSelection(selectedPlayers, player => WithinRangeOf(player) && aisling.GroupParty.Has(player) && Serial != player.Serial);
+                    }
+                    break;
+                case PlayerScope.NearbyGroupMembers when this is Aisling aisling:
+                    {
+                        AddPlayersToSelection(selectedPlayers, player => WithinRangeOf(player) && aisling.GroupParty.Has(player) && Serial != player.Serial);
+                    }
+                    break;
+                case PlayerScope.Clan when this is Aisling aisling:
+                    {
+                        AddPlayersToSelection(selectedPlayers, player => !string.IsNullOrEmpty(player.Clan) && string.Equals(player.Clan, aisling.Clan, StringComparison.CurrentCultureIgnoreCase) && Serial != player.Serial);
+                    }
+                    break;
+                case PlayerScope.Self when this is Aisling aisling:
+                    method(aisling.Client);
+                    return;
+            }
+
+            SendToSelectedPlayers(selectedPlayers.Values, method);
         }
-
-        foreach (var player in selectedPlayers.Where(player => player?.Client != null))
+        catch (Exception)
         {
-            if (method.Method.Name.Contains("CastAnimation") || method.Method.Name.Contains("OnSuccess") || method.Method.Name.Contains("OnApplied"))
+            ServerSetup.EventsLogger($"Issue with {method.Method.Name} within SendTargetedClientMethod called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}");
+            SentrySdk.CaptureMessage($"Issue with {method.Method.Name} within SendTargetedClientMethod called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
+        }
+    }
+
+    private void AddPlayersToSelection(ConcurrentDictionary<long, Aisling> selectedPlayers, Func<Aisling, bool> filter)
+    {
+        var objs = ObjectManager.GetObjects<Aisling>(Map, player => player != null && filter(player));
+        foreach (var (serial, player) in objs)
+        {
+            selectedPlayers.TryAdd(serial, player);
+        }
+    }
+
+    private static void SendToSelectedPlayers(IEnumerable<Aisling> players, Action<WorldClient> method)
+    {
+        foreach (var player in players.Where(p => p?.Client != null))
+        {
+            if (method.Method.Name.Contains("CastAnimation") || method.Method.Name.Contains("OnSuccess") ||
+                method.Method.Name.Contains("OnApplied"))
             {
                 if (!player.GameSettings.Animations) continue;
             }

@@ -1895,7 +1895,6 @@ public class BuffFasSpiorad : Buff
         }
 
         if (affected is not Aisling aisling) return;
-        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(1, null, affected.Serial));
 
         var reduce = aisling.MaximumMp * 0.50;
         if (aisling.CurrentHp - reduce <= 0)
@@ -1906,6 +1905,7 @@ public class BuffFasSpiorad : Buff
             aisling.CurrentHp -= (long)reduce;
 
         aisling.CurrentMp = aisling.MaximumMp;
+        aisling.Client.SendAttributes(StatUpdateType.Vitality);
 
         InsertBuff(aisling, buff);
         aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(26, false));

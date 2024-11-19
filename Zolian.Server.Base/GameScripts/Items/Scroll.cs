@@ -33,7 +33,7 @@ public class Scroll(Item item) : ItemScript(item)
                             client.TransitionToMap(3014, new Position(11, 11));
                             return;
                         case "Mileth Scroll":
-                            client.TransitionToMap(500, new Position(53, 3));
+                            client.TransitionToMap(500, new Position(55, 2));
                             return;
                         case "Tagor Scroll":
                             client.TransitionToMap(662, new Position(28, 81));

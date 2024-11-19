@@ -127,6 +127,7 @@ public class Weapon(Item item) : ItemScript(item)
         if (sprite is not Aisling aisling) return;
         var client = aisling.Client;
         if (!Item.Template.Flags.FlagIsSet(ItemFlags.Equipable)) return;
+        CalculateGearPoints(client);
 
         var templateImage = aisling.EquipmentManager.Equipment[1]?.Item?.Template.Image;
         var offHandImage = aisling.EquipmentManager.Equipment[3]?.Item?.Template.OffHandImage;
@@ -137,7 +138,6 @@ public class Weapon(Item item) : ItemScript(item)
             client.Aisling.ShieldImg = (short)Item.Template.OffHandImage;
 
         client.Aisling.UsingTwoHanded = Item.Template.Flags.FlagIsSet(ItemFlags.TwoHanded) || Item.Template.Flags.FlagIsSet(ItemFlags.TwoHandedStaff);
-        CalculateGearPoints(client);
     }
 
     public override void UnEquipped(Sprite sprite, byte slot)
@@ -146,8 +146,8 @@ public class Weapon(Item item) : ItemScript(item)
         if (Item?.Template == null) return;
         if (sprite is not Aisling aisling) return;
         var client = aisling.Client;
-
         if (!Item.Template.Flags.FlagIsSet(ItemFlags.Equipable)) return;
+        CalculateGearPoints(client);
 
         if (aisling.EquipmentManager.Equipment[1] == null && aisling.EquipmentManager.Equipment[3] == null)
         {
@@ -170,6 +170,5 @@ public class Weapon(Item item) : ItemScript(item)
         }
 
         client.Aisling.UsingTwoHanded = false;
-        CalculateGearPoints(client);
     }
 }

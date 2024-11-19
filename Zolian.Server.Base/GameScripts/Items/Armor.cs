@@ -27,10 +27,10 @@ public class Armor(Item item) : ItemScript(item)
         if (sprite is not Aisling aisling) return;
         var client = aisling.Client;
         if (!Item.Template.Flags.FlagIsSet(ItemFlags.Equipable)) return;
+        CalculateGearPoints(client);
 
         client.Aisling.Pants = (byte)(Item.Template.HasPants ? 1 : 0);
         client.Aisling.ArmorImg = (short)Item.Image;
-        CalculateGearPoints(client);
     }
 
     public override void UnEquipped(Sprite sprite, byte slot)
@@ -40,9 +40,9 @@ public class Armor(Item item) : ItemScript(item)
         if (sprite is not Aisling aisling) return;
         var client = aisling.Client;
         if (!Item.Template.Flags.FlagIsSet(ItemFlags.Equipable)) return;
+        CalculateGearPoints(client);
 
         client.Aisling.Pants = 0;
         client.Aisling.ArmorImg = 0;
-        CalculateGearPoints(client);
     }
 }
