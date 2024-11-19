@@ -39,7 +39,7 @@ public class Wind_Slice(Skill skill) : SkillScript(skill)
 
             if (enemy.Count == 0)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
                 OnFailed(aisling);
                 return;
             }
@@ -178,7 +178,7 @@ public class Dual_Slice(Skill skill) : SkillScript(skill)
 
             if (enemy.Count == 0)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
                 OnFailed(aisling);
                 return;
             }
@@ -240,7 +240,7 @@ public class Dual_Slice(Skill skill) : SkillScript(skill)
 
                 if (_target == null || _target.Serial == sprite.Serial)
                 {
-                    GlobalSkillMethods.FailedAttemptBodyAnimation(sprite, action);
+                    GlobalSkillMethods.FailedAttemptBodyAnimation(sprite);
                     OnFailed(sprite);
                     return;
                 }
@@ -308,7 +308,7 @@ public class Blitz(Skill skill) : SkillScript(skill)
 
             if (_target == null || _target.Serial == aisling.Serial || targetPos == _target.Position)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
                 OnFailed(aisling);
                 return;
             }
@@ -426,7 +426,7 @@ public class Aid(Skill skill) : SkillScript(skill)
 
             if (enemy.Count == 0)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
                 OnFailed(aisling);
                 return;
             }
@@ -529,7 +529,7 @@ public class Lullaby_Strike(Skill skill) : SkillScript(skill)
 
             if (_target == null || _target.Serial == aisling.Serial)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
                 OnFailed(aisling);
                 return;
             }
@@ -627,7 +627,7 @@ public class Desolate(Skill skill) : SkillScript(skill)
 
             if (enemy.Count == 0)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
                 OnFailed(aisling);
                 return;
             }
@@ -768,7 +768,7 @@ public class Crasher(Skill skill) : SkillScript(skill)
 
             if (_target == null || _target.Serial == aisling.Serial)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
                 OnFailed(aisling);
                 return;
             }
@@ -826,7 +826,7 @@ public class Crasher(Skill skill) : SkillScript(skill)
 
                 if (_target == null || _target.Serial == sprite.Serial)
                 {
-                    GlobalSkillMethods.FailedAttemptBodyAnimation(sprite, action);
+                    GlobalSkillMethods.FailedAttemptBodyAnimation(sprite);
                     OnFailed(sprite);
                     return;
                 }
@@ -870,7 +870,7 @@ public class Sever(Skill skill) : SkillScript(skill)
 
             if (enemy.Count == 0)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
                 OnFailed(aisling);
                 return;
             }
@@ -1186,7 +1186,7 @@ public class Titans_Cleave(Skill skill) : SkillScript(skill)
 
             if (enemy.Count == 0)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
                 OnFailed(aisling);
                 return;
             }
@@ -1255,7 +1255,7 @@ public class Titans_Cleave(Skill skill) : SkillScript(skill)
 
                 if (_target == null || _target.Serial == sprite.Serial)
                 {
-                    GlobalSkillMethods.FailedAttemptBodyAnimation(sprite, action);
+                    GlobalSkillMethods.FailedAttemptBodyAnimation(sprite);
                     OnFailed(sprite);
                     return;
                 }
@@ -1340,7 +1340,7 @@ public class Retribution(Skill skill) : SkillScript(skill)
 
             if (enemy.Count == 0)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
                 OnFailed(aisling);
                 return;
             }
@@ -1409,7 +1409,7 @@ public class Retribution(Skill skill) : SkillScript(skill)
 
                 if (_target == null || _target.Serial == sprite.Serial)
                 {
-                    GlobalSkillMethods.FailedAttemptBodyAnimation(sprite, action);
+                    GlobalSkillMethods.FailedAttemptBodyAnimation(sprite);
                     OnFailed(sprite);
                     return;
                 }
@@ -1498,7 +1498,7 @@ public class Sneak_Attack(Skill skill) : SkillScript(skill)
 
             if (_target == null || _target.Serial == aisling.Serial || targetPos == _target.Position)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
                 OnFailed(aisling);
                 return;
             }

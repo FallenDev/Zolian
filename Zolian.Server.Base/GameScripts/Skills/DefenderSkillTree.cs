@@ -38,7 +38,7 @@ public class Rescue(Skill skill) : SkillScript(skill)
 
             if (enemy.Count == 0)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
                 OnFailed(aisling);
                 return;
             }
@@ -142,7 +142,7 @@ public class Wind_Blade(Skill skill) : SkillScript(skill)
 
             if (enemy.Count == 0)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
                 OnFailed(aisling);
                 return;
             }
@@ -285,7 +285,7 @@ public class Beag_Suain(Skill skill) : SkillScript(skill)
 
             if (_target == null || _target.Serial == aisling.Serial)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
                 OnFailed(aisling);
                 return;
             }
@@ -379,7 +379,7 @@ public class Vampiric_Slash(Skill skill) : SkillScript(skill)
 
             if (enemy.Count == 0)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
                 OnFailed(aisling);
                 return;
             }
@@ -1071,7 +1071,7 @@ public class ShieldBash(Skill skill) : SkillScript(skill)
 
             if (enemy.Count == 0)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
                 OnFailed(aisling);
                 return;
             }
@@ -1213,7 +1213,7 @@ public class WrathBlow(Skill skill) : SkillScript(skill)
 
             if (_target == null || _target.Serial == aisling.Serial)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
                 OnFailed(aisling);
                 return;
             }

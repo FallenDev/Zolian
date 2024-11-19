@@ -52,6 +52,8 @@ public sealed class Aisling : Player, IAisling
     };
 
     public bool Overburden => CurrentWeight > MaximumWeight;
+    public byte MeleeBodyAnimation;
+    public byte CastBodyAnimation;
     public bool Dead => IsDead();
     public bool RegenTimerDisabled;
     public bool Skulled => HasDebuff("Skulled");
@@ -71,6 +73,8 @@ public sealed class Aisling : Player, IAisling
         LegendBook = new Legend();
         ClanTitle = string.Empty;
         ClanRank = string.Empty;
+        MeleeBodyAnimation = 1;
+        CastBodyAnimation = 6;
         LoggedIn = false;
         ActiveStatus = ActivityStatus.Awake;
         PartyStatus = GroupStatus.AcceptingRequests;
@@ -363,7 +367,7 @@ public sealed class Aisling : Player, IAisling
                         spell.InUse = true;
 
                         var target = ObjectManager.GetObject(Map, i => i.Serial == info.Target, ObjectManager.Get.Damageable) ?? this;
-                        CastAnimation(spell);
+                        ArmorBodyAnimation(CastBodyAnimation, spell.Template.Sound);
                         var script = spell.Scripts.Values.FirstOrDefault();
                         script?.OnUse(this, target);
                         spell.CurrentCooldown = spell.Template.Cooldown > 0 ? spell.Template.Cooldown : 0;
@@ -394,20 +398,11 @@ public sealed class Aisling : Player, IAisling
     }
 
     /// <summary>
-    /// Displays player's body animation, spell's sound
+    /// Displays player's body animation based on Armor
     /// </summary>
-    public Aisling CastAnimation(Spell spell, byte actionSpeed = 30)
+    public Aisling ArmorBodyAnimation(byte animation, byte sound, byte actionSpeed = 30)
     {
-        var bodyAnim = Path switch
-        {
-            Class.Cleric => (BodyAnimation)128,
-            Class.Arcanus => (BodyAnimation)136,
-            Class.Monster => (BodyAnimation)1,
-            _ => (BodyAnimation)6
-        };
-
-        SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(Serial, bodyAnim, actionSpeed, spell.Template.Sound));
-
+        SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(Serial, (BodyAnimation)animation, actionSpeed, sound));
         return this;
     }
 

@@ -41,7 +41,7 @@ public class Grief_Eruption(Skill skill) : SkillScript(skill)
             else
             {
                 client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
-                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
                 OnFailed(aisling);
                 return;
             }
@@ -50,7 +50,7 @@ public class Grief_Eruption(Skill skill) : SkillScript(skill)
 
             if (enemy.Count == 0)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
                 OnFailed(aisling);
                 return;
             }
@@ -62,7 +62,7 @@ public class Grief_Eruption(Skill skill) : SkillScript(skill)
 
             if (_target is null || _target.Serial == aisling.Serial)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
                 OnFailed(aisling);
                 return;
             }

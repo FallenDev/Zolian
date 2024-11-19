@@ -41,7 +41,7 @@ public class Shadowfade(Skill skill) : SkillScript(skill)
 
                     if (aisling.Dead || aisling.IsInvisible)
                     {
-                        GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
+                        GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
                         OnFailed(aisling);
                         return;
                     }
@@ -114,7 +114,7 @@ public class Archery(Skill skill) : SkillScript(skill)
 
             if (enemy.Count == 0)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
                 OnFailed(aisling);
                 return;
             }
@@ -198,7 +198,7 @@ public class Archery(Skill skill) : SkillScript(skill)
 
                 if (_target == null || _target.Serial == sprite.Serial)
                 {
-                    GlobalSkillMethods.FailedAttemptBodyAnimation(sprite, action);
+                    GlobalSkillMethods.FailedAttemptBodyAnimation(sprite);
                     OnFailed(sprite);
                     return;
                 }
@@ -359,7 +359,7 @@ public class Slash(Skill skill) : SkillScript(skill)
 
             if (_target == null || _target.Serial == aisling.Serial)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
                 OnFailed(aisling);
                 return;
             }
@@ -419,7 +419,7 @@ public class Slash(Skill skill) : SkillScript(skill)
 
                 if (_target == null || _target.Serial == sprite.Serial)
                 {
-                    GlobalSkillMethods.FailedAttemptBodyAnimation(sprite, action);
+                    GlobalSkillMethods.FailedAttemptBodyAnimation(sprite);
                     OnFailed(sprite);
                     return;
                 }
@@ -846,7 +846,7 @@ public class Fire_Breath(Skill skill) : SkillScript(skill)
         else
         {
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
-            GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
+            GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
             OnFailed(aisling);
             return;
         }
@@ -857,7 +857,7 @@ public class Fire_Breath(Skill skill) : SkillScript(skill)
 
             if (enemy.Count == 0)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
                 OnFailed(aisling);
                 GlobalSkillMethods.Train(aisling.Client, Skill);
                 return;
@@ -1044,7 +1044,7 @@ public class Bubble_Burst(Skill skill) : SkillScript(skill)
         else
         {
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
-            GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
+            GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
             OnFailed(aisling);
             return;
         }
@@ -1055,7 +1055,7 @@ public class Bubble_Burst(Skill skill) : SkillScript(skill)
 
             if (enemy.Count == 0)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
                 OnFailed(aisling);
                 GlobalSkillMethods.Train(aisling.Client, Skill);
                 return;
@@ -1243,7 +1243,7 @@ public class Icy_Blast(Skill skill) : SkillScript(skill)
         else
         {
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
-            GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
+            GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
             OnFailed(aisling);
             return;
         }
@@ -1254,7 +1254,7 @@ public class Icy_Blast(Skill skill) : SkillScript(skill)
 
             if (enemy.Count == 0)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
                 OnFailed(aisling);
                 GlobalSkillMethods.Train(aisling.Client, Skill);
                 return;
@@ -1471,7 +1471,7 @@ public class Earthly_Delights(Skill skill) : SkillScript(skill)
 
             if (enemy.Count == 0)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
                 OnFailed(aisling);
                 GlobalSkillMethods.Train(aisling.Client, Skill);
                 return;
@@ -1636,7 +1636,7 @@ public class Heavenly_Gaze(Skill skill) : SkillScript(skill)
 
             if (enemy.Count == 0)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
                 OnFailed(aisling);
                 GlobalSkillMethods.Train(aisling.Client, Skill);
                 return;
@@ -1833,7 +1833,7 @@ public class Silent_Siren(Skill skill) : SkillScript(skill)
 
             if (enemy.Count == 0)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
                 OnFailed(aisling);
                 GlobalSkillMethods.Train(aisling.Client, Skill);
                 return;
@@ -2049,7 +2049,7 @@ public class Poison_Talon(Skill skill) : SkillScript(skill)
 
             if (enemy.Count == 0)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
                 OnFailed(aisling);
                 GlobalSkillMethods.Train(aisling.Client, Skill);
                 return;
@@ -2266,7 +2266,7 @@ public class Toxic_Breath(Skill skill) : SkillScript(skill)
 
             if (enemy.Count == 0)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
                 OnFailed(aisling);
                 GlobalSkillMethods.Train(aisling.Client, Skill);
                 return;

@@ -40,7 +40,7 @@ public class Bang(Skill skill) : SkillScript(skill)
 
             if (enemy.Count == 0)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
                 OnFailed(aisling);
                 return;
             }
@@ -116,7 +116,7 @@ public class Bang(Skill skill) : SkillScript(skill)
 
                 if (_target == null || _target.Serial == sprite.Serial)
                 {
-                    GlobalSkillMethods.FailedAttemptBodyAnimation(sprite, action);
+                    GlobalSkillMethods.FailedAttemptBodyAnimation(sprite);
                     OnFailed(sprite);
                     return;
                 }
@@ -202,7 +202,7 @@ public class Snipe(Skill skill) : SkillScript(skill)
 
             if (enemy.Count == 0)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
                 OnFailed(aisling);
                 return;
             }
@@ -289,7 +289,7 @@ public class Snipe(Skill skill) : SkillScript(skill)
 
                 if (enemy == null || enemy.Serial == sprite.Serial)
                 {
-                    GlobalSkillMethods.FailedAttemptBodyAnimation(sprite, action);
+                    GlobalSkillMethods.FailedAttemptBodyAnimation(sprite);
                     OnFailed(sprite);
                     return;
                 }
@@ -389,7 +389,7 @@ public class Volley(Skill skill) : SkillScript(skill)
 
             if (targets.IsEmpty())
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
                 OnFailed(aisling);
                 return;
             }

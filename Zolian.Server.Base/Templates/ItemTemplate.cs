@@ -44,6 +44,7 @@ public class ItemTemplate : Template
     public Element SecondaryOffensiveElement { get; init; }
     public byte CarryWeight { get; init; }
     public ItemFlags Flags { get; init; }
+    public ArmorAnimationFlags AnimFlags { get; init; }
     public uint MaxDurability { get; init; }
     public uint Value { get; init; }
     public int EquipmentSlot { get; set; }
@@ -174,6 +175,7 @@ public static class ItemStorage
                 var disImage = (int)reader["DisplayImage"];
                 var flags = ServiceStack.AutoMappingUtils.ConvertTo<ItemFlags>(reader["Flags"]);
                 var gender = ServiceStack.AutoMappingUtils.ConvertTo<Gender>(reader["Gender"]);
+                var animations = ServiceStack.AutoMappingUtils.ConvertTo<ArmorAnimationFlags>(reader["AnimFlags"]);
                 var weight = (int)reader["CarryWeight"];
                 var maxDura = (int)reader["MaxDurability"];
                 var worth = (int)reader["Worth"];
@@ -189,6 +191,7 @@ public static class ItemStorage
                     DisplayImage = (ushort)disImage,
                     ScriptName = reader["ScriptName"].ToString(),
                     Flags = flags,
+                    AnimFlags = animations,
                     Gender = gender,
                     OffenseElement = Element.None,
                     DefenseElement = Element.None,

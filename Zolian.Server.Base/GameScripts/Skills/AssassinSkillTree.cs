@@ -40,7 +40,7 @@ public class Stab(Skill skill) : SkillScript(skill)
 
             if (_target == null || _target.Serial == aisling.Serial)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
                 OnFailed(aisling);
                 return;
             }
@@ -98,7 +98,7 @@ public class Stab(Skill skill) : SkillScript(skill)
 
                 if (_target == null || _target.Serial == sprite.Serial)
                 {
-                    GlobalSkillMethods.FailedAttemptBodyAnimation(sprite, action);
+                    GlobalSkillMethods.FailedAttemptBodyAnimation(sprite);
                     OnFailed(sprite);
                     return;
                 }
@@ -166,7 +166,7 @@ public class Stab_Twice(Skill skill) : SkillScript(skill)
 
             if (_target == null || _target.Serial == aisling.Serial)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
                 OnFailed(aisling);
                 return;
             }
@@ -225,7 +225,7 @@ public class Stab_Twice(Skill skill) : SkillScript(skill)
 
                 if (_target == null || _target.Serial == sprite.Serial)
                 {
-                    GlobalSkillMethods.FailedAttemptBodyAnimation(sprite, action);
+                    GlobalSkillMethods.FailedAttemptBodyAnimation(sprite);
                     OnFailed(sprite);
                     return;
                 }
@@ -293,7 +293,7 @@ public class Stab_and_Twist(Skill skill) : SkillScript(skill)
 
             if (enemy.Count == 0)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
                 OnFailed(aisling);
                 return;
             }
@@ -366,7 +366,7 @@ public class Stab_and_Twist(Skill skill) : SkillScript(skill)
 
                 if (_target == null || _target.Serial == sprite.Serial)
                 {
-                    GlobalSkillMethods.FailedAttemptBodyAnimation(sprite, action);
+                    GlobalSkillMethods.FailedAttemptBodyAnimation(sprite);
                     OnFailed(sprite);
                     return;
                 }
@@ -448,7 +448,7 @@ public class Sneak(Skill skill) : SkillScript(skill)
 
                     if (aisling.Dead || aisling.IsInvisible)
                     {
-                        GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
+                        GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
                         OnFailed(aisling);
                         return;
                     }
@@ -522,7 +522,7 @@ public class Flurry(Skill skill) : SkillScript(skill)
 
             if (enemy.Count == 0)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
                 OnFailed(aisling);
                 return;
             }
@@ -791,7 +791,7 @@ public class Double_Edged_Dance(Skill skill) : SkillScript(skill)
 
             if (enemy.Count == 0)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
                 OnFailed(aisling);
                 return;
             }
@@ -937,7 +937,7 @@ public class Ebb_and_Flow(Skill skill) : SkillScript(skill)
 
             if (enemy.Count == 0)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
                 OnFailed(aisling);
                 return;
             }
@@ -1082,7 +1082,7 @@ public class Shadow_Step(Skill skill) : SkillScript(skill)
 
             if (_target == null || _target.Serial == aisling.Serial || targetPos == _target.Position)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
                 OnFailed(aisling);
                 return;
             }

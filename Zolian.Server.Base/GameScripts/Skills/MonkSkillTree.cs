@@ -40,7 +40,7 @@ public class Ambush(Skill skill) : SkillScript(skill)
 
             if (_target == null || _target.Serial == aisling.Serial || targetPos == _target.Position)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
                 OnFailed(aisling);
                 return;
             }
@@ -162,7 +162,7 @@ public class WolfFangFist(Skill skill) : SkillScript(skill)
 
             if (_target == null || _target.Serial == aisling.Serial)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
                 OnFailed(aisling);
                 return;
             }
@@ -260,7 +260,7 @@ public class KnifeHandStrike(Skill skill) : SkillScript(skill)
 
             if (_target == null || _target.Serial == aisling.Serial)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
                 OnFailed(aisling);
                 return;
             }
@@ -315,7 +315,7 @@ public class KnifeHandStrike(Skill skill) : SkillScript(skill)
 
                 if (_target == null || _target.Serial == sprite.Serial)
                 {
-                    GlobalSkillMethods.FailedAttemptBodyAnimation(sprite, action);
+                    GlobalSkillMethods.FailedAttemptBodyAnimation(sprite);
                     OnFailed(sprite);
                     return;
                 }
@@ -384,7 +384,7 @@ public class PalmHeelStrike(Skill skill) : SkillScript(skill)
 
             if (enemy.Count == 0)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
                 OnFailed(aisling);
                 return;
             }
@@ -446,7 +446,7 @@ public class PalmHeelStrike(Skill skill) : SkillScript(skill)
 
                 if (_target == null || _target.Serial == sprite.Serial)
                 {
-                    GlobalSkillMethods.FailedAttemptBodyAnimation(sprite, action);
+                    GlobalSkillMethods.FailedAttemptBodyAnimation(sprite);
                     OnFailed(sprite);
                     return;
                 }
@@ -513,7 +513,7 @@ public class HammerTwist(Skill skill) : SkillScript(skill)
 
             if (enemy.Count == 0)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
                 OnFailed(aisling);
                 return;
             }
@@ -575,7 +575,7 @@ public class HammerTwist(Skill skill) : SkillScript(skill)
 
                 if (_target == null || _target.Serial == sprite.Serial)
                 {
-                    GlobalSkillMethods.FailedAttemptBodyAnimation(sprite, action);
+                    GlobalSkillMethods.FailedAttemptBodyAnimation(sprite);
                     OnFailed(sprite);
                     return;
                 }
@@ -642,7 +642,7 @@ public class CrossBodyPunch(Skill skill) : SkillScript(skill)
 
             if (enemy.Count == 0)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
                 OnFailed(aisling);
                 return;
             }
@@ -704,7 +704,7 @@ public class CrossBodyPunch(Skill skill) : SkillScript(skill)
 
                 if (_target == null || _target.Serial == sprite.Serial)
                 {
-                    GlobalSkillMethods.FailedAttemptBodyAnimation(sprite, action);
+                    GlobalSkillMethods.FailedAttemptBodyAnimation(sprite);
                     OnFailed(sprite);
                     return;
                 }
@@ -772,7 +772,7 @@ public class HurricaneKick(Skill skill) : SkillScript(skill)
 
             if (enemy.Count == 0)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
                 OnFailed(aisling);
                 return;
             }
@@ -842,7 +842,7 @@ public class HurricaneKick(Skill skill) : SkillScript(skill)
 
                 if (_target == null || _target.Serial == sprite.Serial)
                 {
-                    GlobalSkillMethods.FailedAttemptBodyAnimation(sprite, action);
+                    GlobalSkillMethods.FailedAttemptBodyAnimation(sprite);
                     OnFailed(sprite);
                     return;
                 }
@@ -927,7 +927,7 @@ public class Kelberoth_Strike(Skill skill) : SkillScript(skill)
 
             if (_target == null || _target.Serial == aisling.Serial)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
                 OnFailed(aisling);
                 return;
             }
@@ -985,7 +985,7 @@ public class Kelberoth_Strike(Skill skill) : SkillScript(skill)
 
                 if (_target == null || _target.Serial == sprite.Serial)
                 {
-                    GlobalSkillMethods.FailedAttemptBodyAnimation(sprite, action);
+                    GlobalSkillMethods.FailedAttemptBodyAnimation(sprite);
                     OnFailed(sprite);
                     return;
                 }
@@ -1029,7 +1029,7 @@ public class Krane_Kick(Skill skill) : SkillScript(skill)
 
             if (enemy.Count == 0)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
                 OnFailed(aisling);
                 return;
             }
@@ -1091,7 +1091,7 @@ public class Krane_Kick(Skill skill) : SkillScript(skill)
 
                 if (_target == null || _target.Serial == sprite.Serial)
                 {
-                    GlobalSkillMethods.FailedAttemptBodyAnimation(sprite, action);
+                    GlobalSkillMethods.FailedAttemptBodyAnimation(sprite);
                     OnFailed(sprite);
                     return;
                 }
@@ -1157,7 +1157,7 @@ public class Claw_Fist(Skill skill) : SkillScript(skill)
 
         if (aisling.HasBuff("Claw Fist"))
         {
-            GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
+            GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
             OnFailed(aisling);
             return;
         }
@@ -1218,7 +1218,7 @@ public class EmberStrike(Skill skill) : SkillScript(skill)
 
             if (enemy.Count == 0)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
                 OnFailed(aisling);
                 return;
             }
@@ -1359,7 +1359,7 @@ public class Pummel(Skill skill) : SkillScript(skill)
 
             if (enemy.Count == 0)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
                 OnFailed(aisling);
                 return;
             }
@@ -1509,7 +1509,7 @@ public class Thump(Skill skill) : SkillScript(skill)
 
             if (_target == null || _target.Serial == aisling.Serial)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
                 OnFailed(aisling);
                 return;
             }
@@ -1614,7 +1614,7 @@ public class EyeGouge(Skill skill) : SkillScript(skill)
 
             if (_target == null || _target.Serial == aisling.Serial)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
                 OnFailed(aisling);
                 return;
             }
@@ -1759,7 +1759,7 @@ public class HealingPalms(Skill skill) : SkillScript(skill)
 
             if (enemy.Count == 0)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
                 OnFailed(aisling);
                 return;
             }

@@ -41,7 +41,7 @@ public class Flame_Thrower(Skill skill) : SkillScript(skill)
             else
             {
                 client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
-                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
                 OnFailed(aisling);
                 return;
             }
@@ -50,7 +50,7 @@ public class Flame_Thrower(Skill skill) : SkillScript(skill)
 
             if (enemy.Count == 0)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
                 OnFailed(aisling);
                 return;
             }
@@ -62,7 +62,7 @@ public class Flame_Thrower(Skill skill) : SkillScript(skill)
 
             if (_target is null || _target.Serial == aisling.Serial)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
                 OnFailed(aisling);
                 return;
             }
@@ -157,8 +157,7 @@ public class Flame_Thrower(Skill skill) : SkillScript(skill)
                     damageable.ApplyElementalSkillDamage(sprite, dmgCalc, ElementManager.Element.Fire, Skill);
                     damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings,
                         c => c.SendAnimation(Skill.Template.TargetAnimation, null, _target.Serial, 170));
-                    damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                        c => c.SendBodyAnimation(sprite.Serial, BodyAnimation.Assail, 30));
+                    damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(sprite.Serial, BodyAnimation.Assail, 30));
                     if (!_crit) return;
                     damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings,
                         c => c.SendAnimation(387, null, sprite.Serial));
@@ -242,7 +241,7 @@ public class Water_Cannon(Skill skill) : SkillScript(skill)
             else
             {
                 client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
-                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
                 OnFailed(aisling);
                 return;
             }
@@ -251,7 +250,7 @@ public class Water_Cannon(Skill skill) : SkillScript(skill)
 
             if (enemy.Count == 0)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
                 OnFailed(aisling);
                 return;
             }
@@ -263,7 +262,7 @@ public class Water_Cannon(Skill skill) : SkillScript(skill)
 
             if (_target is null || _target.Serial == aisling.Serial)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
                 OnFailed(aisling);
                 return;
             }
@@ -443,7 +442,7 @@ public class Tornado_Vector(Skill skill) : SkillScript(skill)
             else
             {
                 client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
-                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
                 OnFailed(aisling);
                 return;
             }
@@ -452,7 +451,7 @@ public class Tornado_Vector(Skill skill) : SkillScript(skill)
 
             if (enemy.Count == 0)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
                 OnFailed(aisling);
                 return;
             }
@@ -464,7 +463,7 @@ public class Tornado_Vector(Skill skill) : SkillScript(skill)
 
             if (_target is null || _target.Serial == aisling.Serial)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
                 OnFailed(aisling);
                 return;
             }
@@ -644,7 +643,7 @@ public class Earth_Shatter(Skill skill) : SkillScript(skill)
             else
             {
                 client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
-                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
                 OnFailed(aisling);
                 return;
             }
@@ -653,7 +652,7 @@ public class Earth_Shatter(Skill skill) : SkillScript(skill)
 
             if (enemy.Count == 0)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
                 OnFailed(aisling);
                 return;
             }
@@ -665,7 +664,7 @@ public class Earth_Shatter(Skill skill) : SkillScript(skill)
 
             if (_target is null || _target.Serial == aisling.Serial)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
                 OnFailed(aisling);
                 return;
             }

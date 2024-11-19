@@ -320,12 +320,12 @@ public class GlobalSkillMethods
         return 10015;
     }
 
-    public static void FailedAttemptBodyAnimation(Sprite sprite, BodyAnimationArgs action)
+    public static void FailedAttemptBodyAnimation(Sprite sprite)
     {
         try
         {
             if (sprite is not Aisling aisling) return;
-            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed, action.Sound));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(sprite.Serial, (BodyAnimation)aisling.MeleeBodyAnimation, 30));
         }
         catch
         {

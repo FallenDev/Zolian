@@ -52,7 +52,7 @@ public class Bite(Skill skill) : SkillScript(skill)
 
             if (_target == null || _target.Serial == sprite.Serial)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(sprite, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(sprite);
                 OnFailed(sprite);
                 return;
             }
@@ -122,7 +122,7 @@ public class Gatling(Skill skill) : SkillScript(skill)
 
             if (_target == null || _target.Serial == sprite.Serial)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(sprite, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(sprite);
                 OnFailed(sprite);
                 return;
             }
@@ -185,7 +185,7 @@ public class BiteAndShake(Skill skill) : SkillScript(skill)
 
             if (_target == null || _target.Serial == sprite.Serial)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(sprite, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(sprite);
                 OnFailed(sprite);
                 return;
             }
@@ -263,7 +263,7 @@ public class CorrosiveTouch(Skill skill) : SkillScript(skill)
 
             if (_target == null || _target.Serial == sprite.Serial)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(sprite, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(sprite);
                 OnFailed(sprite);
                 return;
             }
@@ -342,7 +342,7 @@ public class Stomp(Skill skill) : SkillScript(skill)
 
             if (_target == null || _target.Serial == sprite.Serial)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(sprite, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(sprite);
                 OnFailed(sprite);
                 return;
             }
@@ -405,7 +405,7 @@ public class HeadButt(Skill skill) : SkillScript(skill)
 
             if (_target == null || _target.Serial == sprite.Serial)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(sprite, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(sprite);
                 OnFailed(sprite);
                 return;
             }
@@ -468,7 +468,7 @@ public class Claw(Skill skill) : SkillScript(skill)
 
             if (_target == null || _target.Serial == sprite.Serial)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(sprite, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(sprite);
                 OnFailed(sprite);
                 return;
             }
@@ -531,7 +531,7 @@ public class MuleKick(Skill skill) : SkillScript(skill)
 
             if (_target == null || _target.Serial == sprite.Serial)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(sprite, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(sprite);
                 OnFailed(sprite);
                 return;
             }
@@ -662,7 +662,7 @@ public class RollOver(Skill skill) : SkillScript(skill)
 
             if (_target == null || _target.Serial == sprite.Serial)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(sprite, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(sprite);
                 OnFailed(sprite);
                 return;
             }
@@ -740,7 +740,7 @@ public class TantalizingGaze(Skill skill) : SkillScript(skill)
 
             if (_target == null || _target.Serial == sprite.Serial)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(sprite, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(sprite);
                 OnFailed(sprite);
                 return;
             }
@@ -818,7 +818,7 @@ public class SwallowWhole(Skill skill) : SkillScript(skill)
 
             if (_target == null || _target.Serial == sprite.Serial)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(sprite, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(sprite);
                 OnFailed(sprite);
                 return;
             }
@@ -956,7 +956,7 @@ public class DeathFromAbove(Skill skill) : SkillScript(skill)
 
             if (_target == null || _target.Serial == sprite.Serial)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(sprite, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(sprite);
                 OnFailed(sprite);
                 return;
             }
@@ -1019,7 +1019,7 @@ public class Pounce(Skill skill) : SkillScript(skill)
 
             if (_target == null || _target.Serial == sprite.Serial)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(sprite, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(sprite);
                 OnFailed(sprite);
                 return;
             }
@@ -1082,7 +1082,7 @@ public class Tentacle(Skill skill) : SkillScript(skill)
 
             if (_target == null || _target.Serial == sprite.Serial)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(sprite, action);
+                GlobalSkillMethods.FailedAttemptBodyAnimation(sprite);
                 OnFailed(sprite);
                 return;
             }
@@ -1193,7 +1193,7 @@ public class OmegaSlash(Skill skill) : SkillScript(skill)
 
                 if (_target == null || _target.Serial == sprite.Serial)
                 {
-                    GlobalSkillMethods.FailedAttemptBodyAnimation(sprite, action);
+                    GlobalSkillMethods.FailedAttemptBodyAnimation(sprite);
                     OnFailed(sprite);
                     continue;
                 }
@@ -1265,7 +1265,7 @@ public class FireWheel(Skill skill) : SkillScript(skill)
 
                 if (_target == null || _target.Serial == sprite.Serial)
                 {
-                    GlobalSkillMethods.FailedAttemptBodyAnimation(sprite, action);
+                    GlobalSkillMethods.FailedAttemptBodyAnimation(sprite);
                     OnFailed(sprite);
                     continue;
                 }

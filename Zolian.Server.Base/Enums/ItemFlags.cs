@@ -82,6 +82,22 @@ public enum ItemFlags
 }
 
 [Flags]
+public enum ArmorAnimationFlags
+{
+    Peasant = 1,
+    Warrior = 1 << 1,
+    Rogue = 1 << 2,
+    Wizard = 1 << 3,
+    Priest = 1 << 4,
+    Monk = 1 << 5,
+    Gladiator = 1 << 6,
+    Archer = 1 << 7,
+    Summoner = 1 << 8,
+    Bard = 1 << 9,
+    Druid = 1 << 10
+}
+
+[Flags]
 public enum LootQualifer
 {
     Random = 1 << 1,
@@ -93,7 +109,6 @@ public enum LootQualifer
     LootGoblinP = 1 << 8,
     LootGoblinO = 1 << 9,
     LootGoblinR = 1 << 10,
-    None = 256,
 
     RandomGold = Random | Gold,
     LootG = LootGoblinG | Gold,
@@ -118,4 +133,5 @@ public static class ItemExtensions
 {
     public static bool FlagIsSet(this ItemFlags self, ItemFlags flag) => (self & flag) == flag;
     public static bool LootFlagIsSet(this LootQualifer self, LootQualifer flag) => (self & flag) == flag;
+    public static bool AnimFlagIsSet(this ArmorAnimationFlags self, ArmorAnimationFlags flag) => (self & flag) == flag;
 }
