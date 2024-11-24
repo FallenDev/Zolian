@@ -718,6 +718,19 @@ BEGIN
 END
 GO
 
+-- CheckIfPlayerSerialExists
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[CheckIfPlayerSerialExists] @Serial BIGINT
+AS
+BEGIN
+	SET NOCOUNT ON;
+	SELECT Username FROM ZolianPlayers.dbo.Players WHERE Serial = @Serial
+END
+GO
+
 -- DeBuffSave
 SET ANSI_NULLS ON
 GO
@@ -1619,4 +1632,16 @@ AS
 BEGIN
 	SET NOCOUNT ON;
 	SELECT MailBoxNumber FROM ZolianPlayers.dbo.PlayersQuests WHERE Serial = @Serial
+END
+
+-- Check MailboxNumber
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[CheckIfMailBoxNumberExists] @MailBoxNumber INT
+AS
+BEGIN
+	SET NOCOUNT ON;
+	SELECT Serial FROM ZolianPlayers.dbo.PlayersQuests WHERE MailBoxNumber = @MailBoxNumber
 END

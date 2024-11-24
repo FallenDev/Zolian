@@ -275,9 +275,9 @@ public class Movable : Identifiable
                     return;
             }
 
-            SendToSelectedPlayers(selectedPlayers.Values, method);
+            SendToSelectedPlayers(selectedPlayers, method);
         }
-        catch (Exception)
+        catch
         {
             ServerSetup.EventsLogger($"Issue with {method.Method.Name} within SendTargetedClientMethod called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}");
             SentrySdk.CaptureMessage($"Issue with {method.Method.Name} within SendTargetedClientMethod called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
@@ -293,17 +293,26 @@ public class Movable : Identifiable
         }
     }
 
-    private static void SendToSelectedPlayers(IEnumerable<Aisling> players, Action<WorldClient> method)
+    private static void SendToSelectedPlayers(ConcurrentDictionary<long, Aisling> players, Action<WorldClient> method)
     {
-        foreach (var player in players.Where(p => p?.Client != null))
+        try
         {
-            if (method.Method.Name.Contains("CastAnimation") || method.Method.Name.Contains("OnSuccess") ||
-                method.Method.Name.Contains("OnApplied"))
+            foreach (var (serial, player) in players)
             {
-                if (!player.GameSettings.Animations) continue;
-            }
+                if (player?.Client == null) continue;
+                if (method.Method.Name.Contains("CastAnimation") || method.Method.Name.Contains("OnSuccess") ||
+                    method.Method.Name.Contains("OnApplied"))
+                {
+                    if (!player.GameSettings.Animations) continue;
+                }
 
-            method(player.Client);
+                method(player.Client);
+            }
+        }
+        catch
+        {
+            ServerSetup.EventsLogger($"Issue with {method.Method.Name} within SendToSelectedPlayers called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}");
+            SentrySdk.CaptureMessage($"Issue with {method.Method.Name} within SendToSelectedPlayers called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
         }
     }
 }

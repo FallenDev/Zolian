@@ -38,14 +38,22 @@ public record AislingStorage : Sql
             return;
         }
 
-        var serial = EphemeralRandomIdGenerator<uint>.Shared.NextId;
-
         try
         {
+            // Serial & Mailbox number uniqueness
+            var serial = EphemeralRandomIdGenerator<uint>.Shared.NextId;
+            var serialFound = await CheckIfPlayerExists(serial);
+            if (serialFound)
+                serial = EphemeralRandomIdGenerator<uint>.Shared.NextId;
+
+            var mailBoxNumber = EphemeralRandomIdGenerator<ushort>.Shared.NextId;
+            var mailBoxFound = await CheckIfMailboxIdExists(mailBoxNumber);
+            if (mailBoxFound)
+                mailBoxNumber = EphemeralRandomIdGenerator<ushort>.Shared.NextId;
+
             // Player
             var connection = ConnectToDatabase(EncryptedConnectionString);
             var cmd = ConnectToDatabaseSqlCommandWithProcedure("PlayerCreation", connection);
-            var mailBoxNumber = EphemeralRandomIdGenerator<ushort>.Shared.NextId;
 
             #region Parameters
 
@@ -645,6 +653,35 @@ public record AislingStorage : Sql
 
     #region DB Checks
 
+    private static async Task<bool> CheckIfPlayerExists(long serial)
+    {
+        try
+        {
+            var sConn = ConnectToDatabase(ConnectionString);
+            var cmd = ConnectToDatabaseSqlCommandWithProcedure("CheckIfPlayerSerialExists", sConn);
+            cmd.Parameters.Add("@Serial", SqlDbType.BigInt).Value = serial;
+            var reader = await cmd.ExecuteReaderAsync();
+            var userFound = false;
+
+            while (reader.Read())
+            {
+                var userName = reader["Username"].ToString();
+                if (userName is null) continue;
+                userFound = true;
+            }
+
+            reader.Close();
+            sConn.Close();
+            return userFound;
+        }
+        catch (Exception e)
+        {
+            SentrySdk.CaptureException(e);
+        }
+
+        return false;
+    }
+
     public static async Task<bool> CheckIfPlayerExists(string name)
     {
         try
@@ -698,6 +735,35 @@ public record AislingStorage : Sql
                 }
             }
 
+            reader.Close();
+            sConn.Close();
+            return userFound;
+        }
+        catch (Exception e)
+        {
+            SentrySdk.CaptureException(e);
+        }
+
+        return false;
+    }
+
+    private static async Task<bool> CheckIfMailboxIdExists(int mailBoxNumber)
+    {
+        try
+        {
+            var sConn = ConnectToDatabase(ConnectionString);
+            var cmd = ConnectToDatabaseSqlCommandWithProcedure("CheckIfMailBoxNumberExists", sConn);
+            cmd.Parameters.Add("@MailBoxNumber", SqlDbType.Int).Value = mailBoxNumber;
+            var reader = await cmd.ExecuteReaderAsync();
+            var userFound = false;
+
+            while (reader.Read())
+            {
+                var serial = (long)reader["Serial"];
+                if (serial != 0)
+                    userFound = true;
+            }
+            
             reader.Close();
             sConn.Close();
             return userFound;
