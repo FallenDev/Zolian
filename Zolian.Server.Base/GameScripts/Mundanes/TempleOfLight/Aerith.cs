@@ -26,8 +26,8 @@ public class Aerith(WorldServer server, Mundane mundane) : MundaneScript(server,
             new(0x01, "Dedicate experience")
         };
 
-        if (client.Aisling.ExpLevel >= 250)
-            options.Add(new Dialog.OptionsDataItem(0x02, "Dedicate ability"));
+        //if (client.Aisling.ExpLevel >= 250)
+        //    options.Add(new Dialog.OptionsDataItem(0x02, "Dedicate ability"));
 
         client.SendOptionsDialog(Mundane, "Let's see if we can transpose your experience to mana.", options.ToArray());
     }
@@ -48,6 +48,7 @@ public class Aerith(WorldServer server, Mundane mundane) : MundaneScript(server,
                     {
                         new(0x03, "{=qMeditate x1"),
                         new(0x04, "{=qMeditate x10"),
+                        new(0x05, "{=qMeditate x100"),
                         new(0x00, "{=bSecond thought")
                     };
 
@@ -77,9 +78,9 @@ public class Aerith(WorldServer server, Mundane mundane) : MundaneScript(server,
 
                     if (baseExp - i >= 0)
                     {
-                        client.Aisling.ExpTotal -= (uint)i;
+                        client.Aisling.ExpTotal -= i;
                         client.Aisling.BaseMp += 25;
-                        client.SendAttributes(StatUpdateType.ExpGold);
+                        client.SendAttributes(StatUpdateType.Full);
                         client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(1, null, client.Aisling.Serial));
                         client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(8, false));
                     }
@@ -93,6 +94,7 @@ public class Aerith(WorldServer server, Mundane mundane) : MundaneScript(server,
                     {
                         new(0x03, "{=qMeditate x1"),
                         new(0x04, "{=qMeditate x10"),
+                        new(0x05, "{=qMeditate x100"),
                         new(0x00, "{=bSecond thought")
                     };
 
@@ -112,9 +114,9 @@ public class Aerith(WorldServer server, Mundane mundane) : MundaneScript(server,
 
                     if (baseExp - i >= 0)
                     {
-                        client.Aisling.ExpTotal -= (uint)i;
+                        client.Aisling.ExpTotal -= i;
                         client.Aisling.BaseMp += 250;
-                        client.SendAttributes(StatUpdateType.ExpGold);
+                        client.SendAttributes(StatUpdateType.Full);
                         client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(1, null, client.Aisling.Serial));
                         client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(8, false));
                     }
@@ -128,6 +130,43 @@ public class Aerith(WorldServer server, Mundane mundane) : MundaneScript(server,
                     {
                         new(0x03, "{=qMeditate x1"),
                         new(0x04, "{=qMeditate x10"),
+                        new(0x05, "{=qMeditate x100"),
+                        new(0x00, "{=bSecond thought")
+                    };
+
+                    client.SendOptionsDialog(Mundane, $"{client.Aisling.ExpTotal} left\nBase Mana: {client.Aisling.BaseMp}", options.ToArray());
+                    break;
+                }
+            case 0x05:
+                {
+                    var baseMp = client.Aisling.BaseMp;
+                    var baseExp = client.Aisling.ExpTotal;
+                    long i;
+
+                    if (client.Aisling.BaseMp >= 500000)
+                        i = baseMp * 200000;
+                    else
+                        i = baseMp * 50000;
+
+                    if (baseExp - i >= 0)
+                    {
+                        client.Aisling.ExpTotal -= i;
+                        client.Aisling.BaseMp += 2500;
+                        client.SendAttributes(StatUpdateType.Full);
+                        client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(263, null, client.Aisling.Serial));
+                        client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(8, false));
+                    }
+                    else
+                    {
+                        client.SendOptionsDialog(Mundane, "uhh, hmm, I'm sorry looks like you don't have enough experience.");
+                        break;
+                    }
+
+                    var options = new List<Dialog.OptionsDataItem>
+                    {
+                        new(0x03, "{=qMeditate x1"),
+                        new(0x04, "{=qMeditate x10"),
+                        new(0x05, "{=qMeditate x100"),
                         new(0x00, "{=bSecond thought")
                     };
 
