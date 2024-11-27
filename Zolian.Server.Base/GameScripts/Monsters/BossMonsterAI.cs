@@ -48,11 +48,10 @@ public class DraconicOmega : MonsterScript
             if (Monster.IsVulnerable || Monster.IsPoisoned)
             {
                 var pos = Monster.Pos;
+                Monster.SendAnimationNearby(75, new Position(pos));
+
                 foreach (var debuff in Monster.Debuffs.Values)
-                {
                     debuff?.OnEnded(Monster, debuff);
-                    Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(75, new Position(pos)));
-                }
             }
 
             MonsterState(elapsedTime);
@@ -346,11 +345,10 @@ public class JackFrost : MonsterScript
             if (Monster.IsVulnerable || Monster.IsPoisoned)
             {
                 var pos = Monster.Pos;
+                Monster.SendAnimationNearby(75, new Position(pos));
+
                 foreach (var debuff in Monster.Debuffs.Values)
-                {
                     debuff?.OnEnded(Monster, debuff);
-                    Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(75, new Position(pos)));
-                }
             }
 
             MonsterState(elapsedTime);
@@ -648,11 +646,10 @@ public class Yeti : MonsterScript
             if (Monster.IsVulnerable || Monster.IsPoisoned)
             {
                 var pos = Monster.Pos;
+                Monster.SendAnimationNearby(75, new Position(pos));
+
                 foreach (var debuff in Monster.Debuffs.Values)
-                {
                     debuff?.OnEnded(Monster, debuff);
-                    Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(75, new Position(pos)));
-                }
             }
 
             MonsterState(elapsedTime);
@@ -1003,11 +1000,10 @@ public class WorldBossBahamut : MonsterScript
             if (Monster.IsVulnerable || Monster.IsPoisoned)
             {
                 var pos = Monster.Pos;
+                Monster.SendAnimationNearby(75, new Position(pos));
+
                 foreach (var debuff in Monster.Debuffs.Values)
-                {
                     debuff?.OnEnded(Monster, debuff);
-                    Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(75, new Position(pos)));
-                }
             }
 
             MonsterState(elapsedTime);

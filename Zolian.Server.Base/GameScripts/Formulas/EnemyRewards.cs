@@ -272,7 +272,7 @@ public class EnemyRewards : RewardScript
             if (critical >= .85)
             {
                 exp *= 2;
-                player.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(341, null, player.Serial));
+                player.SendAnimationNearby(341, null, player.Serial);
             }
         }
 
@@ -309,7 +309,7 @@ public class EnemyRewards : RewardScript
             if (critical >= .85)
             {
                 ap *= 2;
-                player.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(386, null, player.Serial));
+                player.SendAnimationNearby(386, null, player.Serial);
             }
         }
 

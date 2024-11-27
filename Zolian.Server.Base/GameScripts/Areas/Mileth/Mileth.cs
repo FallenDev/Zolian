@@ -125,7 +125,7 @@ public class Mileth : AreaScript
                     if (receivedWeapon)
                     {
                         client.SendServerMessage(ServerMessageType.ActiveMessage, "You hear Ceannlaidir's voice if but for a moment.");
-                        client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(83, client.Aisling.Position));
+                        client.Aisling.SendAnimationNearby(83, client.Aisling.Position);
                     }
                     break;
                 case >= 75 and < 95:
@@ -162,7 +162,7 @@ public class Mileth : AreaScript
                     if (receivedPotion)
                     {
                         client.SendServerMessage(ServerMessageType.ActiveMessage, "The feeling of a motherly embrace comes over you.. Glioca?");
-                        client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(5, client.Aisling.Position));
+                        client.Aisling.SendAnimationNearby(5, client.Aisling.Position);
                     }
                     break;
             }

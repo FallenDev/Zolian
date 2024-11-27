@@ -81,7 +81,7 @@ public class Cloud(WorldServer server, Mundane mundane) : MundaneScript(server, 
                         client.Aisling.ExpTotal -= i;
                         client.Aisling.BaseHp += 50;
                         client.SendAttributes(StatUpdateType.Full);
-                        client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(2, null, client.Aisling.Serial));
+                        client.Aisling.SendAnimationNearby(2, null, client.Aisling.Serial);
                         client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(0, false));
                     }
                     else
@@ -117,7 +117,7 @@ public class Cloud(WorldServer server, Mundane mundane) : MundaneScript(server, 
                         client.Aisling.ExpTotal -= i;
                         client.Aisling.BaseHp += 500;
                         client.SendAttributes(StatUpdateType.Full);
-                        client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(2, null, client.Aisling.Serial));
+                        client.Aisling.SendAnimationNearby(2, null, client.Aisling.Serial);
                         client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(0, false));
                     }
                     else
@@ -153,7 +153,7 @@ public class Cloud(WorldServer server, Mundane mundane) : MundaneScript(server, 
                         client.Aisling.ExpTotal -= i;
                         client.Aisling.BaseHp += 5000;
                         client.SendAttributes(StatUpdateType.Full);
-                        client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(170, null, client.Aisling.Serial));
+                        client.Aisling.SendAnimationNearby(170, null, client.Aisling.Serial);
                         client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(0, false));
                     }
                     else

@@ -66,7 +66,7 @@ public class MilethDreamSword : AreaScript
         if (!a) return;
         if (_playersOnMap.IsEmpty) return;
 
-        _playersOnMap.Values.FirstOrDefault()?.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(86, new Position(11, 4)));
+        _playersOnMap.Values.FirstOrDefault()?.SendAnimationNearby(86, new Position(11, 4));
     }
 
     public override void OnGossip(WorldClient client, string message) { }

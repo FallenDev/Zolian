@@ -90,7 +90,7 @@ public class Grief_Eruption(Skill skill) : SkillScript(skill)
             damageable.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Sorrow, Skill);
             GlobalSkillMethods.OnSuccess(_target, aisling, Skill, 0, false, action);
         }
-        catch (Exception)
+        catch
         {
             ServerSetup.EventsLogger($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}");
             SentrySdk.CaptureMessage($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);

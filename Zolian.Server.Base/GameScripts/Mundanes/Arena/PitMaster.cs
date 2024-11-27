@@ -49,7 +49,7 @@ public class PitMaster(WorldServer server, Mundane mundane) : MundaneScript(serv
                         client.CloseDialog();
                         Task.Delay(350).ContinueWith(ct =>
                         {
-                            client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(1, null, client.Aisling.Serial));
+                            client.Aisling.SendAnimationNearby(1, null, client.Aisling.Serial);
                         });
                     }
                     break;

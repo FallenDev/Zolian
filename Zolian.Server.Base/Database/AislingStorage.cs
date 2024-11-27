@@ -6,6 +6,7 @@ using Darkages.Enums;
 using Darkages.Sprites;
 using Microsoft.Data.SqlClient;
 using System.Data;
+using System.Numerics;
 using Darkages.Models;
 using Darkages.Templates;
 using Chaos.Common.Synchronization;
@@ -14,7 +15,7 @@ using Darkages.Network.Server;
 
 namespace Darkages.Database;
 
-public record AislingStorage : Sql
+public record AislingStorage : Sql, IEqualityOperators<AislingStorage, AislingStorage, bool>
 {
     public const string ConnectionString = "Data Source=.;Initial Catalog=ZolianPlayers;Integrated Security=True;Encrypt=False;MultipleActiveResultSets=True;";
     public const string PersonalMailString = "Data Source=.;Initial Catalog=ZolianBoardsMail;Integrated Security=True;Encrypt=False;MultipleActiveResultSets=True;";
@@ -763,7 +764,7 @@ public record AislingStorage : Sql
                 if (serial != 0)
                     userFound = true;
             }
-            
+
             reader.Close();
             sConn.Close();
             return userFound;

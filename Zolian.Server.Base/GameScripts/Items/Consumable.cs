@@ -81,7 +81,7 @@ public class Consumable(Item item) : ItemScript(item)
                     }
 
                     stockingItem.GiveTo(aisling);
-                    aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(294, aisling.Position));
+                    aisling.SendAnimationNearby(294, aisling.Position);
                     return;
                 }
             case "Necra Scribblings":
@@ -220,7 +220,7 @@ public class Consumable(Item item) : ItemScript(item)
                     if (aisling.CurrentMp > aisling.MaximumMp)
                         aisling.CurrentMp = aisling.MaximumMp;
                     client.SendServerMessage(ServerMessageType.ActiveMessage, "You feel refreshed (+5k MP)");
-                    aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(19, aisling.Position));
+                    aisling.SendAnimationNearby(19, aisling.Position);
                     client.Aisling.Inventory.RemoveRange(client, Item, 1);
                     return;
                 }
@@ -330,19 +330,19 @@ public class Consumable(Item item) : ItemScript(item)
 
                     if (enemy.SpellReflect)
                     {
-                        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(184, null, enemy.Serial));
+                        aisling.SendAnimationNearby(184, null, enemy.Serial);
                         client.SendServerMessage(ServerMessageType.OrangeBar1, "The effect from the pollen has been reflected!");
                         return;
                     }
 
                     if (enemy.SpellNegate)
                     {
-                        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(184, null, enemy.Serial));
+                        aisling.SendAnimationNearby(184, null, enemy.Serial);
                         client.SendServerMessage(ServerMessageType.OrangeBar1, "The effect from the pollen has been negated!");
                         return;
                     }
 
-                    aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(259, enemy.Position));
+                    aisling.SendAnimationNearby(259, enemy.Position);
                     aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(27, false));
                     var debuff = new DebuffBeagcradh();
                     client.EnqueueDebuffAppliedEvent(enemy, debuff);
@@ -352,7 +352,7 @@ public class Consumable(Item item) : ItemScript(item)
                 {
                     var chance = Generator.RandomNumPercentGen();
                     aisling.Debuffs.TryGetValue("Skulled", out var skulled);
-                    aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(49, aisling.Position));
+                    aisling.SendAnimationNearby(49, aisling.Position);
                     client.TakeAwayQuantity(client.Aisling, "Betrayal Blossom", 1);
 
                     if (chance >= .50)
@@ -383,19 +383,19 @@ public class Consumable(Item item) : ItemScript(item)
 
                     if (enemy.SpellReflect)
                     {
-                        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(184, null, enemy.Serial));
+                        aisling.SendAnimationNearby(184, null, enemy.Serial);
                         client.SendServerMessage(ServerMessageType.OrangeBar1, "The effect from the pollen has been reflected!");
                         return;
                     }
 
                     if (enemy.SpellNegate)
                     {
-                        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(184, null, enemy.Serial));
+                        aisling.SendAnimationNearby(184, null, enemy.Serial);
                         client.SendServerMessage(ServerMessageType.OrangeBar1, "The effect from the pollen has been negated!");
                         return;
                     }
 
-                    aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(106, enemy.Position));
+                    aisling.SendAnimationNearby(106, enemy.Position);
                     aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(26, false));
                     var debuff = new DebuffDarkChain();
                     client.EnqueueDebuffAppliedEvent(enemy, debuff);
@@ -416,19 +416,19 @@ public class Consumable(Item item) : ItemScript(item)
 
                     if (enemy.SpellReflect)
                     {
-                        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(184, null, enemy.Serial));
+                        aisling.SendAnimationNearby(184, null, enemy.Serial);
                         client.SendServerMessage(ServerMessageType.OrangeBar1, "The effect from the pollen has been reflected!");
                         return;
                     }
 
                     if (enemy.SpellNegate)
                     {
-                        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(184, null, enemy.Serial));
+                        aisling.SendAnimationNearby(184, null, enemy.Serial);
                         client.SendServerMessage(ServerMessageType.OrangeBar1, "The effect from the pollen has been negated!");
                         return;
                     }
 
-                    aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(95, enemy.Position));
+                    aisling.SendAnimationNearby(95, enemy.Position);
                     aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(28, false));
                     var debuff = new DebuffBeagsuain();
                     client.EnqueueDebuffAppliedEvent(enemy, debuff);
@@ -449,19 +449,19 @@ public class Consumable(Item item) : ItemScript(item)
 
                     if (enemy.SpellReflect)
                     {
-                        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(184, null, enemy.Serial));
+                        aisling.SendAnimationNearby(184, null, enemy.Serial);
                         client.SendServerMessage(ServerMessageType.OrangeBar1, "The effect from the pollen has been reflected!");
                         return;
                     }
 
                     if (enemy.SpellNegate)
                     {
-                        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(184, null, enemy.Serial));
+                        aisling.SendAnimationNearby(184, null, enemy.Serial);
                         client.SendServerMessage(ServerMessageType.OrangeBar1, "The effect from the pollen has been negated!");
                         return;
                     }
 
-                    aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(107, enemy.Position));
+                    aisling.SendAnimationNearby(107, enemy.Position);
                     aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(32, false));
                     var debuff = new DebuffSleep();
                     client.EnqueueDebuffAppliedEvent(enemy, debuff);
@@ -479,13 +479,13 @@ public class Consumable(Item item) : ItemScript(item)
 
                     if (chance >= .50)
                     {
-                        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(122, aisling.Position));
+                        aisling.SendAnimationNearby(122, aisling.Position);
                         var buff = new buff_DiaAite();
                         client.EnqueueBuffAppliedEvent(aisling, buff);
                         return;
                     }
 
-                    aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(193, aisling.Position));
+                    aisling.SendAnimationNearby(193, aisling.Position);
                     var debuff = new DebuffSunSeal();
                     client.EnqueueDebuffAppliedEvent(aisling, debuff);
                     return;
@@ -505,19 +505,19 @@ public class Consumable(Item item) : ItemScript(item)
 
                     if (enemy.SpellReflect)
                     {
-                        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(184, null, enemy.Serial));
+                        aisling.SendAnimationNearby(184, null, enemy.Serial);
                         client.SendServerMessage(ServerMessageType.OrangeBar1, "The effect from the pollen has been reflected!");
                         return;
                     }
 
                     if (enemy.SpellNegate)
                     {
-                        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(184, null, enemy.Serial));
+                        aisling.SendAnimationNearby(184, null, enemy.Serial);
                         client.SendServerMessage(ServerMessageType.OrangeBar1, "The effect from the pollen has been negated!");
                         return;
                     }
 
-                    aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(196, enemy.Position));
+                    aisling.SendAnimationNearby(196, enemy.Position);
                     aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(137, false));
                     var debuff = new DebuffArdPoison();
                     client.EnqueueDebuffAppliedEvent(enemy, debuff);

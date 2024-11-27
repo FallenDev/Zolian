@@ -1757,11 +1757,10 @@ public class AosdaRemnant : MonsterScript
             if (Monster.IsVulnerable || Monster.IsPoisoned)
             {
                 var pos = Monster.Pos;
+                Monster.SendAnimationNearby(75, new Position(pos));
+
                 foreach (var debuff in Monster.Debuffs.Values)
-                {
                     debuff?.OnEnded(Monster, debuff);
-                    Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(75, new Position(pos)));
-                }
             }
 
             MonsterState(elapsedTime);
@@ -2058,11 +2057,10 @@ public class AosdaHero : MonsterScript
             if (Monster.IsVulnerable || Monster.IsPoisoned)
             {
                 var pos = Monster.Pos;
+                Monster.SendAnimationNearby(75, new Position(pos));
+
                 foreach (var debuff in Monster.Debuffs.Values)
-                {
                     debuff?.OnEnded(Monster, debuff);
-                    Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(75, new Position(pos)));
-                }
             }
 
             MonsterState(elapsedTime);
@@ -2356,11 +2354,10 @@ public class AncientDragon : MonsterScript
             if (Monster.IsVulnerable || Monster.IsPoisoned)
             {
                 var pos = Monster.Pos;
+                Monster.SendAnimationNearby(75, new Position(pos));
+
                 foreach (var debuff in Monster.Debuffs.Values)
-                {
                     debuff?.OnEnded(Monster, debuff);
-                    Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(75, new Position(pos)));
-                }
             }
 
             MonsterState(elapsedTime);

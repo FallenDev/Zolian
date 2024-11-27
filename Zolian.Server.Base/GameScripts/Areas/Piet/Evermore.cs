@@ -29,7 +29,7 @@ public class Evermore : AreaScript
             client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=aAssassin: {{=bYou are not permitted to enter");
             client.WarpToAndRefresh(new Position(16, 17));
             Task.Delay(300).Wait();
-            client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(198, new Position(16, 17)));
+            client.Aisling.SendAnimationNearby(198, new Position(16, 17));
             return;
         }
 

@@ -17,7 +17,7 @@ public class GlobalSpellMethods
         if (client.Aisling.CantCast) return false;
         var success = Generator.RandNumGen100();
 
-        if (spell.Level == 100)
+        if (spell.Level >= 100)
         {
             return success >= 3;
         }

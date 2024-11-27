@@ -81,8 +81,7 @@ public class Undine : AreaScript
                         {
                             client.SendServerMessage(ServerMessageType.ActiveMessage,
                                 "You sense Cail's presence. You feel a sense of calm.");
-                            client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                                c => c.SendAnimation(83, client.Aisling.Position));
+                            client.Aisling.SendAnimationNearby(83, client.Aisling.Position);
                         }
                     }
                     break;
@@ -122,8 +121,7 @@ public class Undine : AreaScript
                         {
                             client.SendServerMessage(ServerMessageType.ActiveMessage,
                                 "The feeling of a motherly embrace comes over you.. Glioca?");
-                            client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                                c => c.SendAnimation(5, client.Aisling.Position));
+                            client.Aisling.SendAnimationNearby(5, client.Aisling.Position);
                         }
                     }
                     break;

@@ -1421,6 +1421,13 @@ public class WorldClient : WorldClientBase, IWorldClient
         else
             point = new Point(position.X, position.Y);
 
+        // If no positions and no sprite, exit
+        if (position is null && targetSerial == 0 && casterSerial == 0) return;
+        // If target serial is declared, but target isn't in view, exit
+        if (targetSerial != 0 && !Aisling.SpritesInView.TryGetValue(targetSerial, out _)) return;
+        // If caster serial is declared, but caster isn't in view, exit
+        if (casterSerial != 0 && Aisling.Serial != casterSerial && !Aisling.SpritesInView.TryGetValue(casterSerial, out _)) return;
+
         var args = new AnimationArgs
         {
             AnimationSpeed = speed,

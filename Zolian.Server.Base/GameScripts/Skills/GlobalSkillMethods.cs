@@ -10,28 +10,29 @@ using Darkages.Types;
 
 namespace Darkages.GameScripts.Skills;
 
-public class GlobalSkillMethods
+public static class GlobalSkillMethods
 {
     private static bool Attempt(WorldClient client, Skill skill)
     {
         try
         {
             if (client.Aisling.CantAttack) return false;
+            if (skill.Template.MaxLevel == 1) return true;
 
             var success = Generator.RandNumGen100();
 
-            if (skill.Level == 100)
+            return skill.Level switch
             {
-                return success >= 2;
-            }
-
-            return success switch
-            {
-                <= 25 when skill.Level <= 29 => false,
-                <= 15 when skill.Level <= 49 => false,
-                <= 10 when skill.Level <= 74 => false,
-                <= 5 when skill.Level <= 99 => false,
-                _ => true
+                >= 350 => success >= 1,
+                >= 100 => success >= 2,
+                _ => success switch
+                {
+                    <= 25 when skill.Level <= 29 => false,
+                    <= 15 when skill.Level <= 49 => false,
+                    <= 10 when skill.Level <= 74 => false,
+                    <= 5 when skill.Level <= 99 => false,
+                    _ => true
+                }
             };
         }
         catch
@@ -64,47 +65,40 @@ public class GlobalSkillMethods
         return default;
     }
 
-    public static void ApplyPhysicalDebuff(WorldClient client, Debuff debuff, Sprite target, Skill skill)
+    public static void ApplyPhysicalDebuff(Sprite attacker, Debuff debuff, Sprite target, Skill skill)
     {
         try
         {
-            if (client != null)
+            if (target is not Damageable damageable) return;
+            if (attacker is not Damageable damageDealer) return;
+
+            var dmg = 0;
+
+            if (debuff.Name.Contains("Suain"))
             {
-                var dmg = 0;
+                var knockOutDmg = Generator.RandNumGen100();
 
-                if (!debuff.Name.Contains("Beag Suain"))
+                if (knockOutDmg >= 98)
                 {
-                    var knockOutDmg = Generator.RandNumGen100();
-
-                    if (knockOutDmg >= 98)
-                    {
-                        dmg += knockOutDmg * client.Aisling.Str * 3;
-                    }
-                    else
-                    {
-                        dmg += knockOutDmg * client.Aisling.Str * 1;
-                    }
-
-                    if (target is not Damageable damageable) return;
-                    damageable.ApplyDamage(client.Aisling, dmg, skill);
+                    dmg += knockOutDmg * damageable.Str * 13;
                 }
+                else
+                {
+                    dmg += knockOutDmg * damageable.Str * 3;
+                }
+
+                damageable.ApplyDamage(damageDealer, dmg, skill, true);
             }
 
-            if (client != null)
-                client.EnqueueDebuffAppliedEvent(target, debuff);
-            else if (target is Aisling targetPlayer)
+            if (target.HasDebuff(debuff.Name))
+                target.RemoveDebuff(debuff.Name);
+
+            if (target is Aisling targetPlayer)
                 targetPlayer.Client.EnqueueDebuffAppliedEvent(target, debuff);
             else
                 debuff.OnApplied(target, debuff);
 
-            if (target is not Monster) return;
-            var animationPick = client?.Aisling.Path == Class.Defender
-                ? client.Aisling.UsingTwoHanded
-                    ? BodyAnimation.Swipe
-                    : BodyAnimation.TwoHandAtk
-                : BodyAnimation.Assail;
-
-            client?.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(client.Aisling.Serial, animationPick, 20));
+            damageDealer.SendAnimationNearby(skill.Template.TargetAnimation, null, target.Serial);
         }
         catch
         {
@@ -126,8 +120,7 @@ public class GlobalSkillMethods
                     : BodyAnimation.Assail;
 
                 aisling.Client.EnqueueBuffAppliedEvent(aisling, buff);
-                aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                    c => c.SendBodyAnimation(aisling.Serial, animationPick, 20));
+                aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(aisling.Serial, animationPick, 20));
                 return;
             }
 
@@ -200,6 +193,9 @@ public class GlobalSkillMethods
     {
         try
         {
+            if (attacker is Monster)
+                action.BodyAnimation = BodyAnimation.Assail;
+
             var target = enemy;
 
             // Damage
@@ -324,8 +320,8 @@ public class GlobalSkillMethods
     {
         try
         {
-            if (sprite is not Aisling aisling) return;
-            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(sprite.Serial, (BodyAnimation)aisling.MeleeBodyAnimation, 30));
+            if (sprite is not Damageable damageable) return;
+            damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(sprite.Serial, BodyAnimation.Assail, 35));
         }
         catch
         {
@@ -338,7 +334,10 @@ public class GlobalSkillMethods
     {
         try
         {
+            FailedAttemptBodyAnimation(sprite);
             if (sprite is not Aisling aisling) return;
+            aisling.Client.SendCooldown(true, skill.Slot, skill.Template.Cooldown);
+
             if (target is null) return;
             if (aisling.NextTo(target.X, target.Y))
                 aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(skill.Template.MissAnimation, null, target.Serial));

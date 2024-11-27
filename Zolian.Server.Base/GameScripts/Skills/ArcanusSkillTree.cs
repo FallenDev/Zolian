@@ -71,17 +71,14 @@ public class Flame_Thrower(Skill skill) : SkillScript(skill)
 
             if (_target.SpellReflect)
             {
-                aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                    c => c.SendAnimation(184, null, _target.Serial));
-                aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1,
-                    "Your elemental ability has been reflected!");
+                aisling.SendAnimationNearby(184, null, _target.Serial);
+                aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your elemental ability has been reflected!");
                 _target = Spell.SpellReflect(_target, aisling);
             }
 
             if (_target.SpellNegate)
             {
-                aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                    c => c.SendAnimation(64, null, _target.Serial));
+                aisling.SendAnimationNearby(64, null, _target.Serial);
                 client.SendServerMessage(ServerMessageType.OrangeBar1, "Your elemental ability has been deflected!");
                 return;
             }
@@ -90,7 +87,7 @@ public class Flame_Thrower(Skill skill) : SkillScript(skill)
             damageable.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Fire, Skill);
             GlobalSkillMethods.OnSuccess(_target, aisling, Skill, 0, false, action);
         }
-        catch (Exception)
+        catch
         {
             ServerSetup.EventsLogger($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}");
             SentrySdk.CaptureMessage($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
@@ -141,26 +138,21 @@ public class Flame_Thrower(Skill skill) : SkillScript(skill)
 
                     if (_target.SpellReflect)
                     {
-                        damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                            c => c.SendAnimation(184, null, _target.Serial));
+                        damageable.SendAnimationNearby(184, null, _target.Serial);
                         _target = Spell.SpellReflect(_target, sprite);
                     }
 
                     if (_target.SpellNegate)
                     {
-                        damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                            c => c.SendAnimation(64, null, _target.Serial));
+                        damageable.SendAnimationNearby(64, null, _target.Serial);
                         continue;
                     }
 
                     var dmgCalc = DamageCalc(sprite);
                     damageable.ApplyElementalSkillDamage(sprite, dmgCalc, ElementManager.Element.Fire, Skill);
-                    damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                        c => c.SendAnimation(Skill.Template.TargetAnimation, null, _target.Serial, 170));
-                    damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(sprite.Serial, BodyAnimation.Assail, 30));
+                    damageable.SendAnimationNearby(Skill.Template.TargetAnimation, null, _target.Serial, 170);
                     if (!_crit) return;
-                    damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                        c => c.SendAnimation(387, null, sprite.Serial));
+                    damageable.SendAnimationNearby(387, null, sprite.Serial);
                 }
             }
             catch
@@ -179,7 +171,7 @@ public class Flame_Thrower(Skill skill) : SkillScript(skill)
             var vector = new Position(position.X, position.Y);
             await Task.Delay(200).ContinueWith(ct =>
             {
-                damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(147, vector));
+                damageable.SendAnimationNearby(147, vector);
             });
         }
     }
@@ -271,17 +263,14 @@ public class Water_Cannon(Skill skill) : SkillScript(skill)
 
             if (_target.SpellReflect)
             {
-                aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                    c => c.SendAnimation(184, null, _target.Serial));
-                aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1,
-                    "Your elemental ability has been reflected!");
+                aisling.SendAnimationNearby(184, null, _target.Serial);
+                aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your elemental ability has been reflected!");
                 _target = Spell.SpellReflect(_target, aisling);
             }
 
             if (_target.SpellNegate)
             {
-                aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                    c => c.SendAnimation(64, null, _target.Serial));
+                aisling.SendAnimationNearby(64, null, _target.Serial);
                 client.SendServerMessage(ServerMessageType.OrangeBar1, "Your elemental ability has been deflected!");
                 return;
             }
@@ -290,7 +279,7 @@ public class Water_Cannon(Skill skill) : SkillScript(skill)
             damageable.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Water, Skill);
             GlobalSkillMethods.OnSuccess(_target, aisling, Skill, 0, false, action);
         }
-        catch (Exception)
+        catch
         {
             ServerSetup.EventsLogger($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}");
             SentrySdk.CaptureMessage($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
@@ -341,27 +330,21 @@ public class Water_Cannon(Skill skill) : SkillScript(skill)
 
                     if (_target.SpellReflect)
                     {
-                        damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                            c => c.SendAnimation(184, null, _target.Serial));
+                        damageable.SendAnimationNearby(184, null, _target.Serial);
                         _target = Spell.SpellReflect(_target, sprite);
                     }
 
                     if (_target.SpellNegate)
                     {
-                        damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                            c => c.SendAnimation(64, null, _target.Serial));
+                        damageable.SendAnimationNearby(64, null, _target.Serial);
                         continue;
                     }
 
                     var dmgCalc = DamageCalc(sprite);
                     damageable.ApplyElementalSkillDamage(sprite, dmgCalc, ElementManager.Element.Water, Skill);
-                    damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                        c => c.SendAnimation(Skill.Template.TargetAnimation, null, _target.Serial, 170));
-                    damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                        c => c.SendBodyAnimation(sprite.Serial, BodyAnimation.Assail, 30));
+                    damageable.SendAnimationNearby(Skill.Template.TargetAnimation, null, _target.Serial, 170);
                     if (!_crit) return;
-                    damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                        c => c.SendAnimation(387, null, sprite.Serial));
+                    damageable.SendAnimationNearby(387, null, sprite.Serial);
                 }
             }
             catch
@@ -380,7 +363,7 @@ public class Water_Cannon(Skill skill) : SkillScript(skill)
             var vector = new Position(position.X, position.Y);
             await Task.Delay(200).ContinueWith(ct =>
             {
-                damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(150, vector));
+                damageable.SendAnimationNearby(150, vector);
             });
         }
     }
@@ -472,17 +455,14 @@ public class Tornado_Vector(Skill skill) : SkillScript(skill)
 
             if (_target.SpellReflect)
             {
-                aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                    c => c.SendAnimation(184, null, _target.Serial));
-                aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1,
-                    "Your elemental ability has been reflected!");
+                aisling.SendAnimationNearby(184, null, _target.Serial);
+                aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your elemental ability has been reflected!");
                 _target = Spell.SpellReflect(_target, aisling);
             }
 
             if (_target.SpellNegate)
             {
-                aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                    c => c.SendAnimation(64, null, _target.Serial));
+                aisling.SendAnimationNearby(64, null, _target.Serial);
                 client.SendServerMessage(ServerMessageType.OrangeBar1, "Your elemental ability has been deflected!");
                 return;
             }
@@ -491,7 +471,7 @@ public class Tornado_Vector(Skill skill) : SkillScript(skill)
             damageable.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Wind, Skill);
             GlobalSkillMethods.OnSuccess(_target, aisling, Skill, 0, false, action);
         }
-        catch (Exception)
+        catch
         {
             ServerSetup.EventsLogger($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}");
             SentrySdk.CaptureMessage($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
@@ -542,27 +522,21 @@ public class Tornado_Vector(Skill skill) : SkillScript(skill)
 
                     if (_target.SpellReflect)
                     {
-                        damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                            c => c.SendAnimation(184, null, _target.Serial));
+                        damageable.SendAnimationNearby(184, null, _target.Serial);
                         _target = Spell.SpellReflect(_target, sprite);
                     }
 
                     if (_target.SpellNegate)
                     {
-                        damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                            c => c.SendAnimation(64, null, _target.Serial));
+                        damageable.SendAnimationNearby(64, null, _target.Serial);
                         continue;
                     }
 
                     var dmgCalc = DamageCalc(sprite);
                     damageable.ApplyElementalSkillDamage(sprite, dmgCalc, ElementManager.Element.Wind, Skill);
-                    damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                        c => c.SendAnimation(Skill.Template.TargetAnimation, null, _target.Serial, 170));
-                    damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                        c => c.SendBodyAnimation(sprite.Serial, BodyAnimation.Assail, 30));
+                    damageable.SendAnimationNearby(Skill.Template.TargetAnimation, null, _target.Serial, 170);
                     if (!_crit) return;
-                    damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                        c => c.SendAnimation(387, null, sprite.Serial));
+                    damageable.SendAnimationNearby(387, null, sprite.Serial);
                 }
             }
             catch
@@ -581,7 +555,7 @@ public class Tornado_Vector(Skill skill) : SkillScript(skill)
             var vector = new Position(position.X, position.Y);
             await Task.Delay(200).ContinueWith(ct =>
             {
-                damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(197, vector));
+                damageable.SendAnimationNearby(197, vector);
             });
         }
     }
@@ -673,17 +647,14 @@ public class Earth_Shatter(Skill skill) : SkillScript(skill)
 
             if (_target.SpellReflect)
             {
-                aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                    c => c.SendAnimation(184, null, _target.Serial));
-                aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1,
-                    "Your elemental ability has been reflected!");
+                aisling.SendAnimationNearby(184, null, _target.Serial);
+                aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your elemental ability has been reflected!");
                 _target = Spell.SpellReflect(_target, aisling);
             }
 
             if (_target.SpellNegate)
             {
-                aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                    c => c.SendAnimation(64, null, _target.Serial));
+                aisling.SendAnimationNearby(64, null, _target.Serial);
                 client.SendServerMessage(ServerMessageType.OrangeBar1, "Your elemental ability has been deflected!");
                 return;
             }
@@ -692,7 +663,7 @@ public class Earth_Shatter(Skill skill) : SkillScript(skill)
             damageable.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Earth, Skill);
             GlobalSkillMethods.OnSuccess(_target, aisling, Skill, 0, false, action);
         }
-        catch (Exception)
+        catch
         {
             ServerSetup.EventsLogger($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}");
             SentrySdk.CaptureMessage($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
@@ -743,27 +714,21 @@ public class Earth_Shatter(Skill skill) : SkillScript(skill)
 
                     if (_target.SpellReflect)
                     {
-                        damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                            c => c.SendAnimation(184, null, _target.Serial));
+                        damageable.SendAnimationNearby(184, null, _target.Serial);
                         _target = Spell.SpellReflect(_target, sprite);
                     }
 
                     if (_target.SpellNegate)
                     {
-                        damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                            c => c.SendAnimation(64, null, _target.Serial));
+                        damageable.SendAnimationNearby(64, null, _target.Serial);
                         continue;
                     }
 
                     var dmgCalc = DamageCalc(sprite);
                     damageable.ApplyElementalSkillDamage(sprite, dmgCalc, ElementManager.Element.Earth, Skill);
-                    damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                        c => c.SendAnimation(Skill.Template.TargetAnimation, null, _target.Serial, 170));
-                    damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                        c => c.SendBodyAnimation(sprite.Serial, BodyAnimation.Assail, 30));
+                    damageable.SendAnimationNearby(Skill.Template.TargetAnimation, null, _target.Serial, 170);
                     if (!_crit) return;
-                    damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                        c => c.SendAnimation(387, null, sprite.Serial));
+                    damageable.SendAnimationNearby(387, null, sprite.Serial);
                 }
             }
             catch
@@ -782,7 +747,7 @@ public class Earth_Shatter(Skill skill) : SkillScript(skill)
             var vector = new Position(position.X, position.Y);
             await Task.Delay(200).ContinueWith(ct =>
             {
-                damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(60, vector));
+                damageable.SendAnimationNearby(60, vector);
             });
         }
     }

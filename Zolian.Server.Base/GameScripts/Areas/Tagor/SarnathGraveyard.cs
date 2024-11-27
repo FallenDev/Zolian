@@ -65,7 +65,7 @@ public class SarnathGraveyard : AreaScript
             buff?.OnEnded(client.Aisling, buff);
         }
 
-        client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(75, new Position(location)));
+        client.Aisling.SendAnimationNearby(75, new Position(location));
     }
 
     private void PoisonPool2(WorldClient client, Vector2 location)
@@ -81,7 +81,7 @@ public class SarnathGraveyard : AreaScript
             buff?.OnEnded(client.Aisling, buff);
         }
 
-        client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(75, new Position(location)));
+        client.Aisling.SendAnimationNearby(75, new Position(location));
     }
 
     private void PoisonPool3(WorldClient client, Vector2 location)
@@ -99,7 +99,7 @@ public class SarnathGraveyard : AreaScript
             buff?.OnEnded(client.Aisling, buff);
         }
 
-        client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(75, new Position(location)));
+        client.Aisling.SendAnimationNearby(75, new Position(location));
     }
 
     private void PoisonPool4(WorldClient client, Vector2 location)
@@ -117,7 +117,7 @@ public class SarnathGraveyard : AreaScript
             buff?.OnEnded(client.Aisling, buff);
         }
 
-        client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(75, new Position(location)));
+        client.Aisling.SendAnimationNearby(75, new Position(location));
     }
 
     private void PoisonPool5(WorldClient client, Vector2 location)
@@ -135,7 +135,7 @@ public class SarnathGraveyard : AreaScript
             buff?.OnEnded(client.Aisling, buff);
         }
 
-        client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(75, new Position(location)));
+        client.Aisling.SendAnimationNearby(75, new Position(location));
     }
 
     private void PoisonPool6(WorldClient client, Vector2 location)
@@ -153,7 +153,7 @@ public class SarnathGraveyard : AreaScript
             buff?.OnEnded(client.Aisling, buff);
         }
 
-        client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(75, new Position(location)));
+        client.Aisling.SendAnimationNearby(75, new Position(location));
     }
 
     private void PoisonPool7(WorldClient client, Vector2 location)
@@ -171,7 +171,7 @@ public class SarnathGraveyard : AreaScript
             buff?.OnEnded(client.Aisling, buff);
         }
 
-        client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(75, new Position(location)));
+        client.Aisling.SendAnimationNearby(75, new Position(location));
     }
 
     private void PoisonPool8(WorldClient client, Vector2 location)
@@ -189,7 +189,7 @@ public class SarnathGraveyard : AreaScript
             buff?.OnEnded(client.Aisling, buff);
         }
 
-        client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(75, new Position(location)));
+        client.Aisling.SendAnimationNearby(75, new Position(location));
     }
 
     private void PoisonPool9(WorldClient client, Vector2 location)
@@ -207,7 +207,7 @@ public class SarnathGraveyard : AreaScript
             buff?.OnEnded(client.Aisling, buff);
         }
 
-        client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(75, new Position(location)));
+        client.Aisling.SendAnimationNearby(75, new Position(location));
     }
 
     private void PoisonPool10(WorldClient client, Vector2 location)
@@ -225,7 +225,7 @@ public class SarnathGraveyard : AreaScript
             buff?.OnEnded(client.Aisling, buff);
         }
 
-        client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(75, new Position(location)));
+        client.Aisling.SendAnimationNearby(75, new Position(location));
     }
 
     private void PoisonPool11(WorldClient client, Vector2 location)
@@ -243,7 +243,7 @@ public class SarnathGraveyard : AreaScript
             buff?.OnEnded(client.Aisling, buff);
         }
 
-        client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(75, new Position(location)));
+        client.Aisling.SendAnimationNearby(75, new Position(location));
     }
 
     private void PoisonPool12(WorldClient client, Vector2 location)
@@ -261,7 +261,7 @@ public class SarnathGraveyard : AreaScript
             buff?.OnEnded(client.Aisling, buff);
         }
 
-        client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(75, new Position(location)));
+        client.Aisling.SendAnimationNearby(75, new Position(location));
     }
 
     private void PoisonPool13(WorldClient client, Vector2 location)
@@ -279,7 +279,7 @@ public class SarnathGraveyard : AreaScript
             buff?.OnEnded(client.Aisling, buff);
         }
 
-        client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(75, new Position(location)));
+        client.Aisling.SendAnimationNearby(75, new Position(location));
     }
 
     private static bool ReflexCheck(Aisling aisling)

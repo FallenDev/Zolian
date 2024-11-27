@@ -87,7 +87,7 @@ public class Gigean : MundaneScript
                     if (!succeeded) return;
                     if (serial != client.Aisling.Serial) return;
                     client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=q{client.Aisling.Username} has advanced to Necromancer"));
-                    client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(67, client.Aisling.Position));
+                    client.Aisling.SendAnimationNearby(67, client.Aisling.Position);
                     client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(116, false));
                     client.Aisling.Stage = ClassStage.Job;
                     client.Aisling.JobClass = Job.Necromancer;

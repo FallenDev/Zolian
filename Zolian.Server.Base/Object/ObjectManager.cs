@@ -71,12 +71,6 @@ public class ObjectManager
                     bucket.AddRange(GetObjects<Money>(map, p).Values);
                     break;
                 case Get.All:
-                    bucket.AddRange(GetObjects<Aisling>(map, p).Values);
-                    bucket.AddRange(GetObjects<Monster>(map, p).Values);
-                    bucket.AddRange(GetObjects<Mundane>(map, p).Values);
-                    bucket.AddRange(GetObjects<Money>(map, p).Values);
-                    bucket.AddRange(GetObjects<Item>(map, p).Values);
-                    break;
                 default:
                     bucket.AddRange(GetObjects<Aisling>(map, p).Values);
                     bucket.AddRange(GetObjects<Monster>(map, p).Values);

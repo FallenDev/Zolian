@@ -306,7 +306,7 @@ public abstract class Sprite : INotifyPropertyChanged
 
     #region GetObjects All
 
-    private IEnumerable<Sprite> UnSafeGetSprites(int x, int y) => ObjectManager.GetObjects(Map, i => (int)i.Pos.X == x && (int)i.Pos.Y == y, ObjectManager.Get.All);
+    private List<Sprite> UnSafeGetSprites(int x, int y) => ObjectManager.GetObjects(Map, i => (int)i.Pos.X == x && (int)i.Pos.Y == y, ObjectManager.Get.All);
 
     protected List<Sprite> GetSprites(int x, int y)
     {
@@ -320,7 +320,7 @@ public abstract class Sprite : INotifyPropertyChanged
 
     #region GetObjects Damageable
 
-    private IEnumerable<Sprite> UnSafeGetDamageableSpritesInPosition(int x, int y) => ObjectManager.GetObjects(Map, i => i != null && (int)i.Pos.X == x && (int)i.Pos.Y == y, ObjectManager.Get.Damageable);
+    private List<Sprite> UnSafeGetDamageableSpritesInPosition(int x, int y) => ObjectManager.GetObjects(Map, i => i != null && (int)i.Pos.X == x && (int)i.Pos.Y == y, ObjectManager.Get.Damageable);
 
     protected List<Sprite> GetDamageableSpritesInPosition(int x, int y)
     {
@@ -330,7 +330,7 @@ public abstract class Sprite : INotifyPropertyChanged
         }
     }
 
-    private IEnumerable<Sprite> UnSafeDamageableNearby() => ObjectManager.GetObjects(Map, i => i != null && i.WithinRangeOf(this, ServerSetup.Instance.Config.WithinRangeProximity), ObjectManager.Get.Damageable);
+    private List<Sprite> UnSafeDamageableNearby() => ObjectManager.GetObjects(Map, i => i != null && i.WithinRangeOf(this, ServerSetup.Instance.Config.WithinRangeProximity), ObjectManager.Get.Damageable);
 
     public List<Sprite> DamageableNearby()
     {

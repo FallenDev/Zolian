@@ -35,8 +35,7 @@ public class MilethAdvTrainingCenter : AreaScript
             case 0 when y == 22:
                 client.Aisling.CurrentMp = client.Aisling.MaximumMp;
                 client.SendAttributes(StatUpdateType.FullVitality);
-                client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                    c => c.SendAnimation(209, new Position(client.Aisling.Pos)));
+                client.Aisling.SendAnimationNearby(209, new Position(client.Aisling.Pos));
                 client.SendServerMessage(ServerMessageType.OrangeBar1, "Ahh Refreshing!");
                 break;
         }

@@ -10,7 +10,7 @@ namespace Darkages.Types;
 
 public class SkillBook : ObjectManager
 {
-    private const int SkillLength = 88;
+    private const int SkillLength = 95;
     private readonly int[] _invalidSlots = [0, 36, 72, 89];
     public readonly ConcurrentDictionary<int, Skill> Skills = [];
 
@@ -30,6 +30,10 @@ public class SkillBook : ObjectManager
                 case 35:
                 case 71:
                     continue;
+                // Set a filled assail pane to normal skill pane
+                //case 88:
+                //    i = 0;
+                //    continue;
             }
 
             if (Skills[i + 1] == null) return i + 1;

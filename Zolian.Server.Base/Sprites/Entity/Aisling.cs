@@ -19,13 +19,13 @@ using Darkages.Sprites.Entity;
 
 namespace Darkages.Sprites;
 
-public record KillRecord
+public record KillRecord : IEqualityOperators<KillRecord, KillRecord, bool>
 {
     public int TotalKills { get; set; }
     public DateTime TimeKilled { get; set; }
 }
 
-public record IgnoredRecord
+public record IgnoredRecord : IEqualityOperators<IgnoredRecord, IgnoredRecord, bool>
 {
     public int Serial { get; init; }
     public string PlayerIgnored { get; init; }
@@ -367,7 +367,7 @@ public sealed class Aisling : Player, IAisling
                         spell.InUse = true;
 
                         var target = ObjectManager.GetObject(Map, i => i.Serial == info.Target, ObjectManager.Get.Damageable) ?? this;
-                        ArmorBodyAnimation(CastBodyAnimation, spell.Template.Sound);
+                        SendArmorBodyAnimationNearby(CastBodyAnimation, spell.Template.Sound);
                         var script = spell.Scripts.Values.FirstOrDefault();
                         script?.OnUse(this, target);
                         spell.CurrentCooldown = spell.Template.Cooldown > 0 ? spell.Template.Cooldown : 0;
@@ -400,7 +400,7 @@ public sealed class Aisling : Player, IAisling
     /// <summary>
     /// Displays player's body animation based on Armor
     /// </summary>
-    public Aisling ArmorBodyAnimation(byte animation, byte sound, byte actionSpeed = 30)
+    private Aisling SendArmorBodyAnimationNearby(byte animation, byte sound, byte actionSpeed = 30)
     {
         SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(Serial, (BodyAnimation)animation, actionSpeed, sound));
         return this;

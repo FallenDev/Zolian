@@ -201,6 +201,27 @@ public class Movable : Identifiable
     }
 
     /// <summary>
+    /// Sends an Animation Server Packet to players nearby
+    /// </summary>
+    /// <returns>The sprite calling the animation</returns>
+    public Movable SendAnimationNearby(ushort targetEffect, Position position = null, uint targetSerial = 0, ushort speed = 100, ushort casterEffect = 0, uint casterSerial = 0)
+    {
+        try
+        {
+            var selectedPlayers = new ConcurrentDictionary<long, Aisling>();
+            AddPlayersToSelection(selectedPlayers, WithinRangeOf);
+            SendToSelectedPlayers(selectedPlayers, c => c.SendAnimation(targetEffect, position, targetSerial, speed, casterEffect, casterSerial));
+        }
+        catch
+        {
+            ServerSetup.EventsLogger($"Issue with SendAnimationNearby called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}");
+            SentrySdk.CaptureMessage($"Issue with SendAnimationNearby called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
+        }
+
+        return this;
+    }
+
+    /// <summary>
     /// Sends a ServerFormat to target players using a scope or definer. Uses client of the players returned to the Action
     /// </summary>
     /// <param name="op">Scope of the method call</param>
@@ -300,12 +321,8 @@ public class Movable : Identifiable
             foreach (var (serial, player) in players)
             {
                 if (player?.Client == null) continue;
-                if (method.Method.Name.Contains("CastAnimation") || method.Method.Name.Contains("OnSuccess") ||
-                    method.Method.Name.Contains("OnApplied"))
-                {
-                    if (!player.GameSettings.Animations) continue;
-                }
-
+                if ((method.Method.Name.Contains("SendArmorBodyAnimationNearby") || method.Method.Name.Contains("SendAnimationNearby")) 
+                    && !player.GameSettings.Animations) continue;
                 method(player.Client);
             }
         }

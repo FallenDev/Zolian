@@ -162,9 +162,9 @@ public class Forsaken(WorldServer server, Mundane mundane) : MundaneScript(serve
 
                         RacialBonus(client);
 
-                        await Task.Delay(250).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(303, null, client.Aisling.Serial)); });
+                        await Task.Delay(250).ContinueWith(ct => { client.Aisling.SendAnimationNearby(303, null, client.Aisling.Serial); });
                         await Task.Delay(250).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(97, false)); });
-                        await Task.Delay(450).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(303, null, client.Aisling.Serial)); });
+                        await Task.Delay(450).ContinueWith(ct => { client.Aisling.SendAnimationNearby(303, null, client.Aisling.Serial); });
 
                         var legend = new Legend.LegendItem
                         {
@@ -354,9 +354,9 @@ public class Forsaken(WorldServer server, Mundane mundane) : MundaneScript(serve
                                 client.Aisling.BaseMp -= 300;
                                 client.Aisling.PastClass = client.Aisling.Path;
                                 client.Aisling.Path = Class.Berserker;
-                                await Task.Delay(250).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(303, null, client.Aisling.Serial)); });
+                                await Task.Delay(250).ContinueWith(ct => { client.Aisling.SendAnimationNearby(303, null, client.Aisling.Serial); });
                                 await Task.Delay(250).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(97, false)); });
-                                await Task.Delay(450).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(303, null, client.Aisling.Serial)); });
+                                await Task.Delay(450).ContinueWith(ct => { client.Aisling.SendAnimationNearby(303, null, client.Aisling.Serial); });
                                 var legend = new Legend.LegendItem
                                 {
                                     Key = "AdvClass",
@@ -419,9 +419,9 @@ public class Forsaken(WorldServer server, Mundane mundane) : MundaneScript(serve
                             client.Aisling.BaseMp -= 300;
                             client.Aisling.PastClass = client.Aisling.Path;
                             client.Aisling.Path = Class.Defender;
-                            await Task.Delay(250).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(303, null, client.Aisling.Serial)); });
+                            await Task.Delay(250).ContinueWith(ct => { client.Aisling.SendAnimationNearby(303, null, client.Aisling.Serial); });
                             await Task.Delay(250).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(97, false)); });
-                            await Task.Delay(450).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(303, null, client.Aisling.Serial)); });
+                            await Task.Delay(450).ContinueWith(ct => { client.Aisling.SendAnimationNearby(303, null, client.Aisling.Serial); });
                             var legend = new Legend.LegendItem
                             {
                                 Key = "AdvClass",
@@ -475,9 +475,9 @@ public class Forsaken(WorldServer server, Mundane mundane) : MundaneScript(serve
                             client.Aisling.BaseMp -= 600;
                             client.Aisling.PastClass = client.Aisling.Path;
                             client.Aisling.Path = Class.Assassin;
-                            await Task.Delay(250).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(303, null, client.Aisling.Serial)); });
+                            await Task.Delay(250).ContinueWith(ct => { client.Aisling.SendAnimationNearby(303, null, client.Aisling.Serial); });
                             await Task.Delay(250).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(97, false)); });
-                            await Task.Delay(450).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(303, null, client.Aisling.Serial)); });
+                            await Task.Delay(450).ContinueWith(ct => { client.Aisling.SendAnimationNearby(303, null, client.Aisling.Serial); });
                             var legend = new Legend.LegendItem
                             {
                                 Key = "AdvClass",
@@ -533,9 +533,9 @@ public class Forsaken(WorldServer server, Mundane mundane) : MundaneScript(serve
                                 client.Aisling.BaseMp -= 400;
                                 client.Aisling.PastClass = client.Aisling.Path;
                                 client.Aisling.Path = Class.Cleric;
-                                await Task.Delay(250).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(303, null, client.Aisling.Serial)); });
+                                await Task.Delay(250).ContinueWith(ct => { client.Aisling.SendAnimationNearby(303, null, client.Aisling.Serial); });
                                 await Task.Delay(250).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(97, false)); });
-                                await Task.Delay(450).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(303, null, client.Aisling.Serial)); });
+                                await Task.Delay(450).ContinueWith(ct => { client.Aisling.SendAnimationNearby(303, null, client.Aisling.Serial); });
                                 var legend = new Legend.LegendItem
                                 {
                                     Key = "AdvClass",
@@ -598,9 +598,9 @@ public class Forsaken(WorldServer server, Mundane mundane) : MundaneScript(serve
                             client.Aisling.BaseMp -= 700;
                             client.Aisling.PastClass = client.Aisling.Path;
                             client.Aisling.Path = Class.Arcanus;
-                            await Task.Delay(250).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(303, null, client.Aisling.Serial)); });
+                            await Task.Delay(250).ContinueWith(ct => { client.Aisling.SendAnimationNearby(303, null, client.Aisling.Serial); });
                             await Task.Delay(250).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(97, false)); });
-                            await Task.Delay(450).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(303, null, client.Aisling.Serial)); });
+                            await Task.Delay(450).ContinueWith(ct => { client.Aisling.SendAnimationNearby(303, null, client.Aisling.Serial); });
                             var legend = new Legend.LegendItem
                             {
                                 Key = "AdvClass",
@@ -656,9 +656,9 @@ public class Forsaken(WorldServer server, Mundane mundane) : MundaneScript(serve
                                 client.Aisling.BaseMp -= 400;
                                 client.Aisling.PastClass = client.Aisling.Path;
                                 client.Aisling.Path = Class.Monk;
-                                await Task.Delay(250).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(303, null, client.Aisling.Serial)); });
+                                await Task.Delay(250).ContinueWith(ct => { client.Aisling.SendAnimationNearby(303, null, client.Aisling.Serial); });
                                 await Task.Delay(250).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(97, false)); });
-                                await Task.Delay(450).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(303, null, client.Aisling.Serial)); });
+                                await Task.Delay(450).ContinueWith(ct => { client.Aisling.SendAnimationNearby(303, null, client.Aisling.Serial); });
                                 var legend = new Legend.LegendItem
                                 {
                                     Key = "AdvClass",
@@ -733,18 +733,15 @@ public class Forsaken(WorldServer server, Mundane mundane) : MundaneScript(serve
                         client.Aisling._Hit += 20;
                         await Task.Delay(250).ContinueWith(ct =>
                         {
-                            client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                                c => c.SendAnimation(303, null, client.Aisling.Serial));
+                            client.Aisling.SendAnimationNearby(303, null, client.Aisling.Serial);
                         });
                         await Task.Delay(250).ContinueWith(ct =>
                         {
-                            client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                                c => c.SendSound(97, false));
+                            client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(97, false));
                         });
                         await Task.Delay(450).ContinueWith(ct =>
                         {
-                            client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                                c => c.SendAnimation(303, null, client.Aisling.Serial));
+                            client.Aisling.SendAnimationNearby(303, null, client.Aisling.Serial);
                         });
                         var legend = new Legend.LegendItem
                         {

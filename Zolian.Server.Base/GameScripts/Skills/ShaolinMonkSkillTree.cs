@@ -64,7 +64,7 @@ public class IronSprint(Skill skill) : SkillScript(skill)
             aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings,
                 c => c.SendAnimation(387, null, sprite.Serial));
         }
-        catch (Exception)
+        catch
         {
             ServerSetup.EventsLogger($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}");
             SentrySdk.CaptureMessage($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
@@ -124,7 +124,7 @@ public class IronSprint(Skill skill) : SkillScript(skill)
             _enemyList = aisling.DamageableWithinRange(aisling, 8);
             var closest = int.MaxValue;
 
-            foreach (var enemy in _enemyList.Where(i => i.Serial != aisling.Serial))
+            foreach (var enemy in _enemyList.Where(i => i.Serial != aisling.Serial && i is Monster))
             {
                 var dist = aisling.DistanceFrom(enemy.X, enemy.Y);
                 if (dist >= closest) continue;
@@ -161,7 +161,7 @@ public class IronSprint(Skill skill) : SkillScript(skill)
                 OnSuccess(aisling);
             }
         }
-        catch (Exception)
+        catch
         {
             ServerSetup.EventsLogger($"Issue with {Skill.Name} within Target called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}");
             SentrySdk.CaptureMessage($"Issue with {Skill.Name} within Target called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
@@ -218,7 +218,7 @@ public class IronFang(Skill skill) : SkillScript(skill)
             aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings,
                 c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
         }
-        catch (Exception)
+        catch
         {
             ServerSetup.EventsLogger($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}");
             SentrySdk.CaptureMessage($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
@@ -354,7 +354,7 @@ public class GoldenDragonPalm(Skill skill) : SkillScript(skill)
             aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings,
                 c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
         }
-        catch (Exception)
+        catch
         {
             ServerSetup.EventsLogger($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}");
             SentrySdk.CaptureMessage($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
@@ -488,7 +488,7 @@ public class SnakeWhip(Skill skill) : SkillScript(skill)
             aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings,
                 c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
         }
-        catch (Exception)
+        catch
         {
             ServerSetup.EventsLogger($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}");
             SentrySdk.CaptureMessage($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
@@ -600,7 +600,7 @@ public class SnakeWhip(Skill skill) : SkillScript(skill)
             monster.UpdateAddAndRemove();
             Task.Delay(500).ContinueWith(ct => monster.ThrownBack = false);
         }
-        catch (Exception)
+        catch
         {
             ServerSetup.EventsLogger($"Issue with SnakeWhip ThrowBack called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}");
             SentrySdk.CaptureMessage($"Issue with SnakeWhip ThrowBack called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
@@ -665,7 +665,7 @@ public class TigerSwipe(Skill skill) : SkillScript(skill)
             aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings,
                 c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
         }
-        catch (Exception)
+        catch
         {
             ServerSetup.EventsLogger($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}");
             SentrySdk.CaptureMessage($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
@@ -799,7 +799,7 @@ public class HardenedHands(Skill skill) : SkillScript(skill)
             aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings,
                 c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
         }
-        catch (Exception)
+        catch
         {
             ServerSetup.EventsLogger($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}");
             SentrySdk.CaptureMessage($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);

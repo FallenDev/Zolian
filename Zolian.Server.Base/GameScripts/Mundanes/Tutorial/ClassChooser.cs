@@ -122,9 +122,9 @@ public class ClassChooser(WorldServer server, Mundane mundane) : MundaneScript(s
             if (path != "Peasant")
             {
                 ClassWrapUp(client, path);
-                await Task.Delay(350).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(303, null, client.Aisling.Serial)); });
+                await Task.Delay(350).ContinueWith(ct => { client.Aisling.SendAnimationNearby(303, null, client.Aisling.Serial); });
                 await Task.Delay(350).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(97, false)); });
-                await Task.Delay(750).ContinueWith(ct => { client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(303, null, client.Aisling.Serial)); });
+                await Task.Delay(750).ContinueWith(ct => { client.Aisling.SendAnimationNearby(303, null, client.Aisling.Serial); });
             }
             else
             {

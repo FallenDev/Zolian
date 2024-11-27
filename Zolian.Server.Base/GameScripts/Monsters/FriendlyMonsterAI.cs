@@ -51,7 +51,7 @@ public class BaseFriendlyMonster : MonsterScript
         {
             if (update)
             {
-                Monster.Summoner.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(171, null, Monster.Serial));
+                Monster.Summoner.SendAnimationNearby(171, null, Monster.Serial);
                 Monster.ObjectUpdateEnabled = true;
                 UpdateTarget();
             }
