@@ -8,8 +8,8 @@ namespace Darkages.GameScripts.Skills;
 [Script("Camouflage")]
 public class Camouflage(Skill skill) : SkillScript(skill)
 {
-    public override void OnFailed(Sprite sprite) { }
-    public override void OnSuccess(Sprite sprite) { }
+    protected override void OnFailed(Sprite sprite) { }
+    protected override void OnSuccess(Sprite sprite) { }
     public override void OnCleanup() { }
 
     public override void OnUse(Sprite sprite) { }
@@ -19,8 +19,8 @@ public class Camouflage(Skill skill) : SkillScript(skill)
 [Script("Pain Bane")]
 public class PainBane(Skill skill) : SkillScript(skill)
 {
-    public override void OnFailed(Sprite sprite) { }
-    public override void OnSuccess(Sprite sprite) { }
+    protected override void OnFailed(Sprite sprite) { }
+    protected override void OnSuccess(Sprite sprite) { }
     public override void OnCleanup() { }
 
     public override void OnUse(Sprite sprite) { }
@@ -30,9 +30,9 @@ public class PainBane(Skill skill) : SkillScript(skill)
 [Script("Crane Stance")]
 public class CraneStance(Skill skill) : SkillScript(skill)
 {
-    public override void OnFailed(Sprite sprite) { }
+    protected override void OnFailed(Sprite sprite) { }
 
-    public override void OnSuccess(Sprite sprite) { }
+    protected override void OnSuccess(Sprite sprite) { }
     public override void OnCleanup() { }
 
     public override void OnUse(Sprite sprite) { }

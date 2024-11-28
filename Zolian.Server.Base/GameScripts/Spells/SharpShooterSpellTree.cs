@@ -49,20 +49,18 @@ public class FlashBang(Spell spell) : SpellScript(spell)
             {
                 if (sprite is Aisling caster)
                 {
-                    caster.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                        c => c.SendAnimation(64, null, enemy.Serial));
+                    caster.SendAnimationNearby(64, null, enemy.Serial);
                     caster.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been deflected!");
                 }
 
                 if (enemy is not Aisling targetPlayer) continue;
-                targetPlayer.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                    c => c.SendAnimation(64, null, enemy.Serial));
+                targetPlayer.SendAnimationNearby(64, null, enemy.Serial);
                 targetPlayer.Client.SendServerMessage(ServerMessageType.OrangeBar1,
                     $"You deflected {Spell.Template.Name}");
                 continue;
             }
 
-            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(53, enemy.Position));
+            aisling.SendAnimationNearby(53, enemy.Position);
             var debuff = new DebuffBlind();
             if (enemy is Monster)
                 debuff.OnApplied(enemy, debuff);
@@ -138,7 +136,7 @@ public class FavoredEnemy(Spell spell) : SpellScript(spell)
 
         aisling.FavoredEnemy = monster.Template.MonsterRace;
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=qYou now favor {aisling.FavoredEnemy}s as an enemy");
-        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, monster.Serial));
+        aisling.SendAnimationNearby(Spell.Template.TargetAnimation, null, monster.Serial);
         aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
 
         // Favored Removal
@@ -146,7 +144,7 @@ public class FavoredEnemy(Spell spell) : SpellScript(spell)
         {
             await Task.Delay(300000);
             aisling.FavoredEnemy = MonsterRace.None;
-            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(80, null, aisling.Serial));
+            aisling.SendAnimationNearby(80, null, aisling.Serial);
             aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=qFavor has dissipated");
         });
     }

@@ -20,7 +20,7 @@ public class Apple(Item item) : WeaponScript(item)
         var dmg = damageDealingSprite.Dex * damageDealingSprite.Position.DistanceFrom(enemy.Position);
         // Rotten debuff
         dmg /= 2;
-        damageDealingSprite.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(10010, null, enemy.Serial, 100, 10010, damageDealingSprite.Serial));
+        damageDealingSprite.SendAnimationNearby(10010, null, enemy.Serial, 100, 10010, damageDealingSprite.Serial);
         damageable.ApplyDamage(damageDealingSprite, dmg, null);
     }
 }

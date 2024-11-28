@@ -72,7 +72,7 @@ public class Spell
             {
                 aisling.SpellBook.Set((byte)slot, spell, null);
                 aisling.Client.SendAddSpellToPane(spell);
-                aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(22, null, aisling.Serial));
+                aisling.SendAnimationNearby(22, null, aisling.Serial);
             }
         }
 

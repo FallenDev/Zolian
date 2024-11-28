@@ -213,11 +213,11 @@ public static class GlobalSkillMethods
             if (attacker is not Damageable damageDealer) return;
 
             // Animation
-            damageDealer.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(skill.Template.TargetAnimation, null, enemy.Serial));
+            damageDealer.SendAnimationNearby(skill.Template.TargetAnimation, null, enemy.Serial);
             damageDealer.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed, action.Sound));
             skill.LastUsedSkill = DateTime.UtcNow;
             if (!crit) return;
-            damageDealer.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(387, null, attacker.Serial));
+            damageDealer.SendAnimationNearby(387, null, attacker.Serial);
         }
         catch
         {
@@ -247,10 +247,10 @@ public static class GlobalSkillMethods
             if (attacker is not Damageable damageDealer) return;
 
             // Animation
-            damageDealer.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(skill.Template.TargetAnimation, null, enemy.Serial));
+            damageDealer.SendAnimationNearby(skill.Template.TargetAnimation, null, enemy.Serial);
             skill.LastUsedSkill = DateTime.UtcNow;
             if (!crit) return;
-            damageDealer.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(387, null, attacker.Serial));
+            damageDealer.SendAnimationNearby(387, null, attacker.Serial);
         }
         catch
         {
@@ -281,7 +281,7 @@ public static class GlobalSkillMethods
 
             skill.LastUsedSkill = DateTime.UtcNow;
             if (!crit) return;
-            damageDealer.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(387, null, attacker.Serial));
+            damageDealer.SendAnimationNearby(387, null, attacker.Serial);
         }
         catch
         {
@@ -335,12 +335,10 @@ public static class GlobalSkillMethods
         try
         {
             FailedAttemptBodyAnimation(sprite);
-            if (sprite is not Aisling aisling) return;
-            aisling.Client.SendCooldown(true, skill.Slot, skill.Template.Cooldown);
-
             if (target is null) return;
-            if (aisling.NextTo(target.X, target.Y))
-                aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(skill.Template.MissAnimation, null, target.Serial));
+            if (sprite is not Damageable damageDealer) return;
+            if (damageDealer.NextTo(target.X, target.Y))
+                damageDealer.SendAnimationNearby(skill.Template.MissAnimation, null, target.Serial);
         }
         catch
         {

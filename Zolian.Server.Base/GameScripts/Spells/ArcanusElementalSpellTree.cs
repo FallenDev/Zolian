@@ -471,14 +471,14 @@ public class Gust
 
         if (target.SpellReflect)
         {
-            damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(184, null, target.Serial));
+            damageable.SendAnimationNearby(184, null, target.Serial);
             client.SendServerMessage(ServerMessageType.OrangeBar1, "Your weapon's spell has been negated!");
             return;
         }
 
         if (target.SpellNegate)
         {
-            damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(64, null, target.Serial));
+            damageable.SendAnimationNearby(64, null, target.Serial);
             client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been deflected!");
             return;
         }
@@ -508,7 +508,7 @@ public class Gust
         if (target is not Damageable damageable) return;
         damageable.ApplyElementalSpellDamage(aisling, dmg, ElementManager.Element.Wind, null);
         aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(73, false));
-        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(29, null, target.Serial));
+        aisling.SendAnimationNearby(29, null, target.Serial);
     }
 }
 
@@ -527,14 +527,14 @@ public class Quake
 
         if (target.SpellReflect)
         {
-            damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(184, null, target.Serial));
+            damageable.SendAnimationNearby(184, null, target.Serial);
             client.SendServerMessage(ServerMessageType.OrangeBar1, "Your weapon's spell has been negated!");
             return;
         }
 
         if (target.SpellNegate)
         {
-            damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(64, null, target.Serial));
+            damageable.SendAnimationNearby(64, null, target.Serial);
             client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been deflected!");
             return;
         }
@@ -564,7 +564,7 @@ public class Quake
         if (target is not Damageable damageable) return;
         damageable.ApplyElementalSpellDamage(aisling, dmg, ElementManager.Element.Earth, null);
         aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(73, false));
-        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(77, null, target.Serial));
+        aisling.SendAnimationNearby(77, null, target.Serial);
     }
 }
 
@@ -583,14 +583,14 @@ public class Rain
 
         if (target.SpellReflect)
         {
-            damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(184, null, target.Serial));
+            damageable.SendAnimationNearby(184, null, target.Serial);
             client.SendServerMessage(ServerMessageType.OrangeBar1, "Your weapon's spell has been negated!");
             return;
         }
 
         if (target.SpellNegate)
         {
-            damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(64, null, target.Serial));
+            damageable.SendAnimationNearby(64, null, target.Serial);
             client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been deflected!");
             return;
         }
@@ -620,7 +620,7 @@ public class Rain
         if (target is not Damageable damageable) return;
         damageable.ApplyElementalSpellDamage(aisling, dmg, ElementManager.Element.Water, null);
         aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(73, false));
-        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(9, null, target.Serial));
+        aisling.SendAnimationNearby(9, null, target.Serial);
     }
 }
 
@@ -639,14 +639,14 @@ public class Flame
 
         if (target.SpellReflect)
         {
-            damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(184, null, target.Serial));
+            damageable.SendAnimationNearby(184, null, target.Serial);
             client.SendServerMessage(ServerMessageType.OrangeBar1, "Your weapon's spell has been negated!");
             return;
         }
 
         if (target.SpellNegate)
         {
-            damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(64, null, target.Serial));
+            damageable.SendAnimationNearby(64, null, target.Serial);
             client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been deflected!");
             return;
         }
@@ -676,7 +676,7 @@ public class Flame
         if (target is not Damageable damageable) return;
         damageable.ApplyElementalSpellDamage(aisling, dmg, ElementManager.Element.Fire, null);
         aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(73, false));
-        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(12, null, target.Serial));
+        aisling.SendAnimationNearby(12, null, target.Serial);
     }
 }
 
@@ -695,14 +695,14 @@ public class Dusk
 
         if (target.SpellReflect)
         {
-            damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(184, null, target.Serial));
+            damageable.SendAnimationNearby(184, null, target.Serial);
             client.SendServerMessage(ServerMessageType.OrangeBar1, "Your weapon's spell has been negated!");
             return;
         }
 
         if (target.SpellNegate)
         {
-            damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(64, null, target.Serial));
+            damageable.SendAnimationNearby(64, null, target.Serial);
             client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been deflected!");
             return;
         }
@@ -732,7 +732,7 @@ public class Dusk
         if (target is not Damageable damageable) return;
         damageable.ApplyElementalSpellDamage(aisling, dmg, ElementManager.Element.Void, null);
         aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(73, false));
-        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(76, null, target.Serial));
+        aisling.SendAnimationNearby(76, null, target.Serial);
     }
 }
 
@@ -751,14 +751,14 @@ public class Dawn
 
         if (target.SpellReflect)
         {
-            damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(184, null, target.Serial));
+            damageable.SendAnimationNearby(184, null, target.Serial);
             client.SendServerMessage(ServerMessageType.OrangeBar1, "Your weapon's spell has been negated!");
             return;
         }
 
         if (target.SpellNegate)
         {
-            damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(64, null, target.Serial));
+            damageable.SendAnimationNearby(64, null, target.Serial);
             client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been deflected!");
             return;
         }
@@ -788,7 +788,7 @@ public class Dawn
         if (target is not Damageable damageable) return;
         damageable.ApplyElementalSpellDamage(aisling, dmg, ElementManager.Element.Holy, null);
         aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(73, false));
-        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(78, null, target.Serial));
+        aisling.SendAnimationNearby(78, null, target.Serial);
     }
 }
 

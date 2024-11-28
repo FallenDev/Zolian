@@ -38,13 +38,13 @@ public class Chill_Touch(Spell spell) : SpellScript(spell)
         {
             if (sprite is Aisling caster)
             {
-                caster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(184, null, target.Serial));
+                caster.SendAnimationNearby(184, null, target.Serial);
                 caster.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been reflected!");
             }
 
             if (target is Aisling targetPlayer)
             {
-                targetPlayer.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(184, null, target.Serial));
+                targetPlayer.SendAnimationNearby(184, null, target.Serial);
                 targetPlayer.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You reflected {Spell.Template.Name}");
             }
 
@@ -55,12 +55,12 @@ public class Chill_Touch(Spell spell) : SpellScript(spell)
         {
             if (sprite is Aisling caster)
             {
-                caster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(64, null, target.Serial));
+                caster.SendAnimationNearby(64, null, target.Serial);
                 caster.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been deflected!");
             }
 
             if (target is not Aisling targetPlayer) return;
-            targetPlayer.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(64, null, target.Serial));
+            targetPlayer.SendAnimationNearby(64, null, target.Serial);
             targetPlayer.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You deflected {Spell.Template.Name}");
             return;
         }
@@ -90,7 +90,7 @@ public class Chill_Touch(Spell spell) : SpellScript(spell)
                 debuff.OnApplied(enemy, debuff);
             else
                 playerAction.Client.EnqueueDebuffAppliedEvent(enemy, debuff);
-            playerAction.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(377, enemy.Position));
+            playerAction.SendAnimationNearby(377, enemy.Position);
         }
     }
 
@@ -123,13 +123,13 @@ public class Ray_of_Sickness(Spell spell) : SpellScript(spell)
         {
             if (sprite is Aisling caster)
             {
-                caster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(184, null, target.Serial));
+                caster.SendAnimationNearby(184, null, target.Serial);
                 caster.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been reflected!");
             }
 
             if (target is Aisling targetPlayer)
             {
-                targetPlayer.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(184, null, target.Serial));
+                targetPlayer.SendAnimationNearby(184, null, target.Serial);
                 targetPlayer.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You reflected {Spell.Template.Name}");
             }
 
@@ -140,12 +140,12 @@ public class Ray_of_Sickness(Spell spell) : SpellScript(spell)
         {
             if (sprite is Aisling caster)
             {
-                caster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(64, null, target.Serial));
+                caster.SendAnimationNearby(64, null, target.Serial);
                 caster.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been deflected!");
             }
 
             if (target is not Aisling targetPlayer) return;
-            targetPlayer.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(64, null, target.Serial));
+            targetPlayer.SendAnimationNearby(64, null, target.Serial);
             targetPlayer.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You deflected {Spell.Template.Name}");
             return;
         }
@@ -167,7 +167,7 @@ public class Ray_of_Sickness(Spell spell) : SpellScript(spell)
             return;
         }
 
-        aisling.Client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
+        aisling.Client.Aisling.SendAnimationNearby(Spell.Template.TargetAnimation, null, target.Serial);
         var debuff = new DebuffDeadlyPoison();
         var debuffTwo = new DebuffSilence();
         var debuffThree = new DebuffDarkChain();
@@ -216,7 +216,7 @@ public class Ray_of_Sickness(Spell spell) : SpellScript(spell)
         }
         else
         {
-            playerAction.Client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(115, null, target.Serial));
+            playerAction.Client.Aisling.SendAnimationNearby(115, null, target.Serial);
         }
     }
 }
@@ -248,13 +248,13 @@ public class Finger_of_Death(Spell spell) : SpellScript(spell)
         {
             if (sprite is Aisling caster)
             {
-                caster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(184, null, target.Serial));
+                caster.SendAnimationNearby(184, null, target.Serial);
                 caster.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been reflected!");
             }
 
             if (target is Aisling targetPlayer)
             {
-                targetPlayer.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(184, null, target.Serial));
+                targetPlayer.SendAnimationNearby(184, null, target.Serial);
                 targetPlayer.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You reflected {Spell.Template.Name}");
             }
 
@@ -265,12 +265,12 @@ public class Finger_of_Death(Spell spell) : SpellScript(spell)
         {
             if (sprite is Aisling caster)
             {
-                caster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(64, null, target.Serial));
+                caster.SendAnimationNearby(64, null, target.Serial);
                 caster.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been deflected!");
             }
 
             if (target is not Aisling targetPlayer) return;
-            targetPlayer.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(64, null, target.Serial));
+            targetPlayer.SendAnimationNearby(64, null, target.Serial);
             targetPlayer.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You deflected {Spell.Template.Name}");
             return;
         }
@@ -336,10 +336,10 @@ public class Corpse_Burst(Spell spell) : SpellScript(spell)
                 if (enemy is not Damageable damageable) continue;
                 var dmgCalc = DamageCalc(aisling);
                 damageable.ApplyElementalSpellDamage(sprite, dmgCalc, ElementManager.Element.Void, Spell);
-                aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(77, enemy.Position));
+                aisling.SendAnimationNearby(77, enemy.Position);
             }
 
-            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(75, corpse.Position));
+            aisling.SendAnimationNearby(75, corpse.Position);
             if (corpse is not Item item) continue;
             item.Remove();
         }
@@ -375,7 +375,7 @@ public class Corpse_Burst(Spell spell) : SpellScript(spell)
         }
         else
         {
-            playerAction.Client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(115, null, target.Serial));
+            playerAction.Client.Aisling.SendAnimationNearby(115, null, target.Serial);
         }
     }
 
@@ -414,12 +414,12 @@ public class Command_Undead(Spell spell) : SpellScript(spell)
 
         if (target.CurrentHp > 0)
         {
-            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
+            aisling.SendAnimationNearby(Spell.Template.TargetAnimation, null, target.Serial);
             aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(Spell.Template.Sound, false));
         }
         else
         {
-            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, target.Position));
+            aisling.SendAnimationNearby(Spell.Template.TargetAnimation, target.Position);
         }
 
         if (target is not Monster monster)
@@ -476,7 +476,7 @@ public class Command_Undead(Spell spell) : SpellScript(spell)
         }
         else
         {
-            playerAction.Client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(115, null, target.Serial));
+            playerAction.Client.Aisling.SendAnimationNearby(115, null, target.Serial);
         }
     }
 }
@@ -551,7 +551,7 @@ public class Circle_of_Death(Spell spell) : SpellScript(spell)
 
             if (nearby.SpellNegate)
             {
-                client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(64, null, nearby.Serial));
+                client.Aisling.SendAnimationNearby(64, null, nearby.Serial);
                 client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been deflected!");
 
                 if (nearby is Aisling player)
@@ -575,11 +575,11 @@ public class Circle_of_Death(Spell spell) : SpellScript(spell)
                         aisling.Client.EnqueueDebuffAppliedEvent(nearby, debuff);
                 }
 
-                client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, nearby.Position));
+                client.Aisling.SendAnimationNearby(Spell.Template.TargetAnimation, nearby.Position);
             }
             else
             {
-                client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(115, null, nearby.Serial));
+                client.Aisling.SendAnimationNearby(115, null, nearby.Serial);
             }
 
             if (nearby.Alive) continue;
@@ -604,7 +604,7 @@ public class Circle_of_Death(Spell spell) : SpellScript(spell)
 
         foreach (var targetObj in sprite.AislingsNearby())
         {
-            targetObj?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, targetObj.Position));
+            targetObj?.SendAnimationNearby(Spell.Template.TargetAnimation, targetObj.Position);
         }
     }
 }

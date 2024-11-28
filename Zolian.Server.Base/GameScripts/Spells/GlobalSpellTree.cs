@@ -120,6 +120,6 @@ public class Mine(Spell spell) : SpellScript(spell)
                 break;
         }
 
-        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, aisling.Serial));
+        aisling.SendAnimationNearby(Spell.Template.TargetAnimation, null, aisling.Serial);
     }
 }

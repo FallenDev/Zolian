@@ -35,25 +35,25 @@ public class M4Carbine(Item item) : WeaponScript(item)
         Task.Run(async () =>
         {
             await Task.Delay(50);
-            damageDealingSprite.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(10013, null, enemy.Serial, 20, 10001, damageDealingSprite.Serial));
+            damageDealingSprite.SendAnimationNearby(10013, null, enemy.Serial, 20, 10001, damageDealingSprite.Serial);
         });
 
         Task.Run(async () =>
         {
             await Task.Delay(90);
-            damageDealingSprite.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(10013, null, enemy.Serial, 20, 10001, damageDealingSprite.Serial));
+            damageDealingSprite.SendAnimationNearby(10013, null, enemy.Serial, 20, 10001, damageDealingSprite.Serial);
         });
 
         Task.Run(async () =>
         {
             await Task.Delay(130);
-            damageDealingSprite.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(10013, null, enemy.Serial, 20, 10001, damageDealingSprite.Serial));
+            damageDealingSprite.SendAnimationNearby(10013, null, enemy.Serial, 20, 10001, damageDealingSprite.Serial);
         });
 
         Task.Run(async () =>
         {
             await Task.Delay(170);
-            damageDealingSprite.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(10013, null, enemy.Serial, 20, 10001, damageDealingSprite.Serial));
+            damageDealingSprite.SendAnimationNearby(10013, null, enemy.Serial, 20, 10001, damageDealingSprite.Serial);
         });
 
         damageable.ApplyDamage(damageDealingSprite, dmg, null);

@@ -522,7 +522,7 @@ public class Identifiable : Sprite
             if (!movable.Map.IsWall(pendingX, pendingY))
             {
                 var pos = new Position(pendingX, pendingY);
-                movable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(197, pos, movable.Serial));
+                movable.SendAnimationNearby(197, pos, movable.Serial);
                 continue;
             }
             pendingY--;
@@ -535,7 +535,7 @@ public class Identifiable : Sprite
             if (!movable.Map.IsWall(pendingX, pendingY))
             {
                 var pos = new Position(pendingX, pendingY);
-                movable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(197, pos, movable.Serial));
+                movable.SendAnimationNearby(197, pos, movable.Serial);
                 continue;
             }
             pendingX++;
@@ -548,7 +548,7 @@ public class Identifiable : Sprite
             if (!movable.Map.IsWall(pendingX, pendingY))
             {
                 var pos = new Position(pendingX, pendingY);
-                movable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(197, pos, movable.Serial));
+                movable.SendAnimationNearby(197, pos, movable.Serial);
                 continue;
             }
             pendingY++;
@@ -561,7 +561,7 @@ public class Identifiable : Sprite
             if (!movable.Map.IsWall(pendingX, pendingY))
             {
                 var pos = new Position(pendingX, pendingY);
-                movable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(197, pos, movable.Serial));
+                movable.SendAnimationNearby(197, pos, movable.Serial);
                 continue;
             }
             pendingX--;

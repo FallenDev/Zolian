@@ -2990,6 +2990,8 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
             if (skill.Template == null || skill.Scripts == null) return default;
 
+            if (skill.Template.Cooldown == 0)
+                if (!skill.CanUseZeroLineAbility) return default;
             if (!skill.CanUse()) return default;
             if (skill.InUse) return default;
 

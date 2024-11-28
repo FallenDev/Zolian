@@ -35,13 +35,13 @@ public class IceQuiver(Item item) : WeaponScript(item)
         Task.Run(async () =>
         {
             await Task.Delay(100);
-            damageDealingSprite.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(10006, null, enemy.Serial, 100, 10006, damageDealingSprite.Serial));
+            damageDealingSprite.SendAnimationNearby(10006, null, enemy.Serial, 100, 10006, damageDealingSprite.Serial);
         });
 
         Task.Run(async () =>
         {
             await Task.Delay(200);
-            damageDealingSprite.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(10006, null, enemy.Serial, 100, 10006, damageDealingSprite.Serial));
+            damageDealingSprite.SendAnimationNearby(10006, null, enemy.Serial, 100, 10006, damageDealingSprite.Serial);
         });
 
         damageable.ApplyElementalSkillDamage(damageDealingSprite, dmg, ElementManager.Element.Wind, null);

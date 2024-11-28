@@ -15,11 +15,10 @@ public class Assail(Skill skill) : SkillScript(skill)
 {
     private Sprite _target;
     private bool _crit;
-    private bool _success;
 
-    public override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, _target);
+    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, _target);
 
-    public override void OnSuccess(Sprite sprite)
+    protected override void OnSuccess(Sprite sprite)
     {
         if (sprite is Aisling aisling)
             aisling.ActionUsed = "Assail";
@@ -58,29 +57,6 @@ public class Assail(Skill skill) : SkillScript(skill)
         _target = null;
     }
 
-    public override void OnUse(Sprite sprite)
-    {
-        if (!Skill.CanUse()) return;
-
-        if (sprite is Aisling aisling)
-        {
-            _success = GlobalSkillMethods.OnUse(aisling, Skill);
-
-            if (_success)
-            {
-                OnSuccess(aisling);
-            }
-            else
-            {
-                OnFailed(aisling);
-            }
-        }
-        else
-        {
-            OnSuccess(sprite);
-        }
-    }
-
     private long DamageCalc(Sprite sprite)
     {
         _crit = false;
@@ -111,11 +87,10 @@ public class Assault(Skill skill) : SkillScript(skill)
 {
     private Sprite _target;
     private bool _crit;
-    private bool _success;
 
-    public override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, _target);
+    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, _target);
 
-    public override void OnSuccess(Sprite sprite)
+    protected override void OnSuccess(Sprite sprite)
     {
         if (sprite is Aisling aisling)
             aisling.ActionUsed = "Assault";
@@ -154,29 +129,6 @@ public class Assault(Skill skill) : SkillScript(skill)
         _target = null;
     }
 
-    public override void OnUse(Sprite sprite)
-    {
-        if (!Skill.CanUse()) return;
-
-        if (sprite is Aisling aisling)
-        {
-            _success = GlobalSkillMethods.OnUse(aisling, Skill);
-
-            if (_success)
-            {
-                OnSuccess(aisling);
-            }
-            else
-            {
-                OnFailed(aisling);
-            }
-        }
-        else
-        {
-            OnSuccess(sprite);
-        }
-    }
-
     private long DamageCalc(Sprite sprite)
     {
         _crit = false;
@@ -207,11 +159,10 @@ public class Onslaught(Skill skill) : SkillScript(skill)
 {
     private Sprite _target;
     private bool _crit;
-    private bool _success;
 
-    public override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, _target);
+    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, _target);
 
-    public override void OnSuccess(Sprite sprite)
+    protected override void OnSuccess(Sprite sprite)
     {
         if (sprite is Aisling aisling)
             aisling.ActionUsed = "Onslaught";
@@ -251,29 +202,6 @@ public class Onslaught(Skill skill) : SkillScript(skill)
         _target = null;
     }
 
-    public override void OnUse(Sprite sprite)
-    {
-        if (!Skill.CanUse()) return;
-
-        if (sprite is Aisling aisling)
-        {
-            _success = GlobalSkillMethods.OnUse(aisling, Skill);
-
-            if (_success)
-            {
-                OnSuccess(aisling);
-            }
-            else
-            {
-                OnFailed(aisling);
-            }
-        }
-        else
-        {
-            OnSuccess(sprite);
-        }
-    }
-
     private long DamageCalc(Sprite sprite)
     {
         _crit = false;
@@ -305,11 +233,10 @@ public class Clobber(Skill skill) : SkillScript(skill)
 {
     private Sprite _target;
     private bool _crit;
-    private bool _success;
 
-    public override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, _target);
+    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, _target);
 
-    public override void OnSuccess(Sprite sprite)
+    protected override void OnSuccess(Sprite sprite)
     {
         if (sprite is Aisling aisling)
             aisling.ActionUsed = "Clobber";
@@ -349,29 +276,6 @@ public class Clobber(Skill skill) : SkillScript(skill)
         _target = null;
     }
 
-    public override void OnUse(Sprite sprite)
-    {
-        if (!Skill.CanUse()) return;
-
-        if (sprite is Aisling aisling)
-        {
-            _success = GlobalSkillMethods.OnUse(aisling, Skill);
-
-            if (_success)
-            {
-                OnSuccess(aisling);
-            }
-            else
-            {
-                OnFailed(aisling);
-            }
-        }
-        else
-        {
-            OnSuccess(sprite);
-        }
-    }
-
     private long DamageCalc(Sprite sprite)
     {
         _crit = false;
@@ -402,11 +306,10 @@ public class ClobberX2(Skill skill) : SkillScript(skill)
 {
     private Sprite _target;
     private bool _crit;
-    private bool _success;
 
-    public override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, _target);
+    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, _target);
 
-    public override void OnSuccess(Sprite sprite)
+    protected override void OnSuccess(Sprite sprite)
     {
         if (sprite is Aisling aisling)
             aisling.ActionUsed = "Clobber x2";
@@ -447,29 +350,6 @@ public class ClobberX2(Skill skill) : SkillScript(skill)
         _target = null;
     }
 
-    public override void OnUse(Sprite sprite)
-    {
-        if (!Skill.CanUse()) return;
-
-        if (sprite is Aisling aisling)
-        {
-            _success = GlobalSkillMethods.OnUse(aisling, Skill);
-
-            if (_success)
-            {
-                OnSuccess(aisling);
-            }
-            else
-            {
-                OnFailed(aisling);
-            }
-        }
-        else
-        {
-            OnSuccess(sprite);
-        }
-    }
-
     private long DamageCalc(Sprite sprite)
     {
         _crit = false;
@@ -499,11 +379,10 @@ public class ClobberX2(Skill skill) : SkillScript(skill)
 public class Thrust(Skill skill) : SkillScript(skill)
 {
     private bool _crit;
-    private bool _success;
 
-    public override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
+    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
 
-    public override void OnSuccess(Sprite sprite)
+    protected override void OnSuccess(Sprite sprite)
     {
         if (sprite is Aisling aisling)
             aisling.ActionUsed = "Thrust";
@@ -544,29 +423,6 @@ public class Thrust(Skill skill) : SkillScript(skill)
 
     public override void OnCleanup() { }
 
-    public override void OnUse(Sprite sprite)
-    {
-        if (!Skill.CanUse()) return;
-
-        if (sprite is Aisling aisling)
-        {
-            _success = GlobalSkillMethods.OnUse(aisling, Skill);
-
-            if (_success)
-            {
-                OnSuccess(aisling);
-            }
-            else
-            {
-                OnFailed(aisling);
-            }
-        }
-        else
-        {
-            OnSuccess(sprite);
-        }
-    }
-
     private long DamageCalc(Sprite sprite)
     {
         _crit = false;
@@ -597,11 +453,10 @@ public class Wallop(Skill skill) : SkillScript(skill)
 {
     private Sprite _target;
     private bool _crit;
-    private bool _success;
 
-    public override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, _target);
+    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, _target);
 
-    public override void OnSuccess(Sprite sprite)
+    protected override void OnSuccess(Sprite sprite)
     {
         if (sprite is Aisling aisling)
             aisling.ActionUsed = "Wallop";
@@ -641,29 +496,6 @@ public class Wallop(Skill skill) : SkillScript(skill)
         _target = null;
     }
 
-    public override void OnUse(Sprite sprite)
-    {
-        if (!Skill.CanUse()) return;
-
-        if (sprite is Aisling aisling)
-        {
-            _success = GlobalSkillMethods.OnUse(aisling, Skill);
-
-            if (_success)
-            {
-                OnSuccess(aisling);
-            }
-            else
-            {
-                OnFailed(aisling);
-            }
-        }
-        else
-        {
-            OnSuccess(sprite);
-        }
-    }
-
     private long DamageCalc(Sprite sprite)
     {
         _crit = false;
@@ -695,11 +527,10 @@ public class Thrash(Skill skill) : SkillScript(skill)
 {
     private Sprite _target;
     private bool _crit;
-    private bool _success;
 
-    public override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, _target);
+    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, _target);
 
-    public override void OnSuccess(Sprite sprite)
+    protected override void OnSuccess(Sprite sprite)
     {
         if (sprite is Aisling aisling)
             aisling.ActionUsed = "Thrash";
@@ -739,29 +570,6 @@ public class Thrash(Skill skill) : SkillScript(skill)
         _target = null;
     }
 
-    public override void OnUse(Sprite sprite)
-    {
-        if (!Skill.CanUse()) return;
-
-        if (sprite is Aisling aisling)
-        {
-            _success = GlobalSkillMethods.OnUse(aisling, Skill);
-
-            if (_success)
-            {
-                OnSuccess(aisling);
-            }
-            else
-            {
-                OnFailed(aisling);
-            }
-        }
-        else
-        {
-            OnSuccess(sprite);
-        }
-    }
-
     private long DamageCalc(Sprite sprite)
     {
         _crit = false;
@@ -793,11 +601,10 @@ public class Punch(Skill skill) : SkillScript(skill)
 {
     private Sprite _target;
     private bool _crit;
-    private bool _success;
 
-    public override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, _target);
+    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, _target);
 
-    public override void OnSuccess(Sprite sprite)
+    protected override void OnSuccess(Sprite sprite)
     {
         if (sprite is Aisling aisling)
             aisling.ActionUsed = "Punch";
@@ -837,29 +644,6 @@ public class Punch(Skill skill) : SkillScript(skill)
         _target = null;
     }
 
-    public override void OnUse(Sprite sprite)
-    {
-        if (!Skill.CanUse()) return;
-
-        if (sprite is Aisling aisling)
-        {
-            _success = GlobalSkillMethods.OnUse(aisling, Skill);
-
-            if (_success)
-            {
-                OnSuccess(aisling);
-            }
-            else
-            {
-                OnFailed(aisling);
-            }
-        }
-        else
-        {
-            OnSuccess(sprite);
-        }
-    }
-
     private long DamageCalc(Sprite sprite)
     {
         _crit = false;
@@ -890,11 +674,10 @@ public class DoublePunch(Skill skill) : SkillScript(skill)
 {
     private Sprite _target;
     private bool _crit;
-    private bool _success;
 
-    public override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, _target);
+    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, _target);
 
-    public override void OnSuccess(Sprite sprite)
+    protected override void OnSuccess(Sprite sprite)
     {
         if (sprite is Aisling aisling)
             aisling.ActionUsed = "Double Punch";
@@ -935,29 +718,6 @@ public class DoublePunch(Skill skill) : SkillScript(skill)
         _target = null;
     }
 
-    public override void OnUse(Sprite sprite)
-    {
-        if (!Skill.CanUse()) return;
-
-        if (sprite is Aisling aisling)
-        {
-            _success = GlobalSkillMethods.OnUse(aisling, Skill);
-
-            if (_success)
-            {
-                OnSuccess(aisling);
-            }
-            else
-            {
-                OnFailed(aisling);
-            }
-        }
-        else
-        {
-            OnSuccess(sprite);
-        }
-    }
-
     private long DamageCalc(Sprite sprite)
     {
         _crit = false;
@@ -987,12 +747,11 @@ public class DoublePunch(Skill skill) : SkillScript(skill)
 public class Throw(Skill skill) : SkillScript(skill)
 {
     private bool _crit;
-    private bool _success;
     private AnimationArgs _animationArgs;
 
-    public override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
+    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
 
-    public override void OnSuccess(Sprite sprite)
+    protected override void OnSuccess(Sprite sprite)
     {
         var action = new BodyAnimationArgs
         {
@@ -1072,9 +831,9 @@ public class Throw(Skill skill) : SkillScript(skill)
                 return;
             }
 
-            _success = GlobalSkillMethods.OnUse(aisling, Skill);
+            var success = GlobalSkillMethods.OnUse(aisling, Skill);
 
-            if (_success)
+            if (success)
             {
                 OnSuccess(aisling);
             }
@@ -1117,12 +876,11 @@ public class Throw(Skill skill) : SkillScript(skill)
 public class Aim(Skill skill) : SkillScript(skill)
 {
     private bool _crit;
-    private bool _success;
     private AnimationArgs _animationArgs;
 
-    public override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
+    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
 
-    public override void OnSuccess(Sprite sprite)
+    protected override void OnSuccess(Sprite sprite)
     {
         var action = new BodyAnimationArgs
         {
@@ -1166,13 +924,9 @@ public class Aim(Skill skill) : SkillScript(skill)
                     _animationArgs = new AnimationArgs
                     {
                         AnimationSpeed = 100,
-                        SourceAnimation = (ushort)(_crit
-                                            ? 10002
-                                            : 10000),
+                        SourceAnimation = (ushort)(_crit ? 10002 : 10000),
                         SourceId = sprite.Serial,
-                        TargetAnimation = (ushort)(_crit
-                                            ? 10002
-                                            : 10000),
+                        TargetAnimation = (ushort)(_crit ? 10002 : 10000),
                         TargetId = i.Serial
                     };
                 }
@@ -1206,9 +960,9 @@ public class Aim(Skill skill) : SkillScript(skill)
                 return;
             }
 
-            _success = GlobalSkillMethods.OnUse(aisling, Skill);
+            var success = GlobalSkillMethods.OnUse(aisling, Skill);
 
-            if (_success)
+            if (success)
             {
                 OnSuccess(aisling);
             }
@@ -1251,11 +1005,10 @@ public class Aim(Skill skill) : SkillScript(skill)
 public class TwoHandedAttack(Skill skill) : SkillScript(skill)
 {
     private bool _crit;
-    private bool _success;
 
-    public override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
+    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
 
-    public override void OnSuccess(Sprite sprite)
+    protected override void OnSuccess(Sprite sprite)
     {
         if (sprite is Aisling aisling)
             aisling.ActionUsed = "Two-handed Attack";
@@ -1308,9 +1061,9 @@ public class TwoHandedAttack(Skill skill) : SkillScript(skill)
                 return;
             }
 
-            _success = GlobalSkillMethods.OnUse(aisling, Skill);
+            var success = GlobalSkillMethods.OnUse(aisling, Skill);
 
-            if (_success)
+            if (success)
             {
                 OnSuccess(aisling);
             }
@@ -1353,11 +1106,10 @@ public class TwoHandedAttack(Skill skill) : SkillScript(skill)
 public class Kobudo(Skill skill) : SkillScript(skill)
 {
     private bool _crit;
-    private bool _success;
 
-    public override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
+    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
 
-    public override void OnSuccess(Sprite sprite)
+    protected override void OnSuccess(Sprite sprite)
     {
         if (sprite is Aisling aisling)
             aisling.ActionUsed = "Kobudo";
@@ -1410,9 +1162,9 @@ public class Kobudo(Skill skill) : SkillScript(skill)
                 return;
             }
 
-            _success = GlobalSkillMethods.OnUse(aisling, Skill);
+            var success = GlobalSkillMethods.OnUse(aisling, Skill);
 
-            if (_success)
+            if (success)
             {
                 OnSuccess(aisling);
             }
@@ -1455,11 +1207,10 @@ public class Kobudo(Skill skill) : SkillScript(skill)
 public class AdvancedStaffTraining(Skill skill) : SkillScript(skill)
 {
     private bool _crit;
-    private bool _success;
 
-    public override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
+    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
 
-    public override void OnSuccess(Sprite sprite)
+    protected override void OnSuccess(Sprite sprite)
     {
         if (sprite is Aisling aisling)
             aisling.ActionUsed = "Advanced Staff Training";
@@ -1512,9 +1263,9 @@ public class AdvancedStaffTraining(Skill skill) : SkillScript(skill)
                 return;
             }
 
-            _success = GlobalSkillMethods.OnUse(aisling, Skill);
+            var success = GlobalSkillMethods.OnUse(aisling, Skill);
 
-            if (_success)
+            if (success)
             {
                 OnSuccess(aisling);
             }
@@ -1557,11 +1308,10 @@ public class AdvancedStaffTraining(Skill skill) : SkillScript(skill)
 public class DualWield(Skill skill) : SkillScript(skill)
 {
     private bool _crit;
-    private bool _success;
 
-    public override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
+    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
 
-    public override void OnSuccess(Sprite sprite)
+    protected override void OnSuccess(Sprite sprite)
     {
         if (sprite is Aisling aisling)
             aisling.ActionUsed = "Dual Wield";
@@ -1617,9 +1367,9 @@ public class DualWield(Skill skill) : SkillScript(skill)
                 return;
             }
 
-            _success = GlobalSkillMethods.OnUse(aisling, Skill);
+            var success = GlobalSkillMethods.OnUse(aisling, Skill);
 
-            if (_success)
+            if (success)
             {
                 OnSuccess(aisling);
             }
@@ -1662,11 +1412,10 @@ public class DualWield(Skill skill) : SkillScript(skill)
 public class Ambidextrous(Skill skill) : SkillScript(skill)
 {
     private bool _crit;
-    private bool _success;
 
-    public override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
+    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
 
-    public override void OnSuccess(Sprite sprite)
+    protected override void OnSuccess(Sprite sprite)
     {
         if (sprite is Aisling aisling)
             aisling.ActionUsed = "Ambidextrous";
@@ -1722,9 +1471,9 @@ public class Ambidextrous(Skill skill) : SkillScript(skill)
                 return;
             }
 
-            _success = GlobalSkillMethods.OnUse(aisling, Skill);
+            var success = GlobalSkillMethods.OnUse(aisling, Skill);
 
-            if (_success)
+            if (success)
             {
                 OnSuccess(aisling);
             }
@@ -1767,11 +1516,10 @@ public class Ambidextrous(Skill skill) : SkillScript(skill)
 public class LongStrike(Skill skill) : SkillScript(skill)
 {
     private bool _crit;
-    private bool _success;
 
-    public override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
+    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
 
-    public override void OnSuccess(Sprite sprite)
+    protected override void OnSuccess(Sprite sprite)
     {
         if (sprite is Aisling aisling)
             aisling.ActionUsed = "Long Strike";
@@ -1812,29 +1560,6 @@ public class LongStrike(Skill skill) : SkillScript(skill)
 
     public override void OnCleanup() { }
 
-    public override void OnUse(Sprite sprite)
-    {
-        if (!Skill.CanUse()) return;
-
-        if (sprite is Aisling aisling)
-        {
-            _success = GlobalSkillMethods.OnUse(aisling, Skill);
-
-            if (_success)
-            {
-                OnSuccess(aisling);
-            }
-            else
-            {
-                OnFailed(aisling);
-            }
-        }
-        else
-        {
-            OnSuccess(sprite);
-        }
-    }
-
     private long DamageCalc(Sprite sprite)
     {
         _crit = false;
@@ -1863,11 +1588,10 @@ public class LongStrike(Skill skill) : SkillScript(skill)
 public class DivineThrust(Skill skill) : SkillScript(skill)
 {
     private bool _crit;
-    private bool _success;
 
-    public override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
+    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
 
-    public override void OnSuccess(Sprite sprite)
+    protected override void OnSuccess(Sprite sprite)
     {
         if (sprite is Aisling aisling)
             aisling.ActionUsed = "Divine Thrust";
@@ -1908,29 +1632,6 @@ public class DivineThrust(Skill skill) : SkillScript(skill)
 
     public override void OnCleanup() { }
 
-    public override void OnUse(Sprite sprite)
-    {
-        if (!Skill.CanUse()) return;
-
-        if (sprite is Aisling aisling)
-        {
-            _success = GlobalSkillMethods.OnUse(aisling, Skill);
-
-            if (_success)
-            {
-                OnSuccess(aisling);
-            }
-            else
-            {
-                OnFailed(aisling);
-            }
-        }
-        else
-        {
-            OnSuccess(sprite);
-        }
-    }
-
     private long DamageCalc(Sprite sprite)
     {
         _crit = false;
@@ -1960,11 +1661,10 @@ public class TigerPalm(Skill skill) : SkillScript(skill)
 {
     private Sprite _target;
     private bool _crit;
-    private bool _success;
 
-    public override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, _target);
+    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, _target);
 
-    public override void OnSuccess(Sprite sprite)
+    protected override void OnSuccess(Sprite sprite)
     {
         if (sprite is Aisling aisling)
             aisling.ActionUsed = "Tiger Palm";
@@ -2013,29 +1713,6 @@ public class TigerPalm(Skill skill) : SkillScript(skill)
         _target = null;
     }
 
-    public override void OnUse(Sprite sprite)
-    {
-        if (!Skill.CanUse()) return;
-
-        if (sprite is Aisling aisling)
-        {
-            _success = GlobalSkillMethods.OnUse(aisling, Skill);
-
-            if (_success)
-            {
-                OnSuccess(aisling);
-            }
-            else
-            {
-                OnFailed(aisling);
-            }
-        }
-        else
-        {
-            OnSuccess(sprite);
-        }
-    }
-
     private long DamageCalc(Sprite sprite)
     {
         _crit = false;
@@ -2064,11 +1741,10 @@ public class TigerPalm(Skill skill) : SkillScript(skill)
 public class Kenjutsu(Skill skill) : SkillScript(skill)
 {
     private bool _crit;
-    private bool _success;
 
-    public override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
+    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
 
-    public override void OnSuccess(Sprite sprite)
+    protected override void OnSuccess(Sprite sprite)
     {
         if (sprite is Aisling aisling)
             aisling.ActionUsed = "Kenjutsu";
@@ -2109,29 +1785,6 @@ public class Kenjutsu(Skill skill) : SkillScript(skill)
 
     public override void OnCleanup() { }
 
-    public override void OnUse(Sprite sprite)
-    {
-        if (!Skill.CanUse()) return;
-
-        if (sprite is Aisling aisling)
-        {
-            _success = GlobalSkillMethods.OnUse(aisling, Skill);
-
-            if (_success)
-            {
-                OnSuccess(aisling);
-            }
-            else
-            {
-                OnFailed(aisling);
-            }
-        }
-        else
-        {
-            OnSuccess(sprite);
-        }
-    }
-
     private long DamageCalc(Sprite sprite)
     {
         _crit = false;
@@ -2160,11 +1813,10 @@ public class Kenjutsu(Skill skill) : SkillScript(skill)
 public class ShortStrike(Skill skill) : SkillScript(skill)
 {
     private bool _crit;
-    private bool _success;
 
-    public override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
+    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
 
-    public override void OnSuccess(Sprite sprite)
+    protected override void OnSuccess(Sprite sprite)
     {
         if (sprite is Aisling aisling)
             aisling.ActionUsed = "Short Strike";
@@ -2205,29 +1857,6 @@ public class ShortStrike(Skill skill) : SkillScript(skill)
 
     public override void OnCleanup() { }
 
-    public override void OnUse(Sprite sprite)
-    {
-        if (!Skill.CanUse()) return;
-
-        if (sprite is Aisling aisling)
-        {
-            _success = GlobalSkillMethods.OnUse(aisling, Skill);
-
-            if (_success)
-            {
-                OnSuccess(aisling);
-            }
-            else
-            {
-                OnFailed(aisling);
-            }
-        }
-        else
-        {
-            OnSuccess(sprite);
-        }
-    }
-
     private long DamageCalc(Sprite sprite)
     {
         _crit = false;
@@ -2256,11 +1885,10 @@ public class ShortStrike(Skill skill) : SkillScript(skill)
 public class Mordhau(Skill skill) : SkillScript(skill)
 {
     private bool _crit;
-    private bool _success;
 
-    public override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
+    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
 
-    public override void OnSuccess(Sprite sprite)
+    protected override void OnSuccess(Sprite sprite)
     {
         if (sprite is Aisling aisling)
             aisling.ActionUsed = "Mordhau";
@@ -2301,29 +1929,6 @@ public class Mordhau(Skill skill) : SkillScript(skill)
 
     public override void OnCleanup() { }
 
-    public override void OnUse(Sprite sprite)
-    {
-        if (!Skill.CanUse()) return;
-
-        if (sprite is Aisling aisling)
-        {
-            _success = GlobalSkillMethods.OnUse(aisling, Skill);
-
-            if (_success)
-            {
-                OnSuccess(aisling);
-            }
-            else
-            {
-                OnFailed(aisling);
-            }
-        }
-        else
-        {
-            OnSuccess(sprite);
-        }
-    }
-
     private long DamageCalc(Sprite sprite)
     {
         _crit = false;
@@ -2352,11 +1957,10 @@ public class Mordhau(Skill skill) : SkillScript(skill)
 public class CrushingMace(Skill skill) : SkillScript(skill)
 {
     private bool _crit;
-    private bool _success;
 
-    public override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
+    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
 
-    public override void OnSuccess(Sprite sprite)
+    protected override void OnSuccess(Sprite sprite)
     {
         if (sprite is Aisling aisling)
             aisling.ActionUsed = "Crushing Mace";
@@ -2405,29 +2009,6 @@ public class CrushingMace(Skill skill) : SkillScript(skill)
 
     public override void OnCleanup() { }
 
-    public override void OnUse(Sprite sprite)
-    {
-        if (!Skill.CanUse()) return;
-
-        if (sprite is Aisling aisling)
-        {
-            _success = GlobalSkillMethods.OnUse(aisling, Skill);
-
-            if (_success)
-            {
-                OnSuccess(aisling);
-            }
-            else
-            {
-                OnFailed(aisling);
-            }
-        }
-        else
-        {
-            OnSuccess(sprite);
-        }
-    }
-
     private long DamageCalc(Sprite sprite)
     {
         _crit = false;
@@ -2455,11 +2036,10 @@ public class CrushingMace(Skill skill) : SkillScript(skill)
 public class Daisho(Skill skill) : SkillScript(skill)
 {
     private bool _crit;
-    private bool _success;
 
-    public override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
+    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
 
-    public override void OnSuccess(Sprite sprite)
+    protected override void OnSuccess(Sprite sprite)
     {
         if (sprite is Aisling aisling)
             aisling.ActionUsed = "Daisho";
@@ -2515,9 +2095,9 @@ public class Daisho(Skill skill) : SkillScript(skill)
                 return;
             }
 
-            _success = GlobalSkillMethods.OnUse(aisling, Skill);
+            var success = GlobalSkillMethods.OnUse(aisling, Skill);
 
-            if (_success)
+            if (success)
             {
                 OnSuccess(aisling);
             }

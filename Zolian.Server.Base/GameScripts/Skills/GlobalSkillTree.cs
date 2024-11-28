@@ -11,13 +11,13 @@ namespace Darkages.GameScripts.Skills;
 [Script("Identify Weapon")]
 public class IdentifyWeapon(Skill skill) : SkillScript(skill)
 {
-    public override void OnFailed(Sprite sprite)
+    protected override void OnFailed(Sprite sprite)
     {
         if (sprite is not Aisling aisling) return;
         aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Hmm, can't seem to identify that.");
     }
 
-    public override void OnSuccess(Sprite sprite)
+    protected override void OnSuccess(Sprite sprite)
     {
         if (sprite is not Aisling aisling) return;
         var client = aisling.Client;
@@ -85,7 +85,7 @@ public class IdentifyWeapon(Skill skill) : SkillScript(skill)
             return;
         }
 
-        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.TargetAnimation, null, aisling.Serial));
+        aisling.SendAnimationNearby(Skill.Template.TargetAnimation, null, aisling.Serial);
         aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
     }
 
@@ -103,13 +103,13 @@ public class IdentifyWeapon(Skill skill) : SkillScript(skill)
 [Script("Identify Armor")]
 public class IdentifyArmor(Skill skill) : SkillScript(skill)
 {
-    public override void OnFailed(Sprite sprite)
+    protected override void OnFailed(Sprite sprite)
     {
         if (sprite is not Aisling aisling) return;
         aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Hmm, can't seem to identify that.");
     }
 
-    public override void OnSuccess(Sprite sprite)
+    protected override void OnSuccess(Sprite sprite)
     {
         if (sprite is not Aisling aisling) return;
         var client = aisling.Client;
@@ -154,7 +154,7 @@ public class IdentifyArmor(Skill skill) : SkillScript(skill)
             return;
         }
 
-        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.TargetAnimation, null, aisling.Serial));
+        aisling.SendAnimationNearby(Skill.Template.TargetAnimation, null, aisling.Serial);
         aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
     }
 
@@ -172,13 +172,13 @@ public class IdentifyArmor(Skill skill) : SkillScript(skill)
 [Script("Inspect Item")]
 public class InspectItem(Skill skill) : SkillScript(skill)
 {
-    public override void OnFailed(Sprite sprite)
+    protected override void OnFailed(Sprite sprite)
     {
         if (sprite is not Aisling aisling) return;
         aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Hmm, can't seem to identify that.");
     }
 
-    public override void OnSuccess(Sprite sprite)
+    protected override void OnSuccess(Sprite sprite)
     {
         if (sprite is not Aisling aisling) return;
         var client = aisling.Client;
@@ -223,7 +223,7 @@ public class InspectItem(Skill skill) : SkillScript(skill)
             return;
         }
 
-        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.TargetAnimation, null, aisling.Serial));
+        aisling.SendAnimationNearby(Skill.Template.TargetAnimation, null, aisling.Serial);
         aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
     }
 

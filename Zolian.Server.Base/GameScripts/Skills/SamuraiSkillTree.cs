@@ -18,14 +18,14 @@ public class Iaido(Skill skill) : SkillScript(skill)
     private List<Sprite> _enemyList;
     private bool _success;
 
-    public override void OnFailed(Sprite sprite)
+    protected override void OnFailed(Sprite sprite)
     {
         if (sprite is not Aisling damageDealingAisling) return;
         var client = damageDealingAisling.Client;
         client.SendServerMessage(ServerMessageType.OrangeBar1, "My honour has not faltered..");
     }
 
-    public override void OnSuccess(Sprite sprite)
+    protected override void OnSuccess(Sprite sprite)
     {
         if (sprite is not Aisling aisling) return;
         var client = aisling.Client;
@@ -67,8 +67,7 @@ public class Iaido(Skill skill) : SkillScript(skill)
                 GlobalSkillMethods.Train(client, Skill);
                 Task.Delay(300).ContinueWith(c =>
                 {
-                    aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                        c => c.SendAnimation(119, enemy.Position));
+                    aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(119, enemy.Position));
                 });
 
                 if (!_crit) continue;
@@ -213,9 +212,9 @@ public class MugaiRyu(Skill skill) : SkillScript(skill)
     private bool _crit;
     private bool _success;
 
-    public override void OnFailed(Sprite sprite) { }
+    protected override void OnFailed(Sprite sprite) { }
 
-    public override void OnSuccess(Sprite sprite)
+    protected override void OnSuccess(Sprite sprite)
     {
         if (sprite is not Aisling aisling) return;
         var client = aisling.Client;
@@ -241,9 +240,9 @@ public class NitenIchiRyu(Skill skill) : SkillScript(skill)
     private bool _crit;
     private bool _success;
 
-    public override void OnFailed(Sprite sprite) { }
+    protected override void OnFailed(Sprite sprite) { }
 
-    public override void OnSuccess(Sprite sprite)
+    protected override void OnSuccess(Sprite sprite)
     {
         if (sprite is not Aisling aisling) return;
         var client = aisling.Client;
@@ -268,9 +267,9 @@ public class ShintoRyu(Skill skill) : SkillScript(skill)
     private bool _crit;
     private bool _success;
 
-    public override void OnFailed(Sprite sprite) { }
+    protected override void OnFailed(Sprite sprite) { }
 
-    public override void OnSuccess(Sprite sprite)
+    protected override void OnSuccess(Sprite sprite)
     {
         if (sprite is not Aisling aisling) return;
         var client = aisling.Client;
@@ -293,9 +292,9 @@ public class IttoRu(Skill skill) : SkillScript(skill)
     private bool _crit;
     private bool _success;
 
-    public override void OnFailed(Sprite sprite) { }
+    protected override void OnFailed(Sprite sprite) { }
 
-    public override void OnSuccess(Sprite sprite)
+    protected override void OnSuccess(Sprite sprite)
     {
         if (sprite is not Aisling aisling) return;
         var client = aisling.Client;
@@ -318,9 +317,9 @@ public class TamiyaRyu(Skill skill) : SkillScript(skill)
     private bool _crit;
     private bool _success;
 
-    public override void OnFailed(Sprite sprite) { }
+    protected override void OnFailed(Sprite sprite) { }
 
-    public override void OnSuccess(Sprite sprite)
+    protected override void OnSuccess(Sprite sprite)
     {
         if (sprite is not Aisling aisling) return;
         var client = aisling.Client;

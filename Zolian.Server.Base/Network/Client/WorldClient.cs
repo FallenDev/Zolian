@@ -425,7 +425,7 @@ public class WorldClient : WorldClientBase, IWorldClient
         if (!Socket.Connected || !IsDayDreaming) return;
 
         Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(Aisling.Serial, (BodyAnimation)16, 100));
-        Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(32, Aisling.Position));
+        Aisling.SendAnimationNearby(32, Aisling.Position);
         if (Aisling.Resting == Enums.RestPosition.RestPosition1) return;
         Aisling.Resting = Enums.RestPosition.RestPosition1;
         Aisling.Client.UpdateDisplay();
@@ -606,7 +606,7 @@ public class WorldClient : WorldClientBase, IWorldClient
             SendDisplayAisling(Aisling);
             Enter();
             if (Aisling.Username == "Death")
-                Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(391, Aisling.Position));
+                Aisling.SendAnimationNearby(391, Aisling.Position);
             BoardPostStorage.MailFromDatabase(this);
         }
         catch (Exception ex)
@@ -3489,7 +3489,7 @@ public class WorldClient : WorldClientBase, IWorldClient
 
         // Recall message set in message variable back to the npc
         this.SendOptionsDialog(source, message);
-        Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(subject.TargetAnimation, null, Aisling.Serial));
+        Aisling.SendAnimationNearby(subject.TargetAnimation, null, Aisling.Serial);
 
         // After learning, ensure player's modifiers are set
         var item = new Item();
@@ -3513,7 +3513,7 @@ public class WorldClient : WorldClientBase, IWorldClient
 
         // Recall message set in message variable back to the npc
         this.SendOptionsDialog(source, message);
-        Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(subject.TargetAnimation, null, Aisling.Serial));
+        Aisling.SendAnimationNearby(subject.TargetAnimation, null, Aisling.Serial);
 
         // After learning, ensure player's modifiers are set
         var item = new Item();
@@ -4186,7 +4186,7 @@ public class WorldClient : WorldClientBase, IWorldClient
         player.Client.SendAttributes(StatUpdateType.Full);
 
         player.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{ServerSetup.Instance.Config.LevelUpMessage}, Insight:{player.ExpLevel}");
-        player.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(79, null, player.Serial, 64));
+        player.SendAnimationNearby(79, null, player.Serial, 64);
 
         if (extraExp > 0)
             GiveExp(extraExp);
@@ -4300,7 +4300,7 @@ public class WorldClient : WorldClientBase, IWorldClient
         player.Client.SendAttributes(StatUpdateType.Full);
 
         player.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{ServerSetup.Instance.Config.AbilityUpMessage}, Job Level:{player.AbpLevel}");
-        player.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(385, null, player.Serial, 75));
+        player.SendAnimationNearby(385, null, player.Serial, 75);
 
         if (extraExp > 0)
             GiveAp(extraExp);

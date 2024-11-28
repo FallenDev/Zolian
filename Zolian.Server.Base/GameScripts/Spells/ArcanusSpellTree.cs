@@ -32,7 +32,7 @@ public class Mor_Strioch_Pian_Gar(Spell spell) : SpellScript(spell)
         var healthSap = (long)(aisling.MaximumHp * .33);
         var damage = (long)((healthSap + manaSap) * 0.01) * 200;
 
-        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.Animation, null, aisling.Serial));
+        aisling.SendAnimationNearby(Spell.Template.Animation, null, aisling.Serial);
 
         foreach (var targetObj in targets)
         {
@@ -41,7 +41,7 @@ public class Mor_Strioch_Pian_Gar(Spell spell) : SpellScript(spell)
 
             if (targetObj.SpellNegate)
             {
-                client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(64, null, targetObj.Serial));
+                client.Aisling.SendAnimationNearby(64, null, targetObj.Serial);
                 client.SendServerMessage(ServerMessageType.OrangeBar1, "Your spell has been deflected!");
 
                 if (targetObj is Aisling player)
@@ -54,12 +54,12 @@ public class Mor_Strioch_Pian_Gar(Spell spell) : SpellScript(spell)
 
             if (mR > targetObj.Will)
             {
-                client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, targetObj.Position, targetObj.Serial));
+                client.Aisling.SendAnimationNearby(Spell.Template.TargetAnimation, targetObj.Position, targetObj.Serial);
                 damageable.ApplyElementalSpellDamage(aisling, damage, ElementManager.Element.Terror, Spell);
             }
             else
             {
-                client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(115, null, targetObj.Serial));
+                client.Aisling.SendAnimationNearby(115, null, targetObj.Serial);
             }
         }
     }
@@ -138,7 +138,7 @@ public class AoSithGar(Spell spell) : SpellScript(spell)
         {
             if (targetObj.GroupParty != aisling.GroupParty) continue;
             if (targetObj.Serial == aisling.Serial) continue;
-            client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, targetObj.Serial));
+            client.Aisling.SendAnimationNearby(Spell.Template.TargetAnimation, null, targetObj.Serial);
             foreach (var debuff in targetObj.Debuffs.Values)
             {
                 if (debuff.Affliction) continue;
@@ -184,7 +184,7 @@ public class AoSithGar(Spell spell) : SpellScript(spell)
         foreach (var targetObj in sprite.AislingsNearby())
         {
             if (targetObj == null) continue;
-            targetObj.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, targetObj.Position));
+            targetObj.SendAnimationNearby(Spell.Template.TargetAnimation, targetObj.Position);
             foreach (var debuff in targetObj.Debuffs.Values)
             {
                 if (debuff.Affliction) continue;

@@ -55,9 +55,9 @@ public class Caltrops(Spell spell) : SpellScript(spell)
         damageable.ApplyTrapDamage(sprite, dam, Spell.Template.Sound);
 
         if (target.CurrentHp > 1)
-            damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
+            damageable.SendAnimationNearby(Spell.Template.TargetAnimation, null, target.Serial);
         else
-            damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, target.Position));
+            damageable.SendAnimationNearby(Spell.Template.TargetAnimation, target.Position);
     }
 
     public override void OnUse(Sprite sprite, Sprite target)
@@ -189,12 +189,12 @@ public class DestructiveForce(Spell spell) : SpellScript(spell)
 
         if (target.CurrentHp > 0)
         {
-            damageDealingSprite.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
+            damageDealingSprite.SendAnimationNearby(Spell.Template.TargetAnimation, null, target.Serial);
             damageDealingSprite.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(Spell.Template.Sound, false));
         }
         else
         {
-            damageDealingSprite.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, target.Position));
+            damageDealingSprite.SendAnimationNearby(Spell.Template.TargetAnimation, target.Position);
         }
 
         var mapCheck = damageDealingSprite.Map.ID;
@@ -269,7 +269,7 @@ public class DestructiveForce(Spell spell) : SpellScript(spell)
         {
             var stunned = new DebuffBeagsuain();
             stunned.OnApplied(monster, stunned);
-            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(208, null, monster.Serial));
+            aisling.SendAnimationNearby(208, null, monster.Serial);
         }
 
         monster.Pos = new Vector2(targetPosition.X, targetPosition.Y);
@@ -299,12 +299,12 @@ public class Elemental_Bolt(Spell spell) : SpellScript(spell)
 
         if (target.CurrentHp > 0)
         {
-            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, null, target.Serial));
+            aisling.SendAnimationNearby(Spell.Template.TargetAnimation, null, target.Serial);
             aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(Spell.Template.Sound, false));
         }
         else
         {
-            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, target.Position));
+            aisling.SendAnimationNearby(Spell.Template.TargetAnimation, target.Position);
         }
 
         damageable.ApplyElementalSpellDamage(aisling, dmg, randomEle, Spell);
@@ -406,7 +406,7 @@ public class Remote_Bank(Spell spell) : SpellScript(spell)
     public override void OnUse(Sprite sprite, Sprite target)
     {
         if (sprite is not Aisling playerAction) return;
-        playerAction.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Spell.Template.TargetAnimation, playerAction.Position));
+        playerAction.SendAnimationNearby(Spell.Template.TargetAnimation, playerAction.Position);
         playerAction.ActionUsed = "Remote Bank";
 
         foreach (var npc in ServerSetup.Instance.GlobalMundaneCache)

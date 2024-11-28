@@ -35,25 +35,25 @@ public class RapidQuiver(Item item) : WeaponScript(item)
         Task.Run(async () =>
         {
             await Task.Delay(100);
-            damageDealingSprite.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(10001, null, enemy.Serial, 100, 10001, damageDealingSprite.Serial));
+            damageDealingSprite.SendAnimationNearby(10001, null, enemy.Serial, 100, 10001, damageDealingSprite.Serial);
         });
 
         Task.Run(async () =>
         {
             await Task.Delay(200);
-            damageDealingSprite.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(10001, null, enemy.Serial, 100, 10001, damageDealingSprite.Serial));
+            damageDealingSprite.SendAnimationNearby(10001, null, enemy.Serial, 100, 10001, damageDealingSprite.Serial);
         });
 
         Task.Run(async () =>
         {
             await Task.Delay(300);
-            damageDealingSprite.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(10001, null, enemy.Serial, 100, 10001, damageDealingSprite.Serial));
+            damageDealingSprite.SendAnimationNearby(10001, null, enemy.Serial, 100, 10001, damageDealingSprite.Serial);
         });
 
         Task.Run(async () =>
         {
             await Task.Delay(400);
-            damageDealingSprite.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(10001, null, enemy.Serial, 100, 10001, damageDealingSprite.Serial));
+            damageDealingSprite.SendAnimationNearby(10001, null, enemy.Serial, 100, 10001, damageDealingSprite.Serial);
         });
 
         damageable.ApplyDamage(damageDealingSprite, dmg, null);

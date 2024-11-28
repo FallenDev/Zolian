@@ -46,7 +46,7 @@ public class Skill
         get
         {
             var readyTime = DateTime.UtcNow;
-            return readyTime - LastUsedSkill > new TimeSpan(0, 0, 0, 1, 0);
+            return readyTime - LastUsedSkill >= new TimeSpan(0, 0, 0, 0, 750);
         }
     }
 
@@ -82,7 +82,7 @@ public class Skill
             {
                 aisling.SkillBook.Set((byte)slot, skill, null);
                 aisling.Client.SendAddSkillToPane(skill);
-                aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(22, null, aisling.Serial));
+                aisling.SendAnimationNearby(22, null, aisling.Serial);
             }
         }
 
@@ -135,7 +135,7 @@ public class Skill
         if (enemy is Aisling enemyAisling)
             sender = enemyAisling;
 
-        sender?.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(27, null, enemy.Serial));
+        sender?.SendAnimationNearby(27, null, enemy.Serial);
 
         return enemy;
     }

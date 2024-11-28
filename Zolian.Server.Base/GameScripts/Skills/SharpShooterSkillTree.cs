@@ -19,9 +19,9 @@ public class Bang(Skill skill) : SkillScript(skill)
     private bool _crit;
     private bool _success;
 
-    public override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, _target);
+    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, _target);
 
-    public override void OnSuccess(Sprite sprite)
+    protected override void OnSuccess(Sprite sprite)
     {
         if (sprite is not Aisling aisling) return;
         aisling.ActionUsed = "Bang";
@@ -177,13 +177,13 @@ public class Snipe(Skill skill) : SkillScript(skill)
     private bool _crit;
     private bool _success;
 
-    public override void OnFailed(Sprite sprite)
+    protected override void OnFailed(Sprite sprite)
     {
         if (sprite is not Aisling aisling) return;
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Snipe failed to set the target!");
     }
 
-    public override void OnSuccess(Sprite sprite)
+    protected override void OnSuccess(Sprite sprite)
     {
         if (sprite is not Aisling aisling) return;
         aisling.ActionUsed = "Snipe";
@@ -350,13 +350,13 @@ public class Volley(Skill skill) : SkillScript(skill)
     private bool _crit;
     private bool _success;
 
-    public override void OnFailed(Sprite sprite)
+    protected override void OnFailed(Sprite sprite)
     {
         if (sprite is not Aisling aisling) return;
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Volley failed!");
     }
 
-    public override void OnSuccess(Sprite sprite)
+    protected override void OnSuccess(Sprite sprite)
     {
         if (sprite is not Aisling aisling) return;
         aisling.ActionUsed = "Volley";

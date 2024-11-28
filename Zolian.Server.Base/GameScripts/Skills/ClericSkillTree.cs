@@ -18,13 +18,13 @@ public class Blink(Skill skill) : SkillScript(skill)
 {
     private Position _oldPosition;
 
-    public override void OnFailed(Sprite sprite)
+    protected override void OnFailed(Sprite sprite)
     {
         if (sprite is Aisling aisling)
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "That didn't seem to work");
     }
 
-    public override void OnSuccess(Sprite sprite)
+    protected override void OnSuccess(Sprite sprite)
     {
         if (sprite is Aisling aisling)
             GlobalSkillMethods.Train(aisling.Client, Skill);
@@ -127,16 +127,15 @@ public class Blink(Skill skill) : SkillScript(skill)
 public class Smite(Skill skill) : SkillScript(skill)
 {
     private bool _crit;
-    private bool _success;
 
-    public override void OnFailed(Sprite sprite)
+    protected override void OnFailed(Sprite sprite)
     {
         if (sprite is not Aisling damageDealingAisling) return;
         damageDealingAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Failed to purify");
         damageDealingAisling.SendAnimationNearby(76, null, damageDealingAisling.Serial);
     }
 
-    public override void OnSuccess(Sprite sprite)
+    protected override void OnSuccess(Sprite sprite)
     {
         if (sprite is Aisling aisling)
             aisling.ActionUsed = "Smite";
@@ -187,29 +186,6 @@ public class Smite(Skill skill) : SkillScript(skill)
 
     public override void OnCleanup() { }
 
-    public override void OnUse(Sprite sprite)
-    {
-        if (!Skill.CanUse()) return;
-
-        if (sprite is Aisling aisling)
-        {
-            _success = GlobalSkillMethods.OnUse(aisling, Skill);
-
-            if (_success)
-            {
-                OnSuccess(aisling);
-            }
-            else
-            {
-                OnFailed(aisling);
-            }
-        }
-        else
-        {
-            OnSuccess(sprite);
-        }
-    }
-
     private long DamageCalc(Sprite sprite)
     {
         _crit = false;
@@ -236,13 +212,13 @@ public class Smite(Skill skill) : SkillScript(skill)
 [Script("Remedy")]
 public class Remedy(Skill skill) : SkillScript(skill)
 {
-    public override void OnFailed(Sprite sprite)
+    protected override void OnFailed(Sprite sprite)
     {
         if (sprite is not Aisling damageDealingAisling) return;
         damageDealingAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Failed to focus");
     }
 
-    public override void OnSuccess(Sprite sprite)
+    protected override void OnSuccess(Sprite sprite)
     {
         if (sprite is Aisling aisling)
             aisling.ActionUsed = "Remedy";
@@ -296,11 +272,10 @@ public class Remedy(Skill skill) : SkillScript(skill)
 public class HolyLance(Skill skill) : SkillScript(skill)
 {
     private bool _crit;
-    private bool _success;
 
-    public override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
+    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
 
-    public override void OnSuccess(Sprite sprite)
+    protected override void OnSuccess(Sprite sprite)
     {
         if (sprite is Aisling aisling)
             aisling.ActionUsed = "Holy Lance";
@@ -344,29 +319,6 @@ public class HolyLance(Skill skill) : SkillScript(skill)
 
     public override void OnCleanup() { }
 
-    public override void OnUse(Sprite sprite)
-    {
-        if (!Skill.CanUse()) return;
-
-        if (sprite is Aisling aisling)
-        {
-            _success = GlobalSkillMethods.OnUse(aisling, Skill);
-
-            if (_success)
-            {
-                OnSuccess(aisling);
-            }
-            else
-            {
-                OnFailed(aisling);
-            }
-        }
-        else
-        {
-            OnSuccess(sprite);
-        }
-    }
-
     private long DamageCalc(Sprite sprite, Sprite target)
     {
         _crit = false;
@@ -394,11 +346,10 @@ public class HolyLance(Skill skill) : SkillScript(skill)
 public class Recite(Skill skill) : SkillScript(skill)
 {
     private bool _crit;
-    private bool _success;
 
-    public override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
+    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
 
-    public override void OnSuccess(Sprite sprite)
+    protected override void OnSuccess(Sprite sprite)
     {
         if (sprite is Aisling aisling)
             aisling.ActionUsed = "Recite Scripture";
@@ -459,29 +410,6 @@ public class Recite(Skill skill) : SkillScript(skill)
 
     public override void OnCleanup() { }
 
-    public override void OnUse(Sprite sprite)
-    {
-        if (!Skill.CanUse()) return;
-
-        if (sprite is Aisling aisling)
-        {
-            _success = GlobalSkillMethods.OnUse(aisling, Skill);
-
-            if (_success)
-            {
-                OnSuccess(aisling);
-            }
-            else
-            {
-                OnFailed(aisling);
-            }
-        }
-        else
-        {
-            OnSuccess(sprite);
-        }
-    }
-
     private long DamageCalc(Sprite sprite)
     {
         _crit = false;
@@ -509,11 +437,10 @@ public class Recite(Skill skill) : SkillScript(skill)
 public class UnHolySwipe(Skill skill) : SkillScript(skill)
 {
     private bool _crit;
-    private bool _success;
 
-    public override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
+    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
 
-    public override void OnSuccess(Sprite sprite)
+    protected override void OnSuccess(Sprite sprite)
     {
         if (sprite is Aisling aisling)
             aisling.ActionUsed = "UnHoly Swipe";
@@ -557,29 +484,6 @@ public class UnHolySwipe(Skill skill) : SkillScript(skill)
 
     public override void OnCleanup() { }
 
-    public override void OnUse(Sprite sprite)
-    {
-        if (!Skill.CanUse()) return;
-
-        if (sprite is Aisling aisling)
-        {
-            _success = GlobalSkillMethods.OnUse(aisling, Skill);
-
-            if (_success)
-            {
-                OnSuccess(aisling);
-            }
-            else
-            {
-                OnFailed(aisling);
-            }
-        }
-        else
-        {
-            OnSuccess(sprite);
-        }
-    }
-
     private long DamageCalc(Sprite sprite)
     {
         _crit = false;
@@ -607,11 +511,10 @@ public class UnHolySwipe(Skill skill) : SkillScript(skill)
 public class ConsecratedStrike(Skill skill) : SkillScript(skill)
 {
     private bool _crit;
-    private bool _success;
 
-    public override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
+    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
 
-    public override void OnSuccess(Sprite sprite)
+    protected override void OnSuccess(Sprite sprite)
     {
         if (sprite is Aisling aisling)
             aisling.ActionUsed = "Consecrated Strike";
@@ -655,29 +558,6 @@ public class ConsecratedStrike(Skill skill) : SkillScript(skill)
 
     public override void OnCleanup() { }
 
-    public override void OnUse(Sprite sprite)
-    {
-        if (!Skill.CanUse()) return;
-
-        if (sprite is Aisling aisling)
-        {
-            _success = GlobalSkillMethods.OnUse(aisling, Skill);
-
-            if (_success)
-            {
-                OnSuccess(aisling);
-            }
-            else
-            {
-                OnFailed(aisling);
-            }
-        }
-        else
-        {
-            OnSuccess(sprite);
-        }
-    }
-
     private long DamageCalc(Sprite sprite)
     {
         _crit = false;
@@ -705,11 +585,10 @@ public class ConsecratedStrike(Skill skill) : SkillScript(skill)
 public class DivineWrath(Skill skill) : SkillScript(skill)
 {
     private bool _crit;
-    private bool _success;
 
-    public override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
+    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
 
-    public override void OnSuccess(Sprite sprite)
+    protected override void OnSuccess(Sprite sprite)
     {
         if (sprite is Aisling aisling)
             aisling.ActionUsed = "Divine Wrath";
@@ -766,29 +645,6 @@ public class DivineWrath(Skill skill) : SkillScript(skill)
     }
 
     public override void OnCleanup() { }
-
-    public override void OnUse(Sprite sprite)
-    {
-        if (!Skill.CanUse()) return;
-
-        if (sprite is Aisling aisling)
-        {
-            _success = GlobalSkillMethods.OnUse(aisling, Skill);
-
-            if (_success)
-            {
-                OnSuccess(aisling);
-            }
-            else
-            {
-                OnFailed(aisling);
-            }
-        }
-        else
-        {
-            OnSuccess(sprite);
-        }
-    }
 
     private long DamageCalc(Sprite sprite)
     {

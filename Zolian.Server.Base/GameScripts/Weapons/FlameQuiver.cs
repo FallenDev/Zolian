@@ -35,13 +35,13 @@ public class FlameQuiver(Item item) : WeaponScript(item)
         Task.Run(async () =>
         {
             await Task.Delay(100);
-            damageDealingSprite.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(10003, null, enemy.Serial, 100, 10003, damageDealingSprite.Serial));
+            damageDealingSprite.SendAnimationNearby(10003, null, enemy.Serial, 100, 10003, damageDealingSprite.Serial);
         });
 
         Task.Run(async () =>
         {
             await Task.Delay(200);
-            damageDealingSprite.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(10003, null, enemy.Serial, 100, 10003, damageDealingSprite.Serial));
+            damageDealingSprite.SendAnimationNearby(10003, null, enemy.Serial, 100, 10003, damageDealingSprite.Serial);
         });
 
         damageable.ApplyElementalSkillDamage(damageDealingSprite, dmg, ElementManager.Element.Fire, null);

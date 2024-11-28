@@ -22,13 +22,13 @@ public class IronSprint(Skill skill) : SkillScript(skill)
     private bool _crit;
     private List<Sprite> _enemyList;
 
-    public override void OnFailed(Sprite sprite)
+    protected override void OnFailed(Sprite sprite)
     {
         if (sprite is not Aisling damageDealingAisling) return;
         damageDealingAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "*listens to birds chirp nearby* I may have failed, but I won't falter");
     }
 
-    public override void OnSuccess(Sprite sprite)
+    protected override void OnSuccess(Sprite sprite)
     {
         if (sprite is not Aisling aisling) return;
         var client = aisling.Client;
@@ -177,9 +177,9 @@ public class IronFang(Skill skill) : SkillScript(skill)
     private bool _crit;
     private bool _success;
 
-    public override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, _target);
+    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, _target);
 
-    public override void OnSuccess(Sprite sprite)
+    protected override void OnSuccess(Sprite sprite)
     {
         if (sprite is not Aisling aisling) return;
 
@@ -311,9 +311,9 @@ public class GoldenDragonPalm(Skill skill) : SkillScript(skill)
     private bool _crit;
     private bool _success;
 
-    public override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, _target);
+    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, _target);
 
-    public override void OnSuccess(Sprite sprite)
+    protected override void OnSuccess(Sprite sprite)
     {
         if (sprite is not Aisling aisling) return;
 
@@ -449,9 +449,9 @@ public class SnakeWhip(Skill skill) : SkillScript(skill)
     private bool _crit;
     private bool _success;
 
-    public override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, _target);
+    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, _target);
 
-    public override void OnSuccess(Sprite sprite)
+    protected override void OnSuccess(Sprite sprite)
     {
         if (sprite is not Aisling aisling) return;
         aisling.ActionUsed = "Snake Whip";
@@ -616,9 +616,9 @@ public class TigerSwipe(Skill skill) : SkillScript(skill)
     private bool _crit;
     private bool _success;
 
-    public override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, _target);
+    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, _target);
 
-    public override void OnSuccess(Sprite sprite)
+    protected override void OnSuccess(Sprite sprite)
     {
         if (sprite is not Aisling aisling) return;
         aisling.ActionUsed = "Tiger Swipe";
@@ -758,9 +758,9 @@ public class HardenedHands(Skill skill) : SkillScript(skill)
     private bool _crit;
     private bool _success;
 
-    public override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, _target);
+    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, _target);
 
-    public override void OnSuccess(Sprite sprite)
+    protected override void OnSuccess(Sprite sprite)
     {
         if (sprite is not Aisling aisling) return;
         aisling.ActionUsed = "Hardened Hands";

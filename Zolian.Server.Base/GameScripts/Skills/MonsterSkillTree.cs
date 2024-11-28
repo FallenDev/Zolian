@@ -17,20 +17,16 @@ namespace Darkages.GameScripts.Skills;
 [Script("Bite")]
 public class Bite(Skill skill) : SkillScript(skill)
 {
-    private Sprite _target;
     private bool _crit;
 
-    public override void OnFailed(Sprite sprite) { }
+    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
 
-    public override void OnSuccess(Sprite sprite)
+    protected override void OnSuccess(Sprite sprite)
     {
         // Monster skill
     }
 
-    public override void OnCleanup()
-    {
-        _target = null;
-    }
+    public override void OnCleanup() { }
 
     public override void OnUse(Sprite sprite)
     {
@@ -46,19 +42,17 @@ public class Bite(Skill skill) : SkillScript(skill)
 
         try
         {
-            if (sprite is not Damageable identified) return;
-            var enemy = identified.DamageableGetInFront().FirstOrDefault();
-            _target = enemy;
+            if (sprite is not Damageable damageDealer) return;
+            var enemy = damageDealer.DamageableGetInFront().FirstOrDefault();
 
-            if (_target == null || _target.Serial == sprite.Serial)
+            if (enemy == null || enemy.Serial == sprite.Serial)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(sprite);
                 OnFailed(sprite);
                 return;
             }
 
             var dmgCalc = DamageCalc(sprite);
-            GlobalSkillMethods.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
+            GlobalSkillMethods.OnSuccess(enemy, sprite, Skill, dmgCalc, _crit, action);
         }
         catch
         {
@@ -70,7 +64,7 @@ public class Bite(Skill skill) : SkillScript(skill)
     {
         _crit = false;
         if (sprite is not Monster damageMonster) return 0;
-        var dmg = damageMonster.Str;
+        var dmg = damageMonster.Str * 5;
         var critCheck = GlobalSkillMethods.OnCrit(dmg);
         _crit = critCheck.Item1;
         return critCheck.Item2;
@@ -80,20 +74,16 @@ public class Bite(Skill skill) : SkillScript(skill)
 [Script("Gatling")]
 public class Gatling(Skill skill) : SkillScript(skill)
 {
-    private Sprite _target;
     private bool _crit;
 
-    public override void OnFailed(Sprite sprite) { }
+    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
 
-    public override void OnSuccess(Sprite sprite)
+    protected override void OnSuccess(Sprite sprite)
     {
         // Monster skill
     }
 
-    public override void OnCleanup()
-    {
-        _target = null;
-    }
+    public override void OnCleanup() { }
 
     public override void OnUse(Sprite sprite)
     {
@@ -109,26 +99,16 @@ public class Gatling(Skill skill) : SkillScript(skill)
 
         try
         {
-            var nearby = sprite.AislingsNearby();
+            var nearby = sprite.AislingsNearby().RandomIEnum();
 
-            foreach (var player in nearby)
+            if (nearby == null || nearby.Serial == sprite.Serial)
             {
-                if (player == null) continue;
-                var rand = Generator.RandNumGen100();
-                if (rand >= 60) continue;
-                _target = player;
-            }
-
-
-            if (_target == null || _target.Serial == sprite.Serial)
-            {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(sprite);
                 OnFailed(sprite);
                 return;
             }
 
             var dmgCalc = DamageCalc(sprite);
-            GlobalSkillMethods.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
+            GlobalSkillMethods.OnSuccess(nearby, sprite, Skill, dmgCalc, _crit, action);
         }
         catch
         {
@@ -140,7 +120,7 @@ public class Gatling(Skill skill) : SkillScript(skill)
     {
         _crit = false;
         if (sprite is not Monster damageMonster) return 0;
-        var dmg = damageMonster.Str * 5 + damageMonster.Dex * 8;
+        var dmg = damageMonster.Str * 5 + damageMonster.Dex * 8 * damageMonster.Dmg;
         var critCheck = GlobalSkillMethods.OnCrit(dmg);
         _crit = critCheck.Item1;
         return critCheck.Item2;
@@ -150,20 +130,16 @@ public class Gatling(Skill skill) : SkillScript(skill)
 [Script("Bite'n Shake")]
 public class BiteAndShake(Skill skill) : SkillScript(skill)
 {
-    private Sprite _target;
     private bool _crit;
 
-    public override void OnFailed(Sprite sprite) { }
+    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
 
-    public override void OnSuccess(Sprite sprite)
+    protected override void OnSuccess(Sprite sprite)
     {
         // Monster skill
     }
 
-    public override void OnCleanup()
-    {
-        _target = null;
-    }
+    public override void OnCleanup() { }
 
     public override void OnUse(Sprite sprite)
     {
@@ -179,34 +155,19 @@ public class BiteAndShake(Skill skill) : SkillScript(skill)
 
         try
         {
-            if (sprite is not Damageable identified) return;
-            var enemy = identified.DamageableGetInFront().FirstOrDefault();
-            _target = enemy;
+            if (sprite is not Damageable damageDealer) return;
+            var enemy = damageDealer.DamageableGetInFront().FirstOrDefault();
 
-            if (_target == null || _target.Serial == sprite.Serial)
+            if (enemy == null || enemy.Serial == sprite.Serial)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(sprite);
                 OnFailed(sprite);
                 return;
             }
 
             var debuff = new DebuffBeagsuain();
-
-            if (_target is Aisling targetPlayer)
-            {
-                if (!_target.HasDebuff(debuff.Name))
-                {
-                    targetPlayer.Client.EnqueueDebuffAppliedEvent(_target, debuff);
-                }
-            }
-            else
-            {
-                if (!_target.HasDebuff(debuff.Name))
-                    debuff.OnApplied(_target, debuff);
-            }
-
+            GlobalSkillMethods.ApplyPhysicalDebuff(damageDealer, debuff, enemy, Skill);
             var dmgCalc = DamageCalc(sprite);
-            GlobalSkillMethods.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
+            GlobalSkillMethods.OnSuccess(enemy, sprite, Skill, dmgCalc, _crit, action);
         }
         catch
         {
@@ -218,7 +179,7 @@ public class BiteAndShake(Skill skill) : SkillScript(skill)
     {
         _crit = false;
         if (sprite is not Monster damageMonster) return 0;
-        var dmg = damageMonster.Str * 4 + damageMonster.Dex * 4;
+        var dmg = damageMonster.Str * 14 + damageMonster.Dex * 10;
         var critCheck = GlobalSkillMethods.OnCrit(dmg);
         _crit = critCheck.Item1;
         return critCheck.Item2;
@@ -228,20 +189,16 @@ public class BiteAndShake(Skill skill) : SkillScript(skill)
 [Script("Corrosive Touch")]
 public class CorrosiveTouch(Skill skill) : SkillScript(skill)
 {
-    private Sprite _target;
     private bool _crit;
 
-    public override void OnFailed(Sprite sprite) { }
+    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
 
-    public override void OnSuccess(Sprite sprite)
+    protected override void OnSuccess(Sprite sprite)
     {
         // monster skill
     }
 
-    public override void OnCleanup()
-    {
-        _target = null;
-    }
+    public override void OnCleanup() { }
 
     public override void OnUse(Sprite sprite)
     {
@@ -257,35 +214,19 @@ public class CorrosiveTouch(Skill skill) : SkillScript(skill)
 
         try
         {
-            if (sprite is not Damageable identified) return;
-            var enemy = identified.DamageableGetInFront().FirstOrDefault();
-            _target = enemy;
+            if (sprite is not Damageable damageDealer) return;
+            var enemy = damageDealer.DamageableGetInFront().FirstOrDefault();
 
-            if (_target == null || _target.Serial == sprite.Serial)
+            if (enemy == null || enemy.Serial == sprite.Serial)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(sprite);
                 OnFailed(sprite);
                 return;
             }
 
             var debuff = new DebuffCorrosiveTouch();
-
-            if (_target is Aisling targetPlayer)
-            {
-                if (!_target.HasDebuff(debuff.Name))
-                {
-                    targetPlayer.Client.EnqueueDebuffAppliedEvent(_target, debuff);
-                    targetPlayer.Client.SendAttributes(StatUpdateType.Secondary);
-                }
-            }
-            else
-            {
-                if (!_target.HasDebuff(debuff.Name))
-                    debuff.OnApplied(_target, debuff);
-            }
-
+            GlobalSkillMethods.ApplyPhysicalDebuff(damageDealer, debuff, enemy, Skill);
             var dmgCalc = DamageCalc(sprite);
-            GlobalSkillMethods.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
+            GlobalSkillMethods.OnSuccess(enemy, sprite, Skill, dmgCalc, _crit, action);
         }
         catch
         {
@@ -297,7 +238,7 @@ public class CorrosiveTouch(Skill skill) : SkillScript(skill)
     {
         _crit = false;
         if (sprite is not Monster damageMonster) return 0;
-        var dmg = damageMonster.Str * 2 + damageMonster.Con * 2;
+        var dmg = damageMonster.Str * 20 + damageMonster.Con * 12;
         var critCheck = GlobalSkillMethods.OnCrit(dmg);
         _crit = critCheck.Item1;
         return critCheck.Item2;
@@ -307,20 +248,16 @@ public class CorrosiveTouch(Skill skill) : SkillScript(skill)
 [Script("Stomp")]
 public class Stomp(Skill skill) : SkillScript(skill)
 {
-    private Sprite _target;
     private bool _crit;
 
-    public override void OnFailed(Sprite sprite) { }
+    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
 
-    public override void OnSuccess(Sprite sprite)
+    protected override void OnSuccess(Sprite sprite)
     {
         // Monster skill
     }
 
-    public override void OnCleanup()
-    {
-        _target = null;
-    }
+    public override void OnCleanup() { }
 
     public override void OnUse(Sprite sprite)
     {
@@ -336,19 +273,17 @@ public class Stomp(Skill skill) : SkillScript(skill)
 
         try
         {
-            if (sprite is not Damageable identified) return;
-            var enemy = identified.DamageableGetInFront().FirstOrDefault();
-            _target = enemy;
+            if (sprite is not Damageable damageDealer) return;
+            var enemy = damageDealer.DamageableGetInFront().FirstOrDefault();
 
-            if (_target == null || _target.Serial == sprite.Serial)
+            if (enemy == null || enemy.Serial == sprite.Serial)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(sprite);
                 OnFailed(sprite);
                 return;
             }
 
             var dmgCalc = DamageCalc(sprite);
-            GlobalSkillMethods.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
+            GlobalSkillMethods.OnSuccess(enemy, sprite, Skill, dmgCalc, _crit, action);
         }
         catch
         {
@@ -360,7 +295,7 @@ public class Stomp(Skill skill) : SkillScript(skill)
     {
         _crit = false;
         if (sprite is not Monster damageMonster) return 0;
-        var dmg = damageMonster.Str * 3;
+        var dmg = damageMonster.Str * 30;
         var critCheck = GlobalSkillMethods.OnCrit(dmg);
         _crit = critCheck.Item1;
         return critCheck.Item2;
@@ -370,20 +305,16 @@ public class Stomp(Skill skill) : SkillScript(skill)
 [Script("Head Butt")]
 public class HeadButt(Skill skill) : SkillScript(skill)
 {
-    private Sprite _target;
     private bool _crit;
 
-    public override void OnFailed(Sprite sprite) { }
+    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
 
-    public override void OnSuccess(Sprite sprite)
+    protected override void OnSuccess(Sprite sprite)
     {
         // Monster skill
     }
 
-    public override void OnCleanup()
-    {
-        _target = null;
-    }
+    public override void OnCleanup() { }
 
     public override void OnUse(Sprite sprite)
     {
@@ -399,19 +330,17 @@ public class HeadButt(Skill skill) : SkillScript(skill)
 
         try
         {
-            if (sprite is not Damageable identified) return;
-            var enemy = identified.DamageableGetInFront().FirstOrDefault();
-            _target = enemy;
+            if (sprite is not Damageable damageDealer) return;
+            var enemy = damageDealer.DamageableGetInFront().FirstOrDefault();
 
-            if (_target == null || _target.Serial == sprite.Serial)
+            if (enemy == null || enemy.Serial == sprite.Serial)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(sprite);
                 OnFailed(sprite);
                 return;
             }
 
             var dmgCalc = DamageCalc(sprite);
-            GlobalSkillMethods.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
+            GlobalSkillMethods.OnSuccess(enemy, sprite, Skill, dmgCalc, _crit, action);
         }
         catch
         {
@@ -423,7 +352,7 @@ public class HeadButt(Skill skill) : SkillScript(skill)
     {
         _crit = false;
         if (sprite is not Monster damageMonster) return 0;
-        var dmg = damageMonster.Str * 2 + damageMonster.Dex * 4;
+        var dmg = damageMonster.Str * 20 + damageMonster.Dex * 4 * damageMonster.Hit;
         var critCheck = GlobalSkillMethods.OnCrit(dmg);
         _crit = critCheck.Item1;
         return critCheck.Item2;
@@ -433,20 +362,16 @@ public class HeadButt(Skill skill) : SkillScript(skill)
 [Script("Claw")]
 public class Claw(Skill skill) : SkillScript(skill)
 {
-    private Sprite _target;
     private bool _crit;
 
-    public override void OnFailed(Sprite sprite) { }
+    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
 
-    public override void OnSuccess(Sprite sprite)
+    protected override void OnSuccess(Sprite sprite)
     {
         // Monster skill
     }
 
-    public override void OnCleanup()
-    {
-        _target = null;
-    }
+    public override void OnCleanup() { }
 
     public override void OnUse(Sprite sprite)
     {
@@ -462,19 +387,22 @@ public class Claw(Skill skill) : SkillScript(skill)
 
         try
         {
-            if (sprite is not Damageable identified) return;
-            var enemy = identified.DamageableGetInFront().FirstOrDefault();
-            _target = enemy;
+            if (sprite is not Damageable damageDealer) return;
+            var enemy = damageDealer.GetHorizontalInFront();
 
-            if (_target == null || _target.Serial == sprite.Serial)
+            if (enemy.Count == 0)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(sprite);
                 OnFailed(sprite);
                 return;
             }
 
-            var dmgCalc = DamageCalc(sprite);
-            GlobalSkillMethods.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
+            foreach (var i in enemy.Where(i => sprite.Serial != i.Serial))
+            {
+                var dmgCalc = DamageCalc(sprite);
+                GlobalSkillMethods.OnSuccessWithoutAction(i, damageDealer, Skill, dmgCalc, _crit);
+            }
+
+            damageDealer.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
         }
         catch
         {
@@ -486,7 +414,7 @@ public class Claw(Skill skill) : SkillScript(skill)
     {
         _crit = false;
         if (sprite is not Monster damageMonster) return 0;
-        var dmg = damageMonster.Dex * 5;
+        var dmg = damageMonster.Dex * 50 + damageMonster.Con * 20 * damageMonster.Dmg;
         var critCheck = GlobalSkillMethods.OnCrit(dmg);
         _crit = critCheck.Item1;
         return critCheck.Item2;
@@ -496,20 +424,16 @@ public class Claw(Skill skill) : SkillScript(skill)
 [Script("Mule Kick")]
 public class MuleKick(Skill skill) : SkillScript(skill)
 {
-    private Sprite _target;
     private bool _crit;
 
-    public override void OnFailed(Sprite sprite) { }
+    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
 
-    public override void OnSuccess(Sprite sprite)
+    protected override void OnSuccess(Sprite sprite)
     {
         // Monster skill
     }
 
-    public override void OnCleanup()
-    {
-        _target = null;
-    }
+    public override void OnCleanup() { }
 
     public override void OnUse(Sprite sprite)
     {
@@ -525,19 +449,17 @@ public class MuleKick(Skill skill) : SkillScript(skill)
 
         try
         {
-            if (sprite is not Damageable identified) return;
-            var enemy = identified.DamageableGetInFront().FirstOrDefault();
-            _target = enemy;
+            if (sprite is not Damageable damageDealer) return;
+            var enemy = damageDealer.DamageableGetInFront().FirstOrDefault();
 
-            if (_target == null || _target.Serial == sprite.Serial)
+            if (enemy == null || enemy.Serial == sprite.Serial)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(sprite);
                 OnFailed(sprite);
                 return;
             }
 
             var dmgCalc = DamageCalc(sprite);
-            GlobalSkillMethods.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
+            GlobalSkillMethods.OnSuccess(enemy, sprite, Skill, dmgCalc, _crit, action);
         }
         catch
         {
@@ -549,7 +471,7 @@ public class MuleKick(Skill skill) : SkillScript(skill)
     {
         _crit = false;
         if (sprite is not Monster damageMonster) return 0;
-        var dmg = damageMonster.Str * 6;
+        var dmg = damageMonster.Str * 16 + damageMonster.Dex * 14;
         var critCheck = GlobalSkillMethods.OnCrit(dmg);
         _crit = critCheck.Item1;
         return critCheck.Item2;
@@ -559,20 +481,16 @@ public class MuleKick(Skill skill) : SkillScript(skill)
 [Script("Tail Slap")]
 public class TailSlap(Skill skill) : SkillScript(skill)
 {
-    private Sprite _target;
     private bool _crit;
 
-    public override void OnFailed(Sprite sprite) { }
+    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
 
-    public override void OnSuccess(Sprite sprite)
+    protected override void OnSuccess(Sprite sprite)
     {
         // Monster skill
     }
 
-    public override void OnCleanup()
-    {
-        _target = null;
-    }
+    public override void OnCleanup() { }
 
     public override void OnUse(Sprite sprite)
     {
@@ -589,7 +507,7 @@ public class TailSlap(Skill skill) : SkillScript(skill)
         try
         {
             if (sprite is not Damageable damageable) return;
-            var enemy = damageable.GetInFrontToSide();
+            var enemy = damageable.DamageableGetBehind();
 
             if (enemy.Count == 0)
             {
@@ -597,15 +515,13 @@ public class TailSlap(Skill skill) : SkillScript(skill)
                 return;
             }
 
-            foreach (var i in enemy)
+            foreach (var i in enemy.Where(i => sprite.Serial != i.Serial))
             {
-                _target = i;
                 var dmgCalc = DamageCalc(sprite);
-                GlobalSkillMethods.OnSuccessWithoutAction(_target, sprite, Skill, dmgCalc, _crit);
+                GlobalSkillMethods.OnSuccessWithoutAction(i, sprite, Skill, dmgCalc, _crit);
             }
 
-            damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
+            damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
         }
         catch
         {
@@ -617,7 +533,7 @@ public class TailSlap(Skill skill) : SkillScript(skill)
     {
         _crit = false;
         if (sprite is not Monster damageMonster) return 0;
-        var dmg = damageMonster.Str * 6 + damageMonster.Dex * 12;
+        var dmg = damageMonster.Str * 25 + damageMonster.Dex * 32 * damageMonster.Dmg;
         var critCheck = GlobalSkillMethods.OnCrit(dmg);
         _crit = critCheck.Item1;
         return critCheck.Item2;
@@ -627,20 +543,16 @@ public class TailSlap(Skill skill) : SkillScript(skill)
 [Script("Roll Over")]
 public class RollOver(Skill skill) : SkillScript(skill)
 {
-    private Sprite _target;
     private bool _crit;
 
-    public override void OnFailed(Sprite sprite) { }
+    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
 
-    public override void OnSuccess(Sprite sprite)
+    protected override void OnSuccess(Sprite sprite)
     {
         // Monster skill
     }
 
-    public override void OnCleanup()
-    {
-        _target = null;
-    }
+    public override void OnCleanup() { }
 
     public override void OnUse(Sprite sprite)
     {
@@ -656,34 +568,19 @@ public class RollOver(Skill skill) : SkillScript(skill)
 
         try
         {
-            if (sprite is not Damageable identified) return;
-            var enemy = identified.DamageableGetInFront().FirstOrDefault();
-            _target = enemy;
+            if (sprite is not Damageable damageDealer) return;
+            var enemy = damageDealer.DamageableGetInFront().FirstOrDefault();
 
-            if (_target == null || _target.Serial == sprite.Serial)
+            if (enemy == null || enemy.Serial == sprite.Serial)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(sprite);
                 OnFailed(sprite);
                 return;
             }
 
             var debuff = new DebuffBleeding();
-
-            if (_target is Aisling targetPlayer)
-            {
-                if (!_target.HasDebuff(debuff.Name))
-                {
-                    targetPlayer.Client.EnqueueDebuffAppliedEvent(_target, debuff);
-                }
-            }
-            else
-            {
-                if (!_target.HasDebuff(debuff.Name))
-                    debuff.OnApplied(_target, debuff);
-            }
-
+            GlobalSkillMethods.ApplyPhysicalDebuff(damageDealer, debuff, enemy, Skill);
             var dmgCalc = DamageCalc(sprite);
-            GlobalSkillMethods.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
+            GlobalSkillMethods.OnSuccess(enemy, sprite, Skill, dmgCalc, _crit, action);
         }
         catch
         {
@@ -695,7 +592,7 @@ public class RollOver(Skill skill) : SkillScript(skill)
     {
         _crit = false;
         if (sprite is not Monster damageMonster) return 0;
-        var dmg = damageMonster.Con * 6 + damageMonster.Dex * 8;
+        var dmg = damageMonster.Con * 16 + damageMonster.Dex * 18;
         var critCheck = GlobalSkillMethods.OnCrit(dmg);
         _crit = critCheck.Item1;
         return critCheck.Item2;
@@ -705,20 +602,16 @@ public class RollOver(Skill skill) : SkillScript(skill)
 [Script("Tantalizing Gaze")]
 public class TantalizingGaze(Skill skill) : SkillScript(skill)
 {
-    private Sprite _target;
     private bool _crit;
 
-    public override void OnFailed(Sprite sprite) { }
+    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
 
-    public override void OnSuccess(Sprite sprite)
+    protected override void OnSuccess(Sprite sprite)
     {
         // Monster skill
     }
 
-    public override void OnCleanup()
-    {
-        _target = null;
-    }
+    public override void OnCleanup() { }
 
     public override void OnUse(Sprite sprite)
     {
@@ -734,34 +627,19 @@ public class TantalizingGaze(Skill skill) : SkillScript(skill)
 
         try
         {
-            if (sprite is not Damageable identified) return;
-            var enemy = identified.DamageableGetInFront().FirstOrDefault();
-            _target = enemy;
+            if (sprite is not Damageable damageDealer) return;
+            var enemy = damageDealer.DamageableGetInFront().FirstOrDefault();
 
-            if (_target == null || _target.Serial == sprite.Serial)
+            if (enemy == null || enemy.Serial == sprite.Serial)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(sprite);
                 OnFailed(sprite);
                 return;
             }
 
             var debuff = new DebuffCharmed();
-
-            if (_target is Aisling targetPlayer)
-            {
-                if (!_target.HasDebuff(debuff.Name))
-                {
-                    targetPlayer.Client.EnqueueDebuffAppliedEvent(_target, debuff);
-                }
-            }
-            else
-            {
-                if (!_target.HasDebuff(debuff.Name))
-                    debuff.OnApplied(_target, debuff);
-            }
-
+            GlobalSkillMethods.ApplyPhysicalDebuff(damageDealer, debuff, enemy, Skill);
             var dmgCalc = DamageCalc(sprite);
-            GlobalSkillMethods.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
+            GlobalSkillMethods.OnSuccess(enemy, sprite, Skill, dmgCalc, _crit, action);
         }
         catch
         {
@@ -773,7 +651,7 @@ public class TantalizingGaze(Skill skill) : SkillScript(skill)
     {
         _crit = false;
         if (sprite is not Monster damageMonster) return 0;
-        var dmg = damageMonster.Int * 6 + damageMonster.Wis * 8;
+        var dmg = damageMonster.Int * 16 + damageMonster.Wis * 18;
         var critCheck = GlobalSkillMethods.OnCrit(dmg);
         _crit = critCheck.Item1;
         return critCheck.Item2;
@@ -783,20 +661,16 @@ public class TantalizingGaze(Skill skill) : SkillScript(skill)
 [Script("Swallow Whole")]
 public class SwallowWhole(Skill skill) : SkillScript(skill)
 {
-    private Sprite _target;
     private bool _crit;
 
-    public override void OnFailed(Sprite sprite) { }
+    protected override void OnFailed(Sprite sprite) { }
 
-    public override void OnSuccess(Sprite sprite)
+    protected override void OnSuccess(Sprite sprite)
     {
         // Monster skill
     }
 
-    public override void OnCleanup()
-    {
-        _target = null;
-    }
+    public override void OnCleanup() { }
 
     public override void OnUse(Sprite sprite)
     {
@@ -812,11 +686,10 @@ public class SwallowWhole(Skill skill) : SkillScript(skill)
 
         try
         {
-            if (sprite is not Damageable identified) return;
-            var enemy = identified.DamageableGetInFront().FirstOrDefault();
-            _target = enemy;
+            if (sprite is not Damageable damageDealer) return;
+            var enemy = damageDealer.DamageableGetInFront().FirstOrDefault();
 
-            if (_target == null || _target.Serial == sprite.Serial)
+            if (enemy == null || enemy.Serial == sprite.Serial)
             {
                 GlobalSkillMethods.FailedAttemptBodyAnimation(sprite);
                 OnFailed(sprite);
@@ -824,22 +697,9 @@ public class SwallowWhole(Skill skill) : SkillScript(skill)
             }
 
             var debuff = new DebuffBleeding();
-
-            if (_target is Aisling targetPlayer)
-            {
-                if (!_target.HasDebuff(debuff.Name))
-                {
-                    targetPlayer.Client.EnqueueDebuffAppliedEvent(_target, debuff);
-                }
-            }
-            else
-            {
-                if (!_target.HasDebuff(debuff.Name))
-                    debuff.OnApplied(_target, debuff);
-            }
-
+            GlobalSkillMethods.ApplyPhysicalDebuff(damageDealer, debuff, enemy, Skill);
             var dmgCalc = DamageCalc(sprite);
-            GlobalSkillMethods.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
+            GlobalSkillMethods.OnSuccess(enemy, sprite, Skill, dmgCalc, _crit, action);
         }
         catch
         {
@@ -851,7 +711,7 @@ public class SwallowWhole(Skill skill) : SkillScript(skill)
     {
         _crit = false;
         if (sprite is not Monster damageMonster) return 0;
-        var dmg = damageMonster.Int * 6 + damageMonster.Wis * 8;
+        var dmg = damageMonster.Int * 16 + damageMonster.Wis * 18;
         var critCheck = GlobalSkillMethods.OnCrit(dmg);
         _crit = critCheck.Item1;
         return critCheck.Item2;
@@ -861,9 +721,9 @@ public class SwallowWhole(Skill skill) : SkillScript(skill)
 [Script("Howl'n Call")]
 public class HowlAndCall(Skill skill) : SkillScript(skill)
 {
-    public override void OnFailed(Sprite sprite) { }
+    protected override void OnFailed(Sprite sprite) { }
 
-    public override void OnSuccess(Sprite sprite)
+    protected override void OnSuccess(Sprite sprite)
     {
         // Monster skill
     }
@@ -899,8 +759,7 @@ public class HowlAndCall(Skill skill) : SkillScript(skill)
 
                 foreach (var player in casterMonster.AislingsNearby())
                 {
-                    player.Client.SendCreatureWalk(monster.Serial, new Point(casterMonster.X, casterMonster.Y),
-                        (Direction)casterMonster.Direction);
+                    player.Client.SendCreatureWalk(monster.Serial, new Point(casterMonster.X, casterMonster.Y), (Direction)casterMonster.Direction);
                 }
 
                 monster.LastMovementChanged = readyTime;
@@ -908,8 +767,7 @@ public class HowlAndCall(Skill skill) : SkillScript(skill)
                 break;
             }
 
-            casterMonster.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
+            casterMonster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
         }
         catch
         {
@@ -921,20 +779,16 @@ public class HowlAndCall(Skill skill) : SkillScript(skill)
 [Script("Death From Above")]
 public class DeathFromAbove(Skill skill) : SkillScript(skill)
 {
-    private Sprite _target;
     private bool _crit;
 
-    public override void OnFailed(Sprite sprite) { }
+    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
 
-    public override void OnSuccess(Sprite sprite)
+    protected override void OnSuccess(Sprite sprite)
     {
         // Monster skill
     }
 
-    public override void OnCleanup()
-    {
-        _target = null;
-    }
+    public override void OnCleanup() { }
 
     public override void OnUse(Sprite sprite)
     {
@@ -950,19 +804,17 @@ public class DeathFromAbove(Skill skill) : SkillScript(skill)
 
         try
         {
-            if (sprite is not Damageable identified) return;
-            var enemy = identified.DamageableGetInFront(3).FirstOrDefault();
-            _target = enemy;
+            if (sprite is not Damageable damageDealer) return;
+            var enemy = damageDealer.DamageableGetInFront(3).FirstOrDefault();
 
-            if (_target == null || _target.Serial == sprite.Serial)
+            if (enemy == null || enemy.Serial == sprite.Serial)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(sprite);
                 OnFailed(sprite);
                 return;
             }
 
             var dmgCalc = DamageCalc(sprite);
-            GlobalSkillMethods.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
+            GlobalSkillMethods.OnSuccess(enemy, sprite, Skill, dmgCalc, _crit, action);
         }
         catch
         {
@@ -974,7 +826,7 @@ public class DeathFromAbove(Skill skill) : SkillScript(skill)
     {
         _crit = false;
         if (sprite is not Monster damageMonster) return 0;
-        var dmg = damageMonster.Dex * 15 + damageMonster.Str * 3;
+        var dmg = damageMonster.Dex * 15 + damageMonster.Str * 13;
         var critCheck = GlobalSkillMethods.OnCrit(dmg);
         _crit = critCheck.Item1;
         return critCheck.Item2;
@@ -984,20 +836,16 @@ public class DeathFromAbove(Skill skill) : SkillScript(skill)
 [Script("Pounce")]
 public class Pounce(Skill skill) : SkillScript(skill)
 {
-    private Sprite _target;
     private bool _crit;
 
-    public override void OnFailed(Sprite sprite) { }
+    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
 
-    public override void OnSuccess(Sprite sprite)
+    protected override void OnSuccess(Sprite sprite)
     {
         // Monster skill
     }
 
-    public override void OnCleanup()
-    {
-        _target = null;
-    }
+    public override void OnCleanup() { }
 
     public override void OnUse(Sprite sprite)
     {
@@ -1013,19 +861,17 @@ public class Pounce(Skill skill) : SkillScript(skill)
 
         try
         {
-            if (sprite is not Damageable identified) return;
-            var enemy = identified.DamageableGetInFront(6).FirstOrDefault();
-            _target = enemy;
+            if (sprite is not Damageable damageDealer) return;
+            var enemy = damageDealer.DamageableGetInFront(6).FirstOrDefault();
 
-            if (_target == null || _target.Serial == sprite.Serial)
+            if (enemy == null || enemy.Serial == sprite.Serial)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(sprite);
                 OnFailed(sprite);
                 return;
             }
 
             var dmgCalc = DamageCalc(sprite);
-            GlobalSkillMethods.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
+            GlobalSkillMethods.OnSuccess(enemy, sprite, Skill, dmgCalc, _crit, action);
         }
         catch
         {
@@ -1037,7 +883,7 @@ public class Pounce(Skill skill) : SkillScript(skill)
     {
         _crit = false;
         if (sprite is not Monster damageMonster) return 0;
-        var dmg = damageMonster.Dex * 9 + damageMonster.Str * 9 + damageMonster.Con * 9;
+        var dmg = damageMonster.Dex * 19 + damageMonster.Str * 19 + damageMonster.Con * 19;
         var critCheck = GlobalSkillMethods.OnCrit(dmg);
         _crit = critCheck.Item1;
         return critCheck.Item2;
@@ -1047,20 +893,16 @@ public class Pounce(Skill skill) : SkillScript(skill)
 [Script("Tentacle")]
 public class Tentacle(Skill skill) : SkillScript(skill)
 {
-    private Sprite _target;
     private bool _crit;
 
-    public override void OnFailed(Sprite sprite) { }
+    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
 
-    public override void OnSuccess(Sprite sprite)
+    protected override void OnSuccess(Sprite sprite)
     {
         // Monster skill
     }
 
-    public override void OnCleanup()
-    {
-        _target = null;
-    }
+    public override void OnCleanup() { }
 
     public override void OnUse(Sprite sprite)
     {
@@ -1076,35 +918,20 @@ public class Tentacle(Skill skill) : SkillScript(skill)
 
         try
         {
-            if (sprite is not Damageable identified) return;
-            var enemy = identified.DamageableGetInFront().FirstOrDefault();
-            _target = enemy;
+            if (sprite is not Damageable damageDealer) return;
+            var enemy = damageDealer.DamageableGetInFront().FirstOrDefault();
 
-            if (_target == null || _target.Serial == sprite.Serial)
+            if (enemy == null || enemy.Serial == sprite.Serial)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(sprite);
                 OnFailed(sprite);
                 return;
             }
 
             var debuff = new DebuffBeagsuain();
-
-            if (_target is Aisling targetPlayer)
-            {
-                if (!_target.HasDebuff(debuff.Name))
-                {
-                    targetPlayer.Client.EnqueueDebuffAppliedEvent(_target, debuff);
-                }
-            }
-            else
-            {
-                if (!_target.HasDebuff(debuff.Name))
-                    debuff.OnApplied(_target, debuff);
-            }
-
+            GlobalSkillMethods.ApplyPhysicalDebuff(damageDealer, debuff, enemy, Skill);
             var dmgCalc = DamageCalc(sprite);
-            GlobalSkillMethods.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
-            GlobalSkillMethods.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
+            GlobalSkillMethods.OnSuccessWithoutActionAnimation(enemy, sprite, Skill, dmgCalc, _crit);
+            GlobalSkillMethods.OnSuccess(enemy, sprite, Skill, dmgCalc, _crit, action);
         }
         catch
         {
@@ -1116,7 +943,7 @@ public class Tentacle(Skill skill) : SkillScript(skill)
     {
         _crit = false;
         if (sprite is not Monster damageMonster) return 0;
-        var dmg = damageMonster.Str * 4 + damageMonster.Dex * 4 + damageMonster.Con * 2;
+        var dmg = damageMonster.Str * 14 + damageMonster.Dex * 14 + damageMonster.Con * 8;
         var critCheck = GlobalSkillMethods.OnCrit(dmg);
         _crit = critCheck.Item1;
         return critCheck.Item2;
@@ -1129,9 +956,9 @@ public class OmegaAvoid(Skill skill) : SkillScript(skill)
     private readonly Buff _buff1 = new buff_MorDion();
     private readonly Buff _buff2 = new buff_PerfectDefense();
 
-    public override void OnFailed(Sprite sprite) { }
+    protected override void OnFailed(Sprite sprite) { }
 
-    public override void OnSuccess(Sprite sprite)
+    protected override void OnSuccess(Sprite sprite)
     {
         // Monster skill
     }
@@ -1150,20 +977,16 @@ public class OmegaAvoid(Skill skill) : SkillScript(skill)
 [Script("Omega Slash")]
 public class OmegaSlash(Skill skill) : SkillScript(skill)
 {
-    private Sprite _target;
     private bool _crit;
 
-    public override void OnFailed(Sprite sprite) { }
+    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
 
-    public override void OnSuccess(Sprite sprite)
+    protected override void OnSuccess(Sprite sprite)
     {
         // Monster skill
     }
 
-    public override void OnCleanup()
-    {
-        _target = null;
-    }
+    public override void OnCleanup() { }
 
     public override void OnUse(Sprite sprite)
     {
@@ -1179,28 +1002,22 @@ public class OmegaSlash(Skill skill) : SkillScript(skill)
 
         try
         {
-            if (sprite is not Damageable identified) return;
-            var enemyList = identified.GetInFrontToSide();
+            if (sprite is not Damageable damageDealer) return;
+            var enemyList = damageDealer.GetInFrontToSide();
+
             if (enemyList.Count == 0)
             {
                 OnFailed(sprite);
                 return;
             }
 
-            foreach (var enemy in enemyList)
+            foreach (var enemy in enemyList.Where(i => sprite.Serial != i.Serial))
             {
-                _target = enemy;
-
-                if (_target == null || _target.Serial == sprite.Serial)
-                {
-                    GlobalSkillMethods.FailedAttemptBodyAnimation(sprite);
-                    OnFailed(sprite);
-                    continue;
-                }
-
                 var dmgCalc = DamageCalc(sprite);
-                GlobalSkillMethods.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
+                GlobalSkillMethods.OnSuccessWithoutAction(enemy, sprite, Skill, dmgCalc, _crit);
             }
+
+            damageDealer.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
         }
         catch
         {
@@ -1212,7 +1029,7 @@ public class OmegaSlash(Skill skill) : SkillScript(skill)
     {
         _crit = false;
         if (sprite is not Monster damageMonster) return 0;
-        var dmg = damageMonster.Str * 12 + damageMonster.Dex * 12;
+        var dmg = damageMonster.Str * 80 + damageMonster.Dex * 55 * damageMonster.Dmg;
         var critCheck = GlobalSkillMethods.OnCrit(dmg);
         _crit = critCheck.Item1;
         return critCheck.Item2;
@@ -1222,20 +1039,16 @@ public class OmegaSlash(Skill skill) : SkillScript(skill)
 [Script("Fire Wheel")]
 public class FireWheel(Skill skill) : SkillScript(skill)
 {
-    private Sprite _target;
     private bool _crit;
 
-    public override void OnFailed(Sprite sprite) { }
+    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
 
-    public override void OnSuccess(Sprite sprite)
+    protected override void OnSuccess(Sprite sprite)
     {
         // Monster skill
     }
 
-    public override void OnCleanup()
-    {
-        _target = null;
-    }
+    public override void OnCleanup() { }
 
     public override void OnUse(Sprite sprite)
     {
@@ -1253,34 +1066,24 @@ public class FireWheel(Skill skill) : SkillScript(skill)
         {
             if (sprite is not Damageable damageable) return;
             var enemyList = damageable.GetFiveByFourRectInFront();
+
             if (enemyList.Count == 0)
             {
                 OnFailed(sprite);
                 return;
             }
 
-            foreach (var enemy in enemyList)
+            foreach (var enemy in enemyList.Where(i => sprite.Serial != i.Serial))
             {
-                _target = enemy;
-
-                if (_target == null || _target.Serial == sprite.Serial)
-                {
-                    GlobalSkillMethods.FailedAttemptBodyAnimation(sprite);
-                    OnFailed(sprite);
-                    continue;
-                }
-
-                if (_target is not Aisling aisling) continue;
+                if (enemy is not Aisling aisling) continue;
                 var dmgCalc = DamageCalc(sprite);
                 var fireCalc = FireDamageCalc(sprite);
                 aisling.ApplyElementalSkillDamage(sprite, fireCalc, ElementManager.Element.Fire, Skill);
                 GlobalSkillMethods.OnSuccessWithoutAction(aisling, sprite, Skill, dmgCalc, _crit);
-                aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                    c => c.SendAnimation(223, aisling.Position));
+                aisling.SendAnimationNearby(223, aisling.Position);
             }
 
-            damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
+            damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
         }
         catch
         {
@@ -1312,19 +1115,14 @@ public class FireWheel(Skill skill) : SkillScript(skill)
 [Script("Megaflare")]
 public class Megaflare(Skill skill) : SkillScript(skill)
 {
-    private readonly List<Sprite> _targets = [];
+    protected override void OnFailed(Sprite sprite) { }
 
-    public override void OnFailed(Sprite sprite) { }
-
-    public override void OnSuccess(Sprite sprite)
+    protected override void OnSuccess(Sprite sprite)
     {
         // Monster skill
     }
 
-    public override void OnCleanup()
-    {
-        _targets.Clear();
-    }
+    public override void OnCleanup() { }
 
     public override void OnUse(Sprite sprite)
     {
@@ -1340,35 +1138,24 @@ public class Megaflare(Skill skill) : SkillScript(skill)
 
         try
         {
-            var nearby = GetObjects<Aisling>(sprite.Map, i => i != null && i.WithinRangeOf(sprite, 6)).ToArray();
+            var nearby = GetObjects<Aisling>(sprite.Map, i => i != null && i.WithinRangeOf(sprite, 6)).ToList();
 
-            foreach (var (_, player) in nearby)
-            {
-                if (player == null) continue;
-                var rand = Generator.RandomNumPercentGen();
-                if (rand >= .60) continue;
-                _targets.Add(player);
-            }
-
-            if (_targets.Count == 0)
+            if (nearby.Count == 0)
             {
                 OnFailed(sprite);
                 return;
             }
 
-            foreach (var enemy in _targets.Where(enemy =>
-                         enemy != null && enemy.Serial != sprite.Serial))
+            foreach (var (_, enemy) in nearby.Where(enemy => enemy.Value != null && enemy.Value.Serial != sprite.Serial))
             {
-                if (enemy is not Aisling aisling) continue;
                 var dmgCalc = DamageCalc(sprite);
-                aisling.ApplyElementalSkillDamage(sprite, dmgCalc, ElementManager.Element.Fire, Skill);
-                aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                    c => c.SendAnimation(217, aisling.Position));
+                enemy.ApplyElementalSkillDamage(sprite, dmgCalc, ElementManager.Element.Fire, Skill);
+                GlobalSkillMethods.OnSuccessWithoutAction(enemy, sprite, Skill, dmgCalc, false);
+                enemy.SendAnimationNearby(217, enemy.Position);
             }
 
             if (sprite is not Damageable damageable) return;
-            damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
+            damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
         }
         catch
         {
@@ -1376,10 +1163,10 @@ public class Megaflare(Skill skill) : SkillScript(skill)
         }
     }
 
-    private long DamageCalc(Sprite sprite)
+    private static long DamageCalc(Sprite sprite)
     {
         if (sprite is not Monster damageMonster) return 0;
-        var dmg = damageMonster.Str * 65 + damageMonster.Int * 90;
+        var dmg = damageMonster.Str * 99 + damageMonster.Int * 99;
         var critCheck = GlobalSkillMethods.OnCrit(dmg);
         return critCheck.Item2;
     }
@@ -1391,9 +1178,9 @@ public class LavaArmor(Skill skill) : SkillScript(skill)
     private readonly Buff _buff1 = new buff_skill_reflect();
     private readonly Buff _buff2 = new buff_spell_reflect();
 
-    public override void OnFailed(Sprite sprite) { }
+    protected override void OnFailed(Sprite sprite) { }
 
-    public override void OnSuccess(Sprite sprite)
+    protected override void OnSuccess(Sprite sprite)
     {
         // Monster skill
     }

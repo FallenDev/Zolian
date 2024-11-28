@@ -483,7 +483,7 @@ public class Damageable : Movable
             {
                 SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendHealthBar(this));
                 if (this is not Aisling aisling) return dmg;
-                aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(92, aisling.Position));
+                aisling.SendAnimationNearby(92, aisling.Position);
             }
 
             if (fort <= Fortitude)
@@ -655,7 +655,7 @@ public class Damageable : Movable
                     {
                         aisling.Client.EnqueueBuffAppliedEvent(aisling, buff);
                         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "A flash of light surrounds you, shielding you.");
-                        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(83, null, aisling.Serial));
+                        aisling.SendAnimationNearby(83, null, aisling.Serial);
                     }
                     break;
                 }
@@ -666,7 +666,7 @@ public class Damageable : Movable
                     {
                         aisling.Client.EnqueueBuffAppliedEvent(aisling, buff);
                         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "A flash of light surrounds you, shielding you.");
-                        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(83, null, aisling.Serial));
+                        aisling.SendAnimationNearby(83, null, aisling.Serial);
                     }
                     break;
                 }
@@ -686,7 +686,7 @@ public class Damageable : Movable
                     {
                         aisling.Client.EnqueueBuffAppliedEvent(aisling, buff);
                         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Things begin to slow down around you.");
-                        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(291, null, aisling.Serial));
+                        aisling.SendAnimationNearby(291, null, aisling.Serial);
                     }
                     break;
                 }
@@ -697,7 +697,7 @@ public class Damageable : Movable
                     {
                         aisling.Client.EnqueueBuffAppliedEvent(aisling, buff);
                         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Things begin to really slow down around you.");
-                        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(291, null, aisling.Serial));
+                        aisling.SendAnimationNearby(291, null, aisling.Serial);
                     }
                     break;
                 }
@@ -753,7 +753,7 @@ public class Damageable : Movable
         var deBuff = new DebuffBleeding();
         if (!target.HasDebuff(deBuff.Name)) aisling.Client.EnqueueDebuffAppliedEvent(target, deBuff);
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "The enemy has begun to bleed.");
-        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(105, null, target.Serial));
+        aisling.SendAnimationNearby(105, null, target.Serial);
     }
 
     private static void RendProc(Aisling aisling, Sprite target)
@@ -767,7 +767,7 @@ public class Damageable : Movable
                     var deBuff = new DebuffRending();
                     if (!target.HasDebuff(deBuff.Name)) aisling.Client.EnqueueDebuffAppliedEvent(target, deBuff);
                     aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You temporarily found a weakness! Exploit it!");
-                    aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(160, null, target.Serial));
+                    aisling.SendAnimationNearby(160, null, target.Serial);
                     break;
                 }
             case 2 when rendingChance >= 97:
@@ -775,7 +775,7 @@ public class Damageable : Movable
                     var deBuff = new DebuffRending();
                     if (!target.HasDebuff(deBuff.Name)) aisling.Client.EnqueueDebuffAppliedEvent(target, deBuff);
                     aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You temporarily found a weakness! Exploit it!");
-                    aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(160, null, target.Serial));
+                    aisling.SendAnimationNearby(160, null, target.Serial);
                     break;
                 }
         }
@@ -840,7 +840,7 @@ public class Damageable : Movable
         if (!vamp) return;
         aisling.Client.SendAttributes(StatUpdateType.Vitality);
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Your weapon is hungry....life force.. - it whispers");
-        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(324, null, aisling.Serial));
+        aisling.SendAnimationNearby(324, null, aisling.Serial);
     }
 
     private static void GhostProc(Aisling aisling, Sprite target, long dmg)
@@ -902,7 +902,7 @@ public class Damageable : Movable
         if (!vamp) return;
         aisling.Client.SendAttributes(StatUpdateType.Vitality);
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Your weapon phases in and out of reality");
-        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(61, null, aisling.Serial));
+        aisling.SendAnimationNearby(61, null, aisling.Serial);
     }
 
     private static void ReapProc(Aisling aisling, Sprite target)
@@ -961,9 +961,6 @@ public class Damageable : Movable
         switch (aisling.Gust)
         {
             case 1 when gustChance >= 98:
-                _ = new Gust(aisling, target);
-                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Gust seal breaks!");
-                break;
             case 2 when gustChance >= 95:
                 _ = new Gust(aisling, target);
                 aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Gust seal breaks!");
@@ -978,9 +975,6 @@ public class Damageable : Movable
         switch (aisling.Quake)
         {
             case 1 when quakeChance >= 98:
-                _ = new Quake(aisling, target);
-                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Quake seal breaks!");
-                break;
             case 2 when quakeChance >= 95:
                 _ = new Quake(aisling, target);
                 aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Quake seal breaks!");
@@ -995,9 +989,6 @@ public class Damageable : Movable
         switch (aisling.Rain)
         {
             case 1 when rainChance >= 98:
-                _ = new Rain(aisling, target);
-                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Rain seal breaks!");
-                break;
             case 2 when rainChance >= 95:
                 _ = new Rain(aisling, target);
                 aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Rain seal breaks!");
@@ -1013,9 +1004,6 @@ public class Damageable : Movable
         switch (aisling.Flame)
         {
             case 1 when flameChance >= 98:
-                _ = new Flame(aisling, target);
-                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Flame seal breaks!");
-                break;
             case 2 when flameChance >= 95:
                 _ = new Flame(aisling, target);
                 aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Flame seal breaks!");
@@ -1029,9 +1017,6 @@ public class Damageable : Movable
         switch (aisling.Dusk)
         {
             case 1 when duskChance >= 98:
-                _ = new Dusk(aisling, target);
-                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Dusk seal breaks!");
-                break;
             case 2 when duskChance >= 95:
                 _ = new Dusk(aisling, target);
                 aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Dusk seal breaks!");
@@ -1046,9 +1031,6 @@ public class Damageable : Movable
         switch (aisling.Dawn)
         {
             case 1 when dawnChance >= 98:
-                _ = new Dawn(aisling, target);
-                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Dawn seal breaks!");
-                break;
             case 2 when dawnChance >= 95:
                 _ = new Dawn(aisling, target);
                 aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Dawn seal breaks!");
@@ -1223,7 +1205,7 @@ public class Damageable : Movable
         }
 
         var convDmg = (int)dmg;
-        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendAnimation(163, damageDealingSprite.Position));
+        aisling.SendAnimationNearby(163, damageDealingSprite.Position);
         damageDealingSprite.CurrentHp -= convDmg;
     }
 

@@ -98,7 +98,7 @@ public class LearningPredicate
         {
             player.Client.CloseDialog();
             player.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Hmm, you're not ready yet.");
-            player.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(94, null, player.Serial));
+            player.SendAnimationNearby(94, null, player.Serial);
 
             ServerSetup.EventsLogger(ex.Message, Microsoft.Extensions.Logging.LogLevel.Error);
             ServerSetup.EventsLogger(ex.StackTrace, Microsoft.Extensions.Logging.LogLevel.Error);
@@ -109,7 +109,7 @@ public class LearningPredicate
 
         var ready = CheckPredicates(callbackMsg, result);
         {
-            if (ready) player.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(94, null, player.Serial));
+            if (ready) player.SendAnimationNearby(94, null, player.Serial);
         }
 
         return ready;
