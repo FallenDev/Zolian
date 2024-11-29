@@ -1,6 +1,7 @@
 ﻿using Darkages.Common;
 using Darkages.Enums;
 using Darkages.GameScripts.Affects;
+using Darkages.GameScripts.Spells;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Sprites.Entity;
@@ -240,6 +241,43 @@ public class Potion(Item item) : ItemScript(item)
                                 client.SendServerMessage(ServerMessageType.OrangeBar1, "Delicious Fungi! 15% HP, 10% MP.");
                             }
                             break;
+                        case "Whole Holiday Turkey":
+                            {
+                                aisling.ReviveInFront();
+                                client.Aisling.CurrentHp = client.Aisling.MaximumHp;
+                                client.Aisling.CurrentMp = client.Aisling.MaximumMp;
+                                client.SendServerMessage(ServerMessageType.OrangeBar1, "A cure all for holiday blues!  Revive, Full Hp/Mp, Dia Aite");
+                                var buff = new buff_DiaAite();
+                                client.EnqueueBuffAppliedEvent(client.Aisling, buff);
+                            }
+                            break;
+                        case "Hamper of Treats":
+                            {
+                                client.Aisling.CurrentHp = client.Aisling.MaximumHp;
+                                client.Aisling.CurrentMp = client.Aisling.MaximumMp;
+                                client.SendServerMessage(ServerMessageType.OrangeBar1, "I'm so stuffed!  Full Hp/Mp & Ard Fas Nadur");
+
+                                if (client.Aisling.HasBuff("Ard Fas Nadur"))
+                                {
+                                    return;
+                                }
+
+                                if (client.Aisling.HasBuff("Mor Fas Nadur"))
+                                {
+                                    return;
+                                }
+
+                                if (client.Aisling.HasBuff("Fas Nadur") || client.Aisling.HasBuff("Beag Fas Nadur"))
+                                {
+                                    return;
+                                }
+                                
+                                var buff = new BuffArdFasNadur();
+                                buff.OnApplied(client.Aisling, buff);
+                                client.Aisling.SendAnimationNearby(67, null, client.Aisling.Serial);
+                                client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(20, false));
+                            }
+                            break;
 
                         #endregion
 
@@ -305,6 +343,25 @@ public class Potion(Item item) : ItemScript(item)
                                 {
                                     var buff = new buff_drunkenFist();
                                     buff.OnApplied(aisling, buff);
+                                }
+                            }
+                            break;
+                        case "Holiday Sake":
+                            {
+                                client.SendServerMessage(ServerMessageType.OrangeBar1, "So delicious! Hic..!  Ao Sith");
+
+                                foreach (var debuff in aisling.Debuffs.Values)
+                                {
+                                    if (debuff.Affliction) continue;
+                                    if (debuff.Name is "Skulled") continue;
+                                    debuff.OnEnded(aisling, debuff);
+                                }
+
+                                foreach (var buff in aisling.Buffs.Values)
+                                {
+                                    if (buff.Affliction) continue;
+                                    if (buff.Name is "Double XP" or "Triple XP" or "Dia Haste") continue;
+                                    buff.OnEnded(aisling, buff);
                                 }
                             }
                             break;

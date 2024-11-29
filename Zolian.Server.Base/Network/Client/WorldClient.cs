@@ -1414,31 +1414,47 @@ public class WorldClient : WorldClientBase, IWorldClient
     /// </summary>
     public void SendAnimation(ushort targetEffect, Position position = null, uint targetSerial = 0, ushort speed = 100, ushort casterEffect = 0, uint casterSerial = 0)
     {
-        Point? point;
-
-        if (position is null)
-            point = null;
-        else
-            point = new Point(position.X, position.Y);
-
-        // If no positions and no sprite, exit
-        if (position is null && targetSerial == 0 && casterSerial == 0) return;
-        // If target serial is declared, but target isn't in view, exit
-        if (targetSerial != 0 && !Aisling.SpritesInView.TryGetValue(targetSerial, out _)) return;
-        // If caster serial is declared, but caster isn't in view, exit
-        if (casterSerial != 0 && Aisling.Serial != casterSerial && !Aisling.SpritesInView.TryGetValue(casterSerial, out _)) return;
-
-        var args = new AnimationArgs
+        try
         {
-            AnimationSpeed = speed,
-            SourceAnimation = casterEffect,
-            SourceId = casterSerial,
-            TargetAnimation = targetEffect,
-            TargetId = targetSerial,
-            TargetPoint = point
-        };
+            Point? point;
 
-        Send(args);
+            if (position is null)
+                point = null;
+            else
+                point = new Point(position.X, position.Y);
+
+            var spritesInViewAndMe = new ConcurrentDictionary<uint, Sprite>();
+            foreach (var (key, value) in Aisling.SpritesInView)
+            {
+                spritesInViewAndMe.TryAdd(key, value);
+            }
+
+            spritesInViewAndMe.TryAdd(Aisling.Serial, Aisling);
+
+            // If no positions and no sprite, exit
+            if (position is null && targetSerial == 0 && casterSerial == 0) return;
+            // If target serial is declared, but target isn't in view, exit
+            if (targetSerial != 0 && !spritesInViewAndMe.TryGetValue(targetSerial, out _)) return;
+            // If caster serial is declared, but caster isn't in view, exit
+            if (casterSerial != 0 && Aisling.Serial != casterSerial && !spritesInViewAndMe.TryGetValue(casterSerial, out _)) return;
+
+            var args = new AnimationArgs
+            {
+                AnimationSpeed = speed,
+                SourceAnimation = casterEffect,
+                SourceId = casterSerial,
+                TargetAnimation = targetEffect,
+                TargetId = targetSerial,
+                TargetPoint = point
+            };
+
+            Send(args);
+        }
+        catch
+        {
+            ServerSetup.EventsLogger($"Issue in SendAnimation called from {new StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}");
+            SentrySdk.CaptureMessage($"Issue with SendAnimation called from {new StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
+        }
     }
 
     /// <summary>
@@ -4057,7 +4073,7 @@ public class WorldClient : WorldClientBase, IWorldClient
     #endregion
 
     #region Events & Experience
-    
+
     public void EnqueueExperienceEvent(Aisling player, long exp, bool hunting) => _expQueue.TryAdd(EphemeralRandomIdGenerator<uint>.Shared.NextId, new ExperienceEvent(player, exp, hunting));
     public void EnqueueAbilityEvent(Aisling player, int exp, bool hunting) => _apQueue.TryAdd(EphemeralRandomIdGenerator<uint>.Shared.NextId, new AbilityEvent(player, exp, hunting));
     public void EnqueueDebuffAppliedEvent(Sprite affected, Debuff debuff) => _debuffApplyQueue.TryAdd(EphemeralRandomIdGenerator<uint>.Shared.NextId, new DebuffEvent(affected, debuff));

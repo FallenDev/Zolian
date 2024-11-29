@@ -111,8 +111,12 @@ public class SpriteCollection<T> : ConcurrentDictionary<long, T> where T : Sprit
         }
 
         var deleted = _values.TryRemove(obj.Serial, out _);
-        if (!deleted)
-            ServerSetup.EventsLogger($"Object Service could not delete sprite {obj.Serial}");
+        if (deleted) return;
+
+        _values.TryGetValue(obj.Serial, out var objToDelete);
+        if (objToDelete == null) return;
+        ServerSetup.EventsLogger($"Object Service could not delete sprite {obj.Serial} attempting to delete again.");
+        _values.TryRemove(objToDelete.Serial, out _);
     }
 
     [CanBeNull] public T Query(Predicate<T> predicate) => _values.Values.FirstOrDefault(item => predicate(item));

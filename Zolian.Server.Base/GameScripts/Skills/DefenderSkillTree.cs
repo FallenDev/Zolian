@@ -506,7 +506,7 @@ public class Beag_Suain_Ia_Gar(Skill skill) : SkillScript(skill)
             {
                 var debuff = new DebuffBeagsuaingar();
                 var chance = Generator.RandomNumPercentGen();
-                if (chance >= 0.8)
+                if (chance <= 0.85)
                     GlobalSkillMethods.ApplyPhysicalDebuff(damageDealer, debuff, target, Skill);
             }
         }
@@ -894,7 +894,7 @@ public class BlessedShield(Skill skill) : SkillScript(skill)
     protected override void OnSuccess(Sprite sprite)
     {
         if (sprite is not Aisling damageable) return;
-        damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(295, null, damageable.Serial));
+        damageable.SendAnimationNearby(295, null, damageable.Serial);
         damageable.BlessedShield = true;
     }
 

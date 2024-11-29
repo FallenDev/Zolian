@@ -44,29 +44,6 @@ public class Shadowfade(Skill skill) : SkillScript(skill)
     }
 
     public override void OnCleanup() { }
-
-    public override void OnUse(Sprite sprite)
-    {
-        if (!Skill.CanUse()) return;
-
-        if (sprite is Aisling aisling)
-        {
-            _success = GlobalSkillMethods.OnUse(aisling, Skill);
-
-            if (_success)
-            {
-                OnSuccess(aisling);
-            }
-            else
-            {
-                OnFailed(aisling);
-            }
-        }
-        else
-        {
-            OnSuccess(sprite);
-        }
-    }
 }
 
 // Wood Elf
@@ -75,7 +52,6 @@ public class Shadowfade(Skill skill) : SkillScript(skill)
 public class Archery(Skill skill) : SkillScript(skill)
 {
     private bool _crit;
-    private bool _success;
     private AnimationArgs _animationArgs;
 
     protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
@@ -132,8 +108,6 @@ public class Archery(Skill skill) : SkillScript(skill)
                     };
                 }
 
-
-
                 GlobalSkillMethods.OnSuccessWithoutAction(i, sprite, Skill, dmgCalc, _crit);
                 damageDealer.SendAnimationNearby(_animationArgs.TargetAnimation, null, _animationArgs.TargetId ?? 0, _animationArgs.AnimationSpeed, _animationArgs.SourceAnimation, _animationArgs.SourceId ?? 0);
             }
@@ -151,6 +125,8 @@ public class Archery(Skill skill) : SkillScript(skill)
 
     public override void OnUse(Sprite sprite)
     {
+        if (!Skill.CanUse()) return;
+
         if (sprite is Aisling aisling)
         {
             var client = aisling.Client;
@@ -161,9 +137,9 @@ public class Archery(Skill skill) : SkillScript(skill)
                 return;
             }
 
-            _success = GlobalSkillMethods.OnUse(aisling, Skill);
+            var success = GlobalSkillMethods.OnUse(aisling, Skill);
 
-            if (_success)
+            if (success)
             {
                 OnSuccess(aisling);
             }
@@ -283,7 +259,6 @@ public class Slash(Skill skill) : SkillScript(skill)
 {
     private Sprite _target;
     private bool _crit;
-    private bool _success;
 
     protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, _target);
 
@@ -331,29 +306,6 @@ public class Slash(Skill skill) : SkillScript(skill)
         _target = null;
     }
 
-    public override void OnUse(Sprite sprite)
-    {
-        if (!Skill.CanUse()) return;
-
-        if (sprite is Aisling aisling)
-        {
-            _success = GlobalSkillMethods.OnUse(aisling, Skill);
-
-            if (_success)
-            {
-                OnSuccess(aisling);
-            }
-            else
-            {
-                OnFailed(aisling);
-            }
-        }
-        else
-        {
-            OnSuccess(sprite);
-        }
-    }
-
     private long DamageCalc(Sprite sprite)
     {
         _crit = false;
@@ -383,8 +335,6 @@ public class Slash(Skill skill) : SkillScript(skill)
 [Script("Adrenaline")]
 public class Adrenaline(Skill skill) : SkillScript(skill)
 {
-    private bool _success;
-
     protected override void OnFailed(Sprite sprite)
     {
         if (sprite is not Aisling damageDealingAisling) return;
@@ -417,33 +367,11 @@ public class Adrenaline(Skill skill) : SkillScript(skill)
 
         var buff = new buff_DexUp();
         GlobalSkillMethods.ApplyPhysicalBuff(damageDealer, buff);
-        damageDealer.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
+        damageDealer.SendTargetedClientMethod(PlayerScope.NearbyAislings,
+            c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
     }
 
     public override void OnCleanup() { }
-
-    public override void OnUse(Sprite sprite)
-    {
-        if (!Skill.CanUse()) return;
-
-        if (sprite is Aisling aisling)
-        {
-            _success = GlobalSkillMethods.OnUse(aisling, Skill);
-
-            if (_success)
-            {
-                OnSuccess(aisling);
-            }
-            else
-            {
-                OnFailed(aisling);
-            }
-        }
-        else
-        {
-            OnSuccess(sprite);
-        }
-    }
 }
 
 // Half-Elf

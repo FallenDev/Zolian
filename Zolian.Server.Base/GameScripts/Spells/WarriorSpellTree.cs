@@ -1,7 +1,6 @@
 ﻿using Darkages.GameScripts.Affects;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;
-using Darkages.Sprites.Entity;
 using Darkages.Types;
 
 namespace Darkages.GameScripts.Spells;
@@ -35,7 +34,7 @@ public class Asgall(Spell spell) : SpellScript(spell)
             return;
         }
 
-        GlobalSpellMethods.EnhancementOnUse(sprite, sprite is Monster ? sprite : target, Spell, _buff);
+        GlobalSpellMethods.EnhancementOnUse(sprite, sprite, Spell, _buff);
     }
 }
 
@@ -66,7 +65,7 @@ public class Defensive_Stance(Spell spell) : SpellScript(spell)
             return;
         }
 
-        GlobalSpellMethods.EnhancementOnUse(sprite, sprite is Monster ? sprite : target, Spell, _buff);
+        GlobalSpellMethods.EnhancementOnUse(sprite, sprite, Spell, _buff);
     }
 }
 
@@ -99,6 +98,6 @@ public class Perfect_Defense(Spell spell) : SpellScript(spell)
             return;
         }
 
-        GlobalSpellMethods.EnhancementOnUse(sprite, sprite is Monster ? sprite : target, Spell, _buff);
+        GlobalSpellMethods.EnhancementOnUse(sprite, sprite, Spell, _buff);
     }
 }

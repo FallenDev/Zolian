@@ -481,7 +481,7 @@ public abstract class DatabaseLoad
             [
                 "Generic", "Mileth", "Abel", "Piet", "Rucesion", "Suomi", "Oren", "Rionnag", "Undine", "Tagor", "Nobis",
                 "Loures", "Tutorial", "Arena", "Mehadi", "TempleofLight", "TempleofVoid", "WesternWoodlands", "NorthPole",
-                "Lynith", "CthonicRemains", "Gobleregan"
+                "Lynith", "CthonicRemains", "Gobleregan", "Evermore"
             ];
 
             foreach (var table in dbTables)

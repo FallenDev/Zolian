@@ -381,7 +381,7 @@ public class Corpse_Burst(Spell spell) : SpellScript(spell)
 
     private static long DamageCalc(Aisling summoner)
     {
-        return (long)(summoner.CurrentMp * summoner.AbpLevel * 0.01) * summoner.Int;
+        return (long)(summoner.CurrentMp * summoner.AbpLevel * 0.01) * (int)(summoner.Dmg * 0.10);
     }
 }
 
@@ -389,8 +389,6 @@ public class Corpse_Burst(Spell spell) : SpellScript(spell)
 [Script("Command Undead")]
 public class Command_Undead(Spell spell) : SpellScript(spell)
 {
-    private readonly GlobalSpellMethods _spellMethod = new();
-
     public override void OnFailed(Sprite sprite, Sprite target)
     {
         if (sprite is not Aisling aisling) return;
