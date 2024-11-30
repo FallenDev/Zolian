@@ -197,7 +197,7 @@ public class Splash(Skill skill) : SkillScript(skill)
         {
             aisling.ActionUsed = "Splash";
             GlobalSkillMethods.Train(aisling.Client, Skill);
-            aisling.ThreatMeter += (uint)(aisling.Str + aisling.Dex  * aisling.Dmg * aisling.Luck * 100);
+            aisling.ThreatMeter += (uint)(aisling.Str + aisling.Dex * aisling.Dmg * aisling.Luck * 100);
         }
 
         var action = new BodyAnimationArgs
@@ -680,16 +680,14 @@ public class Appraise(Skill skill) : SkillScript(skill)
 [Script("Fire Breath")]
 public class Fire_Breath(Skill skill) : SkillScript(skill)
 {
-    private Sprite _target;
     private bool _crit;
-    private bool _success;
 
-    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, _target);
+    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
 
     protected override void OnSuccess(Sprite sprite)
     {
-        if (sprite is not Aisling aisling) return;
-        aisling.ActionUsed = "Fire Breath";
+        if (sprite is Aisling aisling)
+            aisling.ActionUsed = "Fire Breath";
 
         var action = new BodyAnimationArgs
         {
@@ -699,60 +697,59 @@ public class Fire_Breath(Skill skill) : SkillScript(skill)
             SourceId = sprite.Serial
         };
 
-        if (aisling.CurrentMp - 300 > 0)
+        if (sprite.CurrentMp - 300 > 0)
         {
-            aisling.CurrentMp -= 300;
+            sprite.CurrentMp -= 300;
         }
         else
         {
-            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
-            GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
-            OnFailed(aisling);
+            if (sprite is Aisling manaOwed)
+                manaOwed.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
+            OnFailed(sprite);
             return;
         }
 
         try
         {
-            var enemy = aisling.GetInFrontToSide();
+            if (sprite is not Damageable damageDealer) return;
+            var enemy = damageDealer.GetInFrontToSide();
 
             if (enemy.Count == 0)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
-                OnFailed(aisling);
-                GlobalSkillMethods.Train(aisling.Client, Skill);
+                OnFailed(sprite);
                 return;
             }
 
             foreach (var entity in enemy.Where(entity => entity is not null))
             {
-                _target = entity;
-                if (_target is not Damageable damageable) continue;
+                var target = entity;
+                if (target is not Damageable damageable) continue;
 
-                if (_target.SpellReflect)
+                if (damageable.SpellReflect)
                 {
-                    aisling.SendAnimationNearby(184, null, _target.Serial);
-                    aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your breath has been repelled");
-                    if (_target is Aisling targetAisling)
-                        targetAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1,
-                            $"You repelled {Skill.Template.Name}.");
+                    damageDealer.SendAnimationNearby(184, null, damageable.Serial);
+                    if (damageDealer is Aisling spellReflected)
+                        spellReflected.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your breath has been repelled");
+                    if (damageable is Aisling targetAisling)
+                        targetAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You repelled {Skill.Template.Name}.");
 
-                    _target = Spell.SpellReflect(_target, sprite);
+                    target = Spell.SpellReflect(damageable, sprite);
                 }
 
-                if (_target.SpellNegate)
+                if (damageable.SpellNegate)
                 {
-                    aisling.SendAnimationNearby(64, null, _target.Serial);
-                    aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your breath has been negated");
-                    if (_target is Aisling targetAisling)
-                        targetAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1,
-                            $"You negated {Skill.Template.Name}.");
+                    damageDealer.SendAnimationNearby(64, null, damageable.Serial);
+                    if (damageDealer is Aisling spellReflected)
+                        spellReflected.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your breath has been negated");
+                    if (damageable is Aisling targetAisling)
+                        targetAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You negated {Skill.Template.Name}.");
 
                     continue;
                 }
 
-                var dmgCalc = DamageCalc(sprite);
-                damageable.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Fire, Skill);
-                GlobalSkillMethods.OnSuccess(_target, sprite, Skill, 0, false, action);
+                var dmgCalc = DamageCalc(sprite, target);
+                damageable.ApplyElementalSkillDamage(damageDealer, dmgCalc, ElementManager.Element.Fire, Skill);
+                GlobalSkillMethods.OnSuccess(target, damageDealer, Skill, 0, _crit, action);
             }
         }
         catch
@@ -762,92 +759,9 @@ public class Fire_Breath(Skill skill) : SkillScript(skill)
         }
     }
 
-    public override void OnCleanup()
-    {
-        _target = null;
-    }
+    public override void OnCleanup() { }
 
-    public override void OnUse(Sprite sprite)
-    {
-        if (!Skill.CanUseZeroLineAbility) return;
-
-        if (sprite is Aisling aisling)
-        {
-            _success = GlobalSkillMethods.OnUse(aisling, Skill);
-
-            if (_success)
-            {
-                OnSuccess(aisling);
-            }
-            else
-            {
-                OnFailed(aisling);
-            }
-        }
-        else
-        {
-            try
-            {
-                if (sprite is not Damageable identifiable) return;
-                var enemy = identifiable.GetInFrontToSide();
-
-                var action = new BodyAnimationArgs
-                {
-                    AnimationSpeed = 30,
-                    BodyAnimation = BodyAnimation.Assail,
-                    Sound = null,
-                    SourceId = sprite.Serial
-                };
-
-                if (enemy.Count == 0) return;
-
-                foreach (var i in enemy.Where(i => i != null && sprite.Serial != i.Serial))
-                {
-                    _target = i;
-                    if (_target is not Damageable damageable) continue;
-
-                    if (_target.SpellReflect)
-                    {
-                        damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                            c => c.SendAnimation(184, null, _target.Serial));
-                        if (_target is Aisling targetAisling)
-                            targetAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1,
-                                $"You repelled {Skill.Template.Name}.");
-
-                        _target = Spell.SpellReflect(_target, sprite);
-                    }
-
-                    if (_target.SpellNegate)
-                    {
-                        damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                            c => c.SendAnimation(64, null, _target.Serial));
-                        if (_target is Aisling targetAisling)
-                            targetAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1,
-                                $"You negated {Skill.Template.Name}.");
-
-                        continue;
-                    }
-
-                    var dmgCalc = DamageCalc(sprite);
-                    damageable.ApplyElementalSkillDamage(sprite, dmgCalc, ElementManager.Element.Fire, Skill);
-                    damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                        c => c.SendAnimation(Skill.Template.TargetAnimation, null, _target.Serial, 170));
-                    damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                        c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
-
-                    if (!_crit) return;
-                    damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                        c => c.SendAnimation(387, null, sprite.Serial));
-                }
-            }
-            catch
-            {
-                // ignored
-            }
-        }
-    }
-
-    private long DamageCalc(Sprite sprite)
+    private long DamageCalc(Sprite sprite, Sprite target)
     {
         _crit = false;
         long dmg;
@@ -855,7 +769,7 @@ public class Fire_Breath(Skill skill) : SkillScript(skill)
         {
             var client = damageDealingAisling.Client;
             var imp = 10 + Skill.Level;
-            dmg = client.Aisling.Str * 4 + client.Aisling.Con * 3 / damageDealingAisling.Position.DistanceFrom(_target.Position);
+            dmg = client.Aisling.Str * 4 + client.Aisling.Con * 3 / damageDealingAisling.Position.DistanceFrom(target.Position);
             dmg += dmg * imp / 100;
         }
         else
@@ -876,16 +790,14 @@ public class Fire_Breath(Skill skill) : SkillScript(skill)
 [Script("Bubble Burst")]
 public class Bubble_Burst(Skill skill) : SkillScript(skill)
 {
-    private Sprite _target;
     private bool _crit;
-    private bool _success;
 
-    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, _target);
+    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
 
     protected override void OnSuccess(Sprite sprite)
     {
-        if (sprite is not Aisling aisling) return;
-        aisling.ActionUsed = "Bubble Burst";
+        if (sprite is Aisling aisling)
+            aisling.ActionUsed = "Bubble Burst";
 
         var action = new BodyAnimationArgs
         {
@@ -895,62 +807,59 @@ public class Bubble_Burst(Skill skill) : SkillScript(skill)
             SourceId = sprite.Serial
         };
 
-        if (aisling.CurrentMp - 300 > 0)
+        if (sprite.CurrentMp - 300 > 0)
         {
-            aisling.CurrentMp -= 300;
+            sprite.CurrentMp -= 300;
         }
         else
         {
-            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
-            GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
-            OnFailed(aisling);
+            if (sprite is Aisling manaOwed)
+                manaOwed.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
+            OnFailed(sprite);
             return;
         }
 
         try
         {
-            var enemy = aisling.GetInFrontToSide();
+            if (sprite is not Damageable damageDealer) return;
+            var enemy = damageDealer.GetInFrontToSide();
 
             if (enemy.Count == 0)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
-                OnFailed(aisling);
-                GlobalSkillMethods.Train(aisling.Client, Skill);
+                OnFailed(sprite);
                 return;
             }
 
             foreach (var entity in enemy.Where(entity => entity is not null))
             {
-                _target = entity;
-                if (_target is not Damageable damageable) continue;
+                var target = entity;
+                if (target is not Damageable damageable) continue;
 
-                if (_target.SpellReflect)
+                if (damageable.SpellReflect)
                 {
-                    aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                        c => c.SendAnimation(184, null, _target.Serial));
-                    aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your breath has been repelled");
-                    if (_target is Aisling targetAisling)
-                        targetAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1,
-                            $"You repelled {Skill.Template.Name}.");
+                    damageDealer.SendAnimationNearby(184, null, damageable.Serial);
+                    if (damageDealer is Aisling spellReflected)
+                        spellReflected.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your breath has been repelled");
+                    if (damageable is Aisling targetAisling)
+                        targetAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You repelled {Skill.Template.Name}.");
 
-                    _target = Spell.SpellReflect(_target, sprite);
+                    target = Spell.SpellReflect(damageable, sprite);
                 }
 
-                if (_target.SpellNegate)
+                if (damageable.SpellNegate)
                 {
-                    aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                        c => c.SendAnimation(64, null, _target.Serial));
-                    aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your breath has been negated");
-                    if (_target is Aisling targetAisling)
-                        targetAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1,
-                            $"You negated {Skill.Template.Name}.");
+                    damageDealer.SendAnimationNearby(64, null, damageable.Serial);
+                    if (damageDealer is Aisling spellReflected)
+                        spellReflected.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your breath has been negated");
+                    if (damageable is Aisling targetAisling)
+                        targetAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You negated {Skill.Template.Name}.");
 
                     continue;
                 }
 
-                var dmgCalc = DamageCalc(sprite);
-                damageable.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Water, Skill);
-                GlobalSkillMethods.OnSuccess(_target, sprite, Skill, 0, false, action);
+                var dmgCalc = DamageCalc(sprite, target);
+                damageable.ApplyElementalSkillDamage(damageDealer, dmgCalc, ElementManager.Element.Water, Skill);
+                GlobalSkillMethods.OnSuccess(target, damageDealer, Skill, 0, _crit, action);
             }
         }
         catch
@@ -960,92 +869,9 @@ public class Bubble_Burst(Skill skill) : SkillScript(skill)
         }
     }
 
-    public override void OnCleanup()
-    {
-        _target = null;
-    }
+    public override void OnCleanup() { }
 
-    public override void OnUse(Sprite sprite)
-    {
-        if (!Skill.CanUseZeroLineAbility) return;
-
-        if (sprite is Aisling aisling)
-        {
-            _success = GlobalSkillMethods.OnUse(aisling, Skill);
-
-            if (_success)
-            {
-                OnSuccess(aisling);
-            }
-            else
-            {
-                OnFailed(aisling);
-            }
-        }
-        else
-        {
-            try
-            {
-                if (sprite is not Damageable identifiable) return;
-                var enemy = identifiable.GetInFrontToSide();
-
-                var action = new BodyAnimationArgs
-                {
-                    AnimationSpeed = 30,
-                    BodyAnimation = BodyAnimation.Assail,
-                    Sound = null,
-                    SourceId = sprite.Serial
-                };
-
-                if (enemy.Count == 0) return;
-
-                foreach (var i in enemy.Where(i => i != null && sprite.Serial != i.Serial))
-                {
-                    _target = i;
-                    if (_target is not Damageable damageable) continue;
-
-                    if (_target.SpellReflect)
-                    {
-                        damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                            c => c.SendAnimation(184, null, _target.Serial));
-                        if (_target is Aisling targetAisling)
-                            targetAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1,
-                                $"You repelled {Skill.Template.Name}.");
-
-                        _target = Spell.SpellReflect(_target, sprite);
-                    }
-
-                    if (_target.SpellNegate)
-                    {
-                        damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                            c => c.SendAnimation(64, null, _target.Serial));
-                        if (_target is Aisling targetAisling)
-                            targetAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1,
-                                $"You negated {Skill.Template.Name}.");
-
-                        continue;
-                    }
-
-                    var dmgCalc = DamageCalc(sprite);
-                    damageable.ApplyElementalSkillDamage(sprite, dmgCalc, ElementManager.Element.Water, Skill);
-                    damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                        c => c.SendAnimation(Skill.Template.TargetAnimation, null, _target.Serial, 170));
-                    damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                        c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
-
-                    if (!_crit) return;
-                    damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                        c => c.SendAnimation(387, null, sprite.Serial));
-                }
-            }
-            catch
-            {
-                // ignored
-            }
-        }
-    }
-
-    private long DamageCalc(Sprite sprite)
+    private long DamageCalc(Sprite sprite, Sprite target)
     {
         _crit = false;
         long dmg;
@@ -1053,7 +879,7 @@ public class Bubble_Burst(Skill skill) : SkillScript(skill)
         {
             var client = damageDealingAisling.Client;
             var imp = 10 + Skill.Level;
-            dmg = client.Aisling.Str * 3 + client.Aisling.Con * 4 / damageDealingAisling.Position.DistanceFrom(_target.Position);
+            dmg = client.Aisling.Str * 3 + client.Aisling.Con * 4 / damageDealingAisling.Position.DistanceFrom(target.Position);
             dmg += dmg * imp / 100;
         }
         else
@@ -1074,17 +900,15 @@ public class Bubble_Burst(Skill skill) : SkillScript(skill)
 [Script("Icy Blast")]
 public class Icy_Blast(Skill skill) : SkillScript(skill)
 {
-    private Sprite _target;
     private bool _crit;
-    private bool _success;
     private DebuffFrozen _debuff;
 
-    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, _target);
+    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
 
     protected override void OnSuccess(Sprite sprite)
     {
-        if (sprite is not Aisling aisling) return;
-        aisling.ActionUsed = "Icy Blast";
+        if (sprite is Aisling aisling)
+            aisling.ActionUsed = "Icy Blast";
 
         var action = new BodyAnimationArgs
         {
@@ -1094,67 +918,63 @@ public class Icy_Blast(Skill skill) : SkillScript(skill)
             SourceId = sprite.Serial
         };
 
-        if (aisling.CurrentMp - 300 > 0)
+        if (sprite.CurrentMp - 300 > 0)
         {
-            aisling.CurrentMp -= 300;
+            sprite.CurrentMp -= 300;
         }
         else
         {
-            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
-            GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
-            OnFailed(aisling);
+            if (sprite is Aisling manaOwed)
+                manaOwed.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
+            OnFailed(sprite);
             return;
         }
 
         try
         {
-            var enemy = aisling.GetInFrontToSide();
+            if (sprite is not Damageable damageDealer) return;
+            var enemy = damageDealer.GetInFrontToSide();
 
             if (enemy.Count == 0)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
-                OnFailed(aisling);
-                GlobalSkillMethods.Train(aisling.Client, Skill);
+                OnFailed(sprite);
                 return;
             }
 
             foreach (var entity in enemy.Where(entity => entity is not null))
             {
-                _target = entity;
-                if (_target is not Damageable damageable) continue;
+                var target = entity;
+                if (target is not Damageable damageable) continue;
 
-                if (_target.SpellReflect)
+                if (damageable.SpellReflect)
                 {
-                    aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                        c => c.SendAnimation(184, null, _target.Serial));
-                    aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your breath has been repelled");
-                    if (_target is Aisling targetAisling)
-                        targetAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1,
-                            $"You repelled {Skill.Template.Name}.");
+                    damageDealer.SendAnimationNearby(184, null, damageable.Serial);
+                    if (damageDealer is Aisling spellReflected)
+                        spellReflected.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your breath has been repelled");
+                    if (damageable is Aisling targetAisling)
+                        targetAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You repelled {Skill.Template.Name}.");
 
-                    _target = Spell.SpellReflect(_target, sprite);
+                    target = Spell.SpellReflect(damageable, sprite);
                 }
 
-                if (_target.SpellNegate)
+                if (damageable.SpellNegate)
                 {
-                    aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                        c => c.SendAnimation(64, null, _target.Serial));
-                    aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your breath has been negated");
-                    if (_target is Aisling targetAisling)
-                        targetAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1,
-                            $"You negated {Skill.Template.Name}.");
+                    damageDealer.SendAnimationNearby(64, null, damageable.Serial);
+                    if (damageDealer is Aisling spellReflected)
+                        spellReflected.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your breath has been negated");
+                    if (damageable is Aisling targetAisling)
+                        targetAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You negated {Skill.Template.Name}.");
 
                     continue;
                 }
 
-                if (_target is Aisling target2Aisling &&
-                    !target2Aisling.Map.Flags.MapFlagIsSet(MapFlags.PlayerKill)) continue;
+                if (target is Aisling && !damageable.Map.Flags.MapFlagIsSet(MapFlags.PlayerKill)) continue;
 
-                var dmgCalc = DamageCalc(sprite);
+                var dmgCalc = DamageCalc(sprite, target);
                 _debuff = new DebuffFrozen();
-                damageable.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Wind, Skill);
-                aisling.Client.EnqueueDebuffAppliedEvent(_target, _debuff);
-                GlobalSkillMethods.OnSuccess(_target, sprite, Skill, 0, false, action);
+                GlobalSkillMethods.ApplyPhysicalDebuff(damageDealer, _debuff, target, Skill);
+                damageable.ApplyElementalSkillDamage(damageDealer, dmgCalc, ElementManager.Element.Wind, Skill);
+                GlobalSkillMethods.OnSuccess(target, damageDealer, Skill, 0, _crit, action);
             }
         }
         catch
@@ -1164,112 +984,16 @@ public class Icy_Blast(Skill skill) : SkillScript(skill)
         }
     }
 
-    public override void OnCleanup()
-    {
-        _target = null;
-    }
+    public override void OnCleanup() { }
 
-    public override void OnUse(Sprite sprite)
-    {
-        if (!Skill.CanUseZeroLineAbility) return;
-
-        if (sprite is Aisling aisling)
-        {
-            _success = GlobalSkillMethods.OnUse(aisling, Skill);
-
-            if (_success)
-            {
-                OnSuccess(aisling);
-            }
-            else
-            {
-                OnFailed(aisling);
-            }
-        }
-        else
-        {
-            try
-            {
-                if (sprite is not Damageable identifiable) return;
-                var enemy = identifiable.GetInFrontToSide();
-
-                var action = new BodyAnimationArgs
-                {
-                    AnimationSpeed = 30,
-                    BodyAnimation = BodyAnimation.Assail,
-                    Sound = null,
-                    SourceId = sprite.Serial
-                };
-
-                if (enemy.Count == 0) return;
-
-                foreach (var i in enemy.Where(i => i != null && sprite.Serial != i.Serial))
-                {
-                    _target = i;
-                    if (_target is not Damageable damageable) continue;
-
-                    if (_target.SpellReflect)
-                    {
-                        damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                            c => c.SendAnimation(184, null, _target.Serial));
-                        if (_target is Aisling targetAisling)
-                            targetAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1,
-                                $"You repelled {Skill.Template.Name}.");
-
-                        _target = Spell.SpellReflect(_target, sprite);
-                    }
-
-                    if (_target.SpellNegate)
-                    {
-                        damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                            c => c.SendAnimation(64, null, _target.Serial));
-                        if (_target is Aisling targetAisling)
-                            targetAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1,
-                                $"You negated {Skill.Template.Name}.");
-
-                        continue;
-                    }
-
-                    var dmgCalc = DamageCalc(sprite);
-                    damageable.ApplyElementalSkillDamage(sprite, dmgCalc, ElementManager.Element.Wind, Skill);
-                    _debuff = new DebuffFrozen();
-
-                    if (_target is Aisling affected)
-                    {
-                        if (!_target.HasDebuff(_debuff.Name))
-                            affected.Client.EnqueueDebuffAppliedEvent(affected, _debuff);
-                    }
-                    else
-                    {
-                        if (!_target.HasDebuff(_debuff.Name))
-                            _debuff.OnApplied(_target, _debuff);
-                    }
-
-                    damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                        c => c.SendAnimation(Skill.Template.TargetAnimation, null, _target.Serial, 170));
-                    damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                        c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
-
-                    if (!_crit) return;
-                    damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                        c => c.SendAnimation(387, null, sprite.Serial));
-                }
-            }
-            catch
-            {
-                // ignored
-            }
-        }
-    }
-
-    private long DamageCalc(Sprite sprite)
+    private long DamageCalc(Sprite sprite, Sprite target)
     {
         _crit = false;
         long dmg;
         if (sprite is Aisling damageDealingAisling)
         {
             var client = damageDealingAisling.Client;
-            var distance = damageDealingAisling.Position.DistanceFrom(_target.Position);
+            var distance = damageDealingAisling.Position.DistanceFrom(target.Position);
             if (distance == 0) distance = 1;
             var imp = 10 + Skill.Level;
             dmg = client.Aisling.Str * 3 + client.Aisling.Wis * 4 / distance;
@@ -1293,17 +1017,16 @@ public class Icy_Blast(Skill skill) : SkillScript(skill)
 [Script("Earthly Delights")]
 public class Earthly_Delights(Skill skill) : SkillScript(skill)
 {
-    private Sprite _target;
     private bool _crit;
-    private bool _success;
 
-    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, _target);
+    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
 
     protected override void OnSuccess(Sprite sprite)
     {
-        if (sprite is not Aisling aisling) return;
-        var client = aisling.Client;
-        aisling.ActionUsed = "Earthly Delights";
+        if (sprite is Aisling aisling)
+        {
+            aisling.ActionUsed = "Earthly Delights";
+        }
 
         var action = new BodyAnimationArgs
         {
@@ -1313,43 +1036,44 @@ public class Earthly_Delights(Skill skill) : SkillScript(skill)
             SourceId = sprite.Serial
         };
 
-        if (aisling.CurrentMp - 300 > 0)
+        if (sprite.CurrentMp - 300 > 0)
         {
-            aisling.CurrentMp -= 300;
+            sprite.CurrentMp -= 300;
         }
         else
         {
-            client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
+            if (sprite is Aisling manaOwed)
+                manaOwed.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
+            OnFailed(sprite);
             return;
         }
 
         try
         {
-            var enemy = client.Aisling.GetInFrontToSide();
+            if (sprite is not Damageable damageDealer) return;
+            var enemy = damageDealer.GetInFrontToSide();
 
             if (enemy.Count == 0)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
-                OnFailed(aisling);
-                GlobalSkillMethods.Train(aisling.Client, Skill);
+                OnFailed(sprite);
                 return;
             }
 
             foreach (var entity in enemy.Where(entity => entity is not null))
             {
-                _target = entity;
-                var dmgCalc = DamageCalc(sprite);
+                var dmgCalc = DamageCalc(sprite, entity);
 
-                if (_target.MaximumHp * 0.30 < dmgCalc)
-                    dmgCalc = (long)(_target.MaximumHp * 0.30);
+                if (entity.MaximumHp * 0.30 < dmgCalc)
+                    dmgCalc = (long)(entity.MaximumHp * 0.30);
 
-                aisling.ThreatMeter += dmgCalc;
-                _target.CurrentHp += dmgCalc;
+                if (entity is Aisling entityAisling)
+                    entityAisling.ThreatMeter += dmgCalc;
+                entity.CurrentHp += dmgCalc;
 
-                if (_target.CurrentHp > _target.MaximumHp)
-                    _target.CurrentHp = _target.MaximumHp;
+                if (entity.CurrentHp > entity.MaximumHp)
+                    entity.CurrentHp = entity.MaximumHp;
 
-                GlobalSkillMethods.OnSuccess(_target, sprite, Skill, 0, false, action);
+                GlobalSkillMethods.OnSuccess(entity, damageDealer, Skill, 0, _crit, action);
             }
         }
         catch
@@ -1359,77 +1083,9 @@ public class Earthly_Delights(Skill skill) : SkillScript(skill)
         }
     }
 
-    public override void OnCleanup()
-    {
-        _target = null;
-    }
+    public override void OnCleanup() { }
 
-    public override void OnUse(Sprite sprite)
-    {
-        if (!Skill.CanUseZeroLineAbility) return;
-
-        if (sprite is Aisling aisling)
-        {
-            _success = GlobalSkillMethods.OnUse(aisling, Skill);
-
-            if (_success)
-            {
-                OnSuccess(aisling);
-            }
-            else
-            {
-                OnFailed(aisling);
-            }
-        }
-        else
-        {
-            try
-            {
-                if (sprite is not Damageable damageable) return;
-                var enemy = damageable.GetInFrontToSide();
-
-                var action = new BodyAnimationArgs
-                {
-                    AnimationSpeed = 30,
-                    BodyAnimation = BodyAnimation.Assail,
-                    Sound = null,
-                    SourceId = sprite.Serial
-                };
-
-                if (enemy.Count == 0) return;
-
-                foreach (var entity in enemy.Where(entity => entity is not null))
-                {
-                    _target = entity;
-                    var dmgCalc = DamageCalc(sprite);
-
-                    if (_target.MaximumHp * 0.30 < dmgCalc)
-                        dmgCalc = (long)(_target.MaximumHp * 0.30);
-
-                    _target.CurrentHp += dmgCalc;
-
-                    if (_target.CurrentHp > _target.MaximumHp)
-                        _target.CurrentHp = _target.MaximumHp;
-
-                    damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                        c => c.SendAnimation(Skill.Template.TargetAnimation, null, _target.Serial, 170));
-                    damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                        c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
-
-                    if (!_crit) continue;
-                    damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                        c => c.SendAnimation(387, null, sprite.Serial));
-                    _crit = false;
-                }
-            }
-            catch
-            {
-                // ignored
-            }
-        }
-    }
-
-    private long DamageCalc(Sprite sprite)
+    private long DamageCalc(Sprite sprite, Sprite target)
     {
         _crit = false;
         long dmg;
@@ -1437,7 +1093,7 @@ public class Earthly_Delights(Skill skill) : SkillScript(skill)
         {
             var client = damageDealingAisling.Client;
             var imp = 10 + Skill.Level;
-            dmg = client.Aisling.Str * 3 + client.Aisling.Con * 3 / damageDealingAisling.Position.DistanceFrom(_target.Position);
+            dmg = client.Aisling.Str * 3 + client.Aisling.Con * 3 / damageDealingAisling.Position.DistanceFrom(target.Position);
             dmg += dmg * imp / 100;
         }
         else
@@ -1458,17 +1114,14 @@ public class Earthly_Delights(Skill skill) : SkillScript(skill)
 [Script("Heavenly Gaze")]
 public class Heavenly_Gaze(Skill skill) : SkillScript(skill)
 {
-    private Sprite _target;
     private bool _crit;
-    private bool _success;
 
-    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, _target);
+    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
 
     protected override void OnSuccess(Sprite sprite)
     {
-        if (sprite is not Aisling aisling) return;
-        var client = aisling.Client;
-        aisling.ActionUsed = "Heavenly Gaze";
+        if (sprite is Aisling aisling)
+            aisling.ActionUsed = "Heavenly Gaze";
 
         var action = new BodyAnimationArgs
         {
@@ -1478,59 +1131,61 @@ public class Heavenly_Gaze(Skill skill) : SkillScript(skill)
             SourceId = sprite.Serial
         };
 
-        if (aisling.CurrentMp - 300 > 0)
+        if (sprite.CurrentMp - 300 > 0)
         {
-            aisling.CurrentMp -= 300;
+            sprite.CurrentMp -= 300;
         }
         else
         {
-            client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
+            if (sprite is Aisling manaOwed)
+                manaOwed.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
+            OnFailed(sprite);
             return;
         }
 
         try
         {
-            var enemy = client.Aisling.GetInFrontToSide();
+            if (sprite is not Damageable damageDealer) return;
+            var enemy = damageDealer.GetInFrontToSide();
 
             if (enemy.Count == 0)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
-                OnFailed(aisling);
-                GlobalSkillMethods.Train(aisling.Client, Skill);
+                OnFailed(sprite);
                 return;
             }
 
             foreach (var entity in enemy.Where(entity => entity is not null))
             {
-                _target = entity;
-                var dmgCalc = DamageCalc(sprite);
-                aisling.ThreatMeter += dmgCalc;
+                var dmgCalc = DamageCalc(sprite, entity);
 
-                if (_target.MaximumHp * 0.15 < dmgCalc)
+                if (entity is Aisling entityAisling)
+                    entityAisling.ThreatMeter += dmgCalc;
+
+                if (entity.MaximumHp * 0.15 < dmgCalc)
                 {
-                    _target.CurrentHp += (long)(_target.MaximumHp * 0.15);
+                    entity.CurrentHp += (long)(entity.MaximumHp * 0.15);
                 }
                 else
                 {
-                    _target.CurrentHp += dmgCalc;
+                    entity.CurrentHp += dmgCalc;
                 }
 
-                if (_target.MaximumMp * 0.20 < dmgCalc)
+                if (entity.MaximumMp * 0.20 < dmgCalc)
                 {
-                    _target.CurrentMp += (long)(_target.MaximumMp * 0.20);
+                    entity.CurrentMp += (long)(entity.MaximumMp * 0.20);
                 }
                 else
                 {
-                    _target.CurrentMp += dmgCalc;
+                    entity.CurrentMp += dmgCalc;
                 }
 
-                if (_target.CurrentHp > _target.MaximumHp)
-                    _target.CurrentHp = _target.MaximumHp;
+                if (entity.CurrentHp > entity.MaximumHp)
+                    entity.CurrentHp = entity.MaximumHp;
 
-                if (_target.CurrentMp > _target.MaximumMp)
-                    _target.CurrentMp = _target.MaximumMp;
+                if (entity.CurrentMp > entity.MaximumMp)
+                    entity.CurrentMp = entity.MaximumMp;
 
-                GlobalSkillMethods.OnSuccess(_target, sprite, Skill, 0, false, action);
+                GlobalSkillMethods.OnSuccess(entity, damageDealer, Skill, 0, _crit, action);
             }
         }
         catch
@@ -1540,93 +1195,9 @@ public class Heavenly_Gaze(Skill skill) : SkillScript(skill)
         }
     }
 
-    public override void OnCleanup()
-    {
-        _target = null;
-    }
+    public override void OnCleanup() { }
 
-    public override void OnUse(Sprite sprite)
-    {
-        if (!Skill.CanUseZeroLineAbility) return;
-
-        if (sprite is Aisling aisling)
-        {
-            _success = GlobalSkillMethods.OnUse(aisling, Skill);
-
-            if (_success)
-            {
-                OnSuccess(aisling);
-            }
-            else
-            {
-                OnFailed(aisling);
-            }
-        }
-        else
-        {
-            try
-            {
-                if (sprite is not Damageable damageable) return;
-                var enemy = damageable.GetInFrontToSide();
-
-                var action = new BodyAnimationArgs
-                {
-                    AnimationSpeed = 30,
-                    BodyAnimation = BodyAnimation.Assail,
-                    Sound = null,
-                    SourceId = sprite.Serial
-                };
-
-                if (enemy.Count == 0) return;
-
-                foreach (var entity in enemy.Where(entity => entity is not null))
-                {
-                    _target = entity;
-                    var dmgCalc = DamageCalc(sprite);
-
-                    if (_target.MaximumHp * 0.15 < dmgCalc)
-                    {
-                        _target.CurrentHp += (long)(_target.MaximumHp * 0.15);
-                    }
-                    else
-                    {
-                        _target.CurrentHp += dmgCalc;
-                    }
-
-                    if (_target.MaximumMp * 0.20 < dmgCalc)
-                    {
-                        _target.CurrentMp += (long)(_target.MaximumMp * 0.20);
-                    }
-                    else
-                    {
-                        _target.CurrentMp += dmgCalc;
-                    }
-
-                    if (_target.CurrentHp > _target.MaximumHp)
-                        _target.CurrentHp = _target.MaximumHp;
-
-                    if (_target.CurrentMp > _target.MaximumMp)
-                        _target.CurrentMp = _target.MaximumMp;
-
-                    damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                        c => c.SendAnimation(Skill.Template.TargetAnimation, null, _target.Serial, 170));
-                    damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                        c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
-
-                    if (!_crit) continue;
-                    damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                        c => c.SendAnimation(387, null, sprite.Serial));
-                    _crit = false;
-                }
-            }
-            catch
-            {
-                // ignored
-            }
-        }
-    }
-
-    private long DamageCalc(Sprite sprite)
+    private long DamageCalc(Sprite sprite, Sprite target)
     {
         _crit = false;
         long dmg;
@@ -1634,7 +1205,7 @@ public class Heavenly_Gaze(Skill skill) : SkillScript(skill)
         {
             var client = damageDealingAisling.Client;
             var imp = 10 + Skill.Level;
-            dmg = client.Aisling.Str * 3 + client.Aisling.Con * 3 / damageDealingAisling.Position.DistanceFrom(_target.Position);
+            dmg = client.Aisling.Str * 3 + client.Aisling.Con * 3 / damageDealingAisling.Position.DistanceFrom(target.Position);
             dmg += dmg * imp / 100;
         }
         else
@@ -1655,17 +1226,14 @@ public class Heavenly_Gaze(Skill skill) : SkillScript(skill)
 [Script("Silent Siren")]
 public class Silent_Siren(Skill skill) : SkillScript(skill)
 {
-    private Sprite _target;
     private bool _crit;
-    private bool _success;
-    private DebuffSilence _debuff;
 
-    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, _target);
+    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
 
     protected override void OnSuccess(Sprite sprite)
     {
-        if (sprite is not Aisling aisling) return;
-        aisling.ActionUsed = "Silent Siren";
+        if (sprite is Aisling aisling)
+            aisling.ActionUsed = "Silent Siren";
 
         var action = new BodyAnimationArgs
         {
@@ -1675,66 +1243,63 @@ public class Silent_Siren(Skill skill) : SkillScript(skill)
             SourceId = sprite.Serial
         };
 
-        if (aisling.CurrentMp - 300 > 0)
+        if (sprite.CurrentMp - 300 > 0)
         {
-            aisling.CurrentMp -= 300;
+            sprite.CurrentMp -= 300;
         }
         else
         {
-            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
+            if (sprite is Aisling manaOwed)
+                manaOwed.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
+            OnFailed(sprite);
             return;
         }
 
         try
         {
-            var enemy = aisling.GetInFrontToSide();
+            if (sprite is not Damageable damageDealer) return;
+            var enemy = damageDealer.GetInFrontToSide();
 
             if (enemy.Count == 0)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
-                OnFailed(aisling);
-                GlobalSkillMethods.Train(aisling.Client, Skill);
+                OnFailed(sprite);
                 return;
             }
 
             foreach (var entity in enemy.Where(entity => entity is not null))
             {
-                _target = entity;
-                if (_target is not Damageable damageable) continue;
+                var target = entity;
+                if (target is not Damageable damageable) continue;
 
-                if (_target.SpellReflect)
+                if (damageable.SpellReflect)
                 {
-                    aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                        c => c.SendAnimation(184, null, _target.Serial));
-                    aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your breath has been repelled");
+                    damageDealer.SendAnimationNearby(184, null, damageable.Serial);
+                    if (damageDealer is Aisling spellReflected)
+                        spellReflected.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your breath has been repelled");
+                    if (damageable is Aisling targetAisling)
+                        targetAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You repelled {Skill.Template.Name}.");
 
-                    if (_target is Aisling targetAisling)
-                        targetAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1,
-                            $"You repelled {Skill.Template.Name}.");
-
-                    _target = Spell.SpellReflect(_target, sprite);
+                    target = Spell.SpellReflect(damageable, sprite);
                 }
 
-                if (_target.SpellNegate)
+                if (damageable.SpellNegate)
                 {
-                    aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                        c => c.SendAnimation(64, null, _target.Serial));
-                    aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your breath has been negated");
-                    if (_target is Aisling targetAisling)
-                        targetAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1,
-                            $"You negated {Skill.Template.Name}.");
+                    damageDealer.SendAnimationNearby(64, null, damageable.Serial);
+                    if (damageDealer is Aisling spellReflected)
+                        spellReflected.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your breath has been negated");
+                    if (damageable is Aisling targetAisling)
+                        targetAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You negated {Skill.Template.Name}.");
 
                     continue;
                 }
 
-                if (_target is Aisling target2Aisling &&
-                    !target2Aisling.Map.Flags.MapFlagIsSet(MapFlags.PlayerKill)) continue;
+                if (damageable is Aisling && !damageable.Map.Flags.MapFlagIsSet(MapFlags.PlayerKill)) continue;
 
-                var dmgCalc = DamageCalc(sprite);
-                _debuff = new DebuffSilence();
-                damageable.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Earth, Skill);
-                aisling.Client.EnqueueDebuffAppliedEvent(_target, _debuff);
-                GlobalSkillMethods.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
+                var dmgCalc = DamageCalc(sprite, target);
+                var debuff = new DebuffSilence();
+                damageable.ApplyElementalSkillDamage(damageDealer, dmgCalc, ElementManager.Element.Earth, Skill);
+                GlobalSkillMethods.OnSuccess(damageable, damageDealer, Skill, dmgCalc, _crit, action);
+                GlobalSkillMethods.ApplyPhysicalDebuff(damageDealer, debuff, damageable, Skill);
             }
         }
         catch
@@ -1744,105 +1309,9 @@ public class Silent_Siren(Skill skill) : SkillScript(skill)
         }
     }
 
-    public override void OnCleanup()
-    {
-        _target = null;
-    }
+    public override void OnCleanup() { }
 
-    public override void OnUse(Sprite sprite)
-    {
-        if (!Skill.CanUseZeroLineAbility) return;
-
-        if (sprite is Aisling aisling)
-        {
-            _success = GlobalSkillMethods.OnUse(aisling, Skill);
-
-            if (_success)
-            {
-                OnSuccess(aisling);
-            }
-            else
-            {
-                OnFailed(aisling);
-            }
-        }
-        else
-        {
-            try
-            {
-                if (sprite is not Damageable identifiable) return;
-                var enemy = identifiable.GetInFrontToSide();
-
-                var action = new BodyAnimationArgs
-                {
-                    AnimationSpeed = 30,
-                    BodyAnimation = BodyAnimation.Assail,
-                    Sound = null,
-                    SourceId = sprite.Serial
-                };
-
-                if (enemy.Count == 0) return;
-
-                foreach (var i in enemy.Where(i => i != null && sprite.Serial != i.Serial))
-                {
-                    _target = i;
-                    if (_target is not Damageable damageable) continue;
-
-                    if (_target.SpellReflect)
-                    {
-                        damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                            c => c.SendAnimation(184, null, _target.Serial));
-                        if (_target is Aisling targetAisling)
-                            targetAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1,
-                                $"You repelled {Skill.Template.Name}.");
-
-                        _target = Spell.SpellReflect(_target, sprite);
-                    }
-
-                    if (_target.SpellNegate)
-                    {
-                        damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                            c => c.SendAnimation(64, null, _target.Serial));
-                        if (_target is Aisling targetAisling)
-                            targetAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1,
-                                $"You negated {Skill.Template.Name}.");
-
-                        continue;
-                    }
-
-                    var dmgCalc = DamageCalc(sprite);
-                    damageable.ApplyElementalSkillDamage(sprite, dmgCalc, ElementManager.Element.Earth, Skill);
-                    _debuff = new DebuffSilence();
-
-                    if (_target is Aisling affected)
-                    {
-                        if (!_target.HasDebuff(_debuff.Name))
-                            affected.Client.EnqueueDebuffAppliedEvent(affected, _debuff);
-                    }
-                    else
-                    {
-                        if (!_target.HasDebuff(_debuff.Name))
-                            _debuff.OnApplied(_target, _debuff);
-                    }
-
-                    damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                        c => c.SendAnimation(Skill.Template.TargetAnimation, null, _target.Serial, 170));
-                    damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                        c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
-
-                    if (!_crit) return;
-                    damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                        c => c.SendAnimation(387, null, sprite.Serial));
-                }
-            }
-            catch
-            {
-                // ignored
-            }
-        }
-    }
-
-    private long DamageCalc(Sprite sprite)
+    private long DamageCalc(Sprite sprite, Sprite target)
     {
         _crit = false;
         long dmg;
@@ -1850,7 +1319,7 @@ public class Silent_Siren(Skill skill) : SkillScript(skill)
         {
             var client = damageDealingAisling.Client;
             var imp = 10 + Skill.Level;
-            dmg = client.Aisling.Str * 2 + client.Aisling.Con * 2 / damageDealingAisling.Position.DistanceFrom(_target.Position);
+            dmg = client.Aisling.Str * 2 + client.Aisling.Con * 2 / damageDealingAisling.Position.DistanceFrom(target.Position);
             dmg += dmg * imp / 100;
         }
         else
@@ -1871,17 +1340,14 @@ public class Silent_Siren(Skill skill) : SkillScript(skill)
 [Script("Poison Talon")]
 public class Poison_Talon(Skill skill) : SkillScript(skill)
 {
-    private Sprite _target;
     private bool _crit;
-    private bool _success;
-    private DebuffPoison _debuff;
 
-    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, _target);
+    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
 
     protected override void OnSuccess(Sprite sprite)
     {
-        if (sprite is not Aisling aisling) return;
-        aisling.ActionUsed = "Poison Talon";
+        if (sprite is Aisling aisling)
+            aisling.ActionUsed = "Poison Talon";
 
         var action = new BodyAnimationArgs
         {
@@ -1891,66 +1357,63 @@ public class Poison_Talon(Skill skill) : SkillScript(skill)
             SourceId = sprite.Serial
         };
 
-        if (aisling.CurrentMp - 300 > 0)
+        if (sprite.CurrentMp - 300 > 0)
         {
-            aisling.CurrentMp -= 300;
+            sprite.CurrentMp -= 300;
         }
         else
         {
-            aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
+            if (sprite is Aisling manaOwed)
+                manaOwed.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
+            OnFailed(sprite);
             return;
         }
 
         try
         {
-            var enemy = aisling.GetInFrontToSide();
+            if (sprite is not Damageable damageDealer) return;
+            var enemy = damageDealer.GetInFrontToSide();
 
             if (enemy.Count == 0)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
-                OnFailed(aisling);
-                GlobalSkillMethods.Train(aisling.Client, Skill);
+                OnFailed(sprite);
                 return;
             }
 
             foreach (var entity in enemy.Where(entity => entity is not null))
             {
-                _target = entity;
-                if (_target is not Damageable damageable) continue;
+                var target = entity;
+                if (target is not Damageable damageable) continue;
 
-                if (_target.SpellReflect)
+                if (damageable.SpellReflect)
                 {
-                    aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                        c => c.SendAnimation(184, null, _target.Serial));
-                    aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your breath has been repelled");
+                    damageDealer.SendAnimationNearby(184, null, damageable.Serial);
+                    if (damageDealer is Aisling spellReflected)
+                        spellReflected.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your breath has been repelled");
+                    if (damageable is Aisling targetAisling)
+                        targetAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You repelled {Skill.Template.Name}.");
 
-                    if (_target is Aisling targetAisling)
-                        targetAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1,
-                            $"You repelled {Skill.Template.Name}.");
-
-                    _target = Spell.SpellReflect(_target, sprite);
+                    target = Spell.SpellReflect(damageable, sprite);
                 }
 
-                if (_target.SpellNegate)
+                if (damageable.SpellNegate)
                 {
-                    aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                        c => c.SendAnimation(64, null, _target.Serial));
-                    aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your breath has been negated");
-                    if (_target is Aisling targetAisling)
-                        targetAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1,
-                            $"You negated {Skill.Template.Name}.");
+                    damageDealer.SendAnimationNearby(64, null, damageable.Serial);
+                    if (damageDealer is Aisling spellReflected)
+                        spellReflected.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your breath has been negated");
+                    if (damageable is Aisling targetAisling)
+                        targetAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You negated {Skill.Template.Name}.");
 
                     continue;
                 }
 
-                if (_target is Aisling target2Aisling &&
-                    !target2Aisling.Map.Flags.MapFlagIsSet(MapFlags.PlayerKill)) continue;
+                if (damageable is Aisling && !damageable.Map.Flags.MapFlagIsSet(MapFlags.PlayerKill)) continue;
 
-                var dmgCalc = DamageCalc(sprite);
-                _debuff = new DebuffPoison();
-                damageable.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Earth, Skill);
-                aisling.Client.EnqueueDebuffAppliedEvent(_target, _debuff);
-                GlobalSkillMethods.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
+                var dmgCalc = DamageCalc(sprite, target);
+                var debuff = new DebuffPoison();
+                damageable.ApplyElementalSkillDamage(damageDealer, dmgCalc, ElementManager.Element.Earth, Skill);
+                GlobalSkillMethods.OnSuccess(damageable, damageDealer, Skill, dmgCalc, _crit, action);
+                GlobalSkillMethods.ApplyPhysicalDebuff(damageDealer, debuff, damageable, Skill);
             }
         }
         catch
@@ -1960,105 +1423,9 @@ public class Poison_Talon(Skill skill) : SkillScript(skill)
         }
     }
 
-    public override void OnCleanup()
-    {
-        _target = null;
-    }
+    public override void OnCleanup() { }
 
-    public override void OnUse(Sprite sprite)
-    {
-        if (!Skill.CanUseZeroLineAbility) return;
-
-        if (sprite is Aisling aisling)
-        {
-            _success = GlobalSkillMethods.OnUse(aisling, Skill);
-
-            if (_success)
-            {
-                OnSuccess(aisling);
-            }
-            else
-            {
-                OnFailed(aisling);
-            }
-        }
-        else
-        {
-            try
-            {
-                if (sprite is not Damageable identifiable) return;
-                var enemy = identifiable.GetInFrontToSide();
-
-                var action = new BodyAnimationArgs
-                {
-                    AnimationSpeed = 30,
-                    BodyAnimation = BodyAnimation.Assail,
-                    Sound = null,
-                    SourceId = sprite.Serial
-                };
-
-                if (enemy.Count == 0) return;
-
-                foreach (var i in enemy.Where(i => i != null && sprite.Serial != i.Serial))
-                {
-                    _target = i;
-                    if (_target is not Damageable damageable) continue;
-
-                    if (_target.SpellReflect)
-                    {
-                        damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                            c => c.SendAnimation(184, null, _target.Serial));
-                        if (_target is Aisling targetAisling)
-                            targetAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1,
-                                $"You repelled {Skill.Template.Name}.");
-
-                        _target = Spell.SpellReflect(_target, sprite);
-                    }
-
-                    if (_target.SpellNegate)
-                    {
-                        damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                            c => c.SendAnimation(64, null, _target.Serial));
-                        if (_target is Aisling targetAisling)
-                            targetAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1,
-                                $"You negated {Skill.Template.Name}.");
-
-                        continue;
-                    }
-
-                    var dmgCalc = DamageCalc(sprite);
-                    damageable.ApplyElementalSkillDamage(sprite, dmgCalc, ElementManager.Element.Earth, Skill);
-                    _debuff = new DebuffPoison();
-
-                    if (_target is Aisling affected)
-                    {
-                        if (!_target.HasDebuff(_debuff.Name))
-                            affected.Client.EnqueueDebuffAppliedEvent(affected, _debuff);
-                    }
-                    else
-                    {
-                        if (!_target.HasDebuff(_debuff.Name))
-                            _debuff.OnApplied(_target, _debuff);
-                    }
-
-                    damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                        c => c.SendAnimation(Skill.Template.TargetAnimation, null, _target.Serial, 170));
-                    damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                        c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
-
-                    if (!_crit) return;
-                    damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                        c => c.SendAnimation(387, null, sprite.Serial));
-                }
-            }
-            catch
-            {
-                // ignored
-            }
-        }
-    }
-
-    private long DamageCalc(Sprite sprite)
+    private long DamageCalc(Sprite sprite, Sprite target)
     {
         _crit = false;
         long dmg;
@@ -2066,7 +1433,7 @@ public class Poison_Talon(Skill skill) : SkillScript(skill)
         {
             var client = damageDealingAisling.Client;
             var imp = 10 + Skill.Level;
-            dmg = client.Aisling.Str * 5 + client.Aisling.Dex * 2 / damageDealingAisling.Position.DistanceFrom(_target.Position);
+            dmg = client.Aisling.Str * 5 + client.Aisling.Dex * 2 / damageDealingAisling.Position.DistanceFrom(target.Position);
             dmg += dmg * imp / 100;
         }
         else
@@ -2087,18 +1454,14 @@ public class Poison_Talon(Skill skill) : SkillScript(skill)
 [Script("Toxic Breath")]
 public class Toxic_Breath(Skill skill) : SkillScript(skill)
 {
-    private Sprite _target;
     private bool _crit;
-    private bool _success;
-    private DebuffPoison _debuff;
 
-    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, _target);
+    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
 
     protected override void OnSuccess(Sprite sprite)
     {
-        if (sprite is not Aisling aisling) return;
-        var client = aisling.Client;
-        aisling.ActionUsed = "Toxic Breath";
+        if (sprite is Aisling aisling)
+            aisling.ActionUsed = "Toxic Breath";
 
         var action = new BodyAnimationArgs
         {
@@ -2108,66 +1471,63 @@ public class Toxic_Breath(Skill skill) : SkillScript(skill)
             SourceId = sprite.Serial
         };
 
-        if (aisling.CurrentMp - 300 > 0)
+        if (sprite.CurrentMp - 300 > 0)
         {
-            aisling.CurrentMp -= 300;
+            sprite.CurrentMp -= 300;
         }
         else
         {
-            client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
+            if (sprite is Aisling manaOwed)
+                manaOwed.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
+            OnFailed(sprite);
             return;
         }
 
         try
         {
-            var enemy = client.Aisling.GetInFrontToSide();
+            if (sprite is not Damageable damageDealer) return;
+            var enemy = damageDealer.GetInFrontToSide();
 
             if (enemy.Count == 0)
             {
-                GlobalSkillMethods.FailedAttemptBodyAnimation(aisling);
-                OnFailed(aisling);
-                GlobalSkillMethods.Train(aisling.Client, Skill);
+                OnFailed(sprite);
                 return;
             }
 
             foreach (var entity in enemy.Where(entity => entity is not null))
             {
-                _target = entity;
-                if (_target is not Damageable damageable) continue;
+                var target = entity;
+                if (target is not Damageable damageable) continue;
 
-                if (_target.SpellReflect)
+                if (damageable.SpellReflect)
                 {
-                    aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                        c => c.SendAnimation(184, null, _target.Serial));
-                    aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your breath has been repelled");
+                    damageDealer.SendAnimationNearby(184, null, damageable.Serial);
+                    if (damageDealer is Aisling spellReflected)
+                        spellReflected.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your breath has been repelled");
+                    if (damageable is Aisling targetAisling)
+                        targetAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You repelled {Skill.Template.Name}.");
 
-                    if (_target is Aisling targetAisling)
-                        targetAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1,
-                            $"You repelled {Skill.Template.Name}.");
-
-                    _target = Spell.SpellReflect(_target, sprite);
+                    target = Spell.SpellReflect(damageable, sprite);
                 }
 
-                if (_target.SpellNegate)
+                if (damageable.SpellNegate)
                 {
-                    aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                        c => c.SendAnimation(64, null, _target.Serial));
-                    client.SendServerMessage(ServerMessageType.OrangeBar1, "Your breath has been negated");
-                    if (_target is Aisling targetAisling)
-                        targetAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1,
-                            $"You negated {Skill.Template.Name}.");
+                    damageDealer.SendAnimationNearby(64, null, damageable.Serial);
+                    if (damageDealer is Aisling spellReflected)
+                        spellReflected.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your breath has been negated");
+                    if (damageable is Aisling targetAisling)
+                        targetAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"You negated {Skill.Template.Name}.");
 
                     continue;
                 }
 
-                if (_target is Aisling target2Aisling &&
-                    !target2Aisling.Map.Flags.MapFlagIsSet(MapFlags.PlayerKill)) continue;
+                if (damageable is Aisling && !damageable.Map.Flags.MapFlagIsSet(MapFlags.PlayerKill)) continue;
 
-                var dmgCalc = DamageCalc(sprite);
-                _debuff = new DebuffPoison();
-                damageable.ApplyElementalSkillDamage(aisling, dmgCalc, ElementManager.Element.Wind, Skill);
-                aisling.Client.EnqueueDebuffAppliedEvent(_target, _debuff);
-                GlobalSkillMethods.OnSuccess(_target, sprite, Skill, dmgCalc, _crit, action);
+                var dmgCalc = DamageCalc(sprite, target);
+                var debuff = new DebuffPoison();
+                damageable.ApplyElementalSkillDamage(damageDealer, dmgCalc, ElementManager.Element.Wind, Skill);
+                GlobalSkillMethods.OnSuccess(damageable, damageDealer, Skill, dmgCalc, _crit, action);
+                GlobalSkillMethods.ApplyPhysicalDebuff(damageDealer, debuff, damageable, Skill);
             }
         }
         catch
@@ -2177,105 +1537,9 @@ public class Toxic_Breath(Skill skill) : SkillScript(skill)
         }
     }
 
-    public override void OnCleanup()
-    {
-        _target = null;
-    }
+    public override void OnCleanup() { }
 
-    public override void OnUse(Sprite sprite)
-    {
-        if (!Skill.CanUseZeroLineAbility) return;
-
-        if (sprite is Aisling aisling)
-        {
-            _success = GlobalSkillMethods.OnUse(aisling, Skill);
-
-            if (_success)
-            {
-                OnSuccess(aisling);
-            }
-            else
-            {
-                OnFailed(aisling);
-            }
-        }
-        else
-        {
-            try
-            {
-                if (sprite is not Damageable identifiable) return;
-                var enemy = identifiable.GetInFrontToSide();
-
-                var action = new BodyAnimationArgs
-                {
-                    AnimationSpeed = 30,
-                    BodyAnimation = BodyAnimation.Assail,
-                    Sound = null,
-                    SourceId = sprite.Serial
-                };
-
-                if (enemy.Count == 0) return;
-
-                foreach (var i in enemy.Where(i => i != null && sprite.Serial != i.Serial))
-                {
-                    _target = i;
-                    if (_target is not Damageable damageable) continue;
-
-                    if (_target.SpellReflect)
-                    {
-                        damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                            c => c.SendAnimation(184, null, _target.Serial));
-                        if (_target is Aisling targetAisling)
-                            targetAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1,
-                                $"You repelled {Skill.Template.Name}.");
-
-                        _target = Spell.SpellReflect(_target, sprite);
-                    }
-
-                    if (_target.SpellNegate)
-                    {
-                        damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                            c => c.SendAnimation(64, null, _target.Serial));
-                        if (_target is Aisling targetAisling)
-                            targetAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1,
-                                $"You negated {Skill.Template.Name}.");
-
-                        continue;
-                    }
-
-                    var dmgCalc = DamageCalc(sprite);
-                    damageable.ApplyElementalSkillDamage(sprite, dmgCalc, ElementManager.Element.Wind, Skill);
-                    _debuff = new DebuffPoison();
-
-                    if (_target is Aisling affected)
-                    {
-                        if (!_target.HasDebuff(_debuff.Name))
-                            affected.Client.EnqueueDebuffAppliedEvent(affected, _debuff);
-                    }
-                    else
-                    {
-                        if (!_target.HasDebuff(_debuff.Name))
-                            _debuff.OnApplied(_target, _debuff);
-                    }
-
-                    damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                        c => c.SendAnimation(Skill.Template.TargetAnimation, null, _target.Serial, 170));
-                    damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                        c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
-
-                    if (!_crit) return;
-                    damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                        c => c.SendAnimation(387, null, sprite.Serial));
-                }
-            }
-            catch
-            {
-                // ignored
-            }
-        }
-    }
-
-    private long DamageCalc(Sprite sprite)
+    private long DamageCalc(Sprite sprite, Sprite target)
     {
         _crit = false;
         long dmg;
@@ -2283,7 +1547,7 @@ public class Toxic_Breath(Skill skill) : SkillScript(skill)
         {
             var client = damageDealingAisling.Client;
             var imp = 10 + Skill.Level;
-            dmg = client.Aisling.Str * 5 + client.Aisling.Con * 2 / damageDealingAisling.Position.DistanceFrom(_target.Position);
+            dmg = client.Aisling.Str * 5 + client.Aisling.Con * 2 / damageDealingAisling.Position.DistanceFrom(target.Position);
             dmg += dmg * imp / 100;
         }
         else
@@ -2304,36 +1568,33 @@ public class Toxic_Breath(Skill skill) : SkillScript(skill)
 [Script("Golden Lair")]
 public class Golden_Lair(Skill skill) : SkillScript(skill)
 {
-    private Sprite _target;
-    private bool _success;
-    private buff_Hasten _buff;
-
     protected override void OnFailed(Sprite sprite)
     {
         if (sprite is not Aisling damageDealingAisling) return;
         damageDealingAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You've lost focus.");
-        GlobalSkillMethods.OnFailed(sprite, Skill, _target);
+        GlobalSkillMethods.OnFailed(sprite, Skill, null);
     }
 
     protected override void OnSuccess(Sprite sprite)
     {
         if (sprite is not Aisling aisling) return;
-        var client = aisling.Client;
         aisling.ActionUsed = "Golden Lair";
 
-        if (aisling.CurrentMp - 1800 > 0)
+        if (sprite.CurrentMp - 1000 > 0)
         {
-            aisling.CurrentMp -= 1800;
+            sprite.CurrentMp -= 1000;
         }
         else
         {
-            client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
+            if (sprite is Aisling manaOwed)
+                manaOwed.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
+            OnFailed(sprite);
             return;
         }
 
         try
         {
-            var party = client.Aisling.GroupParty?.PartyMembers;
+            var party = aisling.GroupParty?.PartyMembers;
             var action = new BodyAnimationArgs
             {
                 AnimationSpeed = 30,
@@ -2343,26 +1604,22 @@ public class Golden_Lair(Skill skill) : SkillScript(skill)
             };
 
             GlobalSkillMethods.Train(aisling.Client, Skill);
-            _buff = new buff_Hasten();
+            var buff = new buff_Hasten();
 
             if (party == null || party.IsEmpty)
             {
-                aisling.Client.EnqueueBuffAppliedEvent(aisling, _buff);
+                GlobalSkillMethods.ApplyPhysicalBuff(aisling, buff);
                 return;
             }
 
             foreach (var entity in party.Values.Where(entity => entity is not null))
             {
                 if (entity.Map.ID != aisling.Map.ID) continue;
-                _target = entity;
-                aisling.Client.EnqueueBuffAppliedEvent(_target, _buff);
-                aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                    c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
-                aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                    c => c.SendAnimation(Skill.Template.TargetAnimation, null, entity.Serial, 170));
+                var groupBuff = new buff_Hasten();
+                GlobalSkillMethods.ApplyPhysicalBuff(entity, groupBuff);
+                aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
+                aisling.SendAnimationNearby(Skill.Template.TargetAnimation, null, entity.Serial, 170);
             }
-
-            Skill.LastUsedSkill = DateTime.UtcNow;
         }
         catch
         {
@@ -2371,33 +1628,7 @@ public class Golden_Lair(Skill skill) : SkillScript(skill)
         }
     }
 
-    public override void OnCleanup()
-    {
-        _target = null;
-    }
-
-    public override void OnUse(Sprite sprite)
-    {
-        if (!Skill.CanUseZeroLineAbility) return;
-
-        if (sprite is Aisling aisling)
-        {
-            _success = GlobalSkillMethods.OnUse(aisling, Skill);
-
-            if (_success)
-            {
-                OnSuccess(aisling);
-            }
-            else
-            {
-                OnFailed(aisling);
-            }
-        }
-        else
-        {
-            OnSuccess(sprite);
-        }
-    }
+    public override void OnCleanup() { }
 }
 
 // Copper Dragonkin
@@ -2405,37 +1636,33 @@ public class Golden_Lair(Skill skill) : SkillScript(skill)
 [Script("Vicious Roar")]
 public class Vicious_Roar(Skill skill) : SkillScript(skill)
 {
-    private Sprite _target;
-    private bool _success;
-    private buff_clawfist _buff;
-
     protected override void OnFailed(Sprite sprite)
     {
         if (sprite is not Aisling damageDealingAisling) return;
         damageDealingAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You've lost focus.");
-        GlobalSkillMethods.OnFailed(sprite, Skill, _target);
+        GlobalSkillMethods.OnFailed(sprite, Skill, null);
     }
 
     protected override void OnSuccess(Sprite sprite)
     {
-        _buff = new buff_clawfist();
-
-        if (sprite is not Aisling aisling)
+        if (sprite is Aisling aisling)
         {
-            _buff.OnApplied(sprite, _buff);
-            return;
+            aisling.ActionUsed = "Vicious Roar";
+            GlobalSkillMethods.Train(aisling.Client, Skill);
         }
 
-        var client = aisling.Client;
-        aisling.ActionUsed = "Vicious Roar";
+        var buff = new buff_clawfist();
+        if (sprite is not Damageable damageDealer) return;
+        GlobalSkillMethods.ApplyPhysicalBuff(damageDealer, buff);
 
-        if (aisling.CurrentMp - 1800 > 0)
+        if (damageDealer.CurrentMp - 1800 > 0)
         {
-            aisling.CurrentMp -= 1800;
+            damageDealer.CurrentMp -= 1800;
         }
         else
         {
-            client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
+            if (damageDealer is Aisling manaOwed)
+                manaOwed.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
             return;
         }
 
@@ -2447,41 +1674,12 @@ public class Vicious_Roar(Skill skill) : SkillScript(skill)
             SourceId = sprite.Serial
         };
 
-        _target = aisling;
-        aisling.Client.EnqueueBuffAppliedEvent(_target, _buff);
-        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(Skill.Template.TargetAnimation, null, _target.Serial, 170));
-        aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
+        damageDealer.SendAnimationNearby(Skill.Template.TargetAnimation, null, damageDealer.Serial, 170);
+        damageDealer.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
         Skill.LastUsedSkill = DateTime.UtcNow;
-        GlobalSkillMethods.Train(client, Skill);
     }
 
-    public override void OnCleanup()
-    {
-        _target = null;
-    }
-
-    public override void OnUse(Sprite sprite)
-    {
-        if (!Skill.CanUseZeroLineAbility) return;
-
-        if (sprite is Aisling aisling)
-        {
-            _success = GlobalSkillMethods.OnUse(aisling, Skill);
-
-            if (_success)
-            {
-                OnSuccess(aisling);
-            }
-            else
-            {
-                OnFailed(aisling);
-            }
-        }
-        else
-        {
-            OnSuccess(sprite);
-        }
-    }
+    public override void OnCleanup() { }
 }
 
 [Script("Dash")]
@@ -2500,30 +1698,33 @@ public class Dash(Skill skill) : SkillScript(skill)
 
     protected override void OnSuccess(Sprite sprite)
     {
-        if (sprite is not Aisling aisling) return;
-        var client = aisling.Client;
-        aisling.ActionUsed = "Dash";
+        if (sprite is Aisling aisling)
+        {
+            aisling.ActionUsed = "Dash";
+            GlobalSkillMethods.Train(aisling.Client, Skill);
+        }
 
         if (_target == null)
         {
-            OnFailed(aisling);
+            OnFailed(sprite);
             return;
         }
 
         try
         {
-            var dmgCalc = DamageCalc(aisling);
+            if (sprite is not Damageable damageDealer) return;
+            var dmgCalc = DamageCalc(damageDealer);
             var position = _target.Position;
-            var mapCheck = aisling.Map.ID;
-            var wallPosition = aisling.GetPendingChargePosition(3, aisling);
-            var targetPos = GlobalSkillMethods.DistanceTo(aisling.Position, position);
-            var wallPos = GlobalSkillMethods.DistanceTo(aisling.Position, wallPosition);
+            var mapCheck = damageDealer.Map.ID;
+            var wallPosition = damageDealer.GetPendingChargePosition(3, damageDealer);
+            var targetPos = GlobalSkillMethods.DistanceTo(damageDealer.Position, position);
+            var wallPos = GlobalSkillMethods.DistanceTo(damageDealer.Position, wallPosition);
 
-            if (mapCheck != aisling.Map.ID) return;
+            if (mapCheck != damageDealer.Map.ID) return;
 
             if (targetPos <= wallPos)
             {
-                switch (aisling.Direction)
+                switch (damageDealer.Direction)
                 {
                     case 0:
                         position.Y++;
@@ -2539,29 +1740,24 @@ public class Dash(Skill skill) : SkillScript(skill)
                         break;
                 }
 
-                if (aisling.Position != position)
+                if (damageDealer.Position != position)
                 {
-                    GlobalSkillMethods.Step(aisling, position.X, position.Y);
+                    GlobalSkillMethods.Step(damageDealer, position.X, position.Y);
                 }
 
                 if (_target is not Damageable damageable) return;
-                damageable.ApplyDamage(aisling, dmgCalc, Skill);
-                GlobalSkillMethods.Train(client, Skill);
-                aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                    c => c.SendAnimation(Skill.Template.TargetAnimation, null, _target.Serial));
+                damageable.ApplyDamage(damageable, dmgCalc, Skill);
+                damageDealer.SendAnimationNearby(Skill.Template.TargetAnimation, null, _target.Serial);
 
                 if (!_crit) return;
-                aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                    c => c.SendAnimation(387, null, sprite.Serial));
+                damageDealer.SendAnimationNearby(387, null, sprite.Serial);
             }
             else
             {
-                GlobalSkillMethods.Step(aisling, wallPosition.X, wallPosition.Y);
-
+                GlobalSkillMethods.Step(damageDealer, wallPosition.X, wallPosition.Y);
                 var stunned = new DebuffBeagsuain();
-                aisling.Client.EnqueueDebuffAppliedEvent(aisling, stunned);
-                aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                    c => c.SendAnimation(208, null, aisling.Serial));
+                GlobalSkillMethods.ApplyPhysicalDebuff(damageDealer, stunned, damageDealer, Skill);
+                damageDealer.SendAnimationNearby(208, null, damageDealer.Serial);
             }
         }
         catch
@@ -2580,17 +1776,15 @@ public class Dash(Skill skill) : SkillScript(skill)
     public override void OnUse(Sprite sprite)
     {
         if (!Skill.CanUse()) return;
-        if (sprite is not Aisling aisling) return;
+        if (sprite is not Damageable damageDealer) return;
 
-        var client = aisling.Client;
-
-        if (client.Aisling.CantAttack)
+        if (damageDealer.CantAttack)
         {
-            OnFailed(aisling);
+            OnFailed(damageDealer);
             return;
         }
 
-        Target(aisling);
+        Target(damageDealer);
     }
 
     private long DamageCalc(Sprite sprite)
@@ -2617,42 +1811,44 @@ public class Dash(Skill skill) : SkillScript(skill)
 
     private void Target(Sprite sprite)
     {
-        if (sprite is not Aisling aisling) return;
-        var client = aisling.Client;
+        if (sprite is not Damageable damageable) return;
 
         try
         {
-            _enemyList = client.Aisling.DamageableGetInFront(3);
+            _enemyList = damageable.DamageableGetInFront(3);
             _target = _enemyList.FirstOrDefault();
-            _target = Skill.Reflect(_target, sprite, Skill);
 
             if (_target == null)
             {
-                var mapCheck = aisling.Map.ID;
-                var wallPosition = aisling.GetPendingChargePositionNoTarget(3, aisling);
-                var wallPos = GlobalSkillMethods.DistanceTo(aisling.Position, wallPosition);
+                var mapCheck = damageable.Map.ID;
+                var wallPosition = damageable.GetPendingChargePositionNoTarget(3, damageable);
+                var wallPos = GlobalSkillMethods.DistanceTo(damageable.Position, wallPosition);
 
-                if (mapCheck != aisling.Map.ID) return;
-                if (!(wallPos > 0)) OnFailed(aisling);
-
-                if (aisling.Position != wallPosition)
+                if (mapCheck != damageable.Map.ID) return;
+                if (!(wallPos > 0))
                 {
-                    GlobalSkillMethods.Step(aisling, wallPosition.X, wallPosition.Y);
+                    OnFailed(damageable);
+                    return;
+                }
+
+                if (damageable.Position != wallPosition)
+                {
+                    GlobalSkillMethods.Step(damageable, wallPosition.X, wallPosition.Y);
                 }
 
                 if (wallPos <= 2)
                 {
                     var stunned = new DebuffBeagsuain();
-                    aisling.Client.EnqueueDebuffAppliedEvent(aisling, stunned);
-                    aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                        c => c.SendAnimation(208, null, aisling.Serial));
+                    GlobalSkillMethods.ApplyPhysicalDebuff(damageable, stunned, damageable, Skill);
+                    damageable.SendAnimationNearby(208, null, damageable.Serial);
                 }
 
-                aisling.UsedSkill(Skill);
+                if (damageable is Aisling skillUsed)
+                    skillUsed.UsedSkill(Skill);
             }
             else
             {
-                OnSuccess(aisling);
+                OnSuccess(sprite);
             }
         }
         catch

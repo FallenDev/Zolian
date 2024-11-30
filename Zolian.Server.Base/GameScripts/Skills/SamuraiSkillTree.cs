@@ -16,24 +16,25 @@ public class Iaido(Skill skill) : SkillScript(skill)
 {
     private bool _crit;
     private List<Sprite> _enemyList;
-    private bool _success;
 
     protected override void OnFailed(Sprite sprite)
     {
         if (sprite is not Aisling damageDealingAisling) return;
-        var client = damageDealingAisling.Client;
-        client.SendServerMessage(ServerMessageType.OrangeBar1, "My honour has not faltered..");
+        damageDealingAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "My honour has not faltered..");
+        GlobalSkillMethods.OnFailed(sprite, Skill, null);
     }
 
     protected override void OnSuccess(Sprite sprite)
     {
-        if (sprite is not Aisling aisling) return;
-        var client = aisling.Client;
-        aisling.ActionUsed = "Iaido";
+        if (sprite is Aisling aisling)
+        {
+            aisling.ActionUsed = "Iaido";
+            GlobalSkillMethods.Train(aisling.Client, Skill);
+        }
 
         if (_enemyList.Count == 0)
         {
-            OnFailed(aisling);
+            OnFailed(sprite);
             return;
         }
 
@@ -42,54 +43,55 @@ public class Iaido(Skill skill) : SkillScript(skill)
             var position = _enemyList.Last()?.Position;
             if (position == null)
             {
-                OnFailed(aisling);
+                OnFailed(sprite);
                 return;
             }
 
-            var mapCheck = aisling.Map.ID;
-            var wallPosition = aisling.GetPendingChargePositionNoTarget(6, aisling);
-            var wallPos = GlobalSkillMethods.DistanceTo(aisling.Position, wallPosition);
+            var mapCheck = sprite.Map.ID;
+            if (sprite is not Damageable damageDealer) return;
+            var wallPosition = damageDealer.GetPendingChargePositionNoTarget(6, damageDealer);
+            var wallPos = GlobalSkillMethods.DistanceTo(damageDealer.Position, wallPosition);
 
-            if (mapCheck != aisling.Map.ID) return;
-            if (!(wallPos > 0)) OnFailed(aisling);
-
-            if (aisling.Position != wallPosition)
+            if (mapCheck != damageDealer.Map.ID) return;
+            if (!(wallPos > 0))
             {
-                GlobalSkillMethods.Step(aisling, wallPosition.X, wallPosition.Y);
+                OnFailed(damageDealer);
+                return;
+            }
+
+            if (damageDealer.Position != wallPosition)
+            {
+                GlobalSkillMethods.Step(damageDealer, wallPosition.X, wallPosition.Y);
             }
 
             foreach (var enemy in _enemyList)
             {
                 if (enemy is not Damageable damageable) continue;
-                var dmgCalc = DamageCalc(aisling);
+                var dmgCalc = DamageCalc(damageable);
 
-                damageable.ApplyDamage(aisling, dmgCalc, Skill);
-                GlobalSkillMethods.Train(client, Skill);
+                damageable.ApplyDamage(damageDealer, dmgCalc, Skill);
                 Task.Delay(300).ContinueWith(c =>
                 {
-                    aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendAnimation(119, enemy.Position));
+                    damageDealer.SendAnimationNearby(119, enemy.Position);
                 });
 
                 if (!_crit) continue;
                 Task.Delay(300).ContinueWith(c =>
                 {
-                    aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                        c => c.SendAnimation(387, null, sprite.Serial));
+                    damageDealer.SendAnimationNearby(387, null, damageDealer.Serial);
                 });
             }
 
             Task.Delay(300).ContinueWith(c =>
             {
-                aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                    c => c.SendAnimation(Skill.Template.TargetAnimation, aisling.Position));
+                damageDealer.SendAnimationNearby(Skill.Template.TargetAnimation, damageDealer.Position);
             });
 
             if (wallPos > 5) return;
 
             var stunned = new DebuffBeagsuain();
-            aisling.Client.EnqueueDebuffAppliedEvent(aisling, stunned);
-            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                c => c.SendAnimation(208, null, aisling.Serial));
+            GlobalSkillMethods.ApplyPhysicalDebuff(damageDealer, stunned, damageDealer, Skill);
+            damageDealer.SendAnimationNearby(208, damageDealer.Position);
         }
         catch
         {
@@ -106,25 +108,23 @@ public class Iaido(Skill skill) : SkillScript(skill)
     public override void OnUse(Sprite sprite)
     {
         if (!Skill.CanUse()) return;
-        if (sprite is not Aisling aisling) return;
+        if (sprite is not Damageable damageDealer) return;
 
-        var client = aisling.Client;
-
-        if (client.Aisling.CantAttack)
+        if (damageDealer.CantAttack)
         {
-            OnFailed(aisling);
+            OnFailed(sprite);
             return;
         }
 
         // Prevent Loss of Macro in Dojo areas
-        if (client.Aisling.Map.Flags.MapFlagIsSet(MapFlags.SafeMap))
+        if (damageDealer is Aisling aisling && aisling.Map.Flags.MapFlagIsSet(MapFlags.SafeMap))
         {
-            GlobalSkillMethods.Train(client, Skill);
+            GlobalSkillMethods.Train(aisling.Client, Skill);
             OnFailed(aisling);
             return;
         }
 
-        Target(aisling);
+        Target(damageDealer);
     }
 
     private long DamageCalc(Sprite sprite)
@@ -151,48 +151,54 @@ public class Iaido(Skill skill) : SkillScript(skill)
 
     private void Target(Sprite sprite)
     {
-        if (sprite is not Aisling aisling) return;
-        var client = aisling.Client;
+        if (sprite is not Damageable damageDealer) return;
 
         try
         {
-            _enemyList = client.Aisling.DamageableGetInFrontColumn(6);
+            _enemyList = damageDealer.DamageableGetInFrontColumn(6);
 
             if (_enemyList.Count == 0)
             {
-                var mapCheck = aisling.Map.ID;
-                var wallPosition = aisling.GetPendingChargePositionNoTarget(6, aisling);
-                var wallPos = GlobalSkillMethods.DistanceTo(aisling.Position, wallPosition);
+                var mapCheck = damageDealer.Map.ID;
+                var wallPosition = damageDealer.GetPendingChargePositionNoTarget(6, damageDealer);
+                var wallPos = GlobalSkillMethods.DistanceTo(damageDealer.Position, wallPosition);
 
-                if (mapCheck != aisling.Map.ID) return;
-                if (!(wallPos > 0)) OnFailed(aisling);
+                if (mapCheck != damageDealer.Map.ID) return;
+                if (!(wallPos > 0)) OnFailed(damageDealer);
 
-                if (aisling.Position != wallPosition)
+                if (damageDealer.Position != wallPosition)
                 {
-                    GlobalSkillMethods.Step(aisling, wallPosition.X, wallPosition.Y);
+                    GlobalSkillMethods.Step(damageDealer, wallPosition.X, wallPosition.Y);
                 }
 
                 if (wallPos <= 5)
                 {
                     var stunned = new DebuffBeagsuain();
-                    aisling.Client.EnqueueDebuffAppliedEvent(aisling, stunned);
-                    aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings,
-                        c => c.SendAnimation(208, null, aisling.Serial));
+                    GlobalSkillMethods.ApplyPhysicalDebuff(damageDealer, stunned, damageDealer, Skill);
+                    damageDealer.SendAnimationNearby(208, damageDealer.Position);
                 }
 
-                aisling.UsedSkill(Skill);
+                if (damageDealer is Aisling aisling)
+                    aisling.UsedSkill(Skill);
             }
             else
             {
-                _success = GlobalSkillMethods.OnUse(aisling, Skill);
-
-                if (_success)
+                if (sprite is Aisling aisling)
                 {
-                    OnSuccess(aisling);
+                    var success = GlobalSkillMethods.OnUse(aisling, Skill);
+
+                    if (success)
+                    {
+                        OnSuccess(aisling);
+                    }
+                    else
+                    {
+                        OnFailed(aisling);
+                    }
                 }
                 else
                 {
-                    OnFailed(aisling);
+                    OnSuccess(sprite);
                 }
             }
         }
@@ -224,11 +230,28 @@ public class MugaiRyu(Skill skill) : SkillScript(skill)
 
     public override void OnCleanup() { }
 
-    public override void OnUse(Sprite sprite)
+    private long DamageCalc(Sprite sprite)
     {
-        if (!Skill.CanUse()) return;
+        _crit = false;
+        long dmg;
+        if (sprite is Aisling damageDealingAisling)
+        {
+            var client = damageDealingAisling.Client;
+            var imp = 10 + Skill.Level;
+            dmg = client.Aisling.Str * 5;
+            dmg += client.Aisling.Dex * 3;
+            dmg += dmg * imp / 100;
+        }
+        else
+        {
+            if (sprite is not Monster damageMonster) return 0;
+            dmg = damageMonster.Str * 5;
+            dmg += damageMonster.Dex * 3;
+        }
 
-
+        var critCheck = GlobalSkillMethods.OnCrit(dmg);
+        _crit = critCheck.Item1;
+        return critCheck.Item2;
     }
 }
 

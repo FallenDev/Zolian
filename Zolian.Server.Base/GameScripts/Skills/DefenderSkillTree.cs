@@ -392,17 +392,15 @@ public class Charge(Skill skill) : SkillScript(skill)
     public override void OnUse(Sprite sprite)
     {
         if (!Skill.CanUse()) return;
-        if (sprite is not Aisling aisling) return;
+        if (sprite is not Damageable damageDealer) return;
 
-        var client = aisling.Client;
-
-        if (client.Aisling.CantAttack)
+        if (damageDealer.CantAttack)
         {
-            OnFailed(aisling);
+            OnFailed(damageDealer);
             return;
         }
 
-        Target(aisling);
+        Target(damageDealer);
     }
 
     private long DamageCalc(Sprite sprite)
@@ -443,7 +441,11 @@ public class Charge(Skill skill) : SkillScript(skill)
                 var wallPos = GlobalSkillMethods.DistanceTo(damageable.Position, wallPosition);
 
                 if (mapCheck != damageable.Map.ID) return;
-                if (!(wallPos > 0)) OnFailed(damageable);
+                if (!(wallPos > 0))
+                {
+                    OnFailed(damageable);
+                    return;
+                }
 
                 if (damageable.Position != wallPosition)
                 {
