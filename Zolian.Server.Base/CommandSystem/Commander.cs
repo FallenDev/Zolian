@@ -102,6 +102,12 @@ public static class Commander
             .SetAction(OnKillCommand)
             .AddArgument(Argument.Create("who")));
 
+        ServerSetup.Instance.Parser.AddCommand(Command
+            .Create("Create Monster", "sm")
+            .SetAction(OnMonsterSummon)
+            .AddArgument(Argument.Create("who"))
+            .AddArgument(Argument.Create("amount")));
+
         #endregion
     }
 
@@ -323,6 +329,13 @@ public static class Commander
     {
         var client = (WorldClient)arg;
         if (client == null) return;
+        var death = client.Aisling.Username.Equals("death", StringComparison.InvariantCultureIgnoreCase);
+        if (!death)
+        {
+            client.SendServerMessage(ServerMessageType.ActiveMessage, "{=bRestricted GM Command - Kill Player");
+            return;
+        }
+
         var who = args.FromName("who").Replace("\"", "");
         if (string.IsNullOrEmpty(who)) return;
         var players = ServerSetup.Instance.Game.Aislings;
@@ -332,12 +345,48 @@ public static class Commander
     }
 
     /// <summary>
+    /// InGame Usage : /sm "base name" 1
+    /// </summary>
+    private static void OnMonsterSummon(Argument[] args, object arg)
+    {
+        var client = (WorldClient)arg;
+        if (client == null) return;
+        var death = client.Aisling.Username.Equals("death", StringComparison.InvariantCultureIgnoreCase);
+        if (!death)
+        {
+            client.SendServerMessage(ServerMessageType.ActiveMessage, "{=bRestricted GM Command - Summon Monster");
+            return;
+        }
+
+        var who = args.FromName("who").Replace("\"", "");
+        if (!int.TryParse(args.FromName("amount"), out var sResult)) return;
+        if (string.IsNullOrEmpty(who)) return;
+        if (sResult == 0)
+            sResult = 1;
+
+        for (var i = 0; i < sResult; i++)
+        {
+            ServerSetup.Instance.GlobalMonsterTemplateCache.TryGetValue(who, out var summon);
+            Monster.CreateFromTemplate(summon, client.Aisling.Map);
+        }
+
+        ServerSetup.EventsLogger($"{client.RemoteIp} used GM Command -Summon Monster- on character: {client.Aisling.Username}");
+    }
+
+    /// <summary>
     /// InGame Usage : /group "playerName"  
     /// </summary>
     private static void OnRemoteGroup(Argument[] args, object arg)
     {
         var client = (WorldClient)arg;
         if (client == null) return;
+        var death = client.Aisling.Username.Equals("death", StringComparison.InvariantCultureIgnoreCase);
+        if (!death)
+        {
+            client.SendServerMessage(ServerMessageType.ActiveMessage, "{=bRestricted GM Command - Group Player");
+            return;
+        }
+
         var who = args.FromName("who").Replace("\"", "");
         if (string.IsNullOrEmpty(who)) return;
         var players = ServerSetup.Instance.Game.Aislings;
@@ -420,6 +469,13 @@ public static class Commander
     {
         var client = (WorldClient)arg;
         if (client == null) return;
+        var death = client.Aisling.Username.Equals("death", StringComparison.InvariantCultureIgnoreCase);
+        if (!death)
+        {
+            client.SendServerMessage(ServerMessageType.ActiveMessage, "{=bRestricted GM Command - Item Creation");
+            return;
+        }
+
         ServerSetup.EventsLogger($"{client.RemoteIp} used GM Command -Item Create- on character: {client.Aisling.Username}");
 
         var name = args.FromName("item").Replace("\"", "");

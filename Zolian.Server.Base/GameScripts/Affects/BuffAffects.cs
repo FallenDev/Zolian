@@ -338,6 +338,8 @@ public class buff_Dia_Haste : Buff
 
     public override void OnDurationUpdate(Sprite affected, Buff buff)
     {
+        base.OnDurationUpdate(affected, buff);
+
         if (affected is Aisling aisling)
             aisling.Client.SkillSpellTimer.Delay = TimeSpan.FromMilliseconds(750);
     }

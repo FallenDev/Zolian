@@ -2029,10 +2029,3 @@ public class AoSuain(Spell spell) : SpellScript(spell)
         client.SendAttributes(StatUpdateType.Vitality);
     }
 }
-
-// Cleric Spells
-// Sustain = prevent ally's death by keeping them at 1hp for 30 seconds then death is recast if not removed
-// Phoenix Wave = red group, 24 hr cooldown
-// Ray of Light = High Holy Damage
-// Water of Life = Heal self based on missing health
-// Booming Shield = stun any target that attacks you for a duration (3 seconds) (30 second cooldown)

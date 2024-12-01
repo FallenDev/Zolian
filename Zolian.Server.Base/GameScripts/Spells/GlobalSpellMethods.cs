@@ -14,7 +14,14 @@ public class GlobalSpellMethods
 
     public static bool Execute(WorldClient client, Spell spell)
     {
-        if (client.Aisling.CantCast) return false;
+        if (client.Aisling.CantCast)
+        {
+            if (spell.Template.Name is not ("Ao Suain" or "Ao Sith"))
+            {
+                return false;
+            }
+        }
+
         var success = Generator.RandNumGen100();
 
         if (spell.Level >= 100)

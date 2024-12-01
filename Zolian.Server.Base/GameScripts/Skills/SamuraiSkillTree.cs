@@ -257,6 +257,7 @@ public class MugaiRyu(Skill skill) : SkillScript(skill)
                 if (damageDealer.CurrentMp > damageDealer.MaximumMp)
                     damageDealer.CurrentMp = damageDealer.MaximumMp;
 
+                damageDealer.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendHealthBar(i, 7));
                 GlobalSkillMethods.OnSuccessWithoutAction(i, damageDealer, Skill, 0, _crit);
             }
 
@@ -330,7 +331,7 @@ public class NitenIchiRyu(Skill skill) : SkillScript(skill)
             {
                 if (i is not Damageable damageable) continue;
                 var dmgCalc = DamageCalc(sprite);
-                dmgCalc += (int)GlobalSpellMethods.WeaponDamageElementalProc(damageDealer, 3);
+                dmgCalc += (int)GlobalSpellMethods.WeaponDamageElementalProc(damageDealer, 4);
                 damageable.ApplyElementalSkillDamage(damageDealer, dmgCalc, ElementManager.Element.Fire, Skill);
                 damageable.ApplyElementalSkillDamage(damageDealer, dmgCalc, ElementManager.Element.Wind, Skill);
                 damageable.ApplyElementalSkillDamage(damageDealer, dmgCalc, ElementManager.Element.Earth, Skill);
@@ -339,7 +340,7 @@ public class NitenIchiRyu(Skill skill) : SkillScript(skill)
                 damageable.ApplyElementalSkillDamage(damageDealer, dmgCalc, ElementManager.Element.Wind, Skill);
                 damageable.ApplyElementalSkillDamage(damageDealer, dmgCalc, ElementManager.Element.Earth, Skill);
                 damageable.ApplyElementalSkillDamage(damageDealer, dmgCalc, ElementManager.Element.Water, Skill);
-                GlobalSkillMethods.OnSuccessWithoutAction(i, damageDealer, Skill, 0, _crit);
+                GlobalSkillMethods.OnSuccessWithoutAction(i, damageDealer, Skill, dmgCalc, _crit);
             }
 
             damageDealer.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
@@ -411,30 +412,48 @@ public class ShintoRyu(Skill skill) : SkillScript(skill)
 
             if (enemy is not Damageable damageable) return;
             var dmgCalc = DamageCalc(sprite);
-            dmgCalc += (int)GlobalSpellMethods.WeaponDamageElementalProc(damageDealer, 8);
+            dmgCalc += (int)GlobalSpellMethods.WeaponDamageElementalProc(damageDealer, 5);
             damageable.ApplyElementalSkillDamage(damageDealer, dmgCalc, ElementManager.Element.Wind, Skill);
             damageable.ApplyElementalSkillDamage(damageDealer, dmgCalc, ElementManager.Element.Void, Skill);
-            GlobalSkillMethods.OnSuccessWithoutAction(enemy, damageDealer, Skill, 0, _crit);
-            damageDealer.SendAnimationNearby(156, damageable.Position);
+            GlobalSkillMethods.OnSuccessWithoutAction(enemy, damageDealer, Skill, dmgCalc, _crit);
+            damageDealer.SendAnimationNearby(156, damageDealer.Position);
+            damageDealer.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
 
             var chain = damageable.GetInFrontToSide();
             chain.AddRange(damageable.DamageableGetBehind());
 
-            if (chain.Count == 0)
-            {
-                OnFailed(sprite);
-                return;
-            }
+            if (chain.Count == 0) return;
 
             foreach (var i in chain.Where(i => sprite.Serial != i.Serial))
             {
-                Task.Delay(200).Wait();
                 damageable.ApplyElementalSkillDamage(damageDealer, dmgCalc, ElementManager.Element.Wind, Skill);
                 damageable.ApplyElementalSkillDamage(damageDealer, dmgCalc, ElementManager.Element.Void, Skill);
                 GlobalSkillMethods.OnSuccessWithoutAction(i, damageDealer, Skill, dmgCalc, _crit);
             }
 
-            damageDealer.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
+            var chain2 = damageable.GetInFrontToSide();
+            chain2.AddRange(damageable.DamageableGetBehind());
+
+            if (chain2.Count == 0) return;
+
+            foreach (var i in chain2.Where(i => sprite.Serial != i.Serial))
+            {
+                damageable.ApplyElementalSkillDamage(damageDealer, dmgCalc, ElementManager.Element.Wind, Skill);
+                damageable.ApplyElementalSkillDamage(damageDealer, dmgCalc, ElementManager.Element.Void, Skill);
+                GlobalSkillMethods.OnSuccessWithoutAction(i, damageDealer, Skill, dmgCalc, _crit);
+            }
+
+            var chain3 = damageable.GetInFrontToSide();
+            chain3.AddRange(damageable.DamageableGetBehind());
+
+            if (chain3.Count == 0) return;
+
+            foreach (var i in chain3.Where(i => sprite.Serial != i.Serial))
+            {
+                damageable.ApplyElementalSkillDamage(damageDealer, dmgCalc, ElementManager.Element.Wind, Skill);
+                damageable.ApplyElementalSkillDamage(damageDealer, dmgCalc, ElementManager.Element.Void, Skill);
+                GlobalSkillMethods.OnSuccessWithoutAction(i, damageDealer, Skill, dmgCalc, _crit);
+            }
         }
         catch
         {

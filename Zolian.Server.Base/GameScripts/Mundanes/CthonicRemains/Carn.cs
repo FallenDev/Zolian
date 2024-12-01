@@ -1,5 +1,7 @@
 ﻿using Darkages.Common;
+using Darkages.Enums;
 using Darkages.GameScripts.Affects;
+using Darkages.GameScripts.Spells;
 using Darkages.Network.Client;
 using Darkages.Network.Server;
 using Darkages.ScriptingBase;
@@ -73,16 +75,36 @@ public class Carn(WorldServer server, Mundane mundane) : MundaneScript(server, m
 
                         if (client.Aisling.GroupId != 0 && client.Aisling.GroupParty != null)
                         {
-                            foreach (var player in client.Aisling.GroupParty.PartyMembers.Values.Where(player => player.Map.ID == 5031))
+                            foreach (var target in client.Aisling.GroupParty.PartyMembers.Values.Where(player => player.Map.ID == 5031))
                             {
                                 var buff = new BuffDoubleExperience();
-                                buff.OnApplied(player, buff);
+                                if (target.CurrentHp > 0)
+                                {
+                                    client.Aisling.SendAnimationNearby(231, null, target.Serial);
+                                    client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(83, false));
+                                }
+                                else
+                                {
+                                    client.Aisling.SendAnimationNearby(231, target.Position);
+                                }
+
+                                target.Client.EnqueueBuffAppliedEvent(target, buff);
                             }
                         }
                         else
                         {
                             var buff = new BuffDoubleExperience();
-                            buff.OnApplied(client.Aisling, buff);
+                            if (client.Aisling.CurrentHp > 0)
+                            {
+                                client.Aisling.SendAnimationNearby(231, null, client.Aisling.Serial);
+                                client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(83, false));
+                            }
+                            else
+                            {
+                                client.Aisling.SendAnimationNearby(231, client.Aisling.Position);
+                            }
+
+                            client.EnqueueBuffAppliedEvent(client.Aisling, buff);
                         }
                     }
                     else
@@ -103,16 +125,36 @@ public class Carn(WorldServer server, Mundane mundane) : MundaneScript(server, m
 
                         if (client.Aisling.GroupId != 0 && client.Aisling.GroupParty != null)
                         {
-                            foreach (var player in client.Aisling.GroupParty.PartyMembers.Values.Where(player => player.Map.ID == 5031))
+                            foreach (var target in client.Aisling.GroupParty.PartyMembers.Values.Where(player => player.Map.ID == 5031))
                             {
                                 var buff = new buff_Dia_Haste();
-                                buff.OnApplied(player, buff);
+                                if (target.CurrentHp > 0)
+                                {
+                                    client.Aisling.SendAnimationNearby(189, null, target.Serial);
+                                    client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(8, false));
+                                }
+                                else
+                                {
+                                    client.Aisling.SendAnimationNearby(189, target.Position);
+                                }
+
+                                target.Client.EnqueueBuffAppliedEvent(target, buff);
                             }
                         }
                         else
                         {
                             var buff = new buff_Dia_Haste();
-                            buff.OnApplied(client.Aisling, buff);
+                            if (client.Aisling.CurrentHp > 0)
+                            {
+                                client.Aisling.SendAnimationNearby(189, null, client.Aisling.Serial);
+                                client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(8, false));
+                            }
+                            else
+                            {
+                                client.Aisling.SendAnimationNearby(189, client.Aisling.Position);
+                            }
+
+                            client.EnqueueBuffAppliedEvent(client.Aisling, buff);
                         }
                     }
                     else
@@ -133,16 +175,36 @@ public class Carn(WorldServer server, Mundane mundane) : MundaneScript(server, m
 
                         if (client.Aisling.GroupId != 0 && client.Aisling.GroupParty != null)
                         {
-                            foreach (var player in client.Aisling.GroupParty.PartyMembers.Values.Where(player => player.Map.ID == 5031))
+                            foreach (var target in client.Aisling.GroupParty.PartyMembers.Values.Where(player => player.Map.ID == 5031))
                             {
                                 var buff = new BuffTripleExperience();
-                                buff.OnApplied(player, buff);
+                                if (target.CurrentHp > 0)
+                                {
+                                    client.Aisling.SendAnimationNearby(231, null, target.Serial);
+                                    client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(83, false));
+                                }
+                                else
+                                {
+                                    client.Aisling.SendAnimationNearby(231, target.Position);
+                                }
+
+                                target.Client.EnqueueBuffAppliedEvent(target, buff);
                             }
                         }
                         else
                         {
                             var buff = new BuffTripleExperience();
-                            buff.OnApplied(client.Aisling, buff);
+                            if (client.Aisling.CurrentHp > 0)
+                            {
+                                client.Aisling.SendAnimationNearby(231, null, client.Aisling.Serial);
+                                client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(83, false));
+                            }
+                            else
+                            {
+                                client.Aisling.SendAnimationNearby(231, client.Aisling.Position);
+                            }
+
+                            client.EnqueueBuffAppliedEvent(client.Aisling, buff);
                         }
                     }
                     else
