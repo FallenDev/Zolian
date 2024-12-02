@@ -67,7 +67,7 @@ public class BlackSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                 //options.Add(new(0x00, "{=bDismantle Weapons"));
                 break;
             case "Artisan":
-                if (client.Aisling.HasItem("Basic Combo Scroll") || client.Aisling.HasItem("Advanced Combo Scroll"))
+                if (client.Aisling.HasItem("Basic Combo Scroll") || client.Aisling.HasItem("Advanced Combo Scroll") || client.Aisling.HasItem("Enhanced Combo Scroll"))
                     options.Add(new(0x50, "Upgrade Combo Scroll"));
                 else if (client.Aisling.HasItem("Enchanted Combo Scroll"))
                     options.Add(new(0x40, "Enchanted Combo Scroll"));

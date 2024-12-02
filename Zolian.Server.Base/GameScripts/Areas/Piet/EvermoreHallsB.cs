@@ -7,7 +7,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Numerics;
 using Darkages.Common;
-using Darkages.Enums;
 using Darkages.Sprites.Entity;
 
 namespace Darkages.GameScripts.Areas.Piet;

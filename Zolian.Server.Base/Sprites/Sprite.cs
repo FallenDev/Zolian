@@ -31,7 +31,7 @@ public abstract class Sprite : INotifyPropertyChanged
     private readonly Lock _spritesWithinRangeLock = new();
     private readonly Lock _getSpritesLock = new();
     private readonly Lock _getAislingDamageLock = new();
-    private readonly Lock _getMonsterDamageLock = new();
+    private readonly Lock _getMovableLock = new();
 
     public bool Alive => CurrentHp > 1;
     public bool Summoned;
@@ -415,6 +415,16 @@ public abstract class Sprite : INotifyPropertyChanged
         lock (_mundanesNearbyLock)
         {
             return UnSafeMundanesNearby().ToList();
+        }
+    }
+
+    private List<Sprite> UnSafeGetMovableSpritesInPosition(int x, int y) => ObjectManager.GetObjects(Map, i => i != null && (int)i.Pos.X == x && (int)i.Pos.Y == y, ObjectManager.Get.Movable);
+
+    public List<Sprite> GetMovableSpritesInPosition(int x, int y)
+    {
+        lock (_getMovableLock)
+        {
+            return UnSafeGetMovableSpritesInPosition(x, y).ToList();
         }
     }
 

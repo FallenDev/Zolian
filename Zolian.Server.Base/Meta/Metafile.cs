@@ -10,14 +10,9 @@ namespace Darkages.Meta;
 
 public class Metafile : CompressableObject
 {
-    public Metafile()
-    {
-        Nodes = new List<MetafileNode>();
-    }
-
     public uint Hash { get; set; }
     public string Name { get; set; }
-    public List<MetafileNode> Nodes { get; init; }
+    public List<MetafileNode> Nodes { get; init; } = [];
 
     protected override void Load(MemoryStream stream)
     {

@@ -2163,7 +2163,7 @@ public class WorldClient : WorldClientBase, IWorldClient
     }
 
     /// <summary>
-    /// 0x6F - MapData Send
+    /// 0x6F - MetaData Send
     /// </summary>
     public void SendMetaData(MetaDataRequestType metaDataRequestType, MetafileManager metaDataStore, string name = null)
     {

@@ -1,5 +1,4 @@
 ﻿using Darkages.Object;
-using Darkages.Sprites;
 using System.Numerics;
 
 namespace Darkages.Types;
@@ -51,33 +50,6 @@ public class TileGrid : ObjectManager
         Parent = parent;
         FScore = fScore;
         CurrentDist = currentDist;
-    }
-
-    public IEnumerable<Sprite> Sprites => AttemptFetchSprites();
-
-    private IEnumerable<Sprite> AttemptFetchSprites()
-    {
-        const int maxAttempts = 3;
-        Exception lastException = null;
-        IEnumerable<Sprite> sprites = null;
-
-        for (var attempt = 0; attempt < maxAttempts; attempt++)
-        {
-            try
-            {
-                sprites = GetObjects(_map, o => o != null && (int)o.Pos.X == _x && (int)o.Pos.Y == _y && o.Alive,
-                    Get.Monsters | Get.Mundanes | Get.Aislings);
-                break;
-            }
-            catch (Exception e)
-            {
-                lastException = e;
-            }
-        }
-
-        if (sprites != null) return sprites;
-        SentrySdk.CaptureException(lastException!);
-        return [];
     }
 
     public bool ShouldRegisterClick

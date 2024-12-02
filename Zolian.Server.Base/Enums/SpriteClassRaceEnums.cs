@@ -1,6 +1,17 @@
 ﻿namespace Darkages.Enums;
 
 [Flags]
+public enum SClassMapper
+{
+    Berserker = 1 << 1,
+    Defender = 1 << 2,
+    Assassin = 1 << 3,
+    Cleric = 1 << 4,
+    Arcanus = 1 << 5,
+    Monk = 1 << 6
+}
+
+[Flags]
 public enum Class
 {
     Peasant = 1,

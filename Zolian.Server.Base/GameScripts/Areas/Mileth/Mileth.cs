@@ -1,5 +1,4 @@
 ﻿using Darkages.Common;
-using Darkages.Enums;
 using Darkages.GameScripts.Formulas;
 using Darkages.Network.Client;
 using Darkages.Network.Server;

@@ -1,6 +1,4 @@
-﻿using System.Security.Cryptography;
-
-using Chaos.Networking.Entities.Server;
+﻿using Chaos.Networking.Entities.Server;
 
 using Darkages.Common;
 using Darkages.Enums;

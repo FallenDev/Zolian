@@ -120,12 +120,13 @@ public class Iaido(Skill skill) : SkillScript(skill)
         }
 
         // Prevent Loss of Macro in Dojo areas
-        if (damageDealer is Aisling aisling && aisling.Map.Flags.MapFlagIsSet(MapFlags.SafeMap))
-        {
-            GlobalSkillMethods.Train(aisling.Client, Skill);
-            OnFailed(aisling);
-            return;
-        }
+        if (damageDealer is Aisling aisling)
+            if (aisling.Map.Flags.MapFlagIsSet(MapFlags.SafeMap))
+            {
+                GlobalSkillMethods.Train(aisling.Client, Skill);
+                OnFailed(aisling);
+                return;
+            }
 
         Target(damageDealer);
     }

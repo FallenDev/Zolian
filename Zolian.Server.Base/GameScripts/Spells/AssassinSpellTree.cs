@@ -427,6 +427,15 @@ public class Hiraishin(Spell spell) : SpellScript(spell)
         if (sprite is Aisling aisling)
         {
             var client = aisling.Client;
+
+            // Prevent Loss of Macro in Dojo areas
+            if (aisling.Map.Flags.MapFlagIsSet(MapFlags.SafeMap))
+            {
+                GlobalSpellMethods.Train(client, Spell);
+                OnFailed(aisling, target);
+                return;
+            }
+
             GlobalSpellMethods.Train(client, Spell);
 
             if (aisling.CurrentMp - Spell.Template.ManaCost > 0)
@@ -557,6 +566,15 @@ public class Shunshin(Spell spell) : SpellScript(spell)
         if (sprite is Aisling aisling)
         {
             var client = aisling.Client;
+
+            // Prevent Loss of Macro in Dojo areas
+            if (aisling.Map.Flags.MapFlagIsSet(MapFlags.SafeMap))
+            {
+                GlobalSpellMethods.Train(client, Spell);
+                OnFailed(aisling, target);
+                return;
+            }
+
             GlobalSpellMethods.Train(client, Spell);
 
             if (aisling.CurrentMp - Spell.Template.ManaCost > 0)

@@ -1,5 +1,4 @@
-﻿using Darkages.Enums;
-using Darkages.GameScripts.Affects;
+﻿using Darkages.GameScripts.Affects;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Sprites.Entity;

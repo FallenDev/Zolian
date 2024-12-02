@@ -15,6 +15,7 @@ public class ObjectManager
         Damageable = Monsters | Aislings,
         Mundanes = 4,
         UpdateNonPlayerSprites = Monsters | Mundanes,
+        Movable = Monsters | Aislings | Mundanes,
         Items = 8,
         Money = 16,
         AllButAislings = Monsters | Mundanes | Items | Money,

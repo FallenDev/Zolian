@@ -3,7 +3,6 @@ using Darkages.Enums;
 using Darkages.Models;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;
-using Microsoft.IdentityModel.Tokens;
 using ServiceStack;
 using System.Numerics;
 using Chaos.Networking.Entities.Server;
@@ -114,7 +113,7 @@ public class Area : Map
         if (x >= sprite.Map.ObjectGrid.GetLength(0) || y >= sprite.Map.ObjectGrid.GetLength(1)) return false; // Bounds check, return false
 
         // Grab list of sprites on x & y
-        var spritesOnLocation = sprite.Map.ObjectGrid[x, y].Sprites.ToList();
+        var spritesOnLocation = sprite.GetMovableSpritesInPosition(x, y);
         if (spritesOnLocation.IsNullOrEmpty()) return false;
         var first = spritesOnLocation.FirstOrDefault();
         return sprite.Target?.Pos != first?.Pos;
@@ -140,7 +139,7 @@ public class Area : Map
     {
         if (x < 0 || y < 0 || x >= sprite.Map.Width || y >= sprite.Map.Height) return true; // Is wall, return true
         if (x >= sprite.Map.ObjectGrid.GetLength(0) || y >= sprite.Map.ObjectGrid.GetLength(1)) return false; // Bounds check, return false
-        return !sprite.Map.ObjectGrid[x, y].Sprites.IsNullOrEmpty();
+        return !sprite.GetMovableSpritesInPosition(x, y).IsNullOrEmpty();
     }
 
     public bool OnLoaded()

@@ -1,6 +1,7 @@
 ﻿using Darkages.Enums;
 using Darkages.Network.Server;
 using System.Numerics;
+using Darkages.Sprites;
 
 namespace Darkages.Types;
 
@@ -74,7 +75,7 @@ public class Position
         return X == pos.X - distance && Y == pos.Y;
     }
 
-    public TileContentPosition[] SurroundingContent(Area map)
+    public TileContentPosition[] SurroundingContent(Sprite sprite, Area map)
     {
         var list = new List<TileContentPosition>();
 
@@ -82,25 +83,25 @@ public class Position
         {
             if (X > 0)
                 list.Add(new TileContentPosition(new Position(X - 1, Y),
-                    !map.ObjectGrid[X - 1, Y].Sprites.Any()
+                    sprite.GetMovableSpritesInPosition(X - 1, Y).Count == 0
                         ? !map.IsWall(X - 1, Y) ? TileContent.None : TileContent.Wall
                         : TileContent.Wall));
 
             if (Y > 0)
                 list.Add(new TileContentPosition(new Position(X, Y - 1),
-                    !map.ObjectGrid[X, Y - 1].Sprites.Any()
+                    sprite.GetMovableSpritesInPosition(X, Y - 1).Count == 0
                         ? !map.IsWall(X, Y - 1) ? TileContent.None : TileContent.Wall
                         : TileContent.Wall));
 
             if (X < map.Height - 1)
                 list.Add(new TileContentPosition(new Position(X + 1, Y),
-                    !map.ObjectGrid[X + 1, Y].Sprites.Any()
+                    sprite.GetMovableSpritesInPosition(X + 1, Y).Count == 0
                         ? !map.IsWall(X + 1, Y) ? TileContent.None : TileContent.Wall
                         : TileContent.Wall));
 
             if (Y < map.Width - 1)
                 list.Add(new TileContentPosition(new Position(X, Y + 1),
-                    !map.ObjectGrid[X, Y + 1].Sprites.Any()
+                    sprite.GetMovableSpritesInPosition(X, Y + 1).Count == 0
                         ? !map.IsWall(X, Y + 1) ? TileContent.None : TileContent.Wall
                         : TileContent.Wall));
         }

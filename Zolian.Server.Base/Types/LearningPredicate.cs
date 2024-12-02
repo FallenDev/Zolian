@@ -28,7 +28,6 @@ public class LearningPredicate
     public int ConRequired { get; set; }
     public int DexRequired { get; set; }
     public int ExpLevelRequired { get; set; }
-    public int AbpLevelRequired { get; set; }
     public uint ExperienceRequired { get; set; }
     public uint GoldRequired { get; set; }
     public int SkillLevelRequired { get; set; }
@@ -38,10 +37,15 @@ public class LearningPredicate
     public ClassStage StageRequired { get; set; }
     public Job JobRequired { get; set; }
     private bool MasterRequired => StageRequired.StageFlagIsSet(ClassStage.Master);
+    private int AbpLevelRequired()
+    {
+        var jobRequired = Convert.ToByte(StageRequired.StageFlagIsSet(ClassStage.Job));
+        return jobRequired == 0 ? 0 : ExpLevelRequired;
+    }
 
     internal string[] MetaData =>
     [
-        $"{ExpLevelRequired}/{Convert.ToByte(MasterRequired)}/{AbpLevelRequired}",
+        $"{ExpLevelRequired}/{Convert.ToByte(MasterRequired)}/{AbpLevelRequired()}",
         $"{(_template is SkillTemplate template ? template.Icon : ((SpellTemplate) _template).Icon)}/0/0",
         $"{(StrRequired == 0 ? 5 : StrRequired)}/{(IntRequired == 0 ? 5 : IntRequired)}/{(WisRequired == 0 ? 5 : WisRequired)}/{(DexRequired == 0 ? 5 : DexRequired)}/{(ConRequired == 0 ? 5 : ConRequired)}",
         $"{(!string.IsNullOrEmpty(SkillRequired) ? SkillRequired : "0")}/{(SkillLevelRequired > 0 ? SkillLevelRequired : 0)}",

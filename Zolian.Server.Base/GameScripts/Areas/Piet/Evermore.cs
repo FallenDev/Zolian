@@ -6,7 +6,6 @@ using Darkages.Types;
 
 using System.Collections.Concurrent;
 using System.Numerics;
-using Darkages.Enums;
 
 namespace Darkages.GameScripts.Areas.Piet;
 

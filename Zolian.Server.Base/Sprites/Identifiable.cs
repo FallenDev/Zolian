@@ -224,7 +224,7 @@ public class Identifiable : Sprite
     public Position GetFromAllSidesEmpty(Sprite target, int tileCount = 1)
     {
         var empty = Position;
-        var blocks = target.Position.SurroundingContent(Map);
+        var blocks = target.Position.SurroundingContent(target, Map);
 
         if (blocks.Length <= 0) return empty;
 
