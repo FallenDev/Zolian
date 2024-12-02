@@ -11,6 +11,7 @@ using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Sprites.Entity;
 using Darkages.Types;
+using MapFlags = Darkages.Enums.MapFlags;
 
 namespace Darkages.GameScripts.Skills;
 
@@ -89,6 +90,15 @@ public class IronSprint(Skill skill) : SkillScript(skill)
             OnFailed(sprite);
             return;
         }
+
+        // Prevent Loss of Macro in Dojo areas
+        if (damageDealer is Aisling aisling)
+            if (aisling.Map.Flags.MapFlagIsSet(MapFlags.SafeMap))
+            {
+                GlobalSkillMethods.Train(aisling.Client, Skill);
+                OnFailed(aisling);
+                return;
+            }
 
         Target(damageDealer);
     }

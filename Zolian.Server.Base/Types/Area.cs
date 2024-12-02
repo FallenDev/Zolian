@@ -116,7 +116,7 @@ public class Area : Map
         var spritesOnLocation = sprite.GetMovableSpritesInPosition(x, y);
         if (spritesOnLocation.IsNullOrEmpty()) return false;
         var first = spritesOnLocation.FirstOrDefault();
-        return sprite.Target?.Pos != first?.Pos;
+        return sprite.Pos != first?.Pos;
     }
 
     /// <summary>
@@ -161,7 +161,7 @@ public class Area : Map
                 {
                     for (byte x = 0; x < Width; x++)
                     {
-                        ObjectGrid[x, y] = new TileGrid(this, x, y);
+                        ObjectGrid[x, y] = new TileGrid();
                         //var leftForeground = ((ushort)(Data[index++] | Data[index++] << 8));
                         //var rightForeground = ((ushort)(Data[index++] | Data[index++] << 8));
 

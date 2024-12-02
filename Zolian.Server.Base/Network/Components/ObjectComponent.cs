@@ -23,14 +23,14 @@ public class ObjectComponent(WorldServer server) : WorldServerComponent(server)
         {
             foreach (var user in readyLoggedIn)
             {
-                if (user.ObjectsUpdating) continue;
                 user.ObjectsUpdating = true;
 
-                while (user.LoggedIn)
+                while (user.LoggedIn && user.ObjectsUpdating)
                 {
                     if (user.Client == null) return;
                     UpdateClientObjects(user);
                     await Task.Delay(50);
+                    user.ObjectsUpdating = false;
                 }
             }
         }

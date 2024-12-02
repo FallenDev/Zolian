@@ -16,6 +16,9 @@ public class Movable : Identifiable
 {
     private readonly Lock _walkLock = new();
 
+    /// <summary>
+    /// Walking logic for NPCs
+    /// </summary>
     private bool Walk()
     {
         void Step0C(int x, int y)
@@ -40,7 +43,7 @@ public class Movable : Identifiable
             PendingX = X;
             PendingY = Y;
 
-            var allowGhostWalk = this is Aisling { GameMaster: true };
+            var allowGhostWalk = false;
 
             if (this is Monster { Template: not null } monster)
             {

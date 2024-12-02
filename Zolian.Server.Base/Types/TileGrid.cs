@@ -5,9 +5,6 @@ namespace Darkages.Types;
 
 public class TileGrid : ObjectManager
 {
-    private readonly Area _map;
-    private readonly int _x;
-    private readonly int _y;
     public readonly bool Impassable;
     public bool HasBeenUsed, IsViewable;
     public float FScore;
@@ -16,11 +13,8 @@ public class TileGrid : ObjectManager
     public Vector2 Parent, Pos;
     public DateTime LastDoorClicked { get; set; } = DateTime.UtcNow;
 
-    public TileGrid(Area map, int x, int y)
+    public TileGrid()
     {
-        _map = map;
-        _x = x;
-        _y = y;
         Impassable = false;
         HasBeenUsed = false;
         IsViewable = false;

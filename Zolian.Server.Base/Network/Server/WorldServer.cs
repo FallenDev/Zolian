@@ -1414,9 +1414,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         aisling.BankManager ??= new BankManager();
         aisling.EquipmentManager ??= new EquipmentManager(aisling.Client);
         aisling.QuestManager ??= new Quests();
-        var skillSet = DecideOnSkillsToPull(client);
-        if (skillSet.IsNullOrEmpty()) return;
-        client.SendMetaData(MetaDataRequestType.DataByName, new MetafileManager(), skillSet);
     }
 
     /// <summary>
@@ -3091,11 +3088,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
             return default;
         }
-    }
-
-    private static string DecideOnSkillsToPull(IWorldClient client)
-    {
-        return client.Aisling == null ? null : SClassDictionary.SkillMap.GetValueOrDefault((client.Aisling.Race, client.Aisling.Path, client.Aisling.PastClass, client.Aisling.JobClass));
     }
 
     #endregion

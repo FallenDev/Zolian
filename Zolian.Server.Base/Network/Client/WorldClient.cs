@@ -608,6 +608,9 @@ public class WorldClient : WorldClientBase, IWorldClient
             if (Aisling.Username == "Death")
                 Aisling.SendAnimationNearby(391, Aisling.Position);
             BoardPostStorage.MailFromDatabase(this);
+            var skillSet = DecideOnSkillsToPull();
+            if (!skillSet.IsNullOrEmpty())
+                SendMetaData(MetaDataRequestType.DataByName, new MetafileManager(), skillSet);
         }
         catch (Exception ex)
         {
@@ -662,6 +665,11 @@ public class WorldClient : WorldClientBase, IWorldClient
         Aisling.MonsterKillCounters = [];
         ReapplyKillCount();
         Aisling.Loading = true;
+    }
+
+    private string DecideOnSkillsToPull()
+    {
+        return Aisling == null ? null : SClassDictionary.SkillMap.GetValueOrDefault((Aisling.Race, Aisling.Path, Aisling.PastClass, Aisling.JobClass));
     }
 
     public WorldClient LoadEquipment(SqlConnection sConn)

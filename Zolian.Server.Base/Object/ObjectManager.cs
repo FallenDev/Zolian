@@ -59,6 +59,11 @@ public class ObjectManager
                     bucket.AddRange(GetObjects<Monster>(map, p).Values);
                     bucket.AddRange(GetObjects<Mundane>(map, p).Values);
                     break;
+                case Get.Movable:
+                    bucket.AddRange(GetObjects<Aisling>(map, p).Values);
+                    bucket.AddRange(GetObjects<Monster>(map, p).Values);
+                    bucket.AddRange(GetObjects<Mundane>(map, p).Values);
+                    break;
                 case Get.Items:
                     bucket.AddRange(GetObjects<Item>(map, p).Values);
                     break;

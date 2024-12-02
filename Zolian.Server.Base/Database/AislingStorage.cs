@@ -367,6 +367,7 @@ public record AislingStorage : Sql, IEqualityOperators<AislingStorage, AislingSt
 
     private static Task PlayerSaveRoutine(Aisling player, SqlConnection connection)
     {
+        if (player.Client == null) return Task.CompletedTask;
         player.Client.LastSave = DateTime.UtcNow;
         var dt = PlayerDataTable();
         var qDt = QuestDataTable();
