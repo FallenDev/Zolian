@@ -1289,9 +1289,9 @@ public class Consumable(Item item) : ItemScript(item)
                                 _ => stockingItem
                             };
 
-                            if (aisling.HasItem("Old Cathonic Saber"))
+                            if (aisling.HasItem("Old Cathonic Saber") && stockingItem.Template.Name == "Old Cathonic Saber")
                             {
-                                client.SendServerMessage(ServerMessageType.ActiveMessage, $"You can only hold one of these.");
+                                client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=qYou can only hold one of these. {{=u(Another try given!)");
                                 return;
                             }
 

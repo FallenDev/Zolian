@@ -1165,8 +1165,105 @@ public class Damageable : Movable
 
     private long LevelDamageMitigation(Sprite damageDealingSprite, long dmg)
     {
-        if (Level <= damageDealingSprite.Level) return dmg;
-        var diff = Level - damageDealingSprite.Level;
+        switch (damageDealingSprite)
+        {
+            case Monster when this is Aisling:
+                return LevelMitigationMonsterToAisling(damageDealingSprite, dmg);
+            case Monster when this is Monster:
+                return LevelMitigationMonsterToMonster(damageDealingSprite, dmg);
+            case Aisling damageDealer when this is Aisling:
+                return LevelMitigationAislingToAisling(damageDealer, dmg);
+            case Aisling damageDealer when this is Monster:
+                return LevelMitigationAislingToMonster(damageDealer, dmg);
+        }
+
+        return dmg;
+    }
+
+    private long LevelMitigationMonsterToAisling(Sprite monster, long dmg)
+    {
+        if (this is not Aisling defender) return dmg;
+        if (defender.ExpLevel + defender.AbpLevel <= monster.Level) return dmg;
+        var diff = (defender.ExpLevel + defender.AbpLevel) - monster.Level;
+
+        switch (diff)
+        {
+            case >= 10 and < 25:
+                dmg = (long)(dmg * .60);
+                break;
+            case >= 25 and < 50:
+                dmg = (long)(dmg * .45);
+                break;
+            case >= 50 and < 75:
+                dmg = (long)(dmg * .30);
+                break;
+            case >= 75:
+                dmg = (long)(dmg * .15);
+                break;
+            default:
+                return dmg;
+        }
+
+        return dmg;
+    }
+
+    private long LevelMitigationMonsterToMonster(Sprite monster, long dmg)
+    {
+        if (Level <= monster.Level) return dmg;
+        var diff = Level - monster.Level;
+
+        switch (diff)
+        {
+            case >= 10 and < 25:
+                dmg = (long)(dmg * .60);
+                break;
+            case >= 25 and < 50:
+                dmg = (long)(dmg * .45);
+                break;
+            case >= 50 and < 75:
+                dmg = (long)(dmg * .30);
+                break;
+            case >= 75:
+                dmg = (long)(dmg * .15);
+                break;
+            default:
+                return dmg;
+        }
+
+        return dmg;
+    }
+
+    private long LevelMitigationAislingToAisling(Aisling attacker, long dmg)
+    {
+        if (this is not Aisling defender) return dmg;
+        if (defender.ExpLevel + defender.AbpLevel <= attacker.ExpLevel + attacker.AbpLevel) return dmg;
+        var diff = (defender.ExpLevel + defender.AbpLevel) - (attacker.ExpLevel + attacker.AbpLevel);
+
+        switch (diff)
+        {
+            case >= 10 and < 25:
+                dmg = (long)(dmg * .60);
+                break;
+            case >= 25 and < 50:
+                dmg = (long)(dmg * .45);
+                break;
+            case >= 50 and < 75:
+                dmg = (long)(dmg * .30);
+                break;
+            case >= 75:
+                dmg = (long)(dmg * .15);
+                break;
+            default:
+                return dmg;
+        }
+
+        return dmg;
+    }
+
+    private long LevelMitigationAislingToMonster(Aisling aisling, long dmg)
+    {
+        if (Level <= aisling.ExpLevel + aisling.AbpLevel) return dmg;
+        var diff = Level - aisling.ExpLevel + aisling.AbpLevel;
 
         switch (diff)
         {

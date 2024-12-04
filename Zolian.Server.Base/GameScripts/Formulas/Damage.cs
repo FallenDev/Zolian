@@ -2,6 +2,7 @@
 using Darkages.Network.Server;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;
+using Darkages.Sprites.Entity;
 
 namespace Darkages.GameScripts.Formulas;
 
@@ -11,22 +12,46 @@ namespace Darkages.GameScripts.Formulas;
 [Script("Base Damage")]
 public class Damage : DamageFormulaScript
 {
-    public Damage(Sprite obj, Sprite target, MonsterEnums type) { }
+    public Damage(Sprite attacker, Sprite defender, MonsterEnums type) { }
 
-    public override double Calculate(Sprite obj, Sprite target, MonsterEnums type)
+    public override double Calculate(Sprite attacker, Sprite defender, MonsterEnums type)
     {
-        if (target is null) return 0;
+        if (defender is null) return 0;
+        double dmg = 0;
+        
+        switch (attacker)
+        {
+            case Monster when defender is Aisling damageReceiver:
+                {
+                    dmg = attacker.Level * (type == MonsterEnums.Physical ? 1 : 2) * ServerSetup.Instance.Config.BaseDamageMod;
+                    var diff = (damageReceiver.ExpLevel + damageReceiver.AbpLevel) - attacker.Level;
+                    dmg *= diff;
+                }
+                break;
+            case Monster when defender is Monster:
+                {
+                    dmg = attacker.Level * (type == MonsterEnums.Physical ? 1 : 2) * ServerSetup.Instance.Config.BaseDamageMod;
+                    var diff = defender.Level - attacker.Level;
+                    dmg *= diff;
+                }
+                break;
+            case Aisling damageDealer when defender is Aisling damageReceiver:
+                {
+                    dmg = (damageDealer.ExpLevel + damageDealer.AbpLevel) * (type == MonsterEnums.Physical ? 1 : 2) * ServerSetup.Instance.Config.BaseDamageMod;
+                    var diff = (damageReceiver.ExpLevel + damageReceiver.AbpLevel) - (damageDealer.ExpLevel + damageDealer.AbpLevel);
+                    dmg *= diff;
+                }
+                break;
+            case Aisling damageDealer when defender is Monster:
+                {
+                    dmg = (damageDealer.ExpLevel + damageDealer.AbpLevel) * (type == MonsterEnums.Physical ? 1 : 2) * ServerSetup.Instance.Config.BaseDamageMod;
+                    var diff = defender.Level - (damageDealer.ExpLevel + damageDealer.AbpLevel);
+                    dmg *= diff;
+                }
+                break;
+        }
 
-        double dmg;
-        var diff = (double)(obj.Level - target.Level);
-
-        if (diff <= 0)
-            dmg = obj.Level * (type == MonsterEnums.Physical ? 1 : 2) * ServerSetup.Instance.Config.BaseDamageMod;
-        else
-            dmg = obj.Level * (type == MonsterEnums.Physical ? 1 : 2) * (ServerSetup.Instance.Config.BaseDamageMod * diff);
-
-        if (dmg <= 0)
-            dmg = 1;
+        if (dmg <= 0) dmg = 1;
 
         return dmg;
     }
