@@ -1074,7 +1074,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         {
             if (localClient.Aisling.DrunkenFist)
             {
-                var slurred = Generator.RandomNumPercentGen();
+                var slurred = Generator.RandomPercentPrecise();
                 if (slurred >= .50)
                 {
                     const string drunk = "..   .hic!  ";
@@ -1562,7 +1562,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             if (localArgs.Message.Length > 100) return default;
             if (localClient.Aisling.DrunkenFist)
             {
-                var slurred = Generator.RandomNumPercentGen();
+                var slurred = Generator.RandomPercentPrecise();
                 if (slurred >= .50)
                 {
                     const string drunk = "..   .hic!  ";

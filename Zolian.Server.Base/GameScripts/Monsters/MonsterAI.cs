@@ -276,7 +276,7 @@ public class BaseMonsterIntelligence : MonsterScript
         // Training Dummy or other enemies who can't attack
         if (Monster.SpellScripts.Count == 0) return;
 
-        if (!(Generator.RandomNumPercentGen() >= 0.70)) return;
+        if (!(Generator.RandomPercentPrecise() >= 0.70)) return;
         var spellIdx = RandomNumberGenerator.GetInt32(Monster.SpellScripts.Count);
 
         if (Monster.SpellScripts[spellIdx] is null) return;
@@ -551,7 +551,7 @@ public class WeakCommon : MonsterScript
         // Training Dummy or other enemies who can't attack
         if (Monster.SpellScripts.Count == 0) return;
 
-        if (!(Generator.RandomNumPercentGen() >= 0.70)) return;
+        if (!(Generator.RandomPercentPrecise() >= 0.70)) return;
         var spellIdx = RandomNumberGenerator.GetInt32(Monster.SpellScripts.Count);
 
         if (Monster.SpellScripts[spellIdx] is null) return;
@@ -1001,7 +1001,7 @@ public class ShadowSight : MonsterScript
         // Training Dummy or other enemies who can't attack
         if (Monster.SpellScripts.Count == 0) return;
 
-        if (!(Generator.RandomNumPercentGen() >= 0.70)) return;
+        if (!(Generator.RandomPercentPrecise() >= 0.70)) return;
         var spellIdx = RandomNumberGenerator.GetInt32(Monster.SpellScripts.Count);
 
         if (Monster.SpellScripts[spellIdx] is null) return;
@@ -1276,7 +1276,7 @@ public class WeakShadowSight : MonsterScript
         // Training Dummy or other enemies who can't attack
         if (Monster.SpellScripts.Count == 0) return;
 
-        if (!(Generator.RandomNumPercentGen() >= 0.70)) return;
+        if (!(Generator.RandomPercentPrecise() >= 0.70)) return;
         var spellIdx = RandomNumberGenerator.GetInt32(Monster.SpellScripts.Count);
 
         if (Monster.SpellScripts[spellIdx] is null) return;

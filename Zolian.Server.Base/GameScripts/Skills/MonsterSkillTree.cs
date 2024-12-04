@@ -534,6 +534,8 @@ public class TailSlap(Skill skill) : SkillScript(skill)
         _crit = false;
         if (sprite is not Monster damageMonster) return 0;
         var dmg = damageMonster.Str * 25 + damageMonster.Dex * 32 * damageMonster.Dmg;
+        if (damageMonster.Template.BaseName == "Bahamut")
+            dmg *= 250;
         var critCheck = GlobalSkillMethods.OnCrit(dmg);
         _crit = critCheck.Item1;
         return critCheck.Item2;
@@ -746,7 +748,7 @@ public class HowlAndCall(Skill skill) : SkillScript(skill)
 
         try
         {
-            if (!(Generator.RandomNumPercentGen() >= 0.70)) return;
+            if (!(Generator.RandomPercentPrecise() >= 0.70)) return;
 
             var monstersNearby = casterMonster.MonstersOnMap();
 

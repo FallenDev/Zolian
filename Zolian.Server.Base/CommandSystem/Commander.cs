@@ -5,8 +5,6 @@ using Darkages.Network.Client;
 using Darkages.Templates;
 using Darkages.Types;
 using Microsoft.Extensions.Logging;
-
-using System.Collections.Concurrent;
 using Darkages.Object;
 using Gender = Darkages.Enums.Gender;
 using Darkages.Network.Server;
@@ -440,14 +438,14 @@ public static class Commander
         ServerSetup.EventsLogger("------------- Maps Reloaded -------------", LogLevel.Warning);
 
         // Wipe
-        ServerSetup.Instance.TempGlobalMapCache = new Dictionary<int, Area>();
-        ServerSetup.Instance.TempGlobalWarpTemplateCache = new();
+        ServerSetup.Instance.TempGlobalMapCache = [];
+        ServerSetup.Instance.TempGlobalWarpTemplateCache = [];
         
         foreach (var npc in ServerSetup.Instance.GlobalMundaneCache.Values)
         {
             ObjectManager.DelObject(npc);
         }
-        ServerSetup.Instance.GlobalMundaneCache = new ConcurrentDictionary<uint, Mundane>();
+        ServerSetup.Instance.GlobalMundaneCache = [];
 
         // Reload
         AreaStorage.Instance.CacheFromDatabase();

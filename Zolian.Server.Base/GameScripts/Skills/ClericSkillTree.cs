@@ -63,6 +63,12 @@ public class Blink(Skill skill) : SkillScript(skill)
             return;
         }
 
+        if (map.ID is >= 6530 and <= 6580)
+        {
+            client.SendServerMessage(ServerMessageType.ActiveMessage, "As you go to use your feather, something blocks it.");
+            return;
+        }
+
         try
         {
             _oldPosition = sprite.Position;

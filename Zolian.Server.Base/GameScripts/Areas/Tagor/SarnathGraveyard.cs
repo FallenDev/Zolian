@@ -4,8 +4,6 @@ using Darkages.Network.Client;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Types;
-
-using System.Collections.Concurrent;
 using System.Numerics;
 
 namespace Darkages.GameScripts.Areas.Tagor;
@@ -13,22 +11,20 @@ namespace Darkages.GameScripts.Areas.Tagor;
 [Script("Sarnath Graveyard")]
 public class SarnathGraveyard : AreaScript
 {
-    private readonly ConcurrentDictionary<long, Aisling> _playersOnMap = [];
     private Debuff _debuff1;
     private Debuff _debuff2;
 
     public SarnathGraveyard(Area area) : base(area) => Area = area;
     public override void Update(TimeSpan elapsedTime) { }
 
-    public override void OnMapEnter(WorldClient client) => _playersOnMap.TryAdd(client.Aisling.Serial, client.Aisling);
+    public override void OnMapEnter(WorldClient client) { }
 
-    public override void OnMapExit(WorldClient client) => _playersOnMap.TryRemove(client.Aisling.Serial, out _);
+    public override void OnMapExit(WorldClient client) { }
 
     public override void OnPlayerWalk(WorldClient client, Position oldLocation, Position newLocation)
     {
         var vectorMap = new Vector2(newLocation.X, newLocation.Y);
         if (client.Aisling.Pos != vectorMap) return;
-        _playersOnMap.TryAdd(client.Aisling.Serial, client.Aisling);
 
         if (ReflexCheck(client.Aisling)) return;
         _debuff1 = new DebuffArdPoison();

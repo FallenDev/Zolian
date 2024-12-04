@@ -357,7 +357,7 @@ public static class NpcShopExtensions
     /// <returns>Quality</returns>
     public static Item.Quality DungeonLowQuality()
     {
-        var qualityGen = Generator.RandomNumPercentGen();
+        var qualityGen = Generator.RandomPercentPrecise();
 
         return qualityGen switch
         {
@@ -374,7 +374,7 @@ public static class NpcShopExtensions
     /// <returns>Quality</returns>
     public static Item.Quality DungeonMediumQuality()
     {
-        var qualityGen = Generator.RandomNumPercentGen();
+        var qualityGen = Generator.RandomPercentPrecise();
 
         return qualityGen switch
         {
@@ -391,7 +391,7 @@ public static class NpcShopExtensions
     /// <returns>Quality</returns>
     public static Item.Quality DungeonHighQuality()
     {
-        var qualityGen = Generator.RandomNumPercentGen();
+        var qualityGen = Generator.RandomPercentPrecise();
 
         return qualityGen switch
         {
@@ -409,7 +409,7 @@ public static class NpcShopExtensions
     /// <returns>Quality</returns>
     public static Item.Quality QuestLowQuality()
     {
-        var qualityGen = Generator.RandomNumPercentGen();
+        var qualityGen = Generator.RandomPercentPrecise();
 
         return qualityGen switch
         {
@@ -426,7 +426,7 @@ public static class NpcShopExtensions
     /// <returns>Quality</returns>
     public static Item.Quality QuestMediumQuality()
     {
-        var qualityGen = Generator.RandomNumPercentGen();
+        var qualityGen = Generator.RandomPercentPrecise();
 
         return qualityGen switch
         {
@@ -443,7 +443,7 @@ public static class NpcShopExtensions
     /// <returns>Quality</returns>
     public static Item.Quality QuestHighQuality()
     {
-        var qualityGen = Generator.RandomNumPercentGen();
+        var qualityGen = Generator.RandomPercentPrecise();
 
         return qualityGen switch
         {

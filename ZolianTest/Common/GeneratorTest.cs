@@ -80,7 +80,7 @@ internal class GeneratorTest
     {
         for (var i = 0; i < 1000; i++)
         {
-            var result = Generator.RandomNumPercentGen();
+            var result = Generator.RandomPercentPrecise();
             var inRange = result is >= 0.00 and <= 1.0;
             Assert.That(inRange);
         }

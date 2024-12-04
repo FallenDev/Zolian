@@ -337,7 +337,7 @@ public class Potion(Item item) : ItemScript(item)
                                     client.Aisling.CurrentMp = 1;
                                 client.SendServerMessage(ServerMessageType.OrangeBar1, "Rummmm, why.. is all the rum Gone! 500 hp, -180 mp");
 
-                                var rand = Generator.RandomNumPercentGen();
+                                var rand = Generator.RandomPercentPrecise();
                                 if (rand >= 0.99)
                                 {
                                     var buff = new buff_drunkenFist();
@@ -539,7 +539,7 @@ public class Potion(Item item) : ItemScript(item)
                             break;
                         case "Fresh Blowfish":
                             {
-                                var rand = Generator.RandomNumPercentGen();
+                                var rand = Generator.RandomPercentPrecise();
                                 if (rand >= 0.50)
                                 {
                                     client.Aisling.CurrentHp = client.Aisling.MaximumHp;

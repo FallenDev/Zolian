@@ -1,7 +1,8 @@
-﻿{=aWelcome to Zolian.
-{=bZolian: {=uis a server based on Dungeons & Dragons (D20), Final Fantasy Series, Blizzard's Diablo & World of Warcraft, Zelda Series, Elder Scrolls Series, and many other MMORPGs. ({=cAll Rights Reserved{=u)
-The mechanics are from traditional JRPGs and may feel addicting. Here, the main focus is on character building, where you can play solo or with friends.  
-{=eGame content is now officially in {=cRelease{=e. Fixes to the server will happen often, character(s) are backedup and if a server is going offline, a warning will be displayed in discord as well as announced on the server shortly before an outage. {=sMaintenance will last around 2 - 5 minutes.
+﻿{=aWelcome to {=bZolian                            {=uStatus: {=qReleased
+{=uThis is a server based on Dungeons & Dragons (D20), Final Fantasy Series, Blizzard's Diablo & World of Warcraft, Zelda Series, Elder Scrolls Series, and many other MMORPGs. ({=cAll Rights Reserved{=u)
+The in-game mechanics are derived from traditional JRPGs and may feel addicting. The main focus here is character building, where zones can be designed for solo-play or group settings. 
+{=sRemember{=e, be mindful of your gaming time and set healthy limits to prevent potential addiction; {=sExcessive {=egaming can negatively impact your {=bphysical {=eand {=bmental {=ewell-being, social life, and responsibilities.
+{=qUpdates to this server will still happen frequently with new content or performance fixes. {=sBack Online: {=q2 - 5 minutes
 {=cFair Use in accordance of U.S. Const. Art. I, SS 8, cl. 8. under Section 107 of the Copyright Act "Nonprofit Educational Purposes"
 {=eThank you,
-- {=bAlvino - GM Death
+{=uAlvino {=c- {=bGM Death

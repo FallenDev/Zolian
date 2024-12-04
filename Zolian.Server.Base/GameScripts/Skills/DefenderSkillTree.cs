@@ -505,7 +505,7 @@ public class Beag_Suain_Ia_Gar(Skill skill) : SkillScript(skill)
             foreach (var target in list)
             {
                 var debuff = new DebuffBeagsuaingar();
-                var chance = Generator.RandomNumPercentGen();
+                var chance = Generator.RandomPercentPrecise();
                 if (chance <= 0.85)
                     GlobalSkillMethods.ApplyPhysicalDebuff(damageDealer, debuff, target, Skill);
             }

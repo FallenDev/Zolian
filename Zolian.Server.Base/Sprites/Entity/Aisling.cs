@@ -720,7 +720,8 @@ public sealed class Aisling : Player, IAisling
         if (!allowGhostWalk)
         {
             if (Map.IsWall(PendingX, PendingY)) return false;
-            if (Area.IsSpriteInLocationOnWalk(this, PendingX, PendingY)) return false;
+            if (Area.IsSpriteInLocationOnWalk
+                    (this, PendingX, PendingY)) return false;
         }
 
         foreach (var player in AislingsNearby())

@@ -1,12 +1,8 @@
 ﻿using Darkages.Network.Client;
 using Darkages.Network.Server;
 using Darkages.ScriptingBase;
-using Darkages.Sprites;
 using Darkages.Sprites.Entity;
 using Darkages.Types;
-
-using System.Collections.Concurrent;
-
 using Gender = Darkages.Enums.Gender;
 
 namespace Darkages.GameScripts.Areas.Tutorial;
@@ -14,16 +10,12 @@ namespace Darkages.GameScripts.Areas.Tutorial;
 [Script("Intro")]
 public class Intro : AreaScript
 {
-    private readonly ConcurrentDictionary<long, Aisling> _playersOnMap = [];
-
     public Intro(Area area) : base(area) => Area = area;
 
     public override void Update(TimeSpan elapsedTime) { }
 
     public override async void OnMapEnter(WorldClient client)
     {
-        _playersOnMap.TryAdd(client.Aisling.Serial, client.Aisling);
-
         await Task.Delay(250).ContinueWith(ct =>
         {
             var item = new Item();
@@ -69,12 +61,10 @@ public class Intro : AreaScript
         }).ConfigureAwait(false);
     }
 
-    public override void OnMapExit(WorldClient client) => _playersOnMap.TryRemove(client.Aisling.Serial, out _);
+    public override void OnMapExit(WorldClient client) { }
 
     public override void OnPlayerWalk(WorldClient client, Position oldLocation, Position newLocation)
     {
-        _playersOnMap.TryAdd(client.Aisling.Serial, client.Aisling);
-
         var item = new Item();
         item = item.Create(client.Aisling,
             client.Aisling.Gender == Gender.Female

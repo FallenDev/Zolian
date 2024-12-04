@@ -89,7 +89,7 @@ public class Talos(WorldServer server, Mundane mundane) : MundaneScript(server, 
 
     private static bool RefineNode(Aisling player)
     {
-        var tryRefine = Generator.RandomNumPercentGen();
+        var tryRefine = Generator.RandomPercentPrecise();
 
         switch (player.QuestManager.StoneSmithingTier)
         {

@@ -40,7 +40,7 @@ public class Consumable(Item item) : ItemScript(item)
 
             case "Stocking Stuffer":
                 {
-                    var rand = Generator.RandomNumPercentGen();
+                    var rand = Generator.RandomPercentPrecise();
                     var stockingItem = new Item();
                     var quality = ItemQualityVariance.DetermineQuality();
                     var variance = ItemQualityVariance.DetermineVariance();
@@ -192,7 +192,7 @@ public class Consumable(Item item) : ItemScript(item)
                 {
                     if (aisling.HasItem("Moonstone Lockpick"))
                     {
-                        var chance = Generator.RandomNumPercentGen();
+                        var chance = Generator.RandomPercentPrecise();
                         if (chance <= .20)
                         {
                             client.SendServerMessage(ServerMessageType.ActiveMessage, "{=qClick! Ahh, Gold!!");
@@ -350,7 +350,7 @@ public class Consumable(Item item) : ItemScript(item)
                 }
             case "Betrayal Blossom":
                 {
-                    var chance = Generator.RandomNumPercentGen();
+                    var chance = Generator.RandomPercentPrecise();
                     aisling.Debuffs.TryGetValue("Skulled", out var skulled);
                     aisling.SendAnimationNearby(49, aisling.Position);
                     client.TakeAwayQuantity(client.Aisling, "Betrayal Blossom", 1);
@@ -470,7 +470,7 @@ public class Consumable(Item item) : ItemScript(item)
             case "Aiten Bloom":
                 {
                     client.TakeAwayQuantity(client.Aisling, "Aiten Bloom", 1);
-                    var chance = Generator.RandomNumPercentGen();
+                    var chance = Generator.RandomPercentPrecise();
                     if (aisling.IsAited)
                     {
                         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Pollen doesn't seem to affect you");
@@ -1261,11 +1261,60 @@ public class Consumable(Item item) : ItemScript(item)
 
             #region Bags & Chests
 
+            case "Medium Treasure Chest":
+                {
+                    if (aisling.HasItem("Diamite Lockpick"))
+                    {
+                        var chance = Generator.RandomPercentPrecise();
+
+                        if (chance <= .80)
+                        {
+                            client.SendServerMessage(ServerMessageType.ActiveMessage, "{=qClick! Nice, it opened!");
+                            client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(132, false));
+
+                            var rand = Generator.RandomPercentPrecise();
+                            var stockingItem = new Item();
+                            var quality = ItemQualityVariance.DetermineQuality();
+                            var variance = ItemQualityVariance.DetermineVariance();
+                            var wVariance = ItemQualityVariance.DetermineWeaponVariance();
+
+                            stockingItem = rand switch
+                            {
+                                > 0 and <= 0.20 => stockingItem.Create(aisling, "Ruined Arm Guards", quality, variance, wVariance),
+                                > 0.20 and <= 0.40 => stockingItem.Create(aisling, "Ruined Shinguards", quality, variance, wVariance),
+                                > 0.40 and <= 0.50 => stockingItem.Create(aisling, "Eternal Knot Band", quality, variance, wVariance),
+                                > 0.50 and <= 0.60 => stockingItem.Create(aisling, "Enchanted Knot Band", quality, variance, wVariance),
+                                > 0.60 and <= 0.80 => stockingItem.Create(aisling, "Gold Pouch", quality, variance, wVariance),
+                                > 0.80 => stockingItem.Create(aisling, "Old Cathonic Saber", quality, variance, wVariance),
+                                _ => stockingItem
+                            };
+
+                            if (aisling.HasItem("Old Cathonic Saber"))
+                            {
+                                client.SendServerMessage(ServerMessageType.ActiveMessage, $"You can only hold one of these.");
+                                return;
+                            }
+
+                            stockingItem.GiveTo(client.Aisling);
+                            client.Aisling.Inventory.RemoveFromInventory(client, Item);
+                            return;
+                        }
+
+                        var lockpick = aisling.HasItemReturnItem("Diamite Lockpick");
+                        aisling.Inventory.RemoveRange(client, lockpick, 1);
+                        client.SendServerMessage(ServerMessageType.ActiveMessage, "{=bLockpick snapped!");
+                        return;
+                    }
+
+                    client.SendServerMessage(ServerMessageType.ActiveMessage, "{=bIt's Locked!");
+                    return;
+                }
+
             case "Strong Treasure Chest":
                 {
                     if (aisling.HasItem("Diamite Lockpick"))
                     {
-                        var chance = Generator.RandomNumPercentGen();
+                        var chance = Generator.RandomPercentPrecise();
 
                         if (chance <= .80)
                         {
@@ -1273,7 +1322,7 @@ public class Consumable(Item item) : ItemScript(item)
                             client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(132, false));
                             client.Aisling.GiveGold((uint)Random.Shared.Next(5000000, 10000000));
 
-                            var rand = Generator.RandomNumPercentGen();
+                            var rand = Generator.RandomPercentPrecise();
                             var stockingItem = new Item();
                             var quality = ItemQualityVariance.DetermineQuality();
                             var variance = ItemQualityVariance.DetermineVariance();
@@ -1296,6 +1345,7 @@ public class Consumable(Item item) : ItemScript(item)
 
                             stockingItem.GiveTo(client.Aisling);
                             client.Aisling.Inventory.RemoveFromInventory(client, Item);
+                            return;
                         }
 
                         var lockpick = aisling.HasItemReturnItem("Diamite Lockpick");
@@ -1305,6 +1355,18 @@ public class Consumable(Item item) : ItemScript(item)
                     }
 
                     client.SendServerMessage(ServerMessageType.ActiveMessage, "{=bIt's Locked!");
+                    return;
+                }
+
+            case "Gold Pouch":
+                {
+                    var chance = Generator.RandomPercentPrecise();
+                    var gold = Random.Shared.Next(15000000, 45000000);
+                    var variance = gold * chance;
+                    var payout = (uint)(gold + variance);
+                    client.Aisling.GiveGold(payout);
+                    client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(132, false));
+                    client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=qReceived: {payout} gold!");
                     return;
                 }
 

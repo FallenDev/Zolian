@@ -98,7 +98,7 @@ public class MonolithComponent(WorldServer server) : WorldServerComponent(server
 
         if (map.MiningNodes.MapNodeFlagIsSet(MiningNodes.Talos))
         {
-            var nodeChance = Generator.RandomNumPercentGen();
+            var nodeChance = Generator.RandomPercentPrecise();
 
             if (nodeChance >= .50)
                 return new Item().Create(map, ServerSetup.Instance.GlobalItemTemplateCache["Raw Talos"]);
@@ -106,7 +106,7 @@ public class MonolithComponent(WorldServer server) : WorldServerComponent(server
 
         if (map.MiningNodes.MapNodeFlagIsSet(MiningNodes.Copper))
         {
-            var nodeChance = Generator.RandomNumPercentGen();
+            var nodeChance = Generator.RandomPercentPrecise();
 
             if (nodeChance >= .50)
                 return new Item().Create(map, ServerSetup.Instance.GlobalItemTemplateCache["Raw Copper"]);
@@ -114,7 +114,7 @@ public class MonolithComponent(WorldServer server) : WorldServerComponent(server
 
         if (map.MiningNodes.MapNodeFlagIsSet(MiningNodes.DarkIron))
         {
-            var nodeChance = Generator.RandomNumPercentGen();
+            var nodeChance = Generator.RandomPercentPrecise();
 
             if (nodeChance >= .50)
                 return new Item().Create(map, ServerSetup.Instance.GlobalItemTemplateCache["Raw Dark Iron"]);
@@ -122,7 +122,7 @@ public class MonolithComponent(WorldServer server) : WorldServerComponent(server
 
         if (map.MiningNodes.MapNodeFlagIsSet(MiningNodes.Hybrasyl))
         {
-            var nodeChance = Generator.RandomNumPercentGen();
+            var nodeChance = Generator.RandomPercentPrecise();
 
             if (nodeChance >= .50)
                 return new Item().Create(map, ServerSetup.Instance.GlobalItemTemplateCache["Raw Hybrasyl"]);
@@ -130,7 +130,7 @@ public class MonolithComponent(WorldServer server) : WorldServerComponent(server
 
         if (map.MiningNodes.MapNodeFlagIsSet(MiningNodes.CobaltSteel))
         {
-            var nodeChance = Generator.RandomNumPercentGen();
+            var nodeChance = Generator.RandomPercentPrecise();
 
             if (nodeChance >= .50)
                 return new Item().Create(map, ServerSetup.Instance.GlobalItemTemplateCache["Raw Cobalt Steel"]);
@@ -138,7 +138,7 @@ public class MonolithComponent(WorldServer server) : WorldServerComponent(server
 
         if (map.MiningNodes.MapNodeFlagIsSet(MiningNodes.Obsidian))
         {
-            var nodeChance = Generator.RandomNumPercentGen();
+            var nodeChance = Generator.RandomPercentPrecise();
 
             if (nodeChance >= .50)
                 return new Item().Create(map, ServerSetup.Instance.GlobalItemTemplateCache["Raw Obsidian"]);
@@ -193,7 +193,7 @@ public class MonolithComponent(WorldServer server) : WorldServerComponent(server
 
         if (map.WildFlowers.MapFlowerFlagIsSet(WildFlowers.GloomBloom))
         {
-            var nodeChance = Generator.RandomNumPercentGen();
+            var nodeChance = Generator.RandomPercentPrecise();
 
             if (nodeChance >= .50)
                 return new Item().Create(map, ServerSetup.Instance.GlobalItemTemplateCache["Gloom Bloom"]);
@@ -201,7 +201,7 @@ public class MonolithComponent(WorldServer server) : WorldServerComponent(server
 
         if (map.WildFlowers.MapFlowerFlagIsSet(WildFlowers.Betrayal))
         {
-            var nodeChance = Generator.RandomNumPercentGen();
+            var nodeChance = Generator.RandomPercentPrecise();
 
             if (nodeChance >= .50)
                 return new Item().Create(map, ServerSetup.Instance.GlobalItemTemplateCache["Betrayal Blossom"]);
@@ -209,7 +209,7 @@ public class MonolithComponent(WorldServer server) : WorldServerComponent(server
 
         if (map.WildFlowers.MapFlowerFlagIsSet(WildFlowers.Bocan))
         {
-            var nodeChance = Generator.RandomNumPercentGen();
+            var nodeChance = Generator.RandomPercentPrecise();
 
             if (nodeChance >= .50)
                 return new Item().Create(map, ServerSetup.Instance.GlobalItemTemplateCache["Bocan Branch"]);
@@ -217,7 +217,7 @@ public class MonolithComponent(WorldServer server) : WorldServerComponent(server
 
         if (map.WildFlowers.MapFlowerFlagIsSet(WildFlowers.Cactus))
         {
-            var nodeChance = Generator.RandomNumPercentGen();
+            var nodeChance = Generator.RandomPercentPrecise();
 
             if (nodeChance >= .50)
                 return new Item().Create(map, ServerSetup.Instance.GlobalItemTemplateCache["Cactus Lilium"]);
@@ -225,7 +225,7 @@ public class MonolithComponent(WorldServer server) : WorldServerComponent(server
 
         if (map.WildFlowers.MapFlowerFlagIsSet(WildFlowers.Prahed))
         {
-            var nodeChance = Generator.RandomNumPercentGen();
+            var nodeChance = Generator.RandomPercentPrecise();
 
             if (nodeChance >= .50)
                 return new Item().Create(map, ServerSetup.Instance.GlobalItemTemplateCache["Prahed Bellis"]);
@@ -233,7 +233,7 @@ public class MonolithComponent(WorldServer server) : WorldServerComponent(server
 
         if (map.WildFlowers.MapFlowerFlagIsSet(WildFlowers.Aiten))
         {
-            var nodeChance = Generator.RandomNumPercentGen();
+            var nodeChance = Generator.RandomPercentPrecise();
 
             if (nodeChance >= .50)
                 return new Item().Create(map, ServerSetup.Instance.GlobalItemTemplateCache["Aiten Bloom"]);
@@ -241,7 +241,7 @@ public class MonolithComponent(WorldServer server) : WorldServerComponent(server
 
         if (map.WildFlowers.MapFlowerFlagIsSet(WildFlowers.Reict))
         {
-            var nodeChance = Generator.RandomNumPercentGen();
+            var nodeChance = Generator.RandomPercentPrecise();
 
             if (nodeChance >= .50)
                 return new Item().Create(map, ServerSetup.Instance.GlobalItemTemplateCache["Reict Weed"]);

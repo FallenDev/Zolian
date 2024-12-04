@@ -2,10 +2,7 @@
 using Darkages.GameScripts.Formulas;
 using Darkages.Network.Client;
 using Darkages.ScriptingBase;
-using Darkages.Sprites;
 using Darkages.Types;
-
-using System.Collections.Concurrent;
 using Darkages.GameScripts.Creations;
 using Darkages.Network.Server;
 using Darkages.Sprites.Entity;
@@ -15,8 +12,6 @@ namespace Darkages.GameScripts.Areas.Undine;
 [Script("Undine")]
 public class Undine : AreaScript
 {
-    private readonly ConcurrentDictionary<long, Aisling> _playersOnMap = [];
-
     private readonly SortedDictionary<Item.Quality, int> _qualityLuckModifiers = new()
     {
         { Item.Quality.Damaged, 0 },
@@ -31,9 +26,9 @@ public class Undine : AreaScript
 
     public Undine(Area area) : base(area) => Area = area;
     public override void Update(TimeSpan elapsedTime) { }
-    public override void OnMapEnter(WorldClient client) => _playersOnMap.TryAdd(client.Aisling.Serial, client.Aisling);
-    public override void OnMapExit(WorldClient client) => _playersOnMap.TryRemove(client.Aisling.Serial, out _);
-    public override void OnPlayerWalk(WorldClient client, Position oldLocation, Position newLocation) => _playersOnMap.TryAdd(client.Aisling.Serial, client.Aisling);
+    public override void OnMapEnter(WorldClient client) { }
+    public override void OnMapExit(WorldClient client) { }
+    public override void OnPlayerWalk(WorldClient client, Position oldLocation, Position newLocation) { }
 
     public override void OnItemDropped(WorldClient client, Item itemDropped, Position locationDropped)
     {

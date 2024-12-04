@@ -49,7 +49,7 @@ public class EnemyRewards : RewardScript
             // Equipment & Enchantable
             if (ServerSetup.Instance.GlobalItemTemplateCache[drop].Flags.FlagIsSet(ItemFlags.Equipable) || ServerSetup.Instance.GlobalItemTemplateCache[drop].Enchantable)
             {
-                var chance = Generator.RandomNumPercentGen();
+                var chance = Generator.RandomPercentPrecise();
                 if (chance > ServerSetup.Instance.GlobalItemTemplateCache[drop].DropRate) continue;
 
                 var equipItem = new Item();
@@ -120,7 +120,7 @@ public class EnemyRewards : RewardScript
             // Equipment & Enchantable
             if (ServerSetup.Instance.GlobalItemTemplateCache[drop].Flags.FlagIsSet(ItemFlags.Equipable) || ServerSetup.Instance.GlobalItemTemplateCache[drop].Enchantable)
             {
-                var chance = Generator.RandomNumPercentGen();
+                var chance = Generator.RandomPercentPrecise();
                 if (chance > ServerSetup.Instance.GlobalItemTemplateCache[drop].DropRate) continue;
 
                 var equipItem = new Item();
@@ -142,7 +142,7 @@ public class EnemyRewards : RewardScript
                 continue;
             }
 
-            var chance2 = Generator.RandomNumPercentGen();
+            var chance2 = Generator.RandomPercentPrecise();
             var item2 = new Item();
             item2 = item2.Create(_monster, ServerSetup.Instance.GlobalItemTemplateCache[drop]);
             if (chance2 <= item2.Template.DropRate)
@@ -182,7 +182,7 @@ public class EnemyRewards : RewardScript
 
         foreach (var item in itemsList)
         {
-            var chance = Generator.RandomNumPercentGen();
+            var chance = Generator.RandomPercentPrecise();
             switch (chance)
             {
                 // If greater than equal 40%, don't add the item
@@ -203,7 +203,7 @@ public class EnemyRewards : RewardScript
 
         foreach (var item in itemsList)
         {
-            var chance = Generator.RandomNumPercentGen();
+            var chance = Generator.RandomPercentPrecise();
             switch (chance)
             {
                 // If greater than equal 85%, don't add the item
@@ -267,7 +267,7 @@ public class EnemyRewards : RewardScript
 
         if (canCrit)
         {
-            var critical = Generator.RandomNumPercentGen();
+            var critical = Generator.RandomPercentPrecise();
 
             if (critical >= .85)
             {
@@ -304,7 +304,7 @@ public class EnemyRewards : RewardScript
 
         if (canCrit)
         {
-            var critical = Generator.RandomNumPercentGen();
+            var critical = Generator.RandomPercentPrecise();
 
             if (critical >= .85)
             {

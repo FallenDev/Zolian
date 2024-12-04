@@ -1,23 +1,18 @@
 ﻿using Darkages.Network.Client;
 using Darkages.ScriptingBase;
-using Darkages.Sprites;
 using Darkages.Types;
-
-using System.Collections.Concurrent;
 
 namespace Darkages.GameScripts.Areas.Mileth;
 
 [Script("Royal Crypts")]
 public class RoyalCrypts : AreaScript
 {
-    private readonly ConcurrentDictionary<long, Aisling> _playersOnMap = [];
-
     public RoyalCrypts(Area area) : base(area) => Area = area;
     public override void Update(TimeSpan elapsedTime) { }
 
-    public override void OnMapEnter(WorldClient client) => _playersOnMap.TryAdd(client.Aisling.Serial, client.Aisling);
+    public override void OnMapEnter(WorldClient client) { }
 
-    public override void OnMapExit(WorldClient client) => _playersOnMap.TryRemove(client.Aisling.Serial, out _);
+    public override void OnMapExit(WorldClient client) { }
 
     public override void OnMapClick(WorldClient client, int x, int y)
     {
@@ -40,5 +35,5 @@ public class RoyalCrypts : AreaScript
         }
     }
 
-    public override void OnPlayerWalk(WorldClient client, Position oldLocation, Position newLocation) => _playersOnMap.TryAdd(client.Aisling.Serial, client.Aisling);
+    public override void OnPlayerWalk(WorldClient client, Position oldLocation, Position newLocation) { }
 }

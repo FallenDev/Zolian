@@ -141,7 +141,7 @@ public sealed class Mundane : Movable
         if (Template.ChatTimer != null && Template.EnableSpeech)
         {
             Template.ChatTimer.UpdateTime(update);
-            var speak = Generator.RandomNumPercentGen();
+            var speak = Generator.RandomPercentPrecise();
 
             if (Template.ChatTimer.Elapsed && Template.Speech.Count > 0)
             {

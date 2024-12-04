@@ -213,7 +213,7 @@ public class DraconicOmega : MonsterScript
         {
             if (Monster.CantMove) return;
             if (walk) Monster.Walk();
-            var rand = Generator.RandomNumPercentGen();
+            var rand = Generator.RandomPercentPrecise();
             if (rand >= 0.93)
             {
                 Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: {GhostChat[RandomNumberGenerator.GetInt32(Count + 1) % GhostChat.Length]}"));
@@ -297,7 +297,7 @@ public class DraconicOmega : MonsterScript
         // Training Dummy or other enemies who can't attack
         if (Monster.SpellScripts.Count == 0) return;
 
-        if (!(Generator.RandomNumPercentGen() >= 0.70)) return;
+        if (!(Generator.RandomPercentPrecise() >= 0.70)) return;
         var spellIdx = RandomNumberGenerator.GetInt32(Monster.SpellScripts.Count);
 
         if (Monster.SpellScripts[spellIdx] is null) return;
@@ -510,7 +510,7 @@ public class JackFrost : MonsterScript
         {
             if (Monster.CantMove) return;
             if (walk) Monster.Walk();
-            var rand = Generator.RandomNumPercentGen();
+            var rand = Generator.RandomPercentPrecise();
             if (rand >= 0.93)
             {
                 Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: {GhostChat[RandomNumberGenerator.GetInt32(Count + 1) % GhostChat.Length]}"));
@@ -594,7 +594,7 @@ public class JackFrost : MonsterScript
         // Training Dummy or other enemies who can't attack
         if (Monster.SpellScripts.Count == 0) return;
 
-        if (!(Generator.RandomNumPercentGen() >= 0.70)) return;
+        if (!(Generator.RandomPercentPrecise() >= 0.70)) return;
         var spellIdx = RandomNumberGenerator.GetInt32(Monster.SpellScripts.Count);
 
         if (Monster.SpellScripts[spellIdx] is null) return;
@@ -868,7 +868,7 @@ public class Yeti : MonsterScript
         {
             if (Monster.CantMove) return;
             if (walk) Monster.Walk();
-            var rand = Generator.RandomNumPercentGen();
+            var rand = Generator.RandomPercentPrecise();
             if (rand >= 0.93)
             {
                 Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: {GhostChat[RandomNumberGenerator.GetInt32(Count + 1) % GhostChat.Length]}"));
@@ -952,7 +952,7 @@ public class Yeti : MonsterScript
         // Training Dummy or other enemies who can't attack
         if (Monster.SpellScripts.Count == 0) return;
 
-        if (!(Generator.RandomNumPercentGen() >= 0.70)) return;
+        if (!(Generator.RandomPercentPrecise() >= 0.70)) return;
         var spellIdx = RandomNumberGenerator.GetInt32(Monster.SpellScripts.Count);
 
         if (Monster.SpellScripts[spellIdx] is null) return;
@@ -1272,7 +1272,7 @@ public class WorldBossBahamut : MonsterScript
         // Training Dummy or other enemies who can't attack
         if (Monster.AbilityScripts.Count == 0) return;
 
-        if (!(Generator.RandomNumPercentGen() >= 0.70)) return;
+        if (!(Generator.RandomPercentPrecise() >= 0.70)) return;
         var abilityIdx = RandomNumberGenerator.GetInt32(Monster.AbilityScripts.Count);
 
         if (Monster.AbilityScripts[abilityIdx] is null) return;
@@ -1289,7 +1289,7 @@ public class WorldBossBahamut : MonsterScript
         // Training Dummy or other enemies who can't attack
         if (Monster.SpellScripts.Count == 0) return;
 
-        if (!(Generator.RandomNumPercentGen() >= 0.70)) return;
+        if (!(Generator.RandomPercentPrecise() >= 0.70)) return;
         var spellIdx = RandomNumberGenerator.GetInt32(Monster.SpellScripts.Count);
 
         if (Monster.SpellScripts[spellIdx] is null) return;
@@ -1323,7 +1323,7 @@ public class WorldBossBahamut : MonsterScript
                 Monster.AbilityEnabled = true;
                 Monster.CastEnabled = true;
 
-                var rand = Generator.RandomNumPercentGen();
+                var rand = Generator.RandomPercentPrecise();
                 if (rand >= 0.90)
                 {
                     Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: {GhostChat[RandomNumberGenerator.GetInt32(Count + 1) % GhostChat.Length]}"));
@@ -1336,7 +1336,7 @@ public class WorldBossBahamut : MonsterScript
             else
             {
                 Monster.AbilityEnabled = true;
-                var rand = Generator.RandomNumPercentGen();
+                var rand = Generator.RandomPercentPrecise();
                 if (rand >= 0.80)
                 {
                     Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: {GhostChase[RandomNumberGenerator.GetInt32(RunCount + 1) % GhostChase.Length]}"));
@@ -1633,7 +1633,7 @@ public class BBShade : MonsterScript
         // Training Dummy or other enemies who can't attack
         if (Monster.SpellScripts.Count == 0) return;
 
-        if (!(Generator.RandomNumPercentGen() >= 0.70)) return;
+        if (!(Generator.RandomPercentPrecise() >= 0.70)) return;
         var spellIdx = RandomNumberGenerator.GetInt32(Monster.SpellScripts.Count);
 
         if (Monster.SpellScripts[spellIdx] is null) return;

@@ -30,9 +30,9 @@ public abstract class RewardScript
         [(226, 249)] = ["Blackstone Ring"],
         [(250, 299)] = ["Flackern Band", "Blazed Ring"],
         [(300, 349)] = null,
-        [(350, 399)] = null,
-        [(400, 449)] = null,
-        [(450, 500)] = null
+        [(350, 399)] = ["Folt Demon Band"],
+        [(400, 449)] = ["Neart Fire Ring", "Fios Ice Ring"],
+        [(450, 500)] = ["Rioga Kings Ring"]
     };
 
     protected internal static readonly Dictionary<(int, int), List<string>> BeltDrops = new()
@@ -140,13 +140,13 @@ public abstract class RewardScript
             "Emblazoned Sapphire Earrings", "Emblazoned Emerald Earrings", "Emblazoned Diamond Earrings",
             "Emblazoned Garnet Earrings"
         ],
-        [(201, 225)] = null,
-        [(226, 249)] = null,
+        [(201, 225)] = ["Elementus Blaze Earrings", "Elementus Blizzard Earrings", "Elementus Typhoon Earrings", "Elementus Shatter Earrings"],
+        [(226, 249)] = ["Elementus Blaze Earrings", "Elementus Blizzard Earrings", "Elementus Typhoon Earrings", "Elementus Shatter Earrings"],
         [(250, 299)] = null,
-        [(300, 349)] = null,
-        [(350, 399)] = null,
-        [(400, 449)] = null,
-        [(450, 500)] = null
+        [(300, 349)] = ["Ruby Triforce Earrings", "Empowered Ruby Triforce Earrings"],
+        [(350, 399)] = ["Gold Triforce Earrings", "Empowered Gold Triforce Earrings"],
+        [(400, 449)] = ["Stone Studded Clips"],
+        [(450, 500)] = ["Rioga Orb Earrings"]
     };
 
     protected static readonly Dictionary<(int, int), List<string>> GreaveDrops = new()
@@ -169,10 +169,10 @@ public abstract class RewardScript
         [(201, 225)] = ["Lava Poleyns"],
         [(226, 249)] = ["Forest Poleyns"],
         [(250, 299)] = ["Mana Guards", "Blade Poleyns"],
-        [(300, 349)] = null,
-        [(350, 399)] = null,
-        [(400, 449)] = null,
-        [(450, 500)] = null
+        [(300, 349)] = ["Fios Poleyns", "Dith Poleyns", "Gnimh Poleyns", "Neart Poleyns"],
+        [(350, 399)] = ["Fios Poleyns", "Dith Poleyns", "Gnimh Poleyns", "Neart Poleyns"],
+        [(400, 449)] = ["Sacra Poleyns"],
+        [(450, 500)] = ["Gaeth Poleyns"]
     };
 
     protected static readonly Dictionary<(int, int), List<string>> HandDrops = new()
@@ -195,10 +195,10 @@ public abstract class RewardScript
         [(201, 225)] = ["Aquatis Vambrace"],
         [(226, 249)] = ["Ruby Hybrasyl Gauntlet"],
         [(250, 299)] = ["Juoinior Gauntlet"],
-        [(300, 349)] = null,
-        [(350, 399)] = null,
-        [(400, 449)] = null,
-        [(450, 500)] = null
+        [(300, 349)] = ["Encrusted Graspers"],
+        [(350, 399)] = ["Depth Encrusted Graspers"],
+        [(400, 449)] = ["Heavy Depth Encrusted Graspers"],
+        [(450, 500)] = ["Flawless Depth Graspers"]
     };
 
     protected static readonly Dictionary<(int, int), List<string>> NecklaceDrops = new()

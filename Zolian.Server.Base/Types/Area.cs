@@ -116,7 +116,9 @@ public class Area : Map
         var spritesOnLocation = sprite.GetMovableSpritesInPosition(x, y);
         if (spritesOnLocation.IsNullOrEmpty()) return false;
         var first = spritesOnLocation.FirstOrDefault();
-        return sprite.Pos != first?.Pos;
+        if (sprite is Mundane or Aisling)
+            return sprite.Pos != first?.Pos;
+        return sprite.Target?.Pos != first?.Pos;
     }
 
     /// <summary>

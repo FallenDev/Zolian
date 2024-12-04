@@ -675,7 +675,7 @@ public class Damageable : Movable
 
     private static void HasteProc(Aisling aisling)
     {
-        var hasteChance = Generator.RandomNumPercentGen();
+        var hasteChance = Generator.RandomPercentPrecise();
 
         switch (aisling.Haste)
         {
@@ -907,7 +907,7 @@ public class Damageable : Movable
 
     private static void ReapProc(Aisling aisling, Sprite target)
     {
-        var reapChance = Generator.RandomNumPercentGen();
+        var reapChance = Generator.RandomPercentPrecise();
 
         switch (target)
         {

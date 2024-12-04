@@ -75,7 +75,7 @@ public class CobaltSteel(WorldServer server, Mundane mundane) : MundaneScript(se
             case 5:
                 if (RefineNode(client.Aisling) && client.Aisling.ExpLevel >= 90)
                 {
-                    var containedGem = Generator.RandomNumPercentGen();
+                    var containedGem = Generator.RandomPercentPrecise();
                     if (containedGem >= .85)
                     {
                         client.Aisling.Client.GiveItem("Flawless Ruby");
@@ -100,7 +100,7 @@ public class CobaltSteel(WorldServer server, Mundane mundane) : MundaneScript(se
 
     private static bool RefineNode(Aisling player)
     {
-        var tryRefine = Generator.RandomNumPercentGen();
+        var tryRefine = Generator.RandomPercentPrecise();
 
         switch (player.QuestManager.StoneSmithingTier)
         {

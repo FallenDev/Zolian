@@ -297,7 +297,7 @@ public class BaseFriendlyMonster : MonsterScript
         if (!Monster.Target.WithinMonsterSpellRangeOf(Monster)) return;
         // Training Dummy or other enemies who can't attack
         if (Monster.SpellScripts.Count == 0) return;
-        if (!(Generator.RandomNumPercentGen() >= 0.70)) return;
+        if (!(Generator.RandomPercentPrecise() >= 0.70)) return;
         var spellIdx = RandomNumberGenerator.GetInt32(Monster.SpellScripts.Count);
         if (Monster.SpellScripts[spellIdx] is null) return;
         Monster.SpellScripts[spellIdx].OnUse(Monster, Monster.Target);

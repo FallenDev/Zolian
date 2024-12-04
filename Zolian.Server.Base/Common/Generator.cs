@@ -14,7 +14,7 @@ public static class Generator
     public static int RandNumGen20() => RandomNumberGenerator.GetInt32(20);
     public static int RandNumGen100() => RandomNumberGenerator.GetInt32(100);
 
-    public static double RandomNumPercentGen() => Random.Shared.NextDouble();
+    public static double RandomPercentPrecise() => Random.Shared.NextDouble();
 
     public static T RandomEnumValue<T>()
     {

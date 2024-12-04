@@ -94,7 +94,7 @@ public class DarkIron(WorldServer server, Mundane mundane) : MundaneScript(serve
 
     private static bool RefineNode(Aisling player)
     {
-        var tryRefine = Generator.RandomNumPercentGen();
+        var tryRefine = Generator.RandomPercentPrecise();
 
         switch (player.QuestManager.StoneSmithingTier)
         {

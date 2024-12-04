@@ -3844,7 +3844,7 @@ public class WorldClient : WorldClientBase, IWorldClient
     {
         if (skill.Level >= skill.Template.MaxLevel) return;
 
-        var levelUpRand = Generator.RandomNumPercentGen();
+        var levelUpRand = Generator.RandomPercentPrecise();
         if (skill.Uses >= 40 && skill.Template.SkillType != SkillScope.Assail)
             levelUpRand += 0.1;
 
@@ -3908,7 +3908,7 @@ public class WorldClient : WorldClientBase, IWorldClient
     {
         if (spell.Level >= spell.Template.MaxLevel) return;
 
-        var levelUpRand = Generator.RandomNumPercentGen();
+        var levelUpRand = Generator.RandomPercentPrecise();
         if (spell.Casts >= 40)
             levelUpRand += 0.1;
 

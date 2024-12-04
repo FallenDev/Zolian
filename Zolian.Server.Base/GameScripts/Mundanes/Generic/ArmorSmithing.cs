@@ -649,7 +649,7 @@ public class ArmorSmithing(WorldServer server, Mundane mundane) : MundaneScript(
             case 0x82:
                 {
                     var item = _itemDetail;
-                    var chance = Generator.RandomNumPercentGen();
+                    var chance = Generator.RandomPercentPrecise();
 
                     if (client.Aisling.Luck > 0)
                         for (var i = 0; i < client.Aisling.Luck; i++)

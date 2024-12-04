@@ -64,7 +64,7 @@ public abstract class MundaneScript(WorldServer server, Mundane mundane) : Objec
 
     public virtual void OnGossip(WorldClient client, string message)
     {
-        var randomInteract = Generator.RandomNumPercentGen();
+        var randomInteract = Generator.RandomPercentPrecise();
 
         switch (randomInteract)
         {

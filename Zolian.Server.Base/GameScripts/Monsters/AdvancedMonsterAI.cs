@@ -213,7 +213,7 @@ public class ShapeShifter : MonsterScript
     {
         try
         {
-            var pct = Generator.RandomNumPercentGen();
+            var pct = Generator.RandomPercentPrecise();
             if (pct >= .92)
             {
                 // Shape-shift to another sprite image
@@ -313,7 +313,7 @@ public class ShapeShifter : MonsterScript
         // Training Dummy or other enemies who can't attack
         if (Monster.SpellScripts.Count == 0) return;
 
-        if (!(Generator.RandomNumPercentGen() >= 0.70)) return;
+        if (!(Generator.RandomPercentPrecise() >= 0.70)) return;
         var spellIdx = RandomNumberGenerator.GetInt32(Monster.SpellScripts.Count);
 
         if (Monster.SpellScripts[spellIdx] is null) return;
@@ -357,7 +357,7 @@ public class ShapeShifter : MonsterScript
                 Monster.AbilityEnabled = true;
                 Monster.CastEnabled = true;
                 Monster.Wander();
-                var pct = Generator.RandomNumPercentGen();
+                var pct = Generator.RandomPercentPrecise();
                 if (pct >= .60)
                     CastSpell();
             }
@@ -875,7 +875,7 @@ public class AlertSummon : MonsterScript
         if (Monster.CantCast) return;
         if (Monster.Target is null) return;
 
-        if (!(Generator.RandomNumPercentGen() >= 0.70)) return;
+        if (!(Generator.RandomPercentPrecise() >= 0.70)) return;
 
         var monstersNearby = Monster.MonstersOnMap();
 
@@ -1120,7 +1120,7 @@ public class Turret : MonsterScript
         if (Monster.Target is null) return;
         if (!Monster.Target.WithinMonsterSpellRangeOf(Monster)) return;
 
-        if (!(Generator.RandomNumPercentGen() >= 0.70)) return;
+        if (!(Generator.RandomPercentPrecise() >= 0.70)) return;
         var spellIdx = RandomNumberGenerator.GetInt32(Monster.SpellScripts.Count);
 
         if (Monster.SpellScripts[spellIdx] is null) return;
@@ -1326,7 +1326,7 @@ public class GeneralPirate : MonsterScript
         {
             if (Monster.CantMove) return;
             if (walk) Monster.Walk();
-            var rand = Generator.RandomNumPercentGen();
+            var rand = Generator.RandomPercentPrecise();
             if (rand >= 0.93)
             {
                 Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"Pirate: {Arggh[RandomNumberGenerator.GetInt32(Count + 1) % Arggh.Length]}"));
@@ -1410,7 +1410,7 @@ public class GeneralPirate : MonsterScript
         // Training Dummy or other enemies who can't attack
         if (Monster.SpellScripts.Count == 0) return;
 
-        if (!(Generator.RandomNumPercentGen() >= 0.70)) return;
+        if (!(Generator.RandomPercentPrecise() >= 0.70)) return;
         var spellIdx = RandomNumberGenerator.GetInt32(Monster.SpellScripts.Count);
 
         if (Monster.SpellScripts[spellIdx] is null) return;
@@ -1616,7 +1616,7 @@ public class PirateOfficer : MonsterScript
         {
             if (Monster.CantMove) return;
             if (walk) Monster.Walk();
-            var rand = Generator.RandomNumPercentGen();
+            var rand = Generator.RandomPercentPrecise();
             if (rand >= 0.93)
             {
                 Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"Pirate: {Arggh[RandomNumberGenerator.GetInt32(Count + 1) % Arggh.Length]}"));
@@ -1657,7 +1657,7 @@ public class PirateOfficer : MonsterScript
         // Training Dummy or other enemies who can't attack
         if (Monster.SkillScripts.Count == 0) return;
 
-        var brigChance = Generator.RandomNumPercentGen();
+        var brigChance = Generator.RandomPercentPrecise();
         if (brigChance >= .95)
         {
             if (Monster.Target is not Aisling aisling) return;
@@ -1709,7 +1709,7 @@ public class PirateOfficer : MonsterScript
         // Training Dummy or other enemies who can't attack
         if (Monster.SpellScripts.Count == 0) return;
 
-        if (!(Generator.RandomNumPercentGen() >= 0.70)) return;
+        if (!(Generator.RandomPercentPrecise() >= 0.70)) return;
         var spellIdx = RandomNumberGenerator.GetInt32(Monster.SpellScripts.Count);
 
         if (Monster.SpellScripts[spellIdx] is null) return;
@@ -1925,7 +1925,7 @@ public class AosdaRemnant : MonsterScript
         {
             if (Monster.CantMove) return;
             if (walk) Monster.Walk();
-            var rand = Generator.RandomNumPercentGen();
+            var rand = Generator.RandomPercentPrecise();
             if (rand >= 0.93)
             {
                 Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: {GhostChat[RandomNumberGenerator.GetInt32(Count + 1) % GhostChat.Length]}"));
@@ -2009,7 +2009,7 @@ public class AosdaRemnant : MonsterScript
         // Training Dummy or other enemies who can't attack
         if (Monster.SpellScripts.Count == 0) return;
 
-        if (!(Generator.RandomNumPercentGen() >= 0.70)) return;
+        if (!(Generator.RandomPercentPrecise() >= 0.70)) return;
         var spellIdx = RandomNumberGenerator.GetInt32(Monster.SpellScripts.Count);
 
         if (Monster.SpellScripts[spellIdx] is null) return;
@@ -2222,7 +2222,7 @@ public class AosdaHero : MonsterScript
         {
             if (Monster.CantMove) return;
             if (walk) Monster.Walk();
-            var rand = Generator.RandomNumPercentGen();
+            var rand = Generator.RandomPercentPrecise();
             if (rand >= 0.93)
             {
                 Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: {GhostChat[RandomNumberGenerator.GetInt32(Count + 1) % GhostChat.Length]}"));
@@ -2306,7 +2306,7 @@ public class AosdaHero : MonsterScript
         // Training Dummy or other enemies who can't attack
         if (Monster.SpellScripts.Count == 0) return;
 
-        if (!(Generator.RandomNumPercentGen() >= 0.50)) return;
+        if (!(Generator.RandomPercentPrecise() >= 0.50)) return;
         var spellIdx = RandomNumberGenerator.GetInt32(Monster.SpellScripts.Count);
 
         if (Monster.SpellScripts[spellIdx] is null) return;
@@ -2519,7 +2519,7 @@ public class AncientDragon : MonsterScript
         {
             if (Monster.CantMove) return;
             if (walk) Monster.Walk();
-            var rand = Generator.RandomNumPercentGen();
+            var rand = Generator.RandomPercentPrecise();
             if (rand >= 0.93)
             {
                 Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: {GhostChat[RandomNumberGenerator.GetInt32(Count + 1) % GhostChat.Length]}"));
@@ -2603,7 +2603,7 @@ public class AncientDragon : MonsterScript
         // Training Dummy or other enemies who can't attack
         if (Monster.SpellScripts.Count == 0) return;
 
-        if (!(Generator.RandomNumPercentGen() >= 0.70)) return;
+        if (!(Generator.RandomPercentPrecise() >= 0.70)) return;
         var spellIdx = RandomNumberGenerator.GetInt32(Monster.SpellScripts.Count);
 
         if (Monster.SpellScripts[spellIdx] is null) return;
@@ -2896,7 +2896,7 @@ public class Swarm : MonsterScript
         // Training Dummy or other enemies who can't attack
         if (Monster.SpellScripts.Count == 0) return;
 
-        if (!(Generator.RandomNumPercentGen() >= 0.70)) return;
+        if (!(Generator.RandomPercentPrecise() >= 0.70)) return;
         var spellIdx = RandomNumberGenerator.GetInt32(Monster.SpellScripts.Count);
 
         if (Monster.SpellScripts[spellIdx] is null) return;

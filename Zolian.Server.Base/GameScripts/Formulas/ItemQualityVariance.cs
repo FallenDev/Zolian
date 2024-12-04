@@ -82,7 +82,7 @@ public static class ItemQualityVariance
 
     public static Item.Quality DetermineQuality()
     {
-        var qualityGen = Generator.RandomNumPercentGen();
+        var qualityGen = Generator.RandomPercentPrecise();
 
         return qualityGen switch
         {
@@ -100,7 +100,7 @@ public static class ItemQualityVariance
 
     public static Item.Quality DetermineHighQuality()
     {
-        var qualityGen = Generator.RandomNumPercentGen();
+        var qualityGen = Generator.RandomPercentPrecise();
 
         return qualityGen switch
         {
@@ -117,7 +117,7 @@ public static class ItemQualityVariance
 
     public static Item.WeaponVariance DetermineWeaponVariance()
     {
-        var weaponVariance = Generator.RandomNumPercentGen();
+        var weaponVariance = Generator.RandomPercentPrecise();
 
         return weaponVariance switch
         {
