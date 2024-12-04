@@ -1188,6 +1188,9 @@ public class Damageable : Movable
 
         switch (diff)
         {
+            case >= 5 and < 10:
+                dmg = (long)(dmg * .80);
+                break;
             case >= 10 and < 25:
                 dmg = (long)(dmg * .60);
                 break;
@@ -1197,8 +1200,20 @@ public class Damageable : Movable
             case >= 50 and < 75:
                 dmg = (long)(dmg * .30);
                 break;
-            case >= 75:
+            case >= 75 and < 100:
                 dmg = (long)(dmg * .15);
+                break;
+            case >= 100 and < 150:
+                dmg = (long)(dmg * .05);
+                break;
+            case >= 150 and < 250:
+                dmg = (long)(dmg * .03);
+                break;
+            case >= 250 and < 500:
+                dmg = (long)(dmg * .02);
+                break;
+            case >= 500 and < 1000:
+                dmg = (long)(dmg * .01);
                 break;
             default:
                 return dmg;
@@ -1214,6 +1229,9 @@ public class Damageable : Movable
 
         switch (diff)
         {
+            case >= 5 and < 10:
+                dmg = (long)(dmg * .80);
+                break;
             case >= 10 and < 25:
                 dmg = (long)(dmg * .60);
                 break;
@@ -1223,8 +1241,20 @@ public class Damageable : Movable
             case >= 50 and < 75:
                 dmg = (long)(dmg * .30);
                 break;
-            case >= 75:
+            case >= 75 and < 100:
                 dmg = (long)(dmg * .15);
+                break;
+            case >= 100 and < 150:
+                dmg = (long)(dmg * .05);
+                break;
+            case >= 150 and < 250:
+                dmg = (long)(dmg * .03);
+                break;
+            case >= 250 and < 500:
+                dmg = (long)(dmg * .02);
+                break;
+            case >= 500 and < 1000:
+                dmg = (long)(dmg * .01);
                 break;
             default:
                 return dmg;
@@ -1241,6 +1271,9 @@ public class Damageable : Movable
 
         switch (diff)
         {
+            case >= 5 and < 10:
+                dmg = (long)(dmg * .80);
+                break;
             case >= 10 and < 25:
                 dmg = (long)(dmg * .60);
                 break;
@@ -1250,8 +1283,20 @@ public class Damageable : Movable
             case >= 50 and < 75:
                 dmg = (long)(dmg * .30);
                 break;
-            case >= 75:
+            case >= 75 and < 100:
                 dmg = (long)(dmg * .15);
+                break;
+            case >= 100 and < 150:
+                dmg = (long)(dmg * .05);
+                break;
+            case >= 150 and < 250:
+                dmg = (long)(dmg * .03);
+                break;
+            case >= 250 and < 500:
+                dmg = (long)(dmg * .02);
+                break;
+            case >= 500 and < 1000:
+                dmg = (long)(dmg * .01);
                 break;
             default:
                 return dmg;
@@ -1267,6 +1312,9 @@ public class Damageable : Movable
 
         switch (diff)
         {
+            case >= 5 and < 10:
+                dmg = (long)(dmg * .80);
+                break;
             case >= 10 and < 25:
                 dmg = (long)(dmg * .60);
                 break;
@@ -1276,8 +1324,20 @@ public class Damageable : Movable
             case >= 50 and < 75:
                 dmg = (long)(dmg * .30);
                 break;
-            case >= 75:
+            case >= 75 and < 100:
                 dmg = (long)(dmg * .15);
+                break;
+            case >= 100 and < 150:
+                dmg = (long)(dmg * .05);
+                break;
+            case >= 150 and < 250:
+                dmg = (long)(dmg * .03);
+                break;
+            case >= 250 and < 500:
+                dmg = (long)(dmg * .02);
+                break;
+            case >= 500 and < 1000:
+                dmg = (long)(dmg * .01);
                 break;
             default:
                 return dmg;
