@@ -17,7 +17,6 @@ namespace Darkages.Sprites;
 public abstract class Sprite : INotifyPropertyChanged
 {
     public Position LastPosition;
-    public List<List<TileGrid>> MasterGrid = [];
     public event PropertyChangedEventHandler PropertyChanged;
     public readonly Stopwatch MonsterBuffAndDebuffStopWatch = new();
     private readonly Stopwatch _threatControl = new();

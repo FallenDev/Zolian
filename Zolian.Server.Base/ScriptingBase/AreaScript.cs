@@ -18,7 +18,7 @@ public abstract class AreaScript(Area area)
 
     public virtual void OnMapClick(WorldClient client, int x, int y)
     {
-        if (!client.Aisling.Map.ObjectGrid[x, y].ShouldRegisterClick || client.Aisling.Map.TileContent[x, y] != TileContent.Door) return;
+        //if (!client.Aisling.Map.ObjectGrid[x, y].ShouldRegisterClick || client.Aisling.Map.TileContent[x, y] != TileContent.Door) return;
 
         //foreach (var door in client.Aisling.Map.Doors)
         //{

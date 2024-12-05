@@ -24,7 +24,7 @@ public record TargetRecord
 
 public sealed class Monster : Damageable
 {
-    private Task<IList<Vector2>> _path;
+    private List<Vector2> _path;
     private Vector2 _targetPos = Vector2.Zero;
     private Vector2 _location = Vector2.Zero;
     public string Name => Template.BaseName;
@@ -345,7 +345,7 @@ public sealed class Monster : Damageable
             _waypointIndex = 0;
     }
 
-    private void AStarPath(Monster monster, IList<Vector2> pathList)
+    private void AStarPath(Monster monster, List<Vector2> pathList)
     {
         if (monster == null) return;
         if (pathList == null)
@@ -467,7 +467,7 @@ public sealed class Monster : Damageable
 
         try
         {
-            _path?.Result?.Clear();
+            _path?.Clear();
         }
         catch (Exception ex)
         {
@@ -494,7 +494,7 @@ public sealed class Monster : Damageable
 
         try
         {
-            _path?.Result?.Clear();
+            _path?.Clear();
         }
         catch (Exception ex)
         {
@@ -573,7 +573,7 @@ public sealed class Monster : Damageable
                 AStar = true;
                 _location = new Vector2(Pos.X, Pos.Y);
                 _targetPos = new Vector2(Target.Pos.X, Target.Pos.Y);
-                _path = Area.GetPath(this, _location, _targetPos);
+                _path = Map.FindPath(this, _location, _targetPos);
 
                 if (ThrownBack) return;
 
@@ -584,14 +584,14 @@ public sealed class Monster : Damageable
                     return;
                 }
 
-                if (_path.Result.Count > 0)
+                if (_path.Count > 0)
                 {
-                    AStarPath(this, _path.Result);
-                    if (!_path.Result.IsEmpty())
-                        _path.Result.RemoveAt(0);
+                    if (!_path.IsEmpty())
+                        _path.RemoveAt(0);
+                    AStarPath(this, _path);
                 }
 
-                if (_path.Result.Count != 0) return;
+                if (_path.Count != 0) return;
                 AStar = false;
 
                 if (Target != null && WalkTo((int)Target.Pos.X, (int)Target.Pos.Y)) return;
