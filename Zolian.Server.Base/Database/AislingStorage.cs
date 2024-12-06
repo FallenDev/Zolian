@@ -31,7 +31,7 @@ public record AislingStorage : Sql, IEqualityOperators<AislingStorage, AislingSt
     /// </summary>
     public async Task Create(Aisling obj)
     {
-        await using var @lock = await CreateLock.WaitAsync(TimeSpan.FromSeconds(5));
+        await using var @lock = await CreateLock.WaitAsync(TimeSpan.FromSeconds(1));
 
         if (@lock == null)
         {
@@ -216,7 +216,7 @@ public record AislingStorage : Sql, IEqualityOperators<AislingStorage, AislingSt
     /// </summary>
     public async Task<Aisling> LoadAisling(string name, long serial)
     {
-        await using var @lock = await LoadLock.WaitAsync(TimeSpan.FromSeconds(5));
+        await using var @lock = await LoadLock.WaitAsync(TimeSpan.FromSeconds(1));
 
         if (@lock == null)
         {

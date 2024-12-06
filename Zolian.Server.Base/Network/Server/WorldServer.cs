@@ -307,11 +307,11 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         while (ServerSetup.Instance.Running)
         {
             var monstersElapsed = monstersWatch.Elapsed;
-            if (monstersElapsed.TotalMilliseconds < 300) continue;
+            if (monstersElapsed.TotalMilliseconds < 100) continue;
             UpdateMonsters(monstersElapsed);
             monstersWatch.Restart();
 
-            await Task.Delay(TimeSpan.FromMilliseconds(300));
+            await Task.Delay(TimeSpan.FromMilliseconds(100));
         }
     }
 

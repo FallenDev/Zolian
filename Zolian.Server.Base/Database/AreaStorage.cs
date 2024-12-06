@@ -25,7 +25,7 @@ public record AreaStorage
 
     public async void CacheFromDatabase()
     {
-        await LoadLock.WaitAsync(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
+        await LoadLock.WaitAsync(TimeSpan.FromSeconds(1)).ConfigureAwait(false);
 
         try
         {
