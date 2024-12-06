@@ -697,7 +697,7 @@ public sealed class Aisling : Player, IAisling
         // Check position before we add direction, add direction, check position to see if we can commit
         if (!allowGhostWalk)
         {
-            if (Map.IsWall(oldPosX, oldPosY)) return false;
+            if (Map.IsWall(this, oldPosX, oldPosY)) return false;
             if (Area.IsSpriteInLocationOnWalk(this, PendingX, PendingY)) return false;
         }
 
@@ -719,7 +719,7 @@ public sealed class Aisling : Player, IAisling
 
         if (!allowGhostWalk)
         {
-            if (Map.IsWall(PendingX, PendingY)) return false;
+            if (Map.IsWall(this, PendingX, PendingY)) return false;
             if (Area.IsSpriteInLocationOnWalk
                     (this, PendingX, PendingY)) return false;
         }

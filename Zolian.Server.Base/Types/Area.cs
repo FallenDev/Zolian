@@ -18,9 +18,11 @@ public class Area : Map
     public ushort Hash;
     public bool Ready;
     private readonly Lock _mapLoadLock = new();
+    private int _maxXBounds;
+    private int _maxYBounds;
 
-    public ConcurrentDictionary<Tuple<int, Type>, object> SpriteCollections { get; } = []; 
-    public FrozenDictionary<int, Vector2> MapGridDict { get; set; }
+    public ConcurrentDictionary<Tuple<int, Type>, object> SpriteCollections { get; } = [];
+    private FrozenDictionary<int, Vector2> MapGridDict { get; set; }
     private Dictionary<int, Vector2> TempMapGridDict { get; } = [];
     public int MiningNodesCount { get; set; }
     public int WildFlowersCount { get; set; }
@@ -79,10 +81,11 @@ public class Area : Map
         return isWall;
     }
 
-    public static bool IsAStarWall(Sprite sprite, int x, int y)
+    public bool IsWall(Sprite sprite, int x, int y)
     {
-        if (x < 0 || x >= sprite.Map.Width) return true;
-        if (y < 0 || y >= sprite.Map.Height) return true;
+        if (x < 0 || y < 0 || x > _maxXBounds || y > _maxYBounds) return true; // OOB return true
+        if (x >= sprite.Map.Width) return true;
+        if (y >= sprite.Map.Height) return true;
 
         var isWall = sprite.Map.TileContent[x, y] == Enums.TileContent.Wall;
         return isWall;
@@ -94,11 +97,8 @@ public class Area : Map
     /// </summary>
     public static bool IsSpriteInLocationOnWalk(Sprite sprite, int x, int y)
     {
-        if (sprite.Map.TileContent[x, y] == Enums.TileContent.Wall) return true; // Is wall, return true
-        var bounds = MaxVectorValuesXAndYOnMap(sprite);
-        if (x < 0 || y < 0 || x > bounds.Item1 || y > bounds.Item2) return true; // OOB return true
-
-        // Grab list of sprites on x & y
+        if (sprite is not Mundane)
+            if (sprite.CurrentHp <= 0 || ((int)sprite.Pos.X == x && (int)sprite.Pos.Y == y)) return false; // Some monster logic needs this check
         var spritesOnLocation = sprite.GetMovableSpritesInPosition(x, y);
         if (spritesOnLocation.IsNullOrEmpty()) return false;
         var first = spritesOnLocation.FirstOrDefault();
@@ -108,24 +108,17 @@ public class Area : Map
     }
 
     /// <summary>
-    /// This method is called for ghost walking to prevent OOB on maps
+    /// This method is called to prevent OOB on maps
     /// </summary>
-    public static bool IsSpriteWithinBoundsWhileGhostWalking(Sprite sprite, int x, int y)
-    {
-        if (sprite is not Mundane)
-            if (sprite is null || sprite.CurrentHp <= 0) return false;
-        var bounds = MaxVectorValuesXAndYOnMap(sprite);
-        return x >= 0 && y >= 0 && x <= bounds.Item1 && y <= bounds.Item2;
-    }
+    public bool IsSpriteWithinBounds(int x, int y) => x >= 0 && y >= 0 && x <= _maxXBounds && y <= _maxYBounds;
 
     /// <summary>
     /// Similar to the IsAStarSprite method, this method is called on Monster creation to ensure monsters aren't created
     /// on top of other sprites or walls
     /// </summary>
-    public static bool IsSpriteInLocationOnCreation(Sprite sprite, int x, int y)
+    public bool IsSpriteInLocationOnCreation(Sprite sprite, int x, int y)
     {
-        var bounds = MaxVectorValuesXAndYOnMap(sprite);
-        if (x < 0 || y < 0 || x > bounds.Item1 || y > bounds.Item2) return true; // OOB return true
+        if (x < 0 || y < 0 || x > _maxXBounds || y > _maxYBounds) return true; // OOB return true
         return !sprite.GetMovableSpritesInPosition(x, y).IsNullOrEmpty();
     }
 
@@ -179,6 +172,8 @@ public class Area : Map
 
         MapGridDict = TempMapGridDict.ToFrozenDictionary();
         TempMapGridDict.Clear();
+        MaxValuesXAndYOnMap();
+
         return Ready;
     }
 
@@ -200,26 +195,27 @@ public class Area : Map
         Script.Item2.Update(elapsedTime);
     }
 
-    private static (int, int) MaxVectorValuesXAndYOnMap(Sprite sprite)
+    private void MaxValuesXAndYOnMap()
     {
-        var gridSeries = sprite.Map.MapGridDict.Values.ToList();
-        var maxX = (int)gridSeries[0].X;
-        var maxY = (int)gridSeries[0].Y;
+        var gridSeries = MapGridDict.Values;
 
-        try
+        if (gridSeries.Length == 0) return;
+
+        var maxX = int.MinValue;
+        var maxY = int.MinValue;
+
+        foreach (var series in gridSeries)
         {
-            for (var i = 0; i < gridSeries.Count; i++)
-            {
-                maxX = Math.Max((int)gridSeries[i].X, maxX);
-                maxY = Math.Max((int)gridSeries[i].Y, maxY);
-            }
-        }
-        catch
-        {
-            // ignored
+            var x = (int)series.X;
+            var y = (int)series.Y;
+
+            // Update max values
+            if (x > maxX) maxX = x;
+            if (y > maxY) maxY = y;
         }
 
-        return (maxX, maxY);
+        _maxXBounds = maxX;
+        _maxYBounds = maxY;
     }
 
     public bool ShouldRegisterClick
@@ -231,97 +227,50 @@ public class Area : Map
         }
     }
 
-    #region A* new
+    #region A*
 
     public List<Vector2> FindPath(Monster sprite, Vector2 start, Vector2 end)
     {
-        switch (sprite.Target)
-        {
-            case null:
-            case Aisling { LoggedIn: false }:
-            case Aisling { IsInvisible: true }:
-            case Aisling { Map: null }:
-                return [];
-        }
+        if (!IsValidTarget(sprite, start, end)) return [];
 
-        if (sprite.Target.Map.ID != sprite.Map.ID) return [];
-        if (!sprite.WithinEarShotOf(sprite.Target)) return [];
-        if (start == Vector2.Zero) return [];
-        if (end == Vector2.Zero) return [];
-
-        // Define the possible movements (up, down, left, right)  
         var movements = new[]
-                {
-                    new Vector2(-1, 0),
-                    new Vector2(1, 0),
-                    new Vector2(0, -1),
-                    new Vector2(0, 1)
-                };
-
-        // Create a 2D array to store the distances from the start point  
-        var distances = new float[Width, Height];
-        for (var x = 0; x < Width; x++)
         {
-            for (var y = 0; y < Height; y++)
-            {
-                distances[x, y] = float.MaxValue;
-            }
-        }
+            new Vector2(-1, 0),
+            new Vector2(1, 0),
+            new Vector2(0, -1),
+            new Vector2(0, 1)
+        };
 
-        distances[(int)start.X, (int)start.Y] = 0;
-
-        // Create a 2D array to store the previous node in the path  
+        // Initialize data structures
+        var distances = InitializeDistances(start);
         var previous = new Vector2?[Width, Height];
-
-        // Create a 2D array to store the priorities of each node  
         var priorities = new float[Width, Height];
 
-        // Calculate the priorities of each node  
+        // Calculate the priorities based on the start and end positions
         CalculateNodePriorities(sprite, start, end, priorities);
 
         // Create a priority queue to store the nodes to be processed  
         var queue = new PriorityQueue<Vector2, float>();
         queue.Enqueue(start, priorities[(int)start.X, (int)start.Y]);
 
+        // A* Algo to find the shortest path
         while (queue.Count > 0)
         {
-            if (!sprite.IsAlive) break;
-            switch (sprite.Target)
-            {
-                case null:
-                case Aisling { LoggedIn: false }:
-                case Aisling { IsInvisible: true }:
-                case Aisling { Map: null }:
-                    return [];
-            }
-            if (sprite.Target.Map.ID != sprite.Map.ID) return [];
-            if (!sprite.WithinEarShotOf(sprite.Target)) return [];
+            if (!sprite.IsAlive || !IsValidTarget(sprite, start, end)) break;
 
-            // Get the node with the smallest distance from the queue  
             var current = queue.Dequeue();
 
-            // If we've reached the end point, construct the path  
+            // If we've reached the end, build path
             if (current == end)
             {
-                var path = new List<Vector2>();
-                while (current != start)
-                {
-                    path.Add(current);
-                    current = previous[(int)current.X, (int)current.Y].GetValueOrDefault();
-                }
-                path.Add(start);
-                path.Reverse();
-                return path;
+                return BuildPath(previous, start, current);
             }
 
-            // Process the neighbors of the current node  
+            // Process the neighboring nodes of the current node  
             foreach (var movement in movements)
             {
                 var neighbor = current + movement;
-
-                // Skip if the neighbor is out of bounds  
-                var bounds = MaxVectorValuesXAndYOnMap(sprite);
-                if (neighbor.X < 0 || neighbor.Y < 0 || neighbor.X > bounds.Item1 || neighbor.Y > bounds.Item2) continue;
+                if (!IsSpriteWithinBounds((int)neighbor.X, (int)neighbor.Y)) continue;
 
                 // Calculate the tentative distance from the start point to the neighbor  
                 var distance = distances[(int)current.X, (int)current.Y] + 1;
@@ -346,7 +295,7 @@ public class Area : Map
         {
             for (var y = 0; y < Height; y++)
             {
-                var impassable = IsAStarWall(sprite, x, y);
+                var impassable = IsWall(sprite, x, y);
                 var filled = IsSpriteInLocationOnWalk(sprite, x, y);
                 var cost = 1;
 
@@ -367,6 +316,48 @@ public class Area : Map
                 priorities[x, y] = priority;
             }
         }
+    }
+
+    private static bool IsValidTarget(Monster sprite, Vector2 start, Vector2 end)
+    {
+        return sprite.Target != null &&
+               sprite.Target is not Aisling { LoggedIn: false } &&
+               sprite.Target is not Aisling { IsInvisible: true } &&
+               sprite.Target is not Aisling { Map: null } &&
+               sprite.Target.Map.ID == sprite.Map.ID &&
+               sprite.WithinEarShotOf(sprite.Target) &&
+               start != Vector2.Zero &&
+               end != Vector2.Zero;
+    }
+
+    private float[,] InitializeDistances(Vector2 start)
+    {
+        var distances = new float[Width, Height];
+        for (var x = 0; x < Width; x++)
+        {
+            for (var y = 0; y < Height; y++)
+            {
+                distances[x, y] = float.MaxValue;
+            }
+        }
+        distances[(int)start.X, (int)start.Y] = 0;
+        return distances;
+    }
+
+    /// <summary>
+    /// Builds the path from the start to the end by backtracking from the end
+    /// </summary>
+    private static List<Vector2> BuildPath(Vector2?[,] previous, Vector2 start, Vector2 current)
+    {
+        var path = new List<Vector2>();
+        while (current != start)
+        {
+            path.Add(current);
+            current = previous[(int)current.X, (int)current.Y].GetValueOrDefault();
+        }
+        path.Add(start);
+        path.Reverse();
+        return path;
     }
 
     #endregion

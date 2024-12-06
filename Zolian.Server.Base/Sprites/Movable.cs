@@ -60,7 +60,7 @@ public class Movable : Identifiable
                 if (Map.IsWall(currentPosX, currentPosY)) return false;
                 if (Area.IsSpriteInLocationOnWalk(this, PendingX, PendingY)) return false;
             }
-            else if (!Area.IsSpriteWithinBoundsWhileGhostWalking(this, PendingX, PendingY)) return false;
+            else if (!Map.IsSpriteWithinBounds(PendingX, PendingY)) return false;
 
             switch (Direction)
             {
@@ -83,7 +83,7 @@ public class Movable : Identifiable
                 if (Map.IsWall(PendingX, PendingY)) return false;
                 if (Area.IsSpriteInLocationOnWalk(this, PendingX, PendingY)) return false;
             }
-            else if (!Area.IsSpriteWithinBoundsWhileGhostWalking(this, PendingX, PendingY)) return false;
+            else if (!Map.IsSpriteWithinBounds(PendingX, PendingY)) return false;
 
             // Commit Walk to other Player Clients
             Step0C(currentPosX, currentPosY);

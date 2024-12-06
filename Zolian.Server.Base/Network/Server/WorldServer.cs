@@ -868,7 +868,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 return default;
             }
 
-            if (localClient.Aisling.Map.IsWall(localArgs.DestinationPoint.X, localArgs.DestinationPoint.Y))
+            if (localClient.Aisling.Map.IsWall(localClient.Aisling, localArgs.DestinationPoint.X, localArgs.DestinationPoint.Y))
                 if ((int)localClient.Aisling.Pos.X != localArgs.DestinationPoint.X || (int)localClient.Aisling.Pos.Y != localArgs.DestinationPoint.Y)
                 {
                     localClient.SendServerMessage(ServerMessageType.ActiveMessage, "Something is in the way.");

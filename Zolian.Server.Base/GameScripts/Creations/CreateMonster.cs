@@ -106,8 +106,8 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
         SetSpawn(obj);
 
         if (obj.Map == null) return null;
-        if (Area.IsAStarWall(obj, (int)obj.Pos.X, (int)obj.Pos.Y)) return null;
-        if (Area.IsSpriteInLocationOnCreation(obj, (int)obj.Pos.X, (int)obj.Pos.Y)) return null;
+        if (obj.Map.IsWall(obj, (int)obj.Pos.X, (int)obj.Pos.Y)) return null;
+        if (obj.Map.IsSpriteInLocationOnCreation(obj, (int)obj.Pos.X, (int)obj.Pos.Y)) return null;
 
         obj.AbandonedDate = DateTime.UtcNow;
         obj.Image = template.Image;
