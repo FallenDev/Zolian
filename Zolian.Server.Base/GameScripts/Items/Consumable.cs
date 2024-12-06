@@ -560,9 +560,11 @@ public class Consumable(Item item) : ItemScript(item)
 
                     foreach (var skill in skills)
                     {
-                        if (skill is null) continue;
+                        if (skill?.Scripts is null || skill.Scripts.IsEmpty) continue;
+                        if (skill.Template.Cooldown == 0)
+                            if (!skill.CanUseZeroLineAbility) continue;
                         if (!skill.CanUse()) continue;
-                        if (skill.Scripts is null || skill.Scripts.IsEmpty) continue;
+                        if (skill.InUse) continue;
 
                         skill.InUse = true;
 
@@ -574,6 +576,7 @@ public class Consumable(Item item) : ItemScript(item)
 
                         if (skill.Template.SkillType == SkillScope.Assail)
                             aisling.Client.LastAssail = DateTime.UtcNow;
+                        script?.OnCleanup();
 
                         skill.InUse = false;
                     }
@@ -630,9 +633,11 @@ public class Consumable(Item item) : ItemScript(item)
 
                     foreach (var skill in skills)
                     {
-                        if (skill is null) continue;
+                        if (skill?.Scripts is null || skill.Scripts.IsEmpty) continue;
+                        if (skill.Template.Cooldown == 0)
+                            if (!skill.CanUseZeroLineAbility) continue;
                         if (!skill.CanUse()) continue;
-                        if (skill.Scripts is null || skill.Scripts.IsEmpty) continue;
+                        if (skill.InUse) continue;
 
                         skill.InUse = true;
 
@@ -644,6 +649,7 @@ public class Consumable(Item item) : ItemScript(item)
 
                         if (skill.Template.SkillType == SkillScope.Assail)
                             aisling.Client.LastAssail = DateTime.UtcNow;
+                        script?.OnCleanup();
 
                         skill.InUse = false;
                     }
@@ -718,9 +724,11 @@ public class Consumable(Item item) : ItemScript(item)
 
                     foreach (var skill in skills)
                     {
-                        if (skill is null) continue;
+                        if (skill?.Scripts is null || skill.Scripts.IsEmpty) continue;
+                        if (skill.Template.Cooldown == 0)
+                            if (!skill.CanUseZeroLineAbility) continue;
                         if (!skill.CanUse()) continue;
-                        if (skill.Scripts is null || skill.Scripts.IsEmpty) continue;
+                        if (skill.InUse) continue;
 
                         skill.InUse = true;
 
@@ -732,6 +740,7 @@ public class Consumable(Item item) : ItemScript(item)
 
                         if (skill.Template.SkillType == SkillScope.Assail)
                             aisling.Client.LastAssail = DateTime.UtcNow;
+                        script?.OnCleanup();
 
                         skill.InUse = false;
                     }
@@ -833,9 +842,11 @@ public class Consumable(Item item) : ItemScript(item)
 
                     foreach (var skill in skills)
                     {
-                        if (skill is null) continue;
+                        if (skill?.Scripts is null || skill.Scripts.IsEmpty) continue;
+                        if (skill.Template.Cooldown == 0)
+                            if (!skill.CanUseZeroLineAbility) continue;
                         if (!skill.CanUse()) continue;
-                        if (skill.Scripts is null || skill.Scripts.IsEmpty) continue;
+                        if (skill.InUse) continue;
 
                         skill.InUse = true;
 
@@ -847,6 +858,7 @@ public class Consumable(Item item) : ItemScript(item)
 
                         if (skill.Template.SkillType == SkillScope.Assail)
                             aisling.Client.LastAssail = DateTime.UtcNow;
+                        script?.OnCleanup();
 
                         skill.InUse = false;
                     }

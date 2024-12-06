@@ -762,6 +762,8 @@ public sealed class Aisling : Player, IAisling
 
                 foreach (var skill in skills.Where(skill => skill.CanUse()).Where(skill => skill.Scripts is not null && !skill.Scripts.IsEmpty))
                 {
+                    if (skill.Template.Cooldown == 0)
+                        if (!skill.CanUseZeroLineAbility) continue;
                     await semaphore.WaitAsync();
                     var task = ProcessSkillAsync(skill, semaphore);
                     tasks.Add(task);
