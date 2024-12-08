@@ -205,10 +205,6 @@ public record AislingStorage : Sql, IEqualityOperators<AislingStorage, AislingSt
         {
             SentrySdk.CaptureException(e);
         }
-        finally
-        {
-            CreateLock.Release();
-        }
     }
 
     /// <summary>
@@ -239,10 +235,6 @@ public record AislingStorage : Sql, IEqualityOperators<AislingStorage, AislingSt
         catch (Exception e)
         {
             SentrySdk.CaptureException(e);
-        }
-        finally
-        {
-            LoadLock.Release();
         }
 
         return aisling;
@@ -358,8 +350,6 @@ public record AislingStorage : Sql, IEqualityOperators<AislingStorage, AislingSt
                 ServerSetup.Instance.ServerSaveConnection = new SqlConnection(ConnectionString);
                 ServerSetup.Instance.ServerSaveConnection.Open();
             }
-
-            SaveLock.Release();
         }
 
         return true;

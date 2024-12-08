@@ -73,31 +73,13 @@ public class WorldClient : WorldClientBase, IWorldClient
         { "Invisible", new Stopwatch() }
     };
 
-    private static readonly SortedDictionary<long, string> AggroColors = new()
-    {
-        {100, "b"},
-        {90, "s"},
-        {75, "c"},
-        {25, "g"}
-    };
-
     public Aisling Aisling { get; set; }
     public bool MapUpdating { get; set; }
     public bool MapOpen { get; set; }
-    private SemaphoreSlim LoadLock { get; } = new(1, 1);
     public DateTime BoardOpened { get; set; }
     public DialogSession DlgSession { get; set; }
     private readonly List<LegendMarkInfo> _legendMarksPublic = [];
     private readonly List<LegendMarkInfo> _legendMarksPrivate = [];
-
-    public bool CanSendLocation
-    {
-        get
-        {
-            var readyTime = DateTime.UtcNow;
-            return readyTime - LastLocationSent < new TimeSpan(0, 0, 0, 2);
-        }
-    }
 
     public bool IsRefreshing
     {
@@ -135,33 +117,6 @@ public class WorldClient : WorldClientBase, IWorldClient
         }
     }
 
-    public bool IsMoving
-    {
-        get
-        {
-            var readyTime = DateTime.UtcNow;
-            return readyTime - LastMovement > new TimeSpan(0, 0, 0, 0, 850);
-        }
-    }
-
-    public bool IsWarping
-    {
-        get
-        {
-            var readyTime = DateTime.UtcNow;
-            return readyTime - LastWarp < new TimeSpan(0, 0, 0, 0, ServerSetup.Instance.Config.WarpCheckRate);
-        }
-    }
-
-    public bool WasUpdatingMapRecently
-    {
-        get
-        {
-            var readyTime = DateTime.UtcNow;
-            return readyTime - LastMapUpdated < new TimeSpan(0, 0, 0, 0, 100);
-        }
-    }
-
     public CastInfo SpellCastInfo { get; set; }
     public DateTime LastAssail { get; set; }
     public DateTime LastSpellCast { get; set; }
@@ -182,11 +137,7 @@ public class WorldClient : WorldClientBase, IWorldClient
     public DateTime LastWhisperMessageSent { get; set; }
     public PendingBuy PendingBuySessions { get; set; }
     public PendingSell PendingItemSessions { get; set; }
-    public bool ShouldUpdateMap { get; set; }
-    public DateTime LastNodeClicked { get; set; }
     public WorldPortal PendingNode { get; set; }
-    public Position LastKnownPosition { get; set; }
-    public int MapClicks { get; set; }
     public uint EntryCheck { get; set; }
     private readonly Lock _warpCheckLock = new();
     private readonly ConcurrentDictionary<uint, ExperienceEvent> _expQueue = [];
@@ -592,7 +543,6 @@ public class WorldClient : WorldClientBase, IWorldClient
 
         if (!ServerSetup.Instance.GlobalMapCache.ContainsKey(Aisling.AreaId)) return null;
         await using var loadConnection = new SqlConnection(AislingStorage.ConnectionString);
-        await LoadLock.WaitAsync().ConfigureAwait(false);
 
         try
         {
@@ -619,13 +569,11 @@ public class WorldClient : WorldClientBase, IWorldClient
             ServerSetup.EventsLogger(ex.StackTrace, LogLevel.Error);
             SentrySdk.CaptureException(ex);
 
-            LoadLock.Release();
             Disconnect();
             return null;
         }
         finally
         {
-            LoadLock.Release();
             loadConnection.Close();
         }
 

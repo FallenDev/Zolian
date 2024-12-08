@@ -2,11 +2,11 @@
 
 public class WorldPortal
 {
-    public Warp Destination { get; set; }
+    public Warp Destination { get; init; }
 
-    public string DisplayName { get; set; }
+    public string DisplayName { get; init; }
 
-    public short PointX { get; set; }
+    public short PointX { get; init; }
 
-    public short PointY { get; set; }
+    public short PointY { get; init; }
 }

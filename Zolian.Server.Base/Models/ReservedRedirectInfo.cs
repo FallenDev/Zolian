@@ -1,6 +1,8 @@
-﻿namespace Darkages.Models;
+﻿using System.Numerics;
 
-public record ReservedRedirectInfo
+namespace Darkages.Models;
+
+public abstract record ReservedRedirectInfo : IEqualityOperators<ReservedRedirectInfo, ReservedRedirectInfo, bool>
 {
     public byte Id { get; set; }
     public string Name { get; set; }

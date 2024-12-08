@@ -753,10 +753,6 @@ public sealed class Item : Identifiable
             ServerSetup.EventsLogger($"Failed to delete {ItemId}:{Name} from Player: {Serial}");
             SentrySdk.CaptureException(e);
         }
-        finally
-        {
-            StorageManager.AislingBucket.SaveLock.Release();
-        }
     }
 
     /// <summary>

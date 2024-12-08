@@ -1,5 +1,6 @@
 ﻿using System.Collections.Frozen;
 
+using Chaos.Common.Synchronization;
 using Chaos.Cryptography;
 
 using Darkages.Enums;
@@ -11,6 +12,7 @@ using Darkages.Sprites.Entity;
 using Darkages.Types;
 
 using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Logging;
 using MapFlags = Darkages.Enums.MapFlags;
 
 namespace Darkages.Database;
@@ -21,11 +23,17 @@ public record AreaStorage
 
     public static AreaStorage Instance { get; } = new();
 
-    private SemaphoreSlim LoadLock { get; } = new(1, 1);
+    private FifoAutoReleasingSemaphoreSlim LoadLock { get; } = new(1, 1);
 
     public async void CacheFromDatabase()
     {
-        await LoadLock.WaitAsync(TimeSpan.FromSeconds(1)).ConfigureAwait(false);
+        await using var @lock = await LoadLock.WaitAsync(TimeSpan.FromSeconds(1)).ConfigureAwait(false);
+
+        if (@lock == null)
+        {
+            ServerSetup.EventsLogger("Failed to acquire lock for Loading Maps", LogLevel.Error);
+            return;
+        }
 
         try
         {
@@ -86,10 +94,6 @@ public record AreaStorage
         catch (SqlException e)
         {
             ServerSetup.EventsLogger(e.ToString());
-        }
-        finally
-        {
-            LoadLock.Release();
         }
 
         ServerSetup.Instance.GlobalMapCache = ServerSetup.Instance.TempGlobalMapCache.ToFrozenDictionary();
