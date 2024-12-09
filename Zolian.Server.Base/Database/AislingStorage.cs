@@ -270,6 +270,32 @@ public record AislingStorage : Sql, IEqualityOperators<AislingStorage, AislingSt
         return true;
     }
 
+    /// <summary>
+    /// Saves a password attempt from the LoginServer
+    /// </summary>
+    public static async Task<bool> PasswordSaveAttempt(Aisling obj)
+    {
+        if (obj == null) return false;
+        if (obj.Loading) return false;
+
+        try
+        {
+            var connection = ConnectToDatabase(EncryptedConnectionString);
+            var cmd = ConnectToDatabaseSqlCommandWithProcedure("AccountLockoutCount", connection);
+            cmd.Parameters.Add("@Name", SqlDbType.VarChar).Value = obj.Username;
+            cmd.Parameters.Add("@Attempts", SqlDbType.Int).Value = obj.PasswordAttempts;
+            cmd.Parameters.Add("@Hacked", SqlDbType.Bit).Value = obj.Hacked;
+            cmd.Parameters.Add("@LastAttemptIP", SqlDbType.VarChar).Value = obj.LastAttemptIP;
+            ExecuteAndCloseConnection(cmd, connection);
+        }
+        catch (Exception e)
+        {
+            SentrySdk.CaptureException(e);
+        }
+
+        return true;
+    }
+
     #endregion
 
     #region Player Save Methods

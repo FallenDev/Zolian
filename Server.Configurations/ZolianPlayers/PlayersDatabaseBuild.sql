@@ -894,6 +894,24 @@ BEGIN
 END
 GO
 
+-- AccountLockoutCount
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[AccountLockoutCount]
+@Name VARCHAR (12), @Attempts INT, @Hacked BIT, @LastAttemptIP VARCHAR (15)
+AS
+BEGIN
+    SET NOCOUNT ON;
+    UPDATE [ZolianPlayers].[dbo].[Players]
+    SET    [PasswordAttempts] = @Attempts,
+           [Hacked]           = @Hacked,
+           [LastAttemptIP]    = @LastAttemptIP
+    WHERE  Username = @Name;
+END
+GO
+
 -- PlayerCreation
 SET ANSI_NULLS ON
 GO
