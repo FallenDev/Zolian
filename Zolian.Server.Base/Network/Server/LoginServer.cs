@@ -196,7 +196,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
 
             if (ServerSetup.Instance.GlobalPasswordAttempt.TryGetValue(localClient.RemoteIp, out var attempts))
             {
-                if (attempts >= 3)
+                if (attempts >= 5)
                 {
                     localClient.SendLoginMessage(LoginMessageType.CharacterDoesntExist, "Your IP has been restricted for too many incorrect password attempts.");
                     ServerSetup.EventsLogger($"{localClient.RemoteIp} has attempted {attempts} and has been restricted.");

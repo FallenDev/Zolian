@@ -39,6 +39,10 @@ public static class Commander
             .Create("Reload Maps", "rm", "- Reload all maps:")
             .SetAction(OnMapReload));
 
+        ServerSetup.Instance.Parser.AddCommand(Command
+            .Create("Reset IP", "ip", "- Resets restricted IPs")
+            .SetAction(OnIpReset));
+
         #endregion
 
         #region GM Control
@@ -422,6 +426,21 @@ public static class Commander
         if (area == null) return;
         client.TransitionToMap(area, new Position(x, y));
         ServerSetup.EventsLogger($"{client.RemoteIp} used GM Command -Port- on character: {client.Aisling.Username}");
+    }
+
+    private static void OnIpReset(Argument[] args, object arg)
+    {
+        var client = (WorldClient)arg;
+        if (client == null) return;
+        var death = client.Aisling.Username.Equals("death", StringComparison.InvariantCultureIgnoreCase);
+        if (!death)
+        {
+            client.SendServerMessage(ServerMessageType.ActiveMessage, "{=bRestricted GM Command - Summon Monster");
+            return;
+        }
+
+        ServerSetup.Instance.GlobalPasswordAttempt.Clear();
+        ServerSetup.EventsLogger($"{client.RemoteIp} used GM Command -Ip Reset- on character: {client.Aisling.Username}");
     }
 
     /// <summary>
