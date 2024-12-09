@@ -185,7 +185,6 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
     public ValueTask OnLogin(ILoginClient client, in Packet packet)
     {
         var args = PacketSerializer.Deserialize<LoginArgs>(in packet);
-
         if (ServerSetup.Instance.Running) return ExecuteHandler(client, args, InnerOnLogin);
 
         client.SendLoginMessage(LoginMessageType.CharacterDoesntExist, "Server is down for maintenance");
@@ -194,15 +193,19 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
         async ValueTask InnerOnLogin(ILoginClient localClient, LoginArgs localArgs)
         {
             if (StringExtensions.IsNullOrEmpty(localArgs.Name) || StringExtensions.IsNullOrEmpty(localArgs.Password)) return;
-            var result = await AislingStorage.CheckPassword(localArgs.Name);
 
-            if (result == null)
+            if (ServerSetup.Instance.GlobalPasswordAttempt.TryGetValue(localClient.RemoteIp, out var attempts))
             {
-                localClient.SendLoginMessage(LoginMessageType.CharacterDoesntExist, $"{{=q'{localArgs.Name}' {{=adoes not currently exist on this server. You can make this hero by clicking on 'Create'");
-                return;
+                if (attempts >= 3)
+                {
+                    localClient.SendLoginMessage(LoginMessageType.CharacterDoesntExist, "Your IP has been restricted for too many incorrect password attempts.");
+                    ServerSetup.EventsLogger($"{localClient.RemoteIp} has attempted {attempts} and has been restricted.");
+                    SentrySdk.CaptureException(new Exception($"{localClient.RemoteIp} has been restricted due to password attempts."));
+                    return;
+                }
             }
 
-            var maintCheck = localArgs.Name.ToLowerInvariant();
+            var result = await AislingStorage.CheckPassword(localArgs.Name);
 
             if (localArgs.Password == ServerSetup.Instance.Unlock)
             {
@@ -224,26 +227,8 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
                 return;
             }
 
-            if (result.Password != localArgs.Password && maintCheck != "death")
-            {
-                if (result.PasswordAttempts <= 9)
-                {
-                    ServerSetup.ConnectionLogger($"{localClient.RemoteIp}: {result.Username} attempted an incorrect password.");
-                    result.LastAttemptIP = localClient.RemoteIp.ToString();
-                    result.PasswordAttempts += 1;
-                    await SavePasswordAttempt(result);
-                    localClient.SendLoginMessage(LoginMessageType.WrongPassword, "Incorrect Information provided.");
-                }
-                else
-                {
-                    ServerSetup.ConnectionLogger($"{result.Username} was locked to protect their account.");
-                    client.SendLoginMessage(LoginMessageType.Confirm, "Hacking detected, the player has been locked.");
-                    result.LastAttemptIP = localClient.RemoteIp.ToString();
-                    result.Hacked = true;
-                    await SavePasswordAttempt(result);
-                }
-                return;
-            }
+            var passed = await OnSecurityCheck(result, localClient, localArgs.Name, localArgs.Password);
+            if (!passed) return;
 
             var connInfo = new ConnectionInfo
             {
@@ -260,7 +245,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
                 localClient.Crypto.Seed,
                 localArgs.Name);
 
-            switch (maintCheck)
+            switch (localArgs.Name.ToLowerInvariant())
             {
                 case "asdf":
                     localClient.SendLoginMessage(LoginMessageType.CharacterDoesntExist, "Locked Account, denied access");
@@ -360,56 +345,77 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
     public ValueTask OnPasswordChange(ILoginClient client, in Packet packet)
     {
         var args = PacketSerializer.Deserialize<PasswordChangeArgs>(in packet);
-        return ExecuteHandler(client, args, InnerOnPasswordChange);
+        if (ServerSetup.Instance.Running) return ExecuteHandler(client, args, InnerOnPasswordChange);
 
-        static async ValueTask InnerOnPasswordChange(ILoginClient localClient, PasswordChangeArgs localArgs)
+        client.SendLoginMessage(LoginMessageType.CharacterDoesntExist, "Server is down for maintenance");
+        return default;
+
+        async ValueTask InnerOnPasswordChange(ILoginClient localClient, PasswordChangeArgs localArgs)
         {
             if (StringExtensions.IsNullOrEmpty(localArgs.Name) || StringExtensions.IsNullOrEmpty(localArgs.CurrentPassword) || StringExtensions.IsNullOrEmpty(localArgs.NewPassword)) return;
-            var aisling = AislingStorage.CheckPassword(localArgs.Name);
 
-            if (aisling.Result == null)
+            if (ServerSetup.Instance.GlobalPasswordAttempt.TryGetValue(localClient.RemoteIp, out var attempts))
             {
-                localClient.SendLoginMessage(LoginMessageType.CharacterDoesntExist, "Player does not exist");
-                return;
-            }
-
-            if (aisling.Result.Hacked)
-            {
-                localClient.SendLoginMessage(LoginMessageType.Confirm, "Hacking detected, we've locked the account; If this is your account, please contact the GM.");
-                return;
-            }
-
-            if (aisling.Result.Password != localArgs.CurrentPassword)
-            {
-                if (aisling.Result.PasswordAttempts <= 9)
+                if (attempts >= 5)
                 {
-                    ServerSetup.ConnectionLogger($"{aisling.Result} attempted an incorrect password.");
-                    aisling.Result.LastAttemptIP = localClient.RemoteIp.ToString();
-                    aisling.Result.PasswordAttempts += 1;
-                    await SavePasswordAttempt(aisling.Result);
-                    localClient.SendLoginMessage(LoginMessageType.Confirm, "Incorrect Information provided.");
+                    localClient.SendLoginMessage(LoginMessageType.CharacterDoesntExist, "Your IP has been restricted for too many incorrect password attempts.");
+                    ServerSetup.EventsLogger($"{localClient.RemoteIp} has attempted {attempts} and has been restricted.");
+                    SentrySdk.CaptureException(new Exception($"{localClient.RemoteIp} has been restricted due to password attempts."));
                     return;
                 }
-
-                ServerSetup.ConnectionLogger($"{aisling.Result} was locked to protect their account.");
-                localClient.SendLoginMessage(LoginMessageType.Confirm, "Hacking detected, the player has been locked.");
-                aisling.Result.LastAttemptIP = localClient.RemoteIp.ToString();
-                aisling.Result.Hacked = true;
-                await SavePasswordAttempt(aisling.Result);
-                return;
             }
+
+            var aisling = await AislingStorage.CheckPassword(localArgs.Name);
+            var passed = await OnSecurityCheck(aisling, localClient, localArgs.Name, localArgs.CurrentPassword);
+            if (!passed) return;
 
             if (localArgs.NewPassword.Length < 6)
             {
-                localClient.SendLoginMessage(LoginMessageType.Confirm, "New password was not accepted. Keep it between 6 to 8 characters.");
+                localClient.SendLoginMessage(LoginMessageType.CharacterDoesntExist, "New password was not accepted. Keep it between 6 to 8 characters.");
                 return;
             }
 
-            aisling.Result.Password = localArgs.NewPassword;
-            aisling.Result.LastIP = localClient.RemoteIp.ToString();
-            aisling.Result.LastAttemptIP = localClient.RemoteIp.ToString();
-            await SavePassword(aisling.Result).ConfigureAwait(false);
+            aisling.Password = localArgs.NewPassword;
+            aisling.LastIP = localClient.RemoteIp.ToString();
+            aisling.LastAttemptIP = localClient.RemoteIp.ToString();
+            await SavePassword(aisling).ConfigureAwait(false);
         }
+    }
+
+    private static async Task<bool> OnSecurityCheck(Aisling aisling, ILoginClient localClient, string localArgsName, string localArgsPass)
+    {
+        if (aisling == null)
+        {
+            localClient.SendLoginMessage(LoginMessageType.CharacterDoesntExist, $"{{=q'{localArgsName}' {{=adoes not currently exist on this server. You can make this hero by clicking on 'Create'");
+            return false;
+        }
+
+        if (aisling.Hacked)
+        {
+            localClient.SendLoginMessage(LoginMessageType.CharacterDoesntExist, "Hacking detected, we've locked the account; If this is your account, please contact the GM.");
+            return false;
+        }
+
+        var maintCheck = localArgsName.ToLowerInvariant();
+        if (aisling.Password == localArgsPass || maintCheck == "death") return true;
+
+        ServerSetup.Instance.GlobalPasswordAttempt.AddOrUpdate(localClient.RemoteIp, 1, (remoteIp, creations) => creations += 1);
+        aisling.LastAttemptIP = localClient.RemoteIp.ToString();
+
+        if (aisling.PasswordAttempts <= 9)
+        {
+            ServerSetup.ConnectionLogger($"{aisling.Username} attempted an incorrect password.");
+            aisling.PasswordAttempts += 1;
+            await SavePasswordAttempt(aisling);
+            localClient.SendLoginMessage(LoginMessageType.WrongPassword, "Incorrect Information provided.");
+            return false;
+        }
+
+        ServerSetup.ConnectionLogger($"{aisling.Username} was locked to protect their account.");
+        localClient.SendLoginMessage(LoginMessageType.CharacterDoesntExist, "Hacking detected, the player has been locked.");
+        aisling.Hacked = true;
+        await SavePasswordAttempt(aisling);
+        return false;
     }
 
     /// <summary>
