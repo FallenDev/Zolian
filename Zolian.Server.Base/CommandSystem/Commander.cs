@@ -435,7 +435,7 @@ public static class Commander
         var death = client.Aisling.Username.Equals("death", StringComparison.InvariantCultureIgnoreCase);
         if (!death)
         {
-            client.SendServerMessage(ServerMessageType.ActiveMessage, "{=bRestricted GM Command - Summon Monster");
+            client.SendServerMessage(ServerMessageType.ActiveMessage, "{=bRestricted GM Command - Reset Restrictions");
             return;
         }
 
