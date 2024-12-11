@@ -83,7 +83,8 @@ public class LoginClient([NotNull] ILoginServer<ILoginClient> server, [NotNull] 
             {
                 try
                 {
-                    var metaData = MetafileManager.GetMetaFile(name);
+                    var metaData = ServerSetup.Instance.Game.Metafiles.FirstOrDefault(file => file.Name == name);
+                    if (metaData == null) break;
                     args.MetaDataInfo = new MetaDataInfo
                     {
                         Name = metaData.Name,
@@ -105,9 +106,7 @@ public class LoginClient([NotNull] ILoginServer<ILoginClient> server, [NotNull] 
                 try
                 {
                     args.MetaDataCollection = [];
-                    var metaFiles = MetafileManager.GetMetaFilesWithoutExtendedClasses();
-
-                    foreach (var file in metaFiles)
+                    foreach (var file in ServerSetup.Instance.Game.Metafiles.Where(file => !file.Name.Contains("SClass")))
                     {
                         var metafileInfo = new MetaDataInfo
                         {

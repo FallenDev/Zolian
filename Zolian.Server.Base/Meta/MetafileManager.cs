@@ -1,14 +1,18 @@
-﻿using Darkages.Compression;
+﻿using System.Numerics;
+using Darkages.Compression;
 using Darkages.Enums;
 using Darkages.Models;
 using Darkages.Network.Server;
+
 using Newtonsoft.Json;
+
 using ServiceStack;
+
 using Nation = Darkages.Enums.Nation;
 
 namespace Darkages.Meta;
 
-public class Node
+public record Node : IEqualityOperators<Node, Node, bool>
 {
     public List<string> Atoms { get; set; }
     public string Name { get; set; }
@@ -16,8 +20,6 @@ public class Node
 
 public class MetafileManager
 {
-    protected static readonly MetafileCollection Metafiles;
-
     static MetafileManager()
     {
         var filePath = Path.Combine(ServerSetup.Instance.StoragePath, "metafile");
@@ -26,7 +28,7 @@ public class MetafileManager
 
         var files = Directory.GetFiles(filePath);
 
-        Metafiles = new MetafileCollection(short.MaxValue);
+        ServerSetup.Instance.Game.Metafiles = new List<Metafile>(short.MaxValue);
 
         foreach (var file in files)
         {
@@ -37,12 +39,58 @@ public class MetafileManager
             if (metaFile.Name.StartsWith("ItemInfo")) continue;
             if (metaFile.Name.StartsWith("NationDesc")) continue;
 
-            Metafiles.Add(metaFile);
+            ServerSetup.Instance.Game.Metafiles.Add(metaFile);
         }
 
         CreateFromTemplates();
         LoadQuestDescriptions();
         CreateNationDescMeta();
+    }
+
+    private static void CreateFromTemplates()
+    {
+        GenerateItemInfoMeta();
+        AbilityMetaBuilder.AbilityMeta();
+    }
+
+    private static void GenerateItemInfoMeta()
+    {
+        var i = 0;
+
+        foreach (var batch in ServerSetup.Instance.GlobalItemTemplateCache
+                     .OrderBy(v => v.Value.LevelRequired)
+                     .BatchesOf(1024))
+        {
+            var metaFile = new Metafile { Name = $"ItemInfo{i}", Nodes = [] };
+
+            foreach (var template in from v in batch select v.Value)
+            {
+                var meta = template.GetMetaData();
+                metaFile.Nodes.Add(new MetafileNode(template.Name, meta));
+            }
+
+            CompileTemplate(metaFile);
+            ServerSetup.Instance.Game.Metafiles.Add(metaFile);
+            i++;
+        }
+
+        foreach (var batch in ServerSetup.Instance.GlobalSqlItemCache
+                     .DistinctBy(v => v.Value.NoColorDisplayName)
+                     .OrderBy(v => v.Value.Template.LevelRequired)
+                     .BatchesOf(1024))
+        {
+            var metaFile = new Metafile { Name = $"ItemInfo{i}", Nodes = [] };
+
+            foreach (var item in from v in batch select v.Value)
+            {
+                var meta = item.Template.GetMetaData();
+                metaFile.Nodes.Add(new MetafileNode(item.NoColorDisplayName, meta));
+            }
+
+            CompileTemplate(metaFile);
+            ServerSetup.Instance.Game.Metafiles.Add(metaFile);
+            i++;
+        }
     }
 
     private static void LoadQuestDescriptions()
@@ -81,7 +129,7 @@ public class MetafileManager
         }
 
         CompileTemplate(metaFile);
-        Metafiles.Add(metaFile);
+        ServerSetup.Instance.Game.Metafiles.Add(metaFile);
     }
 
     private static void LoadCircleQuestDescriptions(string dir, Metafile metaFile)
@@ -109,16 +157,7 @@ public class MetafileManager
         }
 
         CompileTemplate(metaFile);
-        Metafiles.Add(metaFile);
-    }
-
-    public static Metafile GetMetaFile(string name) => Metafiles.FirstOrDefault(o => o.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
-
-    public static MetafileCollection GetMetaFilesWithoutExtendedClasses()
-    {
-        var metaCollection = new MetafileCollection(short.MaxValue);
-        metaCollection.AddRange(Metafiles.Where(file => !file.Name.Contains("SClass")));
-        return metaCollection;
+        ServerSetup.Instance.Game.Metafiles.Add(metaFile);
     }
 
     protected static void CompileTemplate(Metafile metaFile)
@@ -154,52 +193,6 @@ public class MetafileManager
             fs.Write(metaFile.InflatedData);
             fs.Close();
             fs.Dispose();
-        }
-    }
-
-    private static void CreateFromTemplates()
-    {
-        GenerateItemInfoMeta();
-        AbilityMetaBuilder.AbilityMeta();
-    }
-
-    private static void GenerateItemInfoMeta()
-    {
-        var i = 0;
-
-        foreach (var batch in ServerSetup.Instance.GlobalItemTemplateCache
-                     .OrderBy(v => v.Value.LevelRequired)
-                     .BatchesOf(1024))
-        {
-            var metaFile = new Metafile { Name = $"ItemInfo{i}", Nodes = [] };
-
-            foreach (var template in from v in batch select v.Value)
-            {
-                var meta = template.GetMetaData();
-                metaFile.Nodes.Add(new MetafileNode(template.Name, meta));
-            }
-
-            CompileTemplate(metaFile);
-            Metafiles.Add(metaFile);
-            i++;
-        }
-
-        foreach (var batch in ServerSetup.Instance.GlobalSqlItemCache
-                     .DistinctBy(v => v.Value.NoColorDisplayName)
-                     .OrderBy(v => v.Value.Template.LevelRequired)
-                     .BatchesOf(1024))
-        {
-            var metaFile = new Metafile { Name = $"ItemInfo{i}", Nodes = [] };
-
-            foreach (var item in from v in batch select v.Value)
-            {
-                var meta = item.Template.GetMetaData();
-                metaFile.Nodes.Add(new MetafileNode(item.NoColorDisplayName, meta));
-            }
-
-            CompileTemplate(metaFile);
-            Metafiles.Add(metaFile);
-            i++;
         }
     }
 }

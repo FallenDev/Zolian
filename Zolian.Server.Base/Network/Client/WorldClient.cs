@@ -560,7 +560,7 @@ public class WorldClient : WorldClientBase, IWorldClient
             BoardPostStorage.MailFromDatabase(this);
             var skillSet = DecideOnSkillsToPull();
             if (!skillSet.IsNullOrEmpty())
-                SendMetaData(MetaDataRequestType.DataByName, new MetafileManager(), skillSet);
+                SendMetaData(MetaDataRequestType.DataByName, ServerSetup.Instance.Game.MetafileManager, skillSet);
         }
         catch (Exception ex)
         {
@@ -2134,8 +2134,8 @@ public class WorldClient : WorldClientBase, IWorldClient
                 {
                     try
                     {
-                        var metaData = MetafileManager.GetMetaFile(name);
-
+                        var metaData = ServerSetup.Instance.Game.Metafiles.FirstOrDefault(file => file.Name == name);
+                        if (metaData == null) break;
                         if (!name!.Contains("Class"))
                         {
                             args.MetaDataInfo = new MetaDataInfo
@@ -2179,17 +2179,17 @@ public class WorldClient : WorldClientBase, IWorldClient
                 {
                     try
                     {
-                        args.MetaDataCollection = new List<MetaDataInfo>();
-                        var metaFiles = MetafileManager.GetMetaFilesWithoutExtendedClasses();
+                        args.MetaDataCollection = [];
+                        foreach (var file in ServerSetup.Instance.Game.Metafiles.Where(file => !file.Name.Contains("SClass")))
+                        {
+                            var metafileInfo = new MetaDataInfo
+                            {
+                                CheckSum = file.Hash,
+                                Data = file.DeflatedData,
+                                Name = file.Name
+                            };
 
-                        foreach (var metafileInfo in metaFiles.Select(metaFile => new MetaDataInfo
-                        {
-                            CheckSum = metaFile.Hash,
-                            Data = metaFile.DeflatedData,
-                            Name = metaFile.Name
-                        }))
-                        {
-                            args.MetaDataCollection.Add(metafileInfo);
+                            args.MetaDataCollection?.Add(metafileInfo);
                         }
                     }
                     catch (Exception ex)

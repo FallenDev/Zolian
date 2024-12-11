@@ -223,7 +223,10 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
                     return;
                 }
 
+                ServerSetup.Instance.GlobalPasswordAttempt.AddOrUpdate(localClient.RemoteIp, 1, (remoteIp, creations) => creations += 1);
                 localClient.SendLoginMessage(LoginMessageType.CharacterDoesntExist, "GM Action, denied access and IP logged.");
+                ServerSetup.EventsLogger($"{localClient.RemoteIp} has attempted to use the unlock command.");
+                SentrySdk.CaptureException(new Exception($"{localClient.RemoteIp} has attempted to use the unlock command"));
                 return;
             }
 
@@ -320,7 +323,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
 
         static ValueTask InnerOnMetaDataRequest(ILoginClient localClient, MetaDataRequestArgs localArgs)
         {
-            localClient.SendMetaData(localArgs.MetaDataRequestType, new MetafileManager(), localArgs.Name);
+            localClient.SendMetaData(localArgs.MetaDataRequestType, ServerSetup.Instance.Game.MetafileManager, localArgs.Name);
             return default;
         }
     }

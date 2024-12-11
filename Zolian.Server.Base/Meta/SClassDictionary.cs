@@ -12,6 +12,7 @@ public static class SClassDictionary
         // Pre-allocation to a prime number
         var skillMap = GenerateSkillMap();
         SkillMap = skillMap.ToFrozenDictionary();
+
     }
 
     private static Dictionary<(Race race, Class path, Class pastClass, Job job), string> GenerateSkillMap()

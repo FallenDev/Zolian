@@ -21,7 +21,7 @@ public abstract class AbilityMetaBuilder : MetafileManager
             sClass.Nodes.Add(new MetafileNode("", ""));
             SpellBuilder(sClass, race, class1, class2, job);
             CompileTemplate(sClass);
-            Metafiles.Add(sClass);
+            ServerSetup.Instance.Game.Metafiles.Add(sClass);
         }
     }
 

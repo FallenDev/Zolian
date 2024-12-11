@@ -51,6 +51,8 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     private readonly MServerTable _serverTable;
     private const string InternalIP = "192.168.50.1"; // Cannot use ServerConfig due to value needing to be constant
     private static readonly string[] GameMastersIPs = ServerSetup.Instance.GameMastersIPs;
+    public readonly MetafileManager MetafileManager;
+    public List<Metafile> Metafiles = [];
     private ConcurrentDictionary<Type, WorldServerComponent> _serverComponents;
     private readonly WorldServerTimer _trapTimer = new(TimeSpan.FromSeconds(1));
     private const int GameSpeed = 50;
@@ -108,6 +110,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         RegisterServerComponents();
         Console.ForegroundColor = ConsoleColor.Yellow;
         Console.WriteLine("Server is now Online\n");
+        MetafileManager = new MetafileManager();
     }
 
     #region Server Init
@@ -3070,13 +3073,13 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                             if (localArgs.Name is null) return default;
                             if (!localArgs.Name.Contains("Class"))
                             {
-                                localClient.SendMetaData(localArgs.MetaDataRequestType, new MetafileManager(), localArgs.Name);
+                                localClient.SendMetaData(localArgs.MetaDataRequestType, MetafileManager, localArgs.Name);
                             }
                         }
                         break;
                     case MetaDataRequestType.AllCheckSums:
                         {
-                            localClient.SendMetaData(MetaDataRequestType.AllCheckSums, new MetafileManager());
+                            localClient.SendMetaData(MetaDataRequestType.AllCheckSums, MetafileManager);
                         }
                         break;
                 }
