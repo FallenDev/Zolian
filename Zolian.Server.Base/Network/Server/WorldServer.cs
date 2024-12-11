@@ -26,6 +26,7 @@ using RestSharp;
 using ServiceStack;
 
 using System.Collections.Concurrent;
+using System.Collections.Frozen;
 using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
@@ -52,7 +53,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     private const string InternalIP = "192.168.50.1"; // Cannot use ServerConfig due to value needing to be constant
     private static readonly string[] GameMastersIPs = ServerSetup.Instance.GameMastersIPs;
     public readonly MetafileManager MetafileManager;
-    public List<Metafile> Metafiles = [];
+    public FrozenDictionary<int, Metafile> Metafiles { get; set; }
     private ConcurrentDictionary<Type, WorldServerComponent> _serverComponents;
     private readonly WorldServerTimer _trapTimer = new(TimeSpan.FromSeconds(1));
     private const int GameSpeed = 50;

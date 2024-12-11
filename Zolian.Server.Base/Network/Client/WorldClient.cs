@@ -2134,7 +2134,7 @@ public class WorldClient : WorldClientBase, IWorldClient
                 {
                     try
                     {
-                        var metaData = ServerSetup.Instance.Game.Metafiles.FirstOrDefault(file => file.Name == name);
+                        var metaData = ServerSetup.Instance.Game.Metafiles.Values.FirstOrDefault(file => file.Name == name);
                         if (metaData == null) break;
                         if (!name!.Contains("Class"))
                         {
@@ -2180,7 +2180,7 @@ public class WorldClient : WorldClientBase, IWorldClient
                     try
                     {
                         args.MetaDataCollection = [];
-                        foreach (var file in ServerSetup.Instance.Game.Metafiles.Where(file => !file.Name.Contains("SClass")))
+                        foreach (var file in ServerSetup.Instance.Game.Metafiles.Values.Where(file => !file.Name.Contains("SClass")))
                         {
                             var metafileInfo = new MetaDataInfo
                             {

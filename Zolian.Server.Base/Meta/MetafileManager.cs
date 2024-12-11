@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿using System.Collections.Frozen;
+using System.Numerics;
 using Darkages.Compression;
 using Darkages.Enums;
 using Darkages.Models;
@@ -20,6 +21,7 @@ public record Node : IEqualityOperators<Node, Node, bool>
 
 public class MetafileManager
 {
+    protected static readonly Dictionary<int, Metafile> MetaFiles = [];
     static MetafileManager()
     {
         var filePath = Path.Combine(ServerSetup.Instance.StoragePath, "metafile");
@@ -27,8 +29,6 @@ public class MetafileManager
         if (!Directory.Exists(filePath)) return;
 
         var files = Directory.GetFiles(filePath);
-
-        ServerSetup.Instance.Game.Metafiles = new List<Metafile>(short.MaxValue);
 
         foreach (var file in files)
         {
@@ -39,12 +39,14 @@ public class MetafileManager
             if (metaFile.Name.StartsWith("ItemInfo")) continue;
             if (metaFile.Name.StartsWith("NationDesc")) continue;
 
-            ServerSetup.Instance.Game.Metafiles.Add(metaFile);
+            MetaFiles.TryAdd(Random.Shared.Next(), metaFile);
         }
 
         CreateFromTemplates();
         LoadQuestDescriptions();
         CreateNationDescMeta();
+        ServerSetup.Instance.Game.Metafiles = MetaFiles.ToFrozenDictionary();
+        MetaFiles.Clear();
     }
 
     private static void CreateFromTemplates()
@@ -70,7 +72,7 @@ public class MetafileManager
             }
 
             CompileTemplate(metaFile);
-            ServerSetup.Instance.Game.Metafiles.Add(metaFile);
+            MetaFiles.TryAdd(Random.Shared.Next(), metaFile);
             i++;
         }
 
@@ -88,7 +90,7 @@ public class MetafileManager
             }
 
             CompileTemplate(metaFile);
-            ServerSetup.Instance.Game.Metafiles.Add(metaFile);
+            MetaFiles.TryAdd(Random.Shared.Next(), metaFile);
             i++;
         }
     }
@@ -129,7 +131,7 @@ public class MetafileManager
         }
 
         CompileTemplate(metaFile);
-        ServerSetup.Instance.Game.Metafiles.Add(metaFile);
+        MetaFiles.TryAdd(Random.Shared.Next(), metaFile);
     }
 
     private static void LoadCircleQuestDescriptions(string dir, Metafile metaFile)
@@ -157,7 +159,7 @@ public class MetafileManager
         }
 
         CompileTemplate(metaFile);
-        ServerSetup.Instance.Game.Metafiles.Add(metaFile);
+        MetaFiles.TryAdd(Random.Shared.Next(), metaFile);
     }
 
     protected static void CompileTemplate(Metafile metaFile)
