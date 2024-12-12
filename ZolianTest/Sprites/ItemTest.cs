@@ -79,7 +79,7 @@ public class ItemTest
     {
         ObjectService.AddGameObject(variantItem);
         ObjectService.AddGameObject(nonVariantItem);
-        var items = ObjectService.QueryAll<Item>(variantItem.Map, i => i.Serial == variantItem.Serial);
+        var items = ObjectService.QueryAllWithPredicate<Item>(variantItem.Map, i => i.Serial == variantItem.Serial);
         Assert.Equals(variantItem, items.First());
     }
 
@@ -88,7 +88,7 @@ public class ItemTest
     {
         ObjectService.AddGameObject(variantItem);
         ObjectService.AddGameObject(nonVariantItem);
-        var items = ObjectService.QueryAll<Item>(i => i.Serial == variantItem.Serial);
+        var items = ObjectService.QueryAllWithPredicate<Item>(i => i.Serial == variantItem.Serial);
         Assert.Equals(variantItem, items.First());
     }
 }

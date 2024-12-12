@@ -312,7 +312,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         {
             var monstersElapsed = monstersWatch.Elapsed;
             if (monstersElapsed.TotalMilliseconds < 100) continue;
-            UpdateMonsters(monstersElapsed);
+            _ = UpdateMonsters(monstersElapsed);
             monstersWatch.Restart();
 
             await Task.Delay(TimeSpan.FromMilliseconds(100));
@@ -360,7 +360,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         while (ServerSetup.Instance.Running)
         {
             var tickStart = DateTime.UtcNow;
-            var players = Aislings.Where(player => player?.Client != null).ToList();
+            var players = Aislings.Where(player => player?.Client != null);
 
             foreach (var player in players)
             {
@@ -411,24 +411,21 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     {
         try
         {
-            // Routine to check items that have been on the ground longer than 30 minutes
-            foreach (var item in from area in ServerSetup.Instance.GlobalMapCache.Values
-                                 select ObjectManager.GetObjects<Item>(area, i => i.ItemPane == Item.ItemPanes.Ground).Values
-                     into items
-                                 from item in items
-                                 let abandonedDiff = DateTime.UtcNow.Subtract(item.AbandonedDate)
-                                 where !(abandonedDiff.TotalMinutes <= 30)
-                                 select item)
-                item.Remove();
+            foreach (var area in ServerSetup.Instance.GlobalMapCache)
+            {
+                var items = ObjectManager.GetObjects<Item>(area.Value, i => i.ItemPane == Item.ItemPanes.Ground);
 
-            foreach (var item in from area in ServerSetup.Instance.GlobalMapCache.Values
-                                 select ObjectManager.GetObjects<Item>(area, i => i.ItemPane == Item.ItemPanes.Ground).Values
-                     into items
-                                 from item in items
-                                 let abandonedDiff = DateTime.UtcNow.Subtract(item.AbandonedDate)
-                                 where (!(abandonedDiff.TotalMinutes <= 3) && (item.Template.Name is "Corpse"))
-                                 select item)
-                item.Remove();
+                foreach (var item in items)
+                {
+                    var abandonedDiff = DateTime.UtcNow.Subtract(item.Value.AbandonedDate);
+
+                    if (abandonedDiff.TotalMinutes > 3 && item.Value.Template.Name == "Corpse")
+                        item.Value.Remove();
+
+                    if (abandonedDiff.TotalMinutes > 30)
+                        item.Value.Remove();
+                }
+            }
         }
         catch (Exception ex)
         {
@@ -440,12 +437,12 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     {
         try
         {
-            foreach (var money in ServerSetup.Instance.GlobalGroundMoneyCache.Values)
+            foreach (var moneyKvp in ServerSetup.Instance.GlobalGroundMoneyCache)
             {
-                if (money == null) continue;
-                var abandonedDiff = DateTime.UtcNow.Subtract(money.AbandonedDate);
+                if (moneyKvp.Value == null) continue;
+                var abandonedDiff = DateTime.UtcNow.Subtract(moneyKvp.Value.AbandonedDate);
                 if (abandonedDiff.TotalMinutes <= 30) continue;
-                var removed = ServerSetup.Instance.GlobalGroundMoneyCache.TryRemove(money.MoneyId, out var itemToBeRemoved);
+                var removed = ServerSetup.Instance.GlobalGroundMoneyCache.TryRemove(moneyKvp.Value.MoneyId, out var itemToBeRemoved);
                 if (!removed) return;
                 itemToBeRemoved.Remove();
             }
@@ -456,53 +453,75 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         }
     }
 
-    private static void UpdateMonsters(TimeSpan elapsedTime)
+    private static async Task UpdateMonsters(TimeSpan elapsedTime)
     {
+        const int maxConcurrency = 100;
+        var semaphore = new SemaphoreSlim(maxConcurrency);
+        var updateTasks = new List<Task>();
+
         try
         {
-            Parallel.ForEach(ServerSetup.Instance.GlobalMapCache.Values, area =>
+            foreach (var (mapId, area) in ServerSetup.Instance.GlobalMapCache)
             {
-                var monsters = ObjectManager.GetObjects<Monster>(area, i => !i.Skulled).Values.ToList();
-                if (monsters.Count <= 0) return;
+                var spriteType = typeof(Monster);
+                var key = Tuple.Create(mapId, spriteType);
+                if (!area.SpriteCollections.TryGetValue(key, out var objCollection)) continue;
+                var monsterCollection = (SpriteCollection<Monster>)objCollection;
+                var monsters = monsterCollection.Sprites;
 
-                Parallel.ForEach(monsters, monster =>
+                foreach (var (serial, monster) in monsters.Where(i => !i.Value.Skulled))
                 {
-                    if (monster.Scripts == null) return;
-
-                    if (monster.CurrentHp <= 0)
+                    await semaphore.WaitAsync(50);
+                    var task = ProcessMonsterUpdateTask(monster, elapsedTime).ContinueWith(t =>
                     {
-                        monster.Skulled = true;
+                        semaphore.Release();
+                    }, TaskScheduler.Default);
 
-                        if (monster.Target is Aisling aisling)
-                        {
-                            monster.Scripts.Values.FirstOrDefault()?.OnDeath(aisling.Client);
-                        }
-                        else
-                        {
-                            monster.Scripts.Values.FirstOrDefault()?.OnDeath();
-                        }
+                    updateTasks.Add(task);
+                }
+            }
 
-                        return;
-                    }
-
-                    monster.Scripts.Values.FirstOrDefault()?.Update(elapsedTime);
-                    monster.LastUpdated = DateTime.UtcNow;
-
-                    if (!monster.MonsterBuffAndDebuffStopWatch.IsRunning)
-                        monster.MonsterBuffAndDebuffStopWatch.Start();
-
-                    if (monster.MonsterBuffAndDebuffStopWatch.Elapsed.TotalMilliseconds < 1000) return;
-
-                    monster.UpdateBuffs(monster);
-                    monster.UpdateDebuffs(monster);
-                    monster.MonsterBuffAndDebuffStopWatch.Restart();
-                });
-            });
+            await Task.WhenAll(updateTasks);
         }
         catch (Exception ex)
         {
             SentrySdk.CaptureException(ex);
         }
+    }
+
+    private static Task ProcessMonsterUpdateTask(Monster monster, TimeSpan elapsedTime)
+    {
+        if (monster.Scripts == null) return Task.CompletedTask;
+        if (monster.Skulled) return Task.CompletedTask;
+
+        if (monster.CurrentHp <= 0)
+        {
+            monster.Skulled = true;
+
+            if (monster.Target is Aisling aisling)
+            {
+                monster.Scripts.Values.FirstOrDefault()?.OnDeath(aisling.Client);
+            }
+            else
+            {
+                monster.Scripts.Values.FirstOrDefault()?.OnDeath();
+            }
+
+            return Task.CompletedTask;
+        }
+
+        monster.Scripts.Values.FirstOrDefault()?.Update(elapsedTime);
+        monster.LastUpdated = DateTime.UtcNow;
+
+        if (!monster.MonsterBuffAndDebuffStopWatch.IsRunning)
+            monster.MonsterBuffAndDebuffStopWatch.Start();
+
+        if (monster.MonsterBuffAndDebuffStopWatch.Elapsed.TotalMilliseconds < 1000) return Task.CompletedTask;
+
+        monster.UpdateBuffs(monster);
+        monster.UpdateDebuffs(monster);
+        monster.MonsterBuffAndDebuffStopWatch.Restart();
+        return Task.CompletedTask;
     }
 
     private static void UpdateMundanes(TimeSpan elapsedTime)
