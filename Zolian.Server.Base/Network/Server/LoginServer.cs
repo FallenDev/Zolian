@@ -288,9 +288,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
                         return;
                     }
 
-                    var success = Login(result, redirect, localClient);
-                    if (success.IsCompletedSuccessfully) return;
-                    localClient.SendLoginMessage(LoginMessageType.CharacterDoesntExist, "Server is offline");
+                    _ = Login(result, redirect, localClient);
                     break;
                 }
             }
