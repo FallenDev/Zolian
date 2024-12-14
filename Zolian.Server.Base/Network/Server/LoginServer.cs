@@ -259,9 +259,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
 
                         if (IPAddress.IsLoopback(localClient.RemoteIp) || localClient.RemoteIp.Equals(ipLocal))
                         {
-                            var success = Login(result, redirect, localClient);
-                            if (success.IsCompletedSuccessfully) return;
-                            localClient.SendLoginMessage(LoginMessageType.CharacterDoesntExist, "Server is offline");
+                            _ = Login(result, redirect, localClient);
                             return;
                         }
 
@@ -275,9 +273,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
                         if (GameMastersIPs.Any(ip => localClient.RemoteIp.Equals(IPAddress.Parse(ip))) 
                             || IPAddress.IsLoopback(localClient.RemoteIp) || localClient.RemoteIp.Equals(ipLocal))
                         {
-                            var success = Login(result, redirect, localClient);
-                            if (success.IsCompletedSuccessfully) return;
-                            localClient.SendLoginMessage(LoginMessageType.CharacterDoesntExist, "Server is offline");
+                            _ = Login(result, redirect, localClient);
                             return;
                         }
 

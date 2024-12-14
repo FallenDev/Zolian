@@ -311,11 +311,11 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         while (ServerSetup.Instance.Running)
         {
             var monstersElapsed = monstersWatch.Elapsed;
-            if (monstersElapsed.TotalMilliseconds < 100) continue;
-            _ = UpdateMonsters(monstersElapsed);
+            if (monstersElapsed.TotalMilliseconds < 200) continue;
+            UpdateMonsters(monstersElapsed);
             monstersWatch.Restart();
 
-            await Task.Delay(TimeSpan.FromMilliseconds(100));
+            await Task.Delay(TimeSpan.FromMilliseconds(200));
         }
     }
 
@@ -453,35 +453,48 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         }
     }
 
-    private static async Task UpdateMonsters(TimeSpan elapsedTime)
+    private static void UpdateMonsters(TimeSpan elapsedTime)
     {
-        const int maxConcurrency = 100;
-        var semaphore = new SemaphoreSlim(maxConcurrency);
-        var updateTasks = new List<Task>();
-
         try
         {
-            foreach (var (mapId, area) in ServerSetup.Instance.GlobalMapCache)
+            Parallel.ForEach(ServerSetup.Instance.GlobalMapCache.Values, area =>
             {
-                var spriteType = typeof(Monster);
-                var key = Tuple.Create(mapId, spriteType);
-                if (!area.SpriteCollections.TryGetValue(key, out var objCollection)) continue;
-                var monsterCollection = (SpriteCollection<Monster>)objCollection;
-                var monsters = monsterCollection.Sprites;
+                var monsters = ObjectManager.GetObjects<Monster>(area, i => !i.Skulled).Values.ToList();
+                if (monsters.Count <= 0) return;
 
-                foreach (var (serial, monster) in monsters.Where(i => !i.Value.Skulled))
+                Parallel.ForEach(monsters, monster =>
                 {
-                    await semaphore.WaitAsync(50);
-                    var task = ProcessMonsterUpdateTask(monster, elapsedTime).ContinueWith(t =>
+                    if (monster.Scripts == null) return;
+
+                    if (monster.CurrentHp <= 0)
                     {
-                        semaphore.Release();
-                    }, TaskScheduler.Default);
+                        monster.Skulled = true;
 
-                    updateTasks.Add(task);
-                }
-            }
+                        if (monster.Target is Aisling aisling)
+                        {
+                            monster.Scripts.Values.FirstOrDefault()?.OnDeath(aisling.Client);
+                        }
+                        else
+                        {
+                            monster.Scripts.Values.FirstOrDefault()?.OnDeath();
+                        }
 
-            await Task.WhenAll(updateTasks);
+                        return;
+                    }
+
+                    monster.Scripts.Values.FirstOrDefault()?.Update(elapsedTime);
+                    monster.LastUpdated = DateTime.UtcNow;
+
+                    if (!monster.MonsterBuffAndDebuffStopWatch.IsRunning)
+                        monster.MonsterBuffAndDebuffStopWatch.Start();
+
+                    if (monster.MonsterBuffAndDebuffStopWatch.Elapsed.TotalMilliseconds < 1000) return;
+
+                    monster.UpdateBuffs(monster);
+                    monster.UpdateDebuffs(monster);
+                    monster.MonsterBuffAndDebuffStopWatch.Restart();
+                });
+            });
         }
         catch (Exception ex)
         {
