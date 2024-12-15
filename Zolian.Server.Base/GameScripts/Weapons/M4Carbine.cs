@@ -13,6 +13,7 @@ public class M4Carbine(Item item) : WeaponScript(item)
     public override void OnUse(Sprite sprite, Action<int> cb = null)
     {
         if (sprite is not Aisling damageDealingSprite) return;
+        if (damageDealingSprite.EquipmentManager.Weapon?.Item == null) return;
         if (!damageDealingSprite.EquipmentManager.Weapon.Item.Template.Flags.FlagIsSet(ItemFlags.LongRanged)) return;
 
         var action = new BodyAnimationArgs
