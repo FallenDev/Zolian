@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+
 using Darkages.Common;
 using Darkages.Enums;
 using Darkages.Network.Client;
@@ -28,6 +29,9 @@ public class Sabonim(WorldServer server, Mundane mundane) : MundaneScript(server
         if (client.Aisling.Path == Class.Monk || client.Aisling.PastClass == Class.Monk)
         {
             options.Add(new(0x01, "How can I improve?"));
+
+            if (client.Aisling.JobClass != Job.ShaolinMonk)
+                options.Add(new(0x99, "I've lost one of my belts."));
 
             switch (client.Aisling.QuestManager.BeltDegree)
             {
@@ -121,6 +125,7 @@ public class Sabonim(WorldServer server, Mundane mundane) : MundaneScript(server
         {
             // Starting info
             case 0x01:
+                client.SendOptionsDialog(Mundane, "By attaining degrees, you will move through each degree until you've reached Black Belt.");
                 break;
             // Belt attainments
             case 0x02:
@@ -129,7 +134,7 @@ public class Sabonim(WorldServer server, Mundane mundane) : MundaneScript(server
                     client.SendOptionsDialog(Mundane, "Step to the meditation spot in front of me to begin (5, 4)");
                     return;
                 }
-                
+
                 client.SendOptionsDialog(Mundane, "You are not ready for this attainment yet.");
                 break;
             case 0x12:
@@ -171,7 +176,7 @@ public class Sabonim(WorldServer server, Mundane mundane) : MundaneScript(server
                     client.SendOptionsDialog(Mundane, "Step to the meditation spot in front of me to begin (13, 9)");
                     return;
                 }
-                
+
                 client.SendOptionsDialog(Mundane, "You are not ready for this attainment yet.");
                 break;
             case 0x13:
@@ -213,7 +218,7 @@ public class Sabonim(WorldServer server, Mundane mundane) : MundaneScript(server
                     client.SendOptionsDialog(Mundane, "Step to the meditation spot in front of me to begin (4, 11)");
                     return;
                 }
-                
+
                 client.SendOptionsDialog(Mundane, "You are not ready for this attainment yet.");
                 break;
             case 0x14:
@@ -255,7 +260,7 @@ public class Sabonim(WorldServer server, Mundane mundane) : MundaneScript(server
                     client.SendOptionsDialog(Mundane, "Step to the meditation spot in front of me to begin (9, 3)");
                     return;
                 }
-                
+
                 client.SendOptionsDialog(Mundane, "You are not ready for this attainment yet.");
                 break;
             case 0x15:
@@ -297,7 +302,7 @@ public class Sabonim(WorldServer server, Mundane mundane) : MundaneScript(server
                     client.SendOptionsDialog(Mundane, "Step to the meditation spot in front of me to begin (11, 12)");
                     return;
                 }
-                
+
                 client.SendOptionsDialog(Mundane, "You are not ready for this attainment yet.");
                 break;
             case 0x16:
@@ -339,7 +344,7 @@ public class Sabonim(WorldServer server, Mundane mundane) : MundaneScript(server
                     client.SendOptionsDialog(Mundane, "Step to the meditation spot in front of me to begin (3, 7)");
                     return;
                 }
-                
+
                 client.SendOptionsDialog(Mundane, "You are not ready for this attainment yet.");
                 break;
             case 0x17:
@@ -381,7 +386,7 @@ public class Sabonim(WorldServer server, Mundane mundane) : MundaneScript(server
                     client.SendOptionsDialog(Mundane, "Step to the meditation spot in front of me to begin (12, 5)");
                     return;
                 }
-                
+
                 client.SendOptionsDialog(Mundane, "You are not ready for this attainment yet.");
                 break;
             case 0x18:
@@ -423,7 +428,7 @@ public class Sabonim(WorldServer server, Mundane mundane) : MundaneScript(server
                     client.SendOptionsDialog(Mundane, "Step to the meditation spot in front of me to begin (7, 13)");
                     return;
                 }
-                
+
                 client.SendOptionsDialog(Mundane, "You are not ready for this attainment yet.");
                 break;
             case 0x19:
@@ -461,7 +466,7 @@ public class Sabonim(WorldServer server, Mundane mundane) : MundaneScript(server
                 client.SendOptionsDialog(Mundane, "I sense you are lying, try again");
                 break;
             case 0x0A:
-                client.SendOptionsDialog(Mundane, "Ah brother, my fellow Black Belt. You have attained all this old stream can afford to you. However, if you so seek it. There is a druid outside of our stream that knows teachings beyond our own.");
+                client.SendOptionsDialog(Mundane, "Ah brother, my fellow Black Belt. You have attained all this old stream can afford to you. However, if you so seek it. There is a druid outside of our stream that knows teachings beyond our own. The way of the Shaolin Monk.");
                 break;
             case 0x0B:
                 var optionsB = new List<Dialog.OptionsDataItem>
@@ -490,8 +495,93 @@ public class Sabonim(WorldServer server, Mundane mundane) : MundaneScript(server
 
                 client.Aisling.LegendBook.AddLegend(item, client);
                 break;
+            case 0x99:
+                {
+                    ReissueBeltDegree(client);
+                    break;
+                }
+            case 0x991:
+                {
+                    if (client.Aisling.LegendBook.Has("Yellow Belt Attainment"))
+                        client.GiveItem("Yellow Belt");
+                    client.SendOptionsDialog(Mundane, "I happened to find this one near a beggar, is it yours?");
+                    break;
+                }
+            case 0x992:
+                {
+                    if (client.Aisling.LegendBook.Has("Orange Belt Attainment"))
+                        client.GiveItem("Orange Belt");
+                    client.SendOptionsDialog(Mundane, "I happened to find this one near a beggar, is it yours?");
+                    break;
+                }
+            case 0x993:
+                {
+                    if (client.Aisling.LegendBook.Has("Green Belt Attainment"))
+                        client.GiveItem("Green Belt");
+                    client.SendOptionsDialog(Mundane, "I happened to find this one near a beggar, is it yours?");
+                    break;
+                }
+            case 0x994:
+                {
+                    if (client.Aisling.LegendBook.Has("Purple Belt Attainment"))
+                        client.GiveItem("Purple Belt");
+                    client.SendOptionsDialog(Mundane, "I happened to find this one near a beggar, is it yours?");
+                    break;
+                }
+            case 0x995:
+                {
+                    if (client.Aisling.LegendBook.Has("Blue Belt Attainment"))
+                        client.GiveItem("Blue Belt");
+                    client.SendOptionsDialog(Mundane, "I happened to find this one near a beggar, is it yours?");
+                    break;
+                }
+            case 0x996:
+                {
+                    if (client.Aisling.LegendBook.Has("Brown Belt Attainment"))
+                        client.GiveItem("Brown Belt");
+                    client.SendOptionsDialog(Mundane, "I happened to find this one near a beggar, is it yours?");
+                    break;
+                }
+            case 0x997:
+                {
+                    if (client.Aisling.LegendBook.Has("Red Belt Attainment"))
+                        client.GiveItem("Red Belt");
+                    client.SendOptionsDialog(Mundane, "I happened to find this one near a beggar, is it yours?");
+                    break;
+                }
+            case 0x998:
+                {
+                    if (client.Aisling.LegendBook.Has("Black Belt Attainment"))
+                        client.GiveItem("Black Belt");
+                    client.SendOptionsDialog(Mundane, "I happened to find this one near a beggar, is it yours?");
+                    break;
+                }
         }
     }
 
     public override void OnGossip(WorldClient client, string message) { }
+
+    private void ReissueBeltDegree(WorldClient client)
+    {
+        var options = new List<Dialog.OptionsDataItem>();
+
+        if (client.Aisling.LegendBook.Has("Yellow Belt Attainment"))
+            options.Add(new(0x991, "Yellow Belt"));
+        if (client.Aisling.LegendBook.Has("Orange Belt Attainment"))
+            options.Add(new(0x992, "Orange Belt"));
+        if (client.Aisling.LegendBook.Has("Green Belt Attainment"))
+            options.Add(new(0x993, "Green Belt"));
+        if (client.Aisling.LegendBook.Has("Purple Belt Attainment"))
+            options.Add(new(0x994, "Purple Belt"));
+        if (client.Aisling.LegendBook.Has("Blue Belt Attainment"))
+            options.Add(new(0x995, "Blue Belt"));
+        if (client.Aisling.LegendBook.Has("Brown Belt Attainment"))
+            options.Add(new(0x996, "Brown Belt"));
+        if (client.Aisling.LegendBook.Has("Red Belt Attainment"))
+            options.Add(new(0x997, "Red Belt"));
+        if (client.Aisling.LegendBook.Has("Black Belt Attainment"))
+            options.Add(new(0x998, "Black Belt"));
+
+        client.SendOptionsDialog(Mundane, "I understand, which belt are you missing?", options.ToArray());
+    }
 }
