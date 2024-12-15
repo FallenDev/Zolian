@@ -1,12 +1,41 @@
-﻿using Darkages.Network.Server;
+﻿using System.Diagnostics;
+
+using Darkages.Network.Server;
 
 namespace Darkages.Network.Components;
 
 public class ClientCreationLimit(WorldServer server) : WorldServerComponent(server)
 {
-    protected internal override void Update(TimeSpan elapsedTime)
+    private const int ComponentSpeed = 3600000;
+
+    protected internal override async Task Update()
     {
-        ZolianUpdateDelegate.Update(RemoveLimit);
+        var componentStopWatch = new Stopwatch();
+        componentStopWatch.Start();
+        var variableGameSpeed = ComponentSpeed;
+
+        while (ServerSetup.Instance.Running)
+        {
+            if (componentStopWatch.Elapsed.TotalMilliseconds < variableGameSpeed)
+            {
+                await Task.Delay(60000);
+                continue;
+            }
+
+            RemoveLimit();
+            var awaiter = (int)(ComponentSpeed - componentStopWatch.Elapsed.TotalMilliseconds);
+
+            if (awaiter < 0)
+            {
+                variableGameSpeed = ComponentSpeed + awaiter;
+                componentStopWatch.Restart();
+                continue;
+            }
+
+            await Task.Delay(TimeSpan.FromMilliseconds(awaiter));
+            variableGameSpeed = ComponentSpeed;
+            componentStopWatch.Restart();
+        }
     }
 
     private static void RemoveLimit()

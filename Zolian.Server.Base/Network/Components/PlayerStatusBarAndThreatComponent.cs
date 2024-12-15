@@ -8,10 +8,36 @@ namespace Darkages.Network.Components;
 public class PlayerStatusBarAndThreatComponent(WorldServer server) : WorldServerComponent(server)
 {
     private static readonly Stopwatch StatusControl = new();
+    private const int ComponentSpeed = 100;
 
-    protected internal override void Update(TimeSpan elapsedTime)
+    protected internal override async Task Update()
     {
-        _ = UpdatePlayerStatusBarAndThreat();
+        var componentStopWatch = new Stopwatch();
+        componentStopWatch.Start();
+        var variableGameSpeed = ComponentSpeed;
+
+        while (ServerSetup.Instance.Running)
+        {
+            if (componentStopWatch.Elapsed.TotalMilliseconds < variableGameSpeed)
+            {
+                await Task.Delay(1);
+                continue;
+            }
+
+            _ = UpdatePlayerStatusBarAndThreat();
+            var awaiter = (int)(ComponentSpeed - componentStopWatch.Elapsed.TotalMilliseconds);
+
+            if (awaiter < 0)
+            {
+                variableGameSpeed = ComponentSpeed + awaiter;
+                componentStopWatch.Restart();
+                continue;
+            }
+
+            await Task.Delay(TimeSpan.FromMilliseconds(awaiter));
+            variableGameSpeed = ComponentSpeed;
+            componentStopWatch.Restart();
+        }
     }
 
     private static async Task UpdatePlayerStatusBarAndThreat()

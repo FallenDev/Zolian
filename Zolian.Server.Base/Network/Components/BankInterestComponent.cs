@@ -1,12 +1,40 @@
-﻿using Darkages.Network.Server;
+﻿using System.Diagnostics;
+using Darkages.Network.Server;
 
 namespace Darkages.Network.Components;
 
 public class BankInterestComponent(WorldServer server) : WorldServerComponent(server)
 {
-    protected internal override void Update(TimeSpan elapsedTime)
+    private const int ComponentSpeed = 1800000;
+
+    protected internal override async Task Update()
     {
-        ZolianUpdateDelegate.Update(AccrueInterest);
+        var componentStopWatch = new Stopwatch();
+        componentStopWatch.Start();
+        var variableGameSpeed = ComponentSpeed;
+
+        while (ServerSetup.Instance.Running)
+        {
+            if (componentStopWatch.Elapsed.TotalMilliseconds < variableGameSpeed)
+            {
+                await Task.Delay(5000);
+                continue;
+            }
+
+            AccrueInterest();
+            var awaiter = (int)(ComponentSpeed - componentStopWatch.Elapsed.TotalMilliseconds);
+
+            if (awaiter < 0)
+            {
+                variableGameSpeed = ComponentSpeed + awaiter;
+                componentStopWatch.Restart();
+                continue;
+            }
+
+            await Task.Delay(TimeSpan.FromMilliseconds(awaiter));
+            variableGameSpeed = ComponentSpeed;
+            componentStopWatch.Restart();
+        }
     }
 
     private static void AccrueInterest()

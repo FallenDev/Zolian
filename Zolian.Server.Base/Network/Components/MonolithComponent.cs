@@ -1,4 +1,5 @@
-﻿using Darkages.Common;
+﻿using System.Diagnostics;
+using Darkages.Common;
 using Darkages.Network.Server;
 using Darkages.Templates;
 using Darkages.Types;
@@ -11,17 +12,36 @@ namespace Darkages.Network.Components;
 
 public class MonolithComponent(WorldServer server) : WorldServerComponent(server)
 {
-    private static void CreateFromTemplate(MonsterTemplate template, Area map)
-    {
-        var newObj = Monster.Create(template, map);
+    private const int ComponentSpeed = 3000;
 
-        if (newObj == null) return;
-        ObjectManager.AddObject(newObj);
-    }
-
-    protected internal override void Update(TimeSpan elapsedTime)
+    protected internal override async Task Update()
     {
-        ZolianUpdateDelegate.Update(ManageSpawns);
+        var componentStopWatch = new Stopwatch();
+        componentStopWatch.Start();
+        var variableGameSpeed = ComponentSpeed;
+
+        while (ServerSetup.Instance.Running)
+        {
+            if (componentStopWatch.Elapsed.TotalMilliseconds < variableGameSpeed)
+            {
+                await Task.Delay(500);
+                continue;
+            }
+
+            ManageSpawns();
+            var awaiter = (int)(ComponentSpeed - componentStopWatch.Elapsed.TotalMilliseconds);
+
+            if (awaiter < 0)
+            {
+                variableGameSpeed = ComponentSpeed + awaiter;
+                componentStopWatch.Restart();
+                continue;
+            }
+
+            await Task.Delay(TimeSpan.FromMilliseconds(awaiter));
+            variableGameSpeed = ComponentSpeed;
+            componentStopWatch.Restart();
+        }
     }
 
     private static void ManageSpawns()
@@ -50,6 +70,14 @@ public class MonolithComponent(WorldServer server) : WorldServerComponent(server
                 CreateFromTemplate(monster, map);
             }
         }
+    }
+
+    private static void CreateFromTemplate(MonsterTemplate template, Area map)
+    {
+        var newObj = Monster.Create(template, map);
+
+        if (newObj == null) return;
+        ObjectManager.AddObject(newObj);
     }
 
     /// <summary>

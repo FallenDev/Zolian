@@ -1,28 +1,54 @@
-﻿using Darkages.Network.Server;
+﻿using System.Diagnostics;
+using Darkages.Network.Server;
 
 namespace Darkages.Network.Components;
 
 public class PlayerSkillSpellCooldownComponent(WorldServer server) : WorldServerComponent(server)
 {
-    protected internal override void Update(TimeSpan elapsedTime)
+    private const int ComponentSpeed = 100;
+
+    protected internal override async Task Update()
     {
-        ZolianUpdateDelegate.Update(UpdatePlayerSkillSpellCooldowns);
+        var componentStopWatch = new Stopwatch();
+        componentStopWatch.Start();
+        var variableGameSpeed = ComponentSpeed;
+
+        while (ServerSetup.Instance.Running)
+        {
+            if (componentStopWatch.Elapsed.TotalMilliseconds < variableGameSpeed)
+            {
+                await Task.Delay(1);
+                continue;
+            }
+
+            UpdatePlayerSkillSpellCooldowns();
+            var awaiter = (int)(ComponentSpeed - componentStopWatch.Elapsed.TotalMilliseconds);
+
+            if (awaiter < 0)
+            {
+                variableGameSpeed = ComponentSpeed + awaiter;
+                componentStopWatch.Restart();
+                continue;
+            }
+
+            await Task.Delay(TimeSpan.FromMilliseconds(awaiter));
+            variableGameSpeed = ComponentSpeed;
+            componentStopWatch.Restart();
+        }
     }
 
     private static void UpdatePlayerSkillSpellCooldowns()
     {
         if (!ServerSetup.Instance.Running || !Server.Aislings.Any()) return;
 
-        Parallel.ForEach(Server.Aislings, (player) =>
+        foreach (var player in Server.Aislings)
         {
-            if (player?.Client == null) return;
-            if (!player.LoggedIn) return;
+            if (player?.Client == null) continue;
+            if (!player.LoggedIn) continue;
             if (!player.Client.CooldownControl.IsRunning)
-            {
                 player.Client.CooldownControl.Start();
-            }
-
-            if (player.Client.CooldownControl.Elapsed.TotalMilliseconds < player.Client.SkillSpellTimer.Delay.TotalMilliseconds) return;
+            
+            if (player.Client.CooldownControl.Elapsed.TotalMilliseconds < player.Client.SkillSpellTimer.Delay.TotalMilliseconds) continue;
 
             Parallel.ForEach(player.SkillBook.Skills.Values, (skill) =>
             {
@@ -47,6 +73,6 @@ public class PlayerSkillSpellCooldownComponent(WorldServer server) : WorldServer
             });
 
             player.Client.CooldownControl.Restart();
-        });
+        }
     }
 }

@@ -1,9 +1,12 @@
-﻿using Darkages.Network.Server;
+﻿using System.Diagnostics;
+
+using Darkages.Network.Server;
 
 namespace Darkages.Network.Components;
 
 public class DayLightComponent(WorldServer server) : WorldServerComponent(server)
 {
+    private const int ComponentSpeed = 15000;
     private static readonly SortedDictionary<int, (byte start, byte end)> Routine = new()
     {
         {0, (0, 0)},
@@ -20,9 +23,34 @@ public class DayLightComponent(WorldServer server) : WorldServerComponent(server
         {11, (0, 0)}
     };
 
-    protected internal override void Update(TimeSpan elapsedTime)
+    protected internal override async Task Update()
     {
-        ZolianUpdateDelegate.Update(UpdateDayLight);
+        var componentStopWatch = new Stopwatch();
+        componentStopWatch.Start();
+        var variableGameSpeed = ComponentSpeed;
+
+        while (ServerSetup.Instance.Running)
+        {
+            if (componentStopWatch.Elapsed.TotalMilliseconds < variableGameSpeed)
+            {
+                await Task.Delay(500);
+                continue;
+            }
+
+            UpdateDayLight();
+            var awaiter = (int)(ComponentSpeed - componentStopWatch.Elapsed.TotalMilliseconds);
+
+            if (awaiter < 0)
+            {
+                variableGameSpeed = ComponentSpeed + awaiter;
+                componentStopWatch.Restart();
+                continue;
+            }
+
+            await Task.Delay(TimeSpan.FromMilliseconds(awaiter));
+            variableGameSpeed = ComponentSpeed;
+            componentStopWatch.Restart();
+        }
     }
 
     private static void UpdateDayLight()

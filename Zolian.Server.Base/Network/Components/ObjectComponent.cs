@@ -1,4 +1,6 @@
-﻿using Darkages.Common;
+﻿using System.Diagnostics;
+
+using Darkages.Common;
 using Darkages.Network.Server;
 using Darkages.Object;
 using Darkages.Sprites;
@@ -8,12 +10,39 @@ namespace Darkages.Network.Components;
 
 public class ObjectComponent(WorldServer server) : WorldServerComponent(server)
 {
-    protected internal override void Update(TimeSpan elapsedTime)
+    private const int ComponentSpeed = 50;
+
+    protected internal override async Task Update()
     {
-        ZolianUpdateDelegate.Update(UpdateObjects);
+        var componentStopWatch = new Stopwatch();
+        componentStopWatch.Start();
+        var variableGameSpeed = ComponentSpeed;
+
+        while (ServerSetup.Instance.Running)
+        {
+            if (componentStopWatch.Elapsed.TotalMilliseconds < variableGameSpeed)
+            {
+                await Task.Delay(1);
+                continue;
+            }
+
+            _ = UpdateObjects();
+            var awaiter = (int)(ComponentSpeed - componentStopWatch.Elapsed.TotalMilliseconds);
+
+            if (awaiter < 0)
+            {
+                variableGameSpeed = ComponentSpeed + awaiter;
+                componentStopWatch.Restart();
+                continue;
+            }
+
+            await Task.Delay(TimeSpan.FromMilliseconds(awaiter));
+            variableGameSpeed = ComponentSpeed;
+            componentStopWatch.Restart();
+        }
     }
 
-    private static async void UpdateObjects()
+    private static async Task UpdateObjects()
     {
         var connectedUsers = Server.Aislings;
         var readyLoggedIn = connectedUsers.Where(i => i.Map is { Ready: true } && i.LoggedIn).ToArray();
