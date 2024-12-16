@@ -51,6 +51,9 @@ public class Banker(WorldServer server, Mundane mundane) : MundaneScript(server,
             options.Add(new Dialog.OptionsDataItem(0x0A, "Withdraw Gold"));
         }
 
+        if (client.Aisling.ActionUsed != "Remote Bank")
+            options.Add(new Dialog.OptionsDataItem(0x99, "Pawn"));
+
         client.SendOptionsDialog(Mundane, "Don't mind the goblins, they help around here", options.ToArray());
     }
 
@@ -269,6 +272,37 @@ public class Banker(WorldServer server, Mundane mundane) : MundaneScript(server,
                     client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cDeposited: {{=g{item.DisplayName}");
                 }
                 break;
+            case 0x99:
+                {
+                    var options = new List<Dialog.OptionsDataItem> { new(0x991, "Let's proceed") };
+                    client.SendOptionsDialog(Mundane, $"You wish to use our Goblin pawning resources? That's great! What we'll do is sell all of your items of damaged or common quality that aren't stackable resources to Gobleregan. " +
+                                                      $"Note that what the goblins give us, is up to debate.. Are you certain you want to proceed?", options.ToArray());
+                }
+                break;
+            case 0x991:
+                {
+                    uint offer = 0;
+                    var itemsToDelete = new List<Item>();
+
+                    foreach (var (serial, item) in client.Aisling.BankManager.Items)
+                    {
+                        if (item.OriginalQuality >= Item.Quality.Uncommon) continue;
+                        if (item.Template.CanStack) continue;
+                        if (!item.Template.Flags.FlagIsSet(ItemFlags.Dropable)) continue;
+                        if (!item.Template.Flags.FlagIsSet(ItemFlags.Sellable)) continue;
+                        if (item.Template.Flags.FlagIsSet(ItemFlags.QuestRelated)) continue;
+
+                        offer += item.Template.Value / 5;
+                        client.Aisling.BankManager.Items.TryRemove(item.ItemId, out _);
+                        itemsToDelete.Add(item);
+                    }
+                    
+                    BankManager.RemoveFromBank(client, itemsToDelete);
+                    client.Aisling.BankedGold += offer;
+                    client.SendOptionsDialog(Mundane, $"They're going to send over your {offer} gold and we'll store it here in the bank.");
+                }
+                break;
+
         }
     }
 
@@ -492,7 +526,7 @@ public class Banker(WorldServer server, Mundane mundane) : MundaneScript(server,
         client.Aisling.BankManager.Items.TryGetValue(client.PendingItemSessions.ID, out var itemInBank);
 
         #region Validation Checks
-        
+
         if (itemInBank == null)
         {
             client.SendOptionsDialog(Mundane, "We don't seem to have that. *checks ledger*");

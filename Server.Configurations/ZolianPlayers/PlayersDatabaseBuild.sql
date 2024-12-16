@@ -23,15 +23,15 @@ DROP PROCEDURE [dbo].[SpellToPlayer]
 DROP PROCEDURE [dbo].[SkillToPlayer]
 DROP PROCEDURE [dbo].[SelectSpells]
 DROP PROCEDURE [dbo].[SelectSkills]
-DROP PROCEDURE [dbo].[SelectCombos]
 DROP PROCEDURE [dbo].[SelectQuests]
+DROP PROCEDURE [dbo].[SelectCombos]
 DROP PROCEDURE [dbo].[SelectPlayer]
 DROP PROCEDURE [dbo].[SelectLegends]
 DROP PROCEDURE [dbo].[SelectIgnoredPlayers]
-DROP PROCEDURE [dbo].[SelectDiscoveredMaps]
-DROP PROCEDURE [dbo].[SelectInventory]
-DROP PROCEDURE [dbo].[SelectEquipped]
 DROP PROCEDURE [dbo].[SelectBanked]
+DROP PROCEDURE [dbo].[SelectEquipped]
+DROP PROCEDURE [dbo].[SelectInventory]
+DROP PROCEDURE [dbo].[SelectDiscoveredMaps]
 DROP PROCEDURE [dbo].[SelectDeBuffsCheck]
 DROP PROCEDURE [dbo].[SelectDeBuffs]
 DROP PROCEDURE [dbo].[SelectBuffsCheck]
@@ -40,9 +40,10 @@ DROP PROCEDURE [dbo].[PlayerSecurity]
 DROP PROCEDURE [dbo].[PlayerSaveSpells]
 DROP PROCEDURE [dbo].[PlayerSaveSkills]
 DROP PROCEDURE [dbo].[PlayerSave]
-DROP PROCEDURE [dbo].[PlayerComboSave]
 DROP PROCEDURE [dbo].[PlayerQuestSave]
+DROP PROCEDURE [dbo].[PlayerComboSave]
 DROP PROCEDURE [dbo].[PlayerCreation]
+DROP PROCEDURE [dbo].[AccountLockoutCount]
 DROP PROCEDURE [dbo].[PasswordSave]
 DROP PROCEDURE [dbo].[InsertQuests]
 DROP PROCEDURE [dbo].[InsertDeBuff]
@@ -50,12 +51,15 @@ DROP PROCEDURE [dbo].[InsertBuff]
 DROP PROCEDURE [dbo].[IgnoredSave]
 DROP PROCEDURE [dbo].[FoundMap]
 DROP PROCEDURE [dbo].[DeBuffSave]
+DROP PROCEDURE [dbo].[CheckIfPlayerSerialExists]
 DROP PROCEDURE [dbo].[CheckIfPlayerHashExists]
 DROP PROCEDURE [dbo].[CheckIfPlayerExists]
 DROP PROCEDURE [dbo].[LoadItemsToCache]
 DROP PROCEDURE [dbo].[BuffSave]
 DROP PROCEDURE [dbo].[AddLegendMark]
 DROP PROCEDURE [dbo].[ItemUpsert]
+DROP PROCEDURE [dbo].[ItemMassDelete]
+DROP PROCEDURE [dbo].[CheckIfMailBoxNumberExists]
 DROP PROCEDURE [dbo].[ObtainMailBoxNumber]
 GO
 
@@ -640,6 +644,86 @@ CREATE TYPE dbo.DebuffType AS TABLE
     Name VARCHAR (30),
     TimeLeft INT
 );
+
+-- Obtain MailboxNumber
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[ObtainMailBoxNumber] @Serial BIGINT
+AS
+BEGIN
+	SET NOCOUNT ON;
+	SELECT MailBoxNumber FROM ZolianPlayers.dbo.PlayersQuests WHERE Serial = @Serial
+END
+
+-- Check MailboxNumber
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[CheckIfMailBoxNumberExists] @MailBoxNumber INT
+AS
+BEGIN
+	SET NOCOUNT ON;
+	SELECT Serial FROM ZolianPlayers.dbo.PlayersQuests WHERE MailBoxNumber = @MailBoxNumber
+END
+
+-- Item Mass Delete
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[ItemMassDelete]
+@Items dbo.ItemType READONLY
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DELETE FROM [ZolianPlayers].[dbo].[PlayersItems]
+    WHERE ItemId IN (SELECT ItemId FROM @Items);
+END
+
+-- Item Upsert
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[ItemUpsert]
+@Items dbo.ItemType READONLY
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    MERGE INTO [ZolianPlayers].[dbo].[PlayersItems] AS target
+    USING @Items AS source 
+	ON target.ItemId = source.ItemId
+
+    WHEN MATCHED THEN
+    UPDATE SET 
+        Name = source.Name,
+        Serial = source.Serial,
+        ItemPane = source.ItemPane,
+        Slot = source.Slot,
+        InventorySlot = source.InventorySlot,
+        Color = source.Color,
+        Cursed = source.Cursed,
+        Durability = source.Durability,
+        Identified = source.Identified,
+        ItemVariance = source.ItemVariance,
+        WeapVariance = source.WeapVariance,
+        ItemQuality = source.ItemQuality,
+        OriginalQuality = source.OriginalQuality,
+        Stacks = source.Stacks,
+        Enchantable = source.Enchantable,
+        Tarnished = source.Tarnished,
+        GearEnhancement = source.GearEnhancement,
+        ItemMaterial = source.ItemMaterial
+
+    WHEN NOT MATCHED THEN
+    INSERT (ItemId, Name, Serial, ItemPane, Slot, InventorySlot, Color, Cursed, Durability, Identified, ItemVariance, WeapVariance, ItemQuality, OriginalQuality, Stacks, Enchantable, Tarnished, GearEnhancement, ItemMaterial)
+    VALUES (source.ItemId, source.Name, source.Serial, source.ItemPane, source.Slot, source.InventorySlot, source.Color, source.Cursed, source.Durability, source.Identified, source.ItemVariance, source.WeapVariance, source.ItemQuality, source.OriginalQuality, source.Stacks, source.Enchantable, source.Tarnished, source.GearEnhancement, source.ItemMaterial);
+END
 
 -- AddLegendMark
 SET ANSI_NULLS ON
@@ -1598,68 +1682,3 @@ BEGIN
     VALUES	(@Serial, @Level, @Slot, @SpellName, @Casts, @CurrentCooldown);
 END
 GO
-
--- Item Upsert
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE PROCEDURE [dbo].[ItemUpsert]
-@Items dbo.ItemType READONLY
-AS
-BEGIN
-    SET NOCOUNT ON;
-
-    MERGE INTO [ZolianPlayers].[dbo].[PlayersItems] AS target
-    USING @Items AS source 
-	ON target.ItemId = source.ItemId
-
-    WHEN MATCHED THEN
-    UPDATE SET 
-        Name = source.Name,
-        Serial = source.Serial,
-        ItemPane = source.ItemPane,
-        Slot = source.Slot,
-        InventorySlot = source.InventorySlot,
-        Color = source.Color,
-        Cursed = source.Cursed,
-        Durability = source.Durability,
-        Identified = source.Identified,
-        ItemVariance = source.ItemVariance,
-        WeapVariance = source.WeapVariance,
-        ItemQuality = source.ItemQuality,
-        OriginalQuality = source.OriginalQuality,
-        Stacks = source.Stacks,
-        Enchantable = source.Enchantable,
-        Tarnished = source.Tarnished,
-        GearEnhancement = source.GearEnhancement,
-        ItemMaterial = source.ItemMaterial
-
-    WHEN NOT MATCHED THEN
-    INSERT (ItemId, Name, Serial, ItemPane, Slot, InventorySlot, Color, Cursed, Durability, Identified, ItemVariance, WeapVariance, ItemQuality, OriginalQuality, Stacks, Enchantable, Tarnished, GearEnhancement, ItemMaterial)
-    VALUES (source.ItemId, source.Name, source.Serial, source.ItemPane, source.Slot, source.InventorySlot, source.Color, source.Cursed, source.Durability, source.Identified, source.ItemVariance, source.WeapVariance, source.ItemQuality, source.OriginalQuality, source.Stacks, source.Enchantable, source.Tarnished, source.GearEnhancement, source.ItemMaterial);
-END
-
--- Obtain MailboxNumber
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE PROCEDURE [dbo].[ObtainMailBoxNumber] @Serial BIGINT
-AS
-BEGIN
-	SET NOCOUNT ON;
-	SELECT MailBoxNumber FROM ZolianPlayers.dbo.PlayersQuests WHERE Serial = @Serial
-END
-
--- Check MailboxNumber
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE PROCEDURE [dbo].[CheckIfMailBoxNumberExists] @MailBoxNumber INT
-AS
-BEGIN
-	SET NOCOUNT ON;
-	SELECT Serial FROM ZolianPlayers.dbo.PlayersQuests WHERE MailBoxNumber = @MailBoxNumber
-END
