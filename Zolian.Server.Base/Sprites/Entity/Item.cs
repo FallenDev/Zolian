@@ -14,6 +14,7 @@ using System.Numerics;
 using Darkages.GameScripts.Formulas;
 using Darkages.Network.Server;
 using Darkages.Object;
+using ServiceStack;
 
 namespace Darkages.Sprites.Entity;
 
@@ -139,15 +140,38 @@ public sealed class Item : Identifiable
     public bool Tarnished { get; set; }
     public GearEnhancements GearEnhancement { get; set; }
     public ItemMaterials ItemMaterial { get; set; }
+    public string GiftWrapped { get; set; }
     public ConcurrentDictionary<string, ItemScript> Scripts { get; set; }
     public ConcurrentDictionary<string, WeaponScript> WeaponScripts { get; set; }
     public int Dropping { get; set; }
     public bool[] Warnings { get; set; }
     public ushort Image { get; init; }
-    public ushort DisplayImage { get; init; }
+
+    public ushort DisplayImage
+    {
+        get;
+        set
+        {
+            if (GiftWrapped.IsNullOrEmpty())
+            {
+                field = value;
+            }
+
+            field = GiftWrapped switch
+            {
+                "Heart" => 2300,
+                "Snowman" => 2301,
+                "Santa" => 2302,
+                _ => field
+            };
+        }
+    } = 0;
 
     public string GetDisplayName()
     {
+        if (!GiftWrapped.IsNullOrEmpty())
+            return $"{GiftWrapped} Gift Box";
+
         var colorCode = ItemQuality switch
         {
             Quality.Damaged => "{=jDamaged ",
@@ -243,6 +267,9 @@ public sealed class Item : Identifiable
 
     public string NoColorGetDisplayName()
     {
+        if (!GiftWrapped.IsNullOrEmpty())
+            return $"{GiftWrapped} Gift Box";
+
         var colorCode = ItemQuality switch
         {
             Quality.Damaged => "Damaged ",

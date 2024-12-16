@@ -263,7 +263,8 @@ CREATE TABLE PlayersItems
 	[Enchantable] BIT NOT NULL DEFAULT 0,
     [Tarnished] BIT NOT NULL DEFAULT 0,
     [GearEnhancement] VARCHAR(5) NOT NULL DEFAULT 'None',
-    [ItemMaterial] VARCHAR(9) NOT NULL DEFAULT 'None'
+    [ItemMaterial] VARCHAR(9) NOT NULL DEFAULT 'None',
+    [GiftWrapped] VARCHAR(20) NULL
 )
 
 CREATE TABLE PlayersCombos
@@ -608,7 +609,8 @@ CREATE TYPE dbo.ItemType AS TABLE
     Enchantable BIT,
     Tarnished BIT,
     GearEnhancement VARCHAR (5),
-    ItemMaterial VARCHAR (9)
+    ItemMaterial VARCHAR (9),
+    GiftWrapped VARCHAR (20)
 );
 
 CREATE TYPE dbo.SkillType AS TABLE
@@ -718,11 +720,12 @@ BEGIN
         Enchantable = source.Enchantable,
         Tarnished = source.Tarnished,
         GearEnhancement = source.GearEnhancement,
-        ItemMaterial = source.ItemMaterial
+        ItemMaterial = source.ItemMaterial,
+        GiftWrapped = source.GiftWrapped
 
     WHEN NOT MATCHED THEN
-    INSERT (ItemId, Name, Serial, ItemPane, Slot, InventorySlot, Color, Cursed, Durability, Identified, ItemVariance, WeapVariance, ItemQuality, OriginalQuality, Stacks, Enchantable, Tarnished, GearEnhancement, ItemMaterial)
-    VALUES (source.ItemId, source.Name, source.Serial, source.ItemPane, source.Slot, source.InventorySlot, source.Color, source.Cursed, source.Durability, source.Identified, source.ItemVariance, source.WeapVariance, source.ItemQuality, source.OriginalQuality, source.Stacks, source.Enchantable, source.Tarnished, source.GearEnhancement, source.ItemMaterial);
+    INSERT (ItemId, Name, Serial, ItemPane, Slot, InventorySlot, Color, Cursed, Durability, Identified, ItemVariance, WeapVariance, ItemQuality, OriginalQuality, Stacks, Enchantable, Tarnished, GearEnhancement, ItemMaterial, GiftWrapped)
+    VALUES (source.ItemId, source.Name, source.Serial, source.ItemPane, source.Slot, source.InventorySlot, source.Color, source.Cursed, source.Durability, source.Identified, source.ItemVariance, source.WeapVariance, source.ItemQuality, source.OriginalQuality, source.Stacks, source.Enchantable, source.Tarnished, source.GearEnhancement, source.ItemMaterial, source.GiftWrapped);
 END
 
 -- AddLegendMark

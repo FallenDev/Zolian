@@ -1,8 +1,13 @@
 ﻿using Darkages.Common;
 using Darkages.Enums;
+using Darkages.Network.Server;
 using Darkages.Object;
 using Darkages.Sprites.Entity;
 using Darkages.Types;
+
+using Microsoft.Extensions.Logging;
+
+using ServiceStack;
 
 namespace Darkages.Sprites;
 
@@ -307,7 +312,7 @@ public class Identifiable : Sprite
                     results.AddRange(GetDamageableSpritesInPosition((int)Pos.X - sides, (int)Pos.Y - i));
                     break;
 
-                case 1: 
+                case 1:
                     // forward
                     results.AddRange(GetDamageableSpritesInPosition((int)Pos.X + i, (int)Pos.Y));
                     // right
@@ -316,7 +321,7 @@ public class Identifiable : Sprite
                     results.AddRange(GetDamageableSpritesInPosition((int)Pos.X + i, (int)Pos.Y - sides));
                     break;
 
-                case 2: 
+                case 2:
                     // forward
                     results.AddRange(GetDamageableSpritesInPosition((int)Pos.X, (int)Pos.Y + i));
                     // right
@@ -325,7 +330,7 @@ public class Identifiable : Sprite
                     results.AddRange(GetDamageableSpritesInPosition((int)Pos.X + sides, (int)Pos.Y + i));
                     break;
 
-                case 3: 
+                case 3:
                     // forward
                     results.AddRange(GetDamageableSpritesInPosition((int)Pos.X - i, (int)Pos.Y));
                     // right
@@ -334,7 +339,7 @@ public class Identifiable : Sprite
                     results.AddRange(GetDamageableSpritesInPosition((int)Pos.X - i, (int)Pos.Y + sides));
                     break;
             }
-        
+
         return results;
     }
 
@@ -656,24 +661,37 @@ public class Identifiable : Sprite
 
     public void UpdateAddAndRemove()
     {
-        foreach (var playerNearby in AislingsEarShotNearby())
+        var nearby = AislingsEarShotNearby();
+        if (nearby.IsEmpty()) return;
+
+        try
         {
-            uint objectId;
+            foreach (var playerNearby in nearby)
+            {
+                uint objectId;
 
-            if (this is Item item)
-                objectId = item.ItemVisibilityId;
-            else
-                objectId = Serial;
+                if (this is Item item)
+                    objectId = item.ItemVisibilityId;
+                else
+                    objectId = Serial;
 
-            playerNearby.Client.SendRemoveObject(objectId);
-            var obj = new List<Sprite> { this };
-            playerNearby.Client.SendVisibleEntities(obj);
+                playerNearby.Client.SendRemoveObject(objectId);
+                var obj = new List<Sprite> { this };
+                playerNearby.Client.SendVisibleEntities(obj);
+            }
+        }
+        catch (Exception e)
+        {
+            ServerSetup.EventsLogger(e.Message, LogLevel.Error);
+            ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
+            SentrySdk.CaptureException(e);
         }
     }
 
     public void Remove()
     {
         var nearby = AislingsEarShotNearby();
+        if (nearby.IsEmpty()) return;
         uint objectId;
 
         if (this is Item item)
@@ -681,8 +699,17 @@ public class Identifiable : Sprite
         else
             objectId = Serial;
 
-        foreach (var o in nearby)
-            o?.Client?.SendRemoveObject(objectId);
+        try
+        {
+            foreach (var o in nearby)
+                o?.Client?.SendRemoveObject(objectId);
+        }
+        catch (Exception e)
+        {
+            ServerSetup.EventsLogger(e.Message, LogLevel.Error);
+            ServerSetup.EventsLogger(e.StackTrace, LogLevel.Error);
+            SentrySdk.CaptureException(e);
+        }
 
         DeleteObject();
     }

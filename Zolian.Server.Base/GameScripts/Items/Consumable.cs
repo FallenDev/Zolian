@@ -21,8 +21,9 @@ public class Consumable(Item item) : ItemScript(item)
         if (Item?.Template == null) return;
         if (sprite is not Aisling aisling) return;
         var client = aisling.Client;
+        var name = !Item.GiftWrapped.IsNullOrEmpty() ? Item.GiftWrapped : Item.Template.Name;
 
-        switch (Item.Template.Name)
+        switch (name)
         {
             case "Zolian Guide":
                 {
@@ -1379,6 +1380,50 @@ public class Consumable(Item item) : ItemScript(item)
                     client.Aisling.GiveGold(payout);
                     client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(132, false));
                     client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=qReceived: {payout} gold!");
+                    return;
+                }
+
+            case "Santa":
+            case "Snowman":
+            case "Heart":
+                {
+                    aisling.SendAnimationNearby(294, aisling.Position);
+                    Item.GiftWrapped = string.Empty;
+                    Item.DisplayImage = Item.Template.DisplayImage;
+                    client.Aisling.Inventory.UpdateSlot(client, Item);
+                    return;
+                }
+            case "Santa Gift Box":
+                {
+                    foreach (var npc in ServerSetup.Instance.GlobalMundaneCache)
+                    {
+                        if (npc.Value.Scripts is null) continue;
+                        if (!npc.Value.Scripts.TryGetValue("Gift Wrapping Santa", out var scriptObj)) continue;
+                        scriptObj.OnClick(client, npc.Value.Serial);
+                        break;
+                    }
+                    return;
+                }
+            case "Snowman Gift Box":
+                {
+                    foreach (var npc in ServerSetup.Instance.GlobalMundaneCache)
+                    {
+                        if (npc.Value.Scripts is null) continue;
+                        if (!npc.Value.Scripts.TryGetValue("Gift Wrapping Snowman", out var scriptObj)) continue;
+                        scriptObj.OnClick(client, npc.Value.Serial);
+                        break;
+                    }
+                    return;
+                }
+            case "Heart Gift Box":
+                {
+                    foreach (var npc in ServerSetup.Instance.GlobalMundaneCache)
+                    {
+                        if (npc.Value.Scripts is null) continue;
+                        if (!npc.Value.Scripts.TryGetValue("Gift Wrapping Heart", out var scriptObj)) continue;
+                        scriptObj.OnClick(client, npc.Value.Serial);
+                        break;
+                    }
                     return;
                 }
 

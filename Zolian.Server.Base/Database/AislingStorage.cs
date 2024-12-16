@@ -566,6 +566,7 @@ public record AislingStorage : Sql, IEqualityOperators<AislingStorage, AislingSt
                 existingRow["Tarnished"] = item.Tarnished;
                 existingRow["GearEnhancement"] = gearEnhanced;
                 existingRow["ItemMaterial"] = itemMaterial;
+                existingRow["GiftWrapped"] = item.GiftWrapped;
             }
             else
             {
@@ -589,7 +590,8 @@ public record AislingStorage : Sql, IEqualityOperators<AislingStorage, AislingSt
                     item.Enchantable,
                     item.Tarnished,
                     gearEnhanced,
-                    itemMaterial
+                    itemMaterial,
+                    item.GiftWrapped
                 );
             }
         }
@@ -1053,6 +1055,7 @@ public record AislingStorage : Sql, IEqualityOperators<AislingStorage, AislingSt
         dt.Columns.Add("Tarnished", typeof(bool));
         dt.Columns.Add("GearEnhancement", typeof(string));
         dt.Columns.Add("ItemMaterial", typeof(string));
+        dt.Columns.Add("GiftWrapped", typeof(string));
         return dt;
     }
 

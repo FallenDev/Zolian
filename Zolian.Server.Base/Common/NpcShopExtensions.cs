@@ -670,4 +670,10 @@ public static class NpcShopExtensions
     }
 
     #endregion
+
+    public static IEnumerable<byte> GetCharacterGiftBoxInventoryByteList(WorldClient client)
+    {
+        return client.Aisling.Inventory.Items.Values.Where(i => i != null && i.Template.Flags.FlagIsSet(ItemFlags.Dropable) && !i.Template.CanStack).ToList()
+            .Select(i => i.InventorySlot).ToList();
+    }
 }

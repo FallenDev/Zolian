@@ -661,6 +661,7 @@ public class WorldClient : WorldClientBase, IWorldClient
                     Tarnished = item.Tarnished,
                     GearEnhancement = item.GearEnhancement,
                     ItemMaterial = item.ItemMaterial,
+                    GiftWrapped = item.GiftWrapped,
                     Image = item.Template.Image,
                     DisplayImage = item.Template.DisplayImage
                 };
@@ -727,6 +728,7 @@ public class WorldClient : WorldClientBase, IWorldClient
                     Tarnished = item.Tarnished,
                     GearEnhancement = item.GearEnhancement,
                     ItemMaterial = item.ItemMaterial,
+                    GiftWrapped = item.GiftWrapped,
                     Image = item.Template.Image,
                     DisplayImage = item.Template.DisplayImage
                 };
@@ -828,6 +830,7 @@ public class WorldClient : WorldClientBase, IWorldClient
                     Tarnished = item.Tarnished,
                     GearEnhancement = item.GearEnhancement,
                     ItemMaterial = item.ItemMaterial,
+                    GiftWrapped = item.GiftWrapped,
                     Image = item.Template.Image,
                     DisplayImage = item.Template.DisplayImage
                 };

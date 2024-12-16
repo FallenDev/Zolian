@@ -105,6 +105,7 @@ public class BankManager
         dt.Columns.Add("Tarnished", typeof(bool));
         dt.Columns.Add("GearEnhancement", typeof(string));
         dt.Columns.Add("ItemMaterial", typeof(string));
+        dt.Columns.Add("GiftWrapped", typeof(string));
         return dt;
     }
 

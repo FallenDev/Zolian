@@ -1734,14 +1734,22 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 return default;
             }
 
+            // Run Scripts on item on use
+            if (!string.IsNullOrEmpty(item.Template.ScriptName)) item.Scripts ??= ScriptManager.Load<ItemScript>(item.Template.ScriptName, item);
+            if (!string.IsNullOrEmpty(item.Template.WeaponScript)) item.WeaponScripts ??= ScriptManager.Load<WeaponScript>(item.Template.WeaponScript, item);
+
+            if (!item.GiftWrapped.IsNullOrEmpty())
+            {
+                var consumeScript = ScriptManager.Load<ItemScript>("Consumable", item);
+                var script = consumeScript.Values.FirstOrDefault();
+                script?.OnUse(localClient.Aisling, localArgs.SourceSlot);
+                return default;
+            }
+
             if (item.Template.Flags.FlagIsSet(ItemFlags.Equipable))
                 localClient.LastEquip = DateTime.UtcNow;
 
             var activated = false;
-
-            // Run Scripts on item on use
-            if (!string.IsNullOrEmpty(item.Template.ScriptName)) item.Scripts ??= ScriptManager.Load<ItemScript>(item.Template.ScriptName, item);
-            if (!string.IsNullOrEmpty(item.Template.WeaponScript)) item.WeaponScripts ??= ScriptManager.Load<WeaponScript>(item.Template.WeaponScript, item);
 
             if (item.Scripts == null)
             {
