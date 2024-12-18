@@ -53,9 +53,8 @@ public sealed class Money : Identifiable
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"You've received {amount} coins.");
         aisling.Client.SendAttributes(StatUpdateType.ExpGold);
 
-        var removed = ServerSetup.Instance.GlobalGroundMoneyCache.TryRemove(money.MoneyId, out var itemToBeRemoved);
-        if (!removed) return;
-        itemToBeRemoved.Remove();
+        ServerSetup.Instance.GlobalGroundMoneyCache.TryRemove(money.MoneyId, out _);
+        money.Remove();
     }
 
     private void CalcAmount(ulong amount)

@@ -440,9 +440,8 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 if (moneyKvp.Value == null) continue;
                 var abandonedDiff = DateTime.UtcNow.Subtract(moneyKvp.Value.AbandonedDate);
                 if (abandonedDiff.TotalMinutes <= 30) continue;
-                var removed = ServerSetup.Instance.GlobalGroundMoneyCache.TryRemove(moneyKvp.Value.MoneyId, out var itemToBeRemoved);
-                if (!removed) return;
-                itemToBeRemoved.Remove();
+                ServerSetup.Instance.GlobalGroundMoneyCache.TryRemove(moneyKvp.Key, out _);
+                moneyKvp.Value.Remove();
             }
         }
         catch (Exception ex)
@@ -804,7 +803,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
                 if (cantPickup)
                 {
-                    item = itemObjs.Last();
+                    item = itemObjs[^1];
                 }
 
                 if (item.GiveTo(localClient.Aisling))

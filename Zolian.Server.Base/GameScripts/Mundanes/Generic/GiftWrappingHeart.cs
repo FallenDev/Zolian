@@ -26,7 +26,7 @@ public class GiftWrappingHeart(WorldServer server, Mundane mundane) : MundaneScr
             new (0x02, "Wrap a present")
         };
 
-        client.SendOptionsDialog(Mundane, "Take a look, see what we have in stock.", opts.ToArray());
+        client.SendOptionsDialog(Mundane, "Exciting, who will you give it to?", opts.ToArray());
     }
 
     public override void OnResponse(WorldClient client, ushort responseID, string args)

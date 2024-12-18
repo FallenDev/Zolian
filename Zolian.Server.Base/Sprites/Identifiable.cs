@@ -691,7 +691,12 @@ public class Identifiable : Sprite
     public void Remove()
     {
         var nearby = AislingsEarShotNearby();
-        if (nearby.IsEmpty()) return;
+        if (nearby.IsEmpty())
+        {
+            DeleteObject();
+            return;
+        }
+
         uint objectId;
 
         if (this is Item item)

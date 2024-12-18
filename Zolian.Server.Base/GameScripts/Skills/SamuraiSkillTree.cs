@@ -32,7 +32,6 @@ public class Iaido(Skill skill) : SkillScript(skill)
         if (sprite is Aisling aisling)
         {
             aisling.ActionUsed = "Iaido";
-            GlobalSkillMethods.Train(aisling.Client, Skill);
         }
 
         if (_enemyList.Count == 0)
@@ -70,19 +69,17 @@ public class Iaido(Skill skill) : SkillScript(skill)
             foreach (var enemy in _enemyList)
             {
                 if (enemy is not Damageable damageable) continue;
-                var dmgCalc = DamageCalc(damageable);
+                var dmgCalc = DamageCalc(damageDealer);
 
-                damageable.ApplyDamage(damageDealer, dmgCalc, Skill);
+                GlobalSkillMethods.OnSuccessWithoutActionAnimation(enemy, damageDealer, Skill, dmgCalc, true);
                 Task.Delay(300).ContinueWith(c =>
                 {
                     damageDealer.SendAnimationNearby(119, enemy.Position);
                 });
 
-                if (!_crit) continue;
-                Task.Delay(300).ContinueWith(c =>
-                {
-                    damageDealer.SendAnimationNearby(387, null, damageDealer.Serial);
-                });
+                if (!(enemy.CurrentHp <= enemy.MaximumHp * 0.10)) continue;
+                var debuff = new DebuffReaping();
+                GlobalSkillMethods.ApplyPhysicalDebuff(damageDealer, debuff, enemy, Skill);
             }
 
             Task.Delay(300).ContinueWith(c =>
@@ -149,7 +146,8 @@ public class Iaido(Skill skill) : SkillScript(skill)
         }
 
         var critCheck = GlobalSkillMethods.OnCrit(dmg);
-        _crit = critCheck.Item1;
+        // Always crit
+        _crit = true;
         return critCheck.Item2;
     }
 
