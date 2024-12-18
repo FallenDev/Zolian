@@ -78,6 +78,16 @@ public class Iaido(Skill skill) : SkillScript(skill)
                 });
 
                 if (!(enemy.CurrentHp <= enemy.MaximumHp * 0.10)) continue;
+                switch (enemy)
+                {
+                    case Aisling:
+                    case Monster monster when monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.Boss)
+                                              || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.MiniBoss)
+                                              || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.Forsaken):
+                        if (damageDealer is Aisling player)
+                            player.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Death doesn't seem to work on them");
+                        continue;
+                }
                 var debuff = new DebuffReaping();
                 GlobalSkillMethods.ApplyPhysicalDebuff(damageDealer, debuff, enemy, Skill);
             }
