@@ -1399,7 +1399,14 @@ public class DebuffReaping : Debuff
     public override void OnApplied(Sprite affected, Debuff debuff)
     {
         if (affected is Aisling { GameMaster: true }) return;
-
+        if (affected is Aisling mapCheck && mapCheck.Map.ID is >= 800 and <= 810)
+        {
+            mapCheck.Client.TransitionToMap(188, new Position(12, 22));
+            mapCheck.CurrentHp = 1;
+            mapCheck.Client.SendAttributes(StatUpdateType.Full);
+            return;
+        }
+        
         if (affected.Debuffs.TryAdd(debuff.Name, debuff))
         {
             DebuffSpell = debuff;
@@ -1495,7 +1502,7 @@ public class DebuffReaping : Debuff
 
                 aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your soul has been ripped from your mortal coil.");
                 aisling.SendTargetedClientMethod(PlayerScope.AislingsOnSameMap, client => client.SendSound(5, false));
-
+                
                 aisling.PrepareForHell();
                 aisling.CastDeath();
                 aisling.Resting = Enums.RestPosition.Standing;

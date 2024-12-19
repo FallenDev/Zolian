@@ -48,8 +48,10 @@ public abstract class ItemScript(Item item) : ObjectManager
                     totalPoints += 1000;
                     break;
                 case Item.Quality.Primordial:
-                case Item.Quality.Transcendent:
                     totalPoints += 2000;
+                    break;
+                case Item.Quality.Transcendent:
+                    totalPoints += 3000;
                     break;
             }
 

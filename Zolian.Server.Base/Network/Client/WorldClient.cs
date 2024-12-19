@@ -524,6 +524,8 @@ public class WorldClient : WorldClientBase, IWorldClient
                 Aisling.SendTargetedClientMethod(PlayerScope.AislingsOnSameMap, c => c.SendServerMessage(ServerMessageType.ActiveMessage, $"{Aisling.Username} has died."));
             }
 
+            ReviveOnPlayerKillMap(Aisling);
+
             return;
         }
 
@@ -532,6 +534,57 @@ public class WorldClient : WorldClientBase, IWorldClient
 
         var debuff = new DebuffReaping();
         EnqueueDebuffAppliedEvent(Aisling, debuff);
+    }
+
+    private static void ReviveOnPlayerKillMap(Aisling aisling)
+    {
+        Task.Delay(1000).ContinueWith(c =>
+        {
+            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Revive in 10");
+        });
+        Task.Delay(2000).ContinueWith(c =>
+        {
+            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Revive in 9");
+        });
+        Task.Delay(3000).ContinueWith(c =>
+        {
+            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Revive in 8");
+        });
+        Task.Delay(4000).ContinueWith(c =>
+        {
+            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Revive in 7");
+        });
+        Task.Delay(5000).ContinueWith(c =>
+        {
+            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Revive in 6");
+        });
+        Task.Delay(6000).ContinueWith(c =>
+        {
+            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Revive in 5");
+        });
+        Task.Delay(7000).ContinueWith(c =>
+        {
+            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Revive in 4");
+        });
+        Task.Delay(8000).ContinueWith(c =>
+        {
+            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Revive in 3");
+        });
+        Task.Delay(9000).ContinueWith(c =>
+        {
+            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Revive in 2");
+        });
+        Task.Delay(10000).ContinueWith(c =>
+        {
+            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Revive in 1");
+        });
+        Task.Delay(11000).ContinueWith(c =>
+        {
+            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Revived");
+            aisling.Client.Recover();
+            aisling.Client.UpdateDisplay();
+            aisling.Client.SendDisplayAisling(aisling);
+        });
     }
 
     #region Player Load

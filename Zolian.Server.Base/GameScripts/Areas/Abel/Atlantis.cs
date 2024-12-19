@@ -4,6 +4,8 @@ using Darkages.Types;
 using System.Numerics;
 using Darkages.Enums;
 using Darkages.Sprites.Entity;
+using Darkages.GameScripts.Affects;
+using Darkages.Network.Server;
 
 namespace Darkages.GameScripts.Areas.Abel;
 
@@ -20,21 +22,54 @@ public class Atlantis : AreaScript
         var vectorMap = new Vector2(newLocation.X, newLocation.Y);
         if (client.Aisling.Pos != vectorMap) return;
 
-        switch (newLocation.X)
+        if (client.Aisling.Pos == new Vector2(31, 29) ||
+            client.Aisling.Pos == new Vector2(30, 29) ||
+            client.Aisling.Pos == new Vector2(30, 28) ||
+            client.Aisling.Pos == new Vector2(31, 28))
         {
-            case 15 when newLocation.Y == 14:
-                if (client.Aisling.QuestManager.ScubaGearCrafted && client.Aisling.EquipmentManager.Equipment[16]?.Item?.Template.Name == "Scuba Gear"
-                    || client.Aisling.Race.RaceFlagIsSet(Race.Merfolk))
-                {
-                    client.TransitionToMap(188, new Position(2, 19));
-                    return;
-                }
-
-                client.SendServerMessage(ServerMessageType.ActiveMessage, "I'm afraid I'll drown if I slip under this rock! I need to find some Scuba Gear.");
+            foreach (var npc in ServerSetup.Instance.GlobalMundaneCache)
+            {
+                if (npc.Value.Scripts is null) continue;
+                if (!npc.Value.Scripts.TryGetValue("Rifting Warden", out var scriptObj)) continue;
+                scriptObj.OnClick(client, npc.Value.Serial);
                 break;
+            }
         }
+
+        if (client.Aisling.EquipmentManager.Equipment[16]?.Item?.Template.Name == "Scuba Gear") return;
+        if (client.Aisling.Race.RaceFlagIsSet(Race.Merfolk)) return;
+        var drownTick = client.Aisling.MaximumHp * 0.05;
+        client.Aisling.CurrentHp -= (long)drownTick;
+        client.SendAttributes(StatUpdateType.Vitality);
+
+        if (!(client.Aisling.CurrentHp <= client.Aisling.MaximumHp * 0.10)) return;
+        var drown = new DebuffReaping();
+        drown.OnApplied(client.Aisling, drown);
     }
 
-    public override void OnItemDropped(WorldClient client, Item itemDropped, Position locationDropped) { }
-    public override void OnGossip(WorldClient client, string message) { }
+    public override void OnItemDropped(WorldClient client, Item itemDropped, Position locationDropped)
+    {
+        if (client.Aisling.EquipmentManager.Equipment[16]?.Item?.Template.Name == "Scuba Gear") return;
+        if (client.Aisling.Race.RaceFlagIsSet(Race.Merfolk)) return;
+        var drownTick = client.Aisling.MaximumHp * 0.05;
+        client.Aisling.CurrentHp -= (long)drownTick;
+        client.SendAttributes(StatUpdateType.Vitality);
+
+        if (!(client.Aisling.CurrentHp <= client.Aisling.MaximumHp * 0.10)) return;
+        var drown = new DebuffReaping();
+        drown.OnApplied(client.Aisling, drown);
+    }
+
+    public override void OnGossip(WorldClient client, string message)
+    {
+        if (client.Aisling.EquipmentManager.Equipment[16]?.Item?.Template.Name == "Scuba Gear") return;
+        if (client.Aisling.Race.RaceFlagIsSet(Race.Merfolk)) return;
+        var drownTick = client.Aisling.MaximumHp * 0.05;
+        client.Aisling.CurrentHp -= (long)drownTick;
+        client.SendAttributes(StatUpdateType.Vitality);
+
+        if (!(client.Aisling.CurrentHp <= client.Aisling.MaximumHp * 0.10)) return;
+        var drown = new DebuffReaping();
+        drown.OnApplied(client.Aisling, drown);
+    }
 }

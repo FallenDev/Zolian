@@ -1028,7 +1028,9 @@ public sealed class Item : Identifiable
             {Quality.Epic, new QualityBonus(2, 2, 2, 2, 2, 2, 10, 1, 10, 750, 250, 5)},
             {Quality.Legendary, new QualityBonus(3, 3, 3, 3, 3, 15, 20, 2, 20, 1000, 500, 10)},
             {Quality.Forsaken, new QualityBonus(4, 4, 4, 4, 4, 20, 25, 3, 25, 1500, 1000, 20)},
-            {Quality.Mythic, new QualityBonus(5, 5, 5, 5, 5, 25, 30, 5, 30, 2500, 2000, 30)}
+            {Quality.Mythic, new QualityBonus(5, 5, 5, 5, 5, 25, 30, 5, 30, 2500, 2000, 30)},
+            {Quality.Primordial, new QualityBonus(8, 8, 8, 8, 8, 30, 30, 8, 40, 10000, 10000, 40)},
+            {Quality.Transcendent, new QualityBonus(10, 10, 10, 10, 10, 45, 45, 10, 45, 15000, 15000, 50)}
         };
 
         if (!qualityBonuses.TryGetValue(equipment.ItemQuality, out var bonus)) return;

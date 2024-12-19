@@ -6,6 +6,7 @@ using Darkages.ScriptingBase;
 using Darkages.Sprites.Entity;
 using System.Globalization;
 using System.Text.RegularExpressions;
+using Darkages.GameScripts.Monsters;
 
 namespace Darkages.GameScripts.Mundanes.Generic;
 
@@ -82,6 +83,7 @@ public class UserHelper(WorldServer server, Mundane mundane) : MundaneScript(ser
         var latencyCode = ColorCodeLatency(latency);
         var mapNum = client.Aisling.Map.ID;
         var playerBoxed = client.Aisling.ExpTotal;
+        if (mapNum is >= 800 and <= 810) mapNum = 0;
 
         client.SendServerMessage(ServerMessageType.ScrollWindow, $"{{=gMap#: {{=a{mapNum} {{=gInsight: {{=b{level} {{=gRank: {{=b{ability} {{=gLatency: {{={latencyCode}{latencyMs}\n" +
                                                                  $"{{=gBase Stats| {{=cS:{{=a{baseStr}{{=c, I:{{=a{baseInt}{{=c, W:{{=a{baseWis}{{=c, C:{{=a{baseCon}{{=c, D:{{=a{baseDex}\n" +

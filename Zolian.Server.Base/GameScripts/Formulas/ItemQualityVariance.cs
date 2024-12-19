@@ -108,7 +108,8 @@ public static class ItemQualityVariance
             > .77 and <= .89 => Item.Quality.Epic,
             > .89 and <= .99 => Item.Quality.Legendary,
             > .99 and <= .997 => Item.Quality.Forsaken,
-            > .997 => Item.Quality.Mythic,
+            > .997 and <= .999 => Item.Quality.Mythic,
+            > 1 => Item.Quality.Primordial,
             _ => Item.Quality.Rare
         };
     }

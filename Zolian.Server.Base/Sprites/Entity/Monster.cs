@@ -178,6 +178,19 @@ public sealed class Monster : Damageable
         player.UpdateStats();
     }
 
+    public void GenerateRiftRewards(Aisling player)
+    {
+        if (Rewarded) return;
+        if (player.Equals(null)) return;
+        if (player.Client.Aisling == null) return;
+
+        var script = ScriptManager.Load<RewardScript>("Rift Rewards", this, player).FirstOrDefault();
+        script.Value?.GenerateRewards(this, player);
+
+        Rewarded = true;
+        player.UpdateStats();
+    }
+
     public void GenerateInanimateRewards(Aisling player)
     {
         if (Rewarded) return;
