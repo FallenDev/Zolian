@@ -5,7 +5,8 @@ using Darkages.Sprites;
 using Darkages.Types;
 
 using System.Collections.Concurrent;
-using System.Security.Cryptography;
+using Darkages.Object;
+using Darkages.Sprites.Entity;
 
 namespace Darkages.GameScripts.Areas.Generic;
 
@@ -44,8 +45,11 @@ public class Rift : AreaScript
     {
         _playersOnMap.TryRemove(client.Aisling.Serial, out _);
 
-        if (_playersOnMap.IsEmpty)
-            _animate = false;
+        if (!_playersOnMap.IsEmpty) return; 
+        _animate = false;
+        var monsters = ObjectManager.GetObjects<Monster>(Area, p => p is { Alive: true });
+        foreach (var monster in monsters)
+            monster.Value.Remove();
     }
 
     public override void OnPlayerWalk(WorldClient client, Position oldLocation, Position newLocation) => _playersOnMap.TryAdd(client.Aisling.Serial, client.Aisling);

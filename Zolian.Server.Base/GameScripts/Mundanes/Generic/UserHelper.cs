@@ -6,7 +6,6 @@ using Darkages.ScriptingBase;
 using Darkages.Sprites.Entity;
 using System.Globalization;
 using System.Text.RegularExpressions;
-using Darkages.GameScripts.Monsters;
 
 namespace Darkages.GameScripts.Mundanes.Generic;
 

@@ -133,7 +133,7 @@ public static class MonsterStorage
                 temp.IgnoreCollision = (bool)reader["IgnoreCollision"];
                 temp.MovementSpeed = (int)reader["MovementSpeed"];
                 temp.EngagedWalkingSpeed = (int)reader["EngagedSpeed"];
-                temp.Waypoints = new List<Position>();
+                temp.Waypoints = [];
                 if (way1 != null)
                     temp.Waypoints.Add(way1);
                 if (way2 != null)
@@ -151,9 +151,9 @@ public static class MonsterStorage
                 temp.DefenseElement = defEle;
                 var level = (int)reader["Level"];
                 temp.Level = (ushort)level;
-                temp.SkillScripts = new List<string>();
-                temp.SpellScripts = new List<string>();
-                temp.AbilityScripts = new List<string>();
+                temp.SkillScripts = [];
+                temp.SpellScripts = [];
+                temp.AbilityScripts = [];
                 if (skill != null)
                     temp.SkillScripts.Add(skill);
                 if (ability != null)

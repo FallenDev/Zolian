@@ -47,6 +47,7 @@ public enum MonsterType
     DivineCon,
     DivineDex,
     MiniBoss,
+    Rift,
     Boss
 }
 

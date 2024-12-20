@@ -1125,6 +1125,15 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
                 monster.BonusHp += monster.BaseHp * 20;
                 monster.BonusMp += monster.BaseMp * 20;
             },
+            [MonsterType.Rift] = monster =>
+            {
+                monster.BonusStr += monster._Str * 25;
+                monster.BonusInt += monster._Int * 25;
+                monster.BonusDex += monster._Dex * 25;
+                monster.BonusMr += monster._Mr * 25;
+                monster.BonusHit += monster._Hit * 25;
+                monster.BonusDmg += monster._Dmg * 25;
+            },
             [MonsterType.Boss] = monster =>
             {
                 monster.BonusStr += monster._Str * 30;
@@ -1349,7 +1358,7 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
 
         var spellList = new[]
         {
-            "Beag Srad", "Beag Sal", "Beag Athar", "Beag Creag", "Beag Dorcha", "Beag Eadrom", "Beag Puinsein", "Beag Cradh", 
+            "Beag Srad", "Beag Sal", "Beag Athar", "Beag Creag", "Beag Dorcha", "Beag Eadrom", "Beag Puinsein", "Beag Cradh",
             "Ao Beag Cradh"
         };
 
@@ -1428,7 +1437,7 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
 
         var spellList = new[]
         {
-            "Mor Srad", "Mor Sal", "Mor Athar", "Mor Creag", "Mor Dorcha", "Mor Eadrom", "Mor Puinsein", "Mor Cradh", 
+            "Mor Srad", "Mor Sal", "Mor Athar", "Mor Creag", "Mor Dorcha", "Mor Eadrom", "Mor Puinsein", "Mor Cradh",
             "Fas Nadur", "Blind", "Pramh", "Ao Mor Cradh"
         };
 
@@ -1468,7 +1477,7 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
 
         var spellList = new[]
         {
-            "Ard Srad", "Ard Sal", "Ard Athar", "Ard Creag", "Ard Dorcha", "Ard Eadrom", "Ard Puinsein", "Ard Cradh", 
+            "Ard Srad", "Ard Sal", "Ard Athar", "Ard Creag", "Ard Dorcha", "Ard Eadrom", "Ard Puinsein", "Ard Cradh",
             "Mor Fas Nadur", "Blind", "Pramh", "Silence", "Ao Ard Cradh"
         };
 
@@ -1508,7 +1517,7 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
 
         var spellList = new[]
         {
-            "Ard Srad", "Ard Sal", "Ard Athar", "Ard Creag", "Ard Dorcha", "Ard Eadrom", "Ard Puinsein", "Ard Cradh", 
+            "Ard Srad", "Ard Sal", "Ard Athar", "Ard Creag", "Ard Dorcha", "Ard Eadrom", "Ard Puinsein", "Ard Cradh",
             "Ard Fas Nadur", "Blind", "Pramh", "Silence", "Ao Ard Cradh", "Ao Puinsein", "Dark Chain", "Defensive Stance"
         };
 
@@ -1543,14 +1552,14 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
 
         var spellList = new List<string>
         {
-            "Ard Srad", "Ard Sal", "Ard Athar", "Ard Creag", "Ard Dorcha", "Ard Eadrom", "Ard Puinsein", 
-            "Croich Beag Cradh", "Ard Fas Nadur", "Blind", "Pramh", "Silence", "Ao Ard Cradh", "Ao Puinsein", 
+            "Ard Srad", "Ard Sal", "Ard Athar", "Ard Creag", "Ard Dorcha", "Ard Eadrom", "Ard Puinsein",
+            "Croich Beag Cradh", "Ard Fas Nadur", "Blind", "Pramh", "Silence", "Ao Ard Cradh", "Ao Puinsein",
             "Dark Chain", "Defensive Stance"
         };
 
         if (monster.Template.Level >= 500)
         {
-            spellList.AddRange(["Uas Athar", "Uas Creag", "Uas Sal", "Uas Srad", "Uas Dorcha", "Uas Eadrom", 
+            spellList.AddRange(["Uas Athar", "Uas Creag", "Uas Sal", "Uas Srad", "Uas Dorcha", "Uas Eadrom",
                 "Croich Mor Cradh", "Penta Seal", "Decay"]);
         }
 
