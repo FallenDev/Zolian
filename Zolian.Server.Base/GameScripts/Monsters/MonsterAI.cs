@@ -1286,7 +1286,7 @@ public class WeakShadowSight : MonsterScript
     #endregion
 }
 
-[Script("Rift")]
+[Script("RiftMob")]
 public class RiftMob : MonsterScript
 {
     public RiftMob(Monster monster, Area map) : base(monster, map)

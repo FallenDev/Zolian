@@ -103,7 +103,7 @@ public class Chromitus : MundaneScript
         {
             var temp = new MonsterTemplate
             {
-                ScriptName = "Rift",
+                ScriptName = "RiftMob",
                 BaseName = "Rift Mob",
                 Name = $"{Random.Shared.NextInt64()}RiftMob",
                 AreaID = area.ID,

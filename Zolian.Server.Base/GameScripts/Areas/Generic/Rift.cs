@@ -114,7 +114,7 @@ public class Rift : AreaScript
 
         var boss = new MonsterTemplate
         {
-            ScriptName = "Rift",
+            ScriptName = "RiftMob",
             BaseName = "Rift Boss",
             Name = $"{Random.Shared.NextInt64()}RiftBoss",
             AreaID = Area.ID,
