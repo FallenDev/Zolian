@@ -53,8 +53,8 @@ public enum MonsterType
 
 /// <summary>
 /// Common - 75% AC & Will Save
-/// Tank - 100% AC & 30% Will Save
-/// Caster - 30% AC & 100% Will Save
+/// Tank - 98% AC & 50% Will Save
+/// Caster - 50% AC & 98% Will Save
 /// </summary>
 public enum MonsterArmorType
 {

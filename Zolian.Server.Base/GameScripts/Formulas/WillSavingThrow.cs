@@ -40,16 +40,16 @@ public class WillSavingThrow : FormulaScript
         {
             dmgMitigation = monster.Template.MonsterArmorType switch
             {
-                MonsterArmorType.Caster when dmgMitigation >= 0.90f => 0.90f,
-                MonsterArmorType.Common when dmgMitigation >= 0.70f => 0.70f,
-                MonsterArmorType.Tank when dmgMitigation >= 0.65f => 0.65f,
+                MonsterArmorType.Caster when dmgMitigation >= 0.98f => 0.98f,
+                MonsterArmorType.Common when dmgMitigation >= 0.75f => 0.75f,
+                MonsterArmorType.Tank when dmgMitigation >= 0.50f => 0.50f,
                 _ => dmgMitigation
             };
         }
         else
         {
-            if (dmgMitigation >= 0.70f)
-                dmgMitigation = 0.70f;
+            if (dmgMitigation >= 0.85f)
+                dmgMitigation = 0.85f;
         }
         
         var dmgReducedByMitigation = dmgMitigation * value;

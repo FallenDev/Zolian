@@ -32,7 +32,17 @@ public abstract class RewardScript
         [(300, 349)] = null,
         [(350, 399)] = ["Folt Demon Band"],
         [(400, 449)] = ["Neart Fire Ring", "Fios Ice Ring"],
-        [(450, 500)] = ["Rioga Kings Ring"]
+        [(450, 500)] = ["Rioga Kings Ring"],
+        [(501, 550)] = null,
+        [(551, 600)] = null,
+        [(601, 650)] = null,
+        [(651, 700)] = null,
+        [(701, 750)] = null,
+        [(751, 800)] = null,
+        [(801, 850)] = null,
+        [(851, 900)] = null,
+        [(901, 950)] = null,
+        [(951, 1000)] = null
     };
 
     protected internal static readonly Dictionary<(int, int), List<string>> BeltDrops = new()
@@ -80,7 +90,17 @@ public abstract class RewardScript
         [(300, 349)] = null,
         [(350, 399)] = null,
         [(400, 449)] = null,
-        [(450, 500)] = null
+        [(450, 500)] = null,
+        [(501, 550)] = null,
+        [(551, 600)] = null,
+        [(601, 650)] = null,
+        [(651, 700)] = null,
+        [(701, 750)] = null,
+        [(751, 800)] = null,
+        [(801, 850)] = null,
+        [(851, 900)] = null,
+        [(901, 950)] = null,
+        [(951, 1000)] = null
     };
 
     protected static readonly Dictionary<(int, int), List<string>> BootDrops = new()
@@ -106,7 +126,17 @@ public abstract class RewardScript
         [(300, 349)] = null,
         [(350, 399)] = null,
         [(400, 449)] = null,
-        [(450, 500)] = null
+        [(450, 500)] = null,
+        [(501, 550)] = null,
+        [(551, 600)] = null,
+        [(601, 650)] = null,
+        [(651, 700)] = null,
+        [(701, 750)] = null,
+        [(751, 800)] = null,
+        [(801, 850)] = null,
+        [(851, 900)] = null,
+        [(901, 950)] = null,
+        [(951, 1000)] = null
     };
 
     protected static readonly Dictionary<(int, int), List<string>> EarringDrops = new()
@@ -146,7 +176,17 @@ public abstract class RewardScript
         [(300, 349)] = ["Ruby Triforce Earrings", "Empowered Ruby Triforce Earrings"],
         [(350, 399)] = ["Gold Triforce Earrings", "Empowered Gold Triforce Earrings"],
         [(400, 449)] = ["Stone Studded Clips"],
-        [(450, 500)] = ["Rioga Orb Earrings"]
+        [(450, 500)] = ["Rioga Orb Earrings"],
+        [(501, 550)] = null,
+        [(551, 600)] = null,
+        [(601, 650)] = null,
+        [(651, 700)] = null,
+        [(701, 750)] = null,
+        [(751, 800)] = null,
+        [(801, 850)] = null,
+        [(851, 900)] = null,
+        [(901, 950)] = null,
+        [(951, 1000)] = null
     };
 
     protected static readonly Dictionary<(int, int), List<string>> GreaveDrops = new()
@@ -172,7 +212,17 @@ public abstract class RewardScript
         [(300, 349)] = ["Fios Poleyns", "Dith Poleyns", "Gnimh Poleyns", "Neart Poleyns"],
         [(350, 399)] = ["Fios Poleyns", "Dith Poleyns", "Gnimh Poleyns", "Neart Poleyns"],
         [(400, 449)] = ["Sacra Poleyns"],
-        [(450, 500)] = ["Gaeth Poleyns"]
+        [(450, 500)] = ["Gaeth Poleyns"],
+        [(501, 550)] = null,
+        [(551, 600)] = null,
+        [(601, 650)] = null,
+        [(651, 700)] = null,
+        [(701, 750)] = null,
+        [(751, 800)] = null,
+        [(801, 850)] = null,
+        [(851, 900)] = null,
+        [(901, 950)] = null,
+        [(951, 1000)] = null
     };
 
     protected static readonly Dictionary<(int, int), List<string>> HandDrops = new()
@@ -198,7 +248,17 @@ public abstract class RewardScript
         [(300, 349)] = ["Encrusted Graspers"],
         [(350, 399)] = ["Depth Encrusted Graspers"],
         [(400, 449)] = ["Heavy Depth Encrusted Graspers"],
-        [(450, 500)] = ["Flawless Depth Graspers"]
+        [(450, 500)] = ["Flawless Depth Graspers"],
+        [(501, 550)] = null,
+        [(551, 600)] = null,
+        [(601, 650)] = null,
+        [(651, 700)] = null,
+        [(701, 750)] = null,
+        [(751, 800)] = null,
+        [(801, 850)] = null,
+        [(851, 900)] = null,
+        [(901, 950)] = null,
+        [(951, 1000)] = null
     };
 
     protected static readonly Dictionary<(int, int), List<string>> NecklaceDrops = new()
@@ -256,7 +316,17 @@ public abstract class RewardScript
         [(300, 349)] = null,
         [(350, 399)] = null,
         [(400, 449)] = null,
-        [(450, 500)] = null
+        [(450, 500)] = null,
+        [(501, 550)] = null,
+        [(551, 600)] = null,
+        [(601, 650)] = null,
+        [(651, 700)] = null,
+        [(701, 750)] = null,
+        [(751, 800)] = null,
+        [(801, 850)] = null,
+        [(851, 900)] = null,
+        [(901, 950)] = null,
+        [(951, 1000)] = null
     };
 
     protected static readonly Dictionary<(int, int), List<string>> OffHandDrops = new()
@@ -282,7 +352,17 @@ public abstract class RewardScript
         [(300, 349)] = null,
         [(350, 399)] = null,
         [(400, 449)] = null,
-        [(450, 500)] = null
+        [(450, 500)] = null,
+        [(501, 550)] = null,
+        [(551, 600)] = null,
+        [(601, 650)] = null,
+        [(651, 700)] = null,
+        [(701, 750)] = null,
+        [(751, 800)] = null,
+        [(801, 850)] = null,
+        [(851, 900)] = null,
+        [(901, 950)] = null,
+        [(951, 1000)] = null
     };
 
     protected internal static readonly Dictionary<(int, int), List<string>> ShieldDrops = new()
@@ -344,7 +424,17 @@ public abstract class RewardScript
         [(300, 349)] = null,
         [(350, 399)] = null,
         [(400, 449)] = null,
-        [(450, 500)] = null
+        [(450, 500)] = null,
+        [(501, 550)] = null,
+        [(551, 600)] = null,
+        [(601, 650)] = null,
+        [(651, 700)] = null,
+        [(701, 750)] = null,
+        [(751, 800)] = null,
+        [(801, 850)] = null,
+        [(851, 900)] = null,
+        [(901, 950)] = null,
+        [(951, 1000)] = null
     };
 
     protected static readonly Dictionary<(int, int), List<string>> WristDrops = new()
@@ -370,7 +460,17 @@ public abstract class RewardScript
         [(300, 349)] = ["Golden Talon Gauntlet"],
         [(350, 399)] = null,
         [(400, 449)] = null,
-        [(450, 500)] = null
+        [(450, 500)] = null,
+        [(501, 550)] = null,
+        [(551, 600)] = null,
+        [(601, 650)] = null,
+        [(651, 700)] = null,
+        [(701, 750)] = null,
+        [(751, 800)] = null,
+        [(801, 850)] = null,
+        [(851, 900)] = null,
+        [(901, 950)] = null,
+        [(951, 1000)] = null
     };
 
     // Reward based on Monster level

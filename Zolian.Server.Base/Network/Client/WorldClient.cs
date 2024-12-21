@@ -118,6 +118,7 @@ public class WorldClient : WorldClientBase, IWorldClient
     }
 
     public CastInfo SpellCastInfo { get; set; }
+    public bool SummonRiftBoss { get; set; }
     public DateTime LastAssail { get; set; }
     public DateTime LastSpellCast { get; set; }
     public DateTime LastSelfProfileRequest { get; set; }
@@ -493,7 +494,7 @@ public class WorldClient : WorldClientBase, IWorldClient
             Aisling.SecondaryOffensiveElement = ElementManager.Element.None;
     }
 
-    public void DeathStatusCheck()
+    public void DeathStatusCheck(Sprite damageDealer)
     {
         var proceed = false;
 
@@ -506,7 +507,7 @@ public class WorldClient : WorldClientBase, IWorldClient
         if (!proceed) return;
         SendAttributes(StatUpdateType.Vitality);
 
-        if (Aisling.Map.Flags.MapFlagIsSet(MapFlags.PlayerKill))
+        if (Aisling.Map.Flags.MapFlagIsSet(MapFlags.PlayerKill) && damageDealer is Aisling)
         {
             for (var i = 0; i < 2; i++)
                 Aisling.RemoveBuffsAndDebuffs();
@@ -4078,7 +4079,7 @@ public class WorldClient : WorldClientBase, IWorldClient
         if (user != null)
         {
             user.CurrentHp = 0;
-            user.Client.DeathStatusCheck();
+            user.Client.DeathStatusCheck(new Item());
         }
     }
 

@@ -103,7 +103,7 @@ public class Chromitus : MundaneScript
         {
             var temp = new MonsterTemplate
             {
-                ScriptName = "Common",
+                ScriptName = "Rift",
                 BaseName = "Rift Mob",
                 Name = $"{Random.Shared.NextInt64()}RiftMob",
                 AreaID = area.ID,
@@ -111,7 +111,7 @@ public class Chromitus : MundaneScript
                 ElementType = ElementQualifer.Random,
                 PathQualifer = PathQualifer.Wander,
                 SpawnType = SpawnQualifer.Random,
-                SpawnSize = 20,
+                SpawnSize = Random.Shared.Next(10, 20),
                 MoodType = MoodQualifer.Aggressive,
                 MonsterType = MonsterType.Rift,
                 MonsterArmorType = Enum.GetValues<MonsterArmorType>().RandomIEnum(),
@@ -119,15 +119,18 @@ public class Chromitus : MundaneScript
                 IgnoreCollision = false,
                 Waypoints = [],
                 MovementSpeed = 1000,
-                EngagedWalkingSpeed = 900,
-                AttackSpeed = 700,
-                CastSpeed = 4000,
+                EngagedWalkingSpeed = Random.Shared.Next(800, 1400),
+                AttackSpeed = Random.Shared.Next(500, 1000),
+                CastSpeed = Random.Shared.Next(3000, 6000),
                 LootType = LootQualifer.RandomGold,
-                Level = (ushort)(client.Aisling.ExpLevel + client.Aisling.AbpLevel + 15),
+                Level = (ushort)(client.Aisling.ExpLevel + client.Aisling.AbpLevel + Random.Shared.Next(1, 15)),
                 SkillScripts = [],
                 AbilityScripts = [],
                 SpellScripts = []
             };
+
+            if (temp.MonsterRace.MonsterRaceIsSet(MonsterRace.HigherBeing))
+                temp.IgnoreCollision = true;
 
             monsterTemplates.Add(temp);
         }

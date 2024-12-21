@@ -293,7 +293,7 @@ public class Finger_of_Death(Spell spell) : SpellScript(spell)
             GlobalSpellMethods.ElementalOnSuccess(sprite, enemy, Spell, 2500);
         }
 
-        GlobalSpellMethods.ElementalOnSuccess(sprite, target, Spell, 5000);
+        GlobalSpellMethods.ElementalOnSuccess(sprite, target, Spell, 3500);
     }
 }
 

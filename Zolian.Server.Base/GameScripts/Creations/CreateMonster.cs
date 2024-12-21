@@ -1127,12 +1127,12 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
             },
             [MonsterType.Rift] = monster =>
             {
-                monster.BonusStr += monster._Str * 25;
-                monster.BonusInt += monster._Int * 25;
-                monster.BonusDex += monster._Dex * 25;
-                monster.BonusMr += monster._Mr * 25;
-                monster.BonusHit += monster._Hit * 25;
-                monster.BonusDmg += monster._Dmg * 25;
+                monster.BonusStr += monster._Str * 22;
+                monster.BonusInt += monster._Int * 22;
+                monster.BonusDex += monster._Dex * 22;
+                monster.BonusMr += monster._Mr * 22;
+                monster.BonusHit += monster._Hit * 22;
+                monster.BonusDmg += monster._Dmg * 22;
             },
             [MonsterType.Boss] = monster =>
             {

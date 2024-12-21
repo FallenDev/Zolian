@@ -40,8 +40,8 @@ public class Ac : FormulaScript
         {
             dmgMitigation = monster.Template.MonsterArmorType switch
             {
-                MonsterArmorType.Caster when dmgMitigation >= 0.90f => 0.90f,
-                MonsterArmorType.Common when dmgMitigation >= 0.95f => 0.95f,
+                MonsterArmorType.Caster when dmgMitigation >= 0.50f => 0.50f,
+                MonsterArmorType.Common when dmgMitigation >= 0.75f => 0.75f,
                 MonsterArmorType.Tank when dmgMitigation >= 0.98f => 0.98f,
                 _ => dmgMitigation
             };
