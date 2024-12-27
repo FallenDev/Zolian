@@ -39,7 +39,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Chaos-Networking" Version="2.3.3" />
+		<PackageReference Include="Chaos-Networking" Version="2.4.0" />
 		<PackageReference Include="Microsoft.Data.SqlClient" Version="6.0.0-preview3.24332.3" />
 		<PackageReference Include="Microsoft.DependencyValidation.Analyzers" Version="0.11.0" />
 		<PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.0">

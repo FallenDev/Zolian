@@ -49,6 +49,8 @@ namespace Darkages.Network.Server;
 public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldClient>
 {
     private readonly IClientFactory<WorldClient> _clientProvider;
+    public ServerPacketLogger ServerPacketLogger { get; } = new();
+    public ClientPacketLogger ClientPacketLogger { get; } = new();
     private readonly MServerTable _serverTable;
     private const string InternalIP = "192.168.50.1"; // Cannot use ServerConfig due to value needing to be constant
     private static readonly string[] GameMastersIPs = ServerSetup.Instance.GameMastersIPs;
@@ -2665,6 +2667,19 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     }
 
     /// <summary>
+    /// 0x42 - Client Exception reported to the Server
+    /// </summary>
+    /// <returns>Prints details of the packets leading up to the crash</returns>
+    public ValueTask OnClientException(IWorldClient client, in Packet packet)
+    {
+        var args = PacketSerializer.Deserialize<ClientExceptionArgs>(in packet);
+        ServerSetup.EventsLogger($"{client.RemoteIp} encountered an exception: {args.ExceptionStr} - See packetLogger for details", LogLevel.Critical);
+        DisplayRecentServerPacketLogs(client);
+        DisplayRecentClientPacketLogs(client);
+        return default;
+    }
+
+    /// <summary>
     /// 0x43 - Client Click (map, player, npc, monster) - F1 Button
     /// </summary>
     public ValueTask OnClick(IWorldClient client, in Packet clientPacket)
@@ -3137,7 +3152,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         {
             if (handler is not null)
             {
-                client.ClientPacketLogger.LogPacket($"{client.Aisling?.Username ?? client.RemoteIp.ToString()} with Client OpCode: {opCode} ({Enum.GetName(typeof(ClientOpCode), opCode)})");
+                ClientPacketLogger.LogPacket(client.RemoteIp, $"{client.Aisling?.Username ?? client.RemoteIp.ToString()} with Client OpCode: {opCode} ({Enum.GetName(typeof(ClientOpCode), opCode)})");
                 return handler(client, in packet);
             }
 
@@ -3186,6 +3201,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         ClientHandlers[(byte)ClientOpCode.BoardInteraction] = OnBoardInteraction; // 0x3B
         ClientHandlers[(byte)ClientOpCode.SkillUse] = OnSkillUse; // 0x3E
         ClientHandlers[(byte)ClientOpCode.WorldMapClick] = OnWorldMapClick; // 0x3F
+        ClientHandlers[(byte)ClientOpCode.ClientException] = OnClientException; // 0x42
         ClientHandlers[(byte)ClientOpCode.Click] = OnClick; // 0x43
         ClientHandlers[(byte)ClientOpCode.Unequip] = OnUnequip; // 0x44
         ClientHandlers[(byte)ClientOpCode.HeartBeat] = OnHeartBeatAsync; // 0x45
@@ -3284,9 +3300,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
         if (aisling == null)
         {
-            // Capture Unclean Exit
-            DisplayRecentServerPacketLogs(client);
-            DisplayRecentClientPacketLogs(client);
             ClientRegistry.TryRemove(client.Id, out _);
             return;
         }
@@ -3299,10 +3312,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
         try
         {
-            // Capture Unclean Exit
-            DisplayRecentServerPacketLogs(client);
-            DisplayRecentClientPacketLogs(client);
-
             // Close Popups
             client.CloseDialog();
             aisling.CancelExchange();
@@ -3469,20 +3478,20 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         }
     }
 
-    private static void DisplayRecentClientPacketLogs(IWorldClient client)
+    private void DisplayRecentClientPacketLogs(IWorldClient client)
     {
-        var logs = client.ClientPacketLogger.GetRecentLogs().ToList();
+        var logs = ClientPacketLogger.GetRecentLogs(client.RemoteIp).ToList();
 
         foreach (var log in logs)
-            ServerSetup.PacketLogger(log, LogLevel.Critical);
+            ServerSetup.PacketLogger(log);
     }
 
-    private static void DisplayRecentServerPacketLogs(IWorldClient client)
+    private void DisplayRecentServerPacketLogs(IWorldClient client)
     {
-        var logs = client.ServerPacketLogger.GetRecentLogs().ToList();
+        var logs = ServerPacketLogger.GetRecentLogs(client.RemoteIp).ToList();
 
         foreach (var log in logs)
-            ServerSetup.PacketLogger(log, LogLevel.Critical);
+            ServerSetup.PacketLogger(log);
     }
 
     private static bool IsManualAction(ClientOpCode opCode) => opCode switch

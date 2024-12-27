@@ -2,7 +2,6 @@
 using Darkages.Types;
 
 using System.Collections.Concurrent;
-using JetBrains.Annotations;
 using Darkages.Sprites.Entity;
 using Darkages.Network.Server;
 

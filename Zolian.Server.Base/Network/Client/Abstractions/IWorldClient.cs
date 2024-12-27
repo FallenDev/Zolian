@@ -9,14 +9,11 @@ using Darkages.Types;
 
 using System.Diagnostics;
 using Chaos.Networking.Entities.Server;
-using Darkages.Network.Server;
 
 namespace Darkages.Network.Client.Abstractions;
 
 public interface IWorldClient : IConnectedClient
 {
-    ServerPacketLogger ServerPacketLogger { get; }
-    ClientPacketLogger ClientPacketLogger { get; }
     bool MapUpdating { get; set; }
     Aisling Aisling { get; set; }
     DialogSession DlgSession { get; set; }

@@ -1,27 +1,33 @@
-﻿namespace Darkages.Network.Client;
+﻿using System.Collections.Concurrent;
+using System.Net;
+
+namespace Darkages.Network.Client;
 
 public class ClientPacketLogger
 {
     private const int MaxLogSize = 15;
-    private readonly Queue<string> _packetLog = [];
+    private ConcurrentDictionary<IPAddress, Queue<string>> _packetLog = [];
     private readonly Lock _logLock = new();
 
-    public void LogPacket(string packetDetails)
+    public void LogPacket(IPAddress ip, string packetDetails)
     {
         lock (_logLock)
         {
-            if (_packetLog.Count >= MaxLogSize)
-                _packetLog.Dequeue();  // Remove the oldest log
+            _packetLog.TryGetValue(ip, out var packetLog);
+            if (packetLog is null) return;
+            if (packetLog.Count >= MaxLogSize)
+                packetLog.Dequeue();  // Remove the oldest log
 
-            _packetLog.Enqueue(packetDetails);
+            packetLog.Enqueue(packetDetails);
         }
     }
 
-    public IEnumerable<string> GetRecentLogs()
+    public IEnumerable<string> GetRecentLogs(IPAddress ip)
     {
         lock (_logLock)
         {
-            return _packetLog;
+            _packetLog.TryGetValue(ip, out var packetLog);
+            return packetLog;
         }
     }
 }

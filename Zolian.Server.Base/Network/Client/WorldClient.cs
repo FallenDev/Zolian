@@ -49,7 +49,6 @@ using MapFlags = Darkages.Enums.MapFlags;
 using Nation = Chaos.DarkAges.Definitions.Nation;
 using RestPosition = Chaos.DarkAges.Definitions.RestPosition;
 using Darkages.Sprites.Entity;
-using static ServiceStack.Diagnostics.Events;
 
 namespace Darkages.Network.Client;
 
@@ -57,8 +56,6 @@ namespace Darkages.Network.Client;
 public class WorldClient : WorldClientBase, IWorldClient
 {
     private readonly IWorldServer<WorldClient> _server;
-    public ServerPacketLogger ServerPacketLogger { get; } = new();
-    public ClientPacketLogger ClientPacketLogger { get; } = new();
     public readonly WorldServerTimer SkillSpellTimer = new(TimeSpan.FromMilliseconds(1000));
     public readonly Stopwatch CooldownControl = new();
     public readonly Stopwatch SpellControl = new();
@@ -1345,8 +1342,9 @@ public class WorldClient : WorldClientBase, IWorldClient
         var stackTrace = new StackTrace();
         var currentMethod = stackTrace.GetFrame(1)?.GetMethod()?.Name ?? "Unknown";
         var callingMethod = stackTrace.GetFrame(2)?.GetMethod()?.Name ?? "Unknown";
-
-        ServerPacketLogger.LogPacket($"{Aisling?.Username ?? RemoteIp.ToString()} with {currentMethod}, called from {callingMethod}");
+        var callingMethodTwo = stackTrace.GetFrame(3)?.GetMethod()?.Name ?? "Unknown";
+        var callingMethodThree = stackTrace.GetFrame(4)?.GetMethod()?.Name ?? "Unknown";
+        ServerSetup.Instance.Game.ServerPacketLogger.LogPacket(RemoteIp, $"{Aisling?.Username ?? RemoteIp.ToString()} with: {currentMethod}, from: {callingMethod}, from: {callingMethodTwo}, from: {callingMethodThree}");
     }
 
     /// <summary>
@@ -1360,7 +1358,6 @@ public class WorldClient : WorldClientBase, IWorldClient
             Message = message
         };
 
-        ServerPacketDisplayBuilder();
         Send(args);
     }
 
@@ -1475,7 +1472,8 @@ public class WorldClient : WorldClientBase, IWorldClient
             var callingMethodOne = stackTrace.GetFrame(2)?.GetMethod()?.Name ?? "Unknown";
             var callingMethodTwo = stackTrace.GetFrame(3)?.GetMethod()?.Name ?? "Unknown";
             var callingMethodThree = stackTrace.GetFrame(4)?.GetMethod()?.Name ?? "Unknown";
-            ServerPacketLogger.LogPacket($"{Aisling?.Username ?? RemoteIp.ToString()} Animation from: {callingMethodOne}, from: {callingMethodTwo}, from: {callingMethodThree}");
+            var callingMethodFour = stackTrace.GetFrame(5)?.GetMethod()?.Name ?? "Unknown";
+            ServerSetup.Instance.Game.ServerPacketLogger.LogPacket(RemoteIp, $"{Aisling?.Username ?? RemoteIp.ToString()} Animation from: {callingMethodOne}, from: {callingMethodTwo}, from: {callingMethodThree}, from: {callingMethodFour}");
             Send(args);
         }
         catch
@@ -1782,7 +1780,6 @@ public class WorldClient : WorldClientBase, IWorldClient
             ExitConfirmed = ExitConfirmed
         };
 
-        ServerPacketDisplayBuilder();
         Send(args);
     }
 
@@ -1808,7 +1805,6 @@ public class WorldClient : WorldClientBase, IWorldClient
             CooldownSecs = (uint)cooldownSeconds
         };
 
-        ServerPacketDisplayBuilder();
         Send(args);
     }
 
@@ -1956,7 +1952,6 @@ public class WorldClient : WorldClientBase, IWorldClient
             EffectIcon = effectIcon
         };
 
-        ServerPacketDisplayBuilder();
         Send(args);
     }
 
@@ -2160,7 +2155,6 @@ public class WorldClient : WorldClientBase, IWorldClient
             LightLevel = lightLevel
         };
 
-        ServerPacketDisplayBuilder();
         Send(args);
     }
 
