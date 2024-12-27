@@ -49,6 +49,7 @@
 		<PackageReference Include="Sentry" Version="5.0.0" />
 		<PackageReference Include="Sentry.Extensions.Logging" Version="5.0.0" />
 		<PackageReference Include="Sentry.Profiling" Version="5.0.0" />
+		<PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
 		<PackageReference Include="ServiceStack" Version="8.5.2" />
 		<PackageReference Include="ServiceStack.Text" Version="8.5.2" />
 		<PackageReference Include="SunCalcNet" Version="1.2.4" />

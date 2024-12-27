@@ -49,6 +49,7 @@ using MapFlags = Darkages.Enums.MapFlags;
 using Nation = Chaos.DarkAges.Definitions.Nation;
 using RestPosition = Chaos.DarkAges.Definitions.RestPosition;
 using Darkages.Sprites.Entity;
+using static ServiceStack.Diagnostics.Events;
 
 namespace Darkages.Network.Client;
 
@@ -56,6 +57,8 @@ namespace Darkages.Network.Client;
 public class WorldClient : WorldClientBase, IWorldClient
 {
     private readonly IWorldServer<WorldClient> _server;
+    public ServerPacketLogger ServerPacketLogger { get; } = new();
+    public ClientPacketLogger ClientPacketLogger { get; } = new();
     public readonly WorldServerTimer SkillSpellTimer = new(TimeSpan.FromMilliseconds(1000));
     public readonly Stopwatch CooldownControl = new();
     public readonly Stopwatch SpellControl = new();
@@ -147,12 +150,6 @@ public class WorldClient : WorldClientBase, IWorldClient
     private readonly ConcurrentDictionary<uint, BuffEvent> _buffApplyQueue = [];
     private readonly ConcurrentDictionary<uint, DebuffEvent> _debuffUpdateQueue = [];
     private readonly ConcurrentDictionary<uint, BuffEvent> _buffUpdateQueue = [];
-    private readonly Task _experienceTask;
-    private readonly Task _apTask;
-    private readonly Task _applyBuffTask;
-    private readonly Task _applyDebuffTask;
-    private readonly Task _updateBuffTask;
-    private readonly Task _updateDebuffTask;
 
     public WorldClient([NotNull] IWorldServer<IWorldClient> server, [NotNull] Socket socket,
         [NotNull] ICrypto crypto, [NotNull] IPacketSerializer packetSerializer,
@@ -161,12 +158,12 @@ public class WorldClient : WorldClientBase, IWorldClient
         _server = server;
 
         // Event-Driven Tasks
-        _experienceTask = Task.Run(ProcessExperienceEvents);
-        _apTask = Task.Run(ProcessAbilityEvents);
-        _applyBuffTask = Task.Run(ProcessApplyingBuffsEvents);
-        _applyDebuffTask = Task.Run(ProcessApplyingDebuffsEvents);
-        _updateBuffTask = Task.Run(ProcessUpdatingBuffsEvents);
-        _updateDebuffTask = Task.Run(ProcessUpdatingDebuffsEvents);
+        Task.Run(ProcessExperienceEvents);
+        Task.Run(ProcessAbilityEvents);
+        Task.Run(ProcessApplyingBuffsEvents);
+        Task.Run(ProcessApplyingDebuffsEvents);
+        Task.Run(ProcessUpdatingBuffsEvents);
+        Task.Run(ProcessUpdatingDebuffsEvents);
 
         foreach (var stopwatch in _clientStopwatches.Values)
             stopwatch.Start();
@@ -1343,6 +1340,15 @@ public class WorldClient : WorldClientBase, IWorldClient
         return _server.HandlePacketAsync(this, in packet);
     }
 
+    private void ServerPacketDisplayBuilder()
+    {
+        var stackTrace = new StackTrace();
+        var currentMethod = stackTrace.GetFrame(1)?.GetMethod()?.Name ?? "Unknown";
+        var callingMethod = stackTrace.GetFrame(2)?.GetMethod()?.Name ?? "Unknown";
+
+        ServerPacketLogger.LogPacket($"{Aisling?.Username ?? RemoteIp.ToString()} with {currentMethod}, called from {callingMethod}");
+    }
+
     /// <summary>
     /// 0x02 - Send Login Message
     /// </summary>
@@ -1354,6 +1360,7 @@ public class WorldClient : WorldClientBase, IWorldClient
             Message = message
         };
 
+        ServerPacketDisplayBuilder();
         Send(args);
     }
 
@@ -1378,6 +1385,7 @@ public class WorldClient : WorldClientBase, IWorldClient
             }
         };
 
+        ServerPacketDisplayBuilder();
         Send(args);
     }
 
@@ -1397,6 +1405,7 @@ public class WorldClient : WorldClientBase, IWorldClient
             }
         };
 
+        ServerPacketDisplayBuilder();
         Send(args);
     }
 
@@ -1419,6 +1428,7 @@ public class WorldClient : WorldClientBase, IWorldClient
             }
         };
 
+        ServerPacketDisplayBuilder();
         Send(args);
     }
 
@@ -1461,6 +1471,11 @@ public class WorldClient : WorldClientBase, IWorldClient
                 TargetPoint = point
             };
 
+            var stackTrace = new StackTrace();
+            var callingMethodOne = stackTrace.GetFrame(2)?.GetMethod()?.Name ?? "Unknown";
+            var callingMethodTwo = stackTrace.GetFrame(3)?.GetMethod()?.Name ?? "Unknown";
+            var callingMethodThree = stackTrace.GetFrame(4)?.GetMethod()?.Name ?? "Unknown";
+            ServerPacketLogger.LogPacket($"{Aisling?.Username ?? RemoteIp.ToString()} Animation from: {callingMethodOne}, from: {callingMethodTwo}, from: {callingMethodThree}");
             Send(args);
         }
         catch
@@ -1532,6 +1547,7 @@ public class WorldClient : WorldClientBase, IWorldClient
             Wis = (byte)Math.Clamp(Aisling.Wis, byte.MinValue, byte.MaxValue)
         };
 
+        ServerPacketDisplayBuilder();
         Send(args);
     }
 
@@ -1567,6 +1583,7 @@ public class WorldClient : WorldClientBase, IWorldClient
                 StartPostId = short.MaxValue
             };
 
+            ServerPacketDisplayBuilder();
             Send(args);
             return true;
         }
@@ -1610,6 +1627,7 @@ public class WorldClient : WorldClientBase, IWorldClient
                 StartPostId = short.MaxValue
             };
 
+            ServerPacketDisplayBuilder();
             Send(args);
             return true;
         }
@@ -1647,6 +1665,7 @@ public class WorldClient : WorldClientBase, IWorldClient
             if (isMail)
                 UpdateMailAsRead(args);
 
+            ServerPacketDisplayBuilder();
             Send(args);
             return true;
         }
@@ -1677,6 +1696,7 @@ public class WorldClient : WorldClientBase, IWorldClient
             Success = success
         };
 
+        ServerPacketDisplayBuilder();
         Send(args);
     }
 
@@ -1695,6 +1715,7 @@ public class WorldClient : WorldClientBase, IWorldClient
             AnimationSpeed = speed
         };
 
+        ServerPacketDisplayBuilder();
         Send(args);
     }
 
@@ -1728,6 +1749,7 @@ public class WorldClient : WorldClientBase, IWorldClient
             OldPoint = new Point(oldPoint.X, oldPoint.Y)
         };
 
+        ServerPacketDisplayBuilder();
         Send(args);
     }
 
@@ -1760,6 +1782,7 @@ public class WorldClient : WorldClientBase, IWorldClient
             ExitConfirmed = ExitConfirmed
         };
 
+        ServerPacketDisplayBuilder();
         Send(args);
     }
 
@@ -1785,6 +1808,7 @@ public class WorldClient : WorldClientBase, IWorldClient
             CooldownSecs = (uint)cooldownSeconds
         };
 
+        ServerPacketDisplayBuilder();
         Send(args);
     }
 
@@ -1810,6 +1834,7 @@ public class WorldClient : WorldClientBase, IWorldClient
             Direction = direction
         };
 
+        ServerPacketDisplayBuilder();
         Send(args);
     }
 
@@ -1825,6 +1850,7 @@ public class WorldClient : WorldClientBase, IWorldClient
             Direction = direction
         };
 
+        ServerPacketDisplayBuilder();
         Send(args);
     }
 
@@ -1903,6 +1929,7 @@ public class WorldClient : WorldClientBase, IWorldClient
                 args.NameTagStyle = NameTagStyle.NeutralHover;
         }
 
+        ServerPacketDisplayBuilder();
         Send(args);
     }
 
@@ -1913,7 +1940,9 @@ public class WorldClient : WorldClientBase, IWorldClient
             Doors = doors
         };
 
-        if (doorArgs.Doors.Any()) Send(doorArgs);
+        if (doorArgs.Doors.Count == 0) return;
+        ServerPacketDisplayBuilder();
+        Send(doorArgs);
     }
 
     /// <summary>
@@ -1927,6 +1956,7 @@ public class WorldClient : WorldClientBase, IWorldClient
             EffectIcon = effectIcon
         };
 
+        ServerPacketDisplayBuilder();
         Send(args);
     }
 
@@ -1956,6 +1986,7 @@ public class WorldClient : WorldClientBase, IWorldClient
             }
         };
 
+        ServerPacketDisplayBuilder();
         Send(args);
     }
 
@@ -1971,6 +2002,7 @@ public class WorldClient : WorldClientBase, IWorldClient
             OtherUserName = fromAisling.Username
         };
 
+        ServerPacketDisplayBuilder();
         Send(args);
     }
 
@@ -1992,6 +2024,7 @@ public class WorldClient : WorldClientBase, IWorldClient
         if (item.Stacks > 1)
             args.ItemName = $"{item.DisplayName} [{item.Stacks}]";
 
+        ServerPacketDisplayBuilder();
         Send(args);
     }
 
@@ -2007,6 +2040,7 @@ public class WorldClient : WorldClientBase, IWorldClient
             GoldAmount = (int)amount
         };
 
+        ServerPacketDisplayBuilder();
         Send(args);
     }
 
@@ -2021,6 +2055,7 @@ public class WorldClient : WorldClientBase, IWorldClient
             FromSlot = slot
         };
 
+        ServerPacketDisplayBuilder();
         Send(args);
     }
 
@@ -2036,6 +2071,7 @@ public class WorldClient : WorldClientBase, IWorldClient
             Message = "Exchange completed."
         };
 
+        ServerPacketDisplayBuilder();
         Send(args);
     }
 
@@ -2051,6 +2087,7 @@ public class WorldClient : WorldClientBase, IWorldClient
             Message = "Exchange cancelled."
         };
 
+        ServerPacketDisplayBuilder();
         Send(args);
     }
 
@@ -2065,6 +2102,7 @@ public class WorldClient : WorldClientBase, IWorldClient
             Data = clientPacket.Buffer.ToArray()
         };
 
+        ServerPacketDisplayBuilder();
         Send(args);
     }
 
@@ -2082,6 +2120,7 @@ public class WorldClient : WorldClientBase, IWorldClient
         if (serverGroupSwitch == ServerGroupSwitch.ShowGroupBox)
             args.GroupBoxInfo = groupBoxInfo;
 
+        ServerPacketDisplayBuilder();
         Send(args);
     }
 
@@ -2099,6 +2138,7 @@ public class WorldClient : WorldClientBase, IWorldClient
             Sound = sound
         };
 
+        ServerPacketDisplayBuilder();
         Send(args);
     }
 
@@ -2120,6 +2160,7 @@ public class WorldClient : WorldClientBase, IWorldClient
             LightLevel = lightLevel
         };
 
+        ServerPacketDisplayBuilder();
         Send(args);
     }
 
@@ -2134,6 +2175,7 @@ public class WorldClient : WorldClientBase, IWorldClient
             Y = Aisling.Y
         };
 
+        ServerPacketDisplayBuilder();
         Send(args);
     }
 
@@ -2153,6 +2195,7 @@ public class WorldClient : WorldClientBase, IWorldClient
                 MapData = mapTemplate.GetRowData(y).ToArray()
             };
 
+            ServerPacketDisplayBuilder();
             Send(args);
         }
     }
@@ -2172,6 +2215,7 @@ public class WorldClient : WorldClientBase, IWorldClient
             Width = Aisling.Map.Width
         };
 
+        ServerPacketDisplayBuilder();
         Send(args);
     }
 
@@ -2260,6 +2304,7 @@ public class WorldClient : WorldClientBase, IWorldClient
                 }
         }
 
+        ServerPacketDisplayBuilder();
         Send(args);
     }
 
@@ -2274,6 +2319,7 @@ public class WorldClient : WorldClientBase, IWorldClient
             Message = message ?? string.Empty
         };
 
+        ServerPacketDisplayBuilder();
         Send(args);
     }
 
@@ -2669,6 +2715,7 @@ public class WorldClient : WorldClientBase, IWorldClient
             Title = $"Lvl: {aisling.ExpLevel}  Rnk: {aisling.AbpLevel}"
         };
 
+        ServerPacketDisplayBuilder();
         Send(args);
     }
 
@@ -2745,6 +2792,7 @@ public class WorldClient : WorldClientBase, IWorldClient
             Message = message
         };
 
+        ServerPacketDisplayBuilder();
         Send(args);
     }
 
@@ -2759,6 +2807,7 @@ public class WorldClient : WorldClientBase, IWorldClient
             Slot = slot
         };
 
+        ServerPacketDisplayBuilder();
         Send(args);
     }
 
@@ -2773,6 +2822,7 @@ public class WorldClient : WorldClientBase, IWorldClient
             SourceId = id
         };
 
+        ServerPacketDisplayBuilder();
         Send(args);
     }
 
@@ -2787,6 +2837,7 @@ public class WorldClient : WorldClientBase, IWorldClient
             Slot = slot
         };
 
+        ServerPacketDisplayBuilder();
         Send(args);
     }
 
@@ -2801,6 +2852,7 @@ public class WorldClient : WorldClientBase, IWorldClient
             Slot = slot
         };
 
+        ServerPacketDisplayBuilder();
         Send(args);
     }
 
@@ -3199,6 +3251,7 @@ public class WorldClient : WorldClientBase, IWorldClient
             Title = $"Lvl: {Aisling.ExpLevel}  Rnk: {Aisling.AbpLevel}"
         };
 
+        ServerPacketDisplayBuilder();
         Send(args);
     }
 
@@ -3213,6 +3266,7 @@ public class WorldClient : WorldClientBase, IWorldClient
             Message = message
         };
 
+        ServerPacketDisplayBuilder();
         Send(args);
     }
 
@@ -3229,6 +3283,7 @@ public class WorldClient : WorldClientBase, IWorldClient
             IsMusic = isMusic
         };
 
+        ServerPacketDisplayBuilder();
         Send(args);
     }
 
@@ -3243,6 +3298,7 @@ public class WorldClient : WorldClientBase, IWorldClient
             EquipmentSlot = equipmentSlot
         };
 
+        ServerPacketDisplayBuilder();
         Send(args);
     }
 
@@ -3258,6 +3314,7 @@ public class WorldClient : WorldClientBase, IWorldClient
             Id = Aisling.Serial
         };
 
+        ServerPacketDisplayBuilder();
         Send(args);
     }
 
@@ -3348,6 +3405,7 @@ public class WorldClient : WorldClientBase, IWorldClient
                         break;
                 }
 
+            ServerPacketDisplayBuilder();
             Send(args);
         }
     }
@@ -3418,6 +3476,7 @@ public class WorldClient : WorldClientBase, IWorldClient
             worldList.Add(arg);
         }
 
+        ServerPacketDisplayBuilder();
         Send(args);
     }
 
@@ -3474,6 +3533,7 @@ public class WorldClient : WorldClientBase, IWorldClient
             Nodes = warpsList
         };
 
+        ServerPacketDisplayBuilder();
         Send(args);
     }
 

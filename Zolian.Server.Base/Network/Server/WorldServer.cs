@@ -3135,7 +3135,12 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
         try
         {
-            if (handler is not null) return handler(client, in packet);
+            if (handler is not null)
+            {
+                client.ClientPacketLogger.LogPacket($"{client.Aisling?.Username ?? client.RemoteIp.ToString()} with Client OpCode: {opCode} ({Enum.GetName(typeof(ClientOpCode), opCode)})");
+                return handler(client, in packet);
+            }
+
             ServerSetup.PacketLogger("//////////////// Handled World Server Unknown Packet ////////////////", LogLevel.Error);
             ServerSetup.PacketLogger($"{opCode} from {client.RemoteIp}", LogLevel.Error);
         }
@@ -3279,6 +3284,9 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
         if (aisling == null)
         {
+            // Capture Unclean Exit
+            DisplayRecentServerPacketLogs(client);
+            DisplayRecentClientPacketLogs(client);
             ClientRegistry.TryRemove(client.Id, out _);
             return;
         }
@@ -3291,6 +3299,10 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
         try
         {
+            // Capture Unclean Exit
+            DisplayRecentServerPacketLogs(client);
+            DisplayRecentClientPacketLogs(client);
+
             // Close Popups
             client.CloseDialog();
             aisling.CancelExchange();
@@ -3455,6 +3467,22 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         {
             // ignore
         }
+    }
+
+    private static void DisplayRecentClientPacketLogs(IWorldClient client)
+    {
+        var logs = client.ClientPacketLogger.GetRecentLogs().ToList();
+
+        foreach (var log in logs)
+            ServerSetup.PacketLogger(log, LogLevel.Critical);
+    }
+
+    private static void DisplayRecentServerPacketLogs(IWorldClient client)
+    {
+        var logs = client.ServerPacketLogger.GetRecentLogs().ToList();
+
+        foreach (var log in logs)
+            ServerSetup.PacketLogger(log, LogLevel.Critical);
     }
 
     private static bool IsManualAction(ClientOpCode opCode) => opCode switch

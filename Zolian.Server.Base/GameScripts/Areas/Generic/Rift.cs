@@ -42,7 +42,7 @@ public class Rift : AreaScript
         _monstersOnMap = ObjectManager.GetObjects<Monster>(Area, p => p is { Alive: true }).Count;
         if (_monstersOnMap != 0) return;
 
-        var riftBossKilled = _playersOnMap.Values.FirstOrDefault(p => p.MonsterKillCounters["Rift Boss"].TotalKills >= 1);
+        var riftBossKilled = _playersOnMap.Values.FirstOrDefault(p => p.MonsterKillCounters.ContainsKey("Rift Boss") && p.MonsterKillCounters["Rift Boss"]?.TotalKills >= 1);
         if (riftBossKilled is not null)
         {
             // ToDo: Create rewards for main player who killed the boss
@@ -55,7 +55,7 @@ public class Rift : AreaScript
             return;
         }
 
-        var topKiller = _playersOnMap.Values.OrderByDescending(p => p.MonsterKillCounters["Rift Mob"].TotalKills).FirstOrDefault();
+        var topKiller = _playersOnMap.Values.Where(p => p.MonsterKillCounters.ContainsKey("Rift Mob")).OrderByDescending(p => p.MonsterKillCounters["Rift Mob"]?.TotalKills).FirstOrDefault();
         if (topKiller is null) return;
         if (topKiller.MonsterKillCounters["Rift Mob"].TotalKills >= 20 && !topKiller.Client.SummonRiftBoss)
         {

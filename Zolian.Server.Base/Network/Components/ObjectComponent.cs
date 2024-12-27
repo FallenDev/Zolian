@@ -79,12 +79,32 @@ public class ObjectComponent(WorldServer server) : WorldServerComponent(server)
 
         foreach (var obj in objects)
         {
-            if (obj == null) continue;
-
-            if (obj.WithinRangeOf(user))
-                payload.Add(obj);
-            else
-                RemoveObject(user, obj);
+            switch (obj)
+            {
+                case null:
+                    continue;
+                case Item item when obj.WithinRangeOf(user, 13) && !user.SpritesInView.ContainsKey(item.ItemVisibilityId):
+                    {
+                        payload.Add(obj);
+                        break;
+                    }
+                case Item item when !obj.WithinRangeOf(user, 13) && user.SpritesInView.ContainsKey(item.ItemVisibilityId):
+                    {
+                        RemoveObject(user, obj);
+                        break;
+                    }
+                case Aisling:
+                case Monster:
+                case Mundane:
+                case Money:
+                    {
+                        if (obj.WithinRangeOf(user, 13) && !user.SpritesInView.ContainsKey(obj.Serial))
+                            payload.Add(obj);
+                        else if (!obj.WithinRangeOf(user, 13) && user.SpritesInView.ContainsKey(obj.Serial))
+                            RemoveObject(user, obj);
+                        break;
+                    }
+            }
         }
 
         // Handle OnApproach visible objects
@@ -107,7 +127,10 @@ public class ObjectComponent(WorldServer server) : WorldServerComponent(server)
             script?.OnLeave(self.Client);
         }
 
-        self.SpritesInView.TryRemove(objectToRemove.Serial, out _);
+        if (objectToRemove is Item item)
+            self.SpritesInView.TryRemove(item.ItemVisibilityId, out _);
+        else
+            self.SpritesInView.TryRemove(objectToRemove.Serial, out _);
         identifiable.HideFrom(self);
     }
 
@@ -117,11 +140,8 @@ public class ObjectComponent(WorldServer server) : WorldServerComponent(server)
 
         // Validate
         if (self == null || payload == null) return default;
-
-        // HashSet to avoid multiple lookups
-        var spritesInViewSet = new HashSet<uint>(self.SpritesInView.Keys);
-
-        foreach (var obj in payload.Where(obj => obj != null && !spritesInViewSet.Contains(obj.Serial)))
+        
+        foreach (var obj in payload.Where(obj => obj != null))
         {
             // Handle sprite types
             switch (obj)
@@ -154,7 +174,10 @@ public class ObjectComponent(WorldServer server) : WorldServerComponent(server)
             }
 
             toUpdate.Add(obj);
-            self.SpritesInView.AddOrUpdate(obj.Serial, obj, (_, _) => obj);
+            if (obj is Item item)
+                self.SpritesInView.AddOrUpdate(item.ItemVisibilityId, obj, (_, _) => obj);
+            else
+                self.SpritesInView.AddOrUpdate(obj.Serial, obj, (_, _) => obj);
         }
 
         return toUpdate;

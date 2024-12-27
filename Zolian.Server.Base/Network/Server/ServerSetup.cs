@@ -19,6 +19,9 @@ using Darkages.Network.Server.Abstractions;
 using Microsoft.Data.SqlClient;
 using RestSharp;
 using Darkages.Sprites.Entity;
+using Serilog;
+using Serilog.Core;
+using Serilog.Events;
 
 namespace Darkages.Network.Server;
 
@@ -26,6 +29,7 @@ public class ServerSetup : IServerContext
 {
     public static ServerSetup Instance { get; private set; }
     private static ILogger<ServerSetup> _eventsLogger;
+    private static Logger _packetLogger;
     public static IOptions<ServerOptions> ServerOptions;
     public readonly RestClient RestClient;
     public readonly RestClient RestReport;
@@ -99,6 +103,11 @@ public class ServerSetup : IServerContext
         var restSettings = SetupRestClients();
         RestClient = new RestClient(restSettings.Item1);
         RestReport = new RestClient(restSettings.Item2);
+
+        const string logTemplate = "[{Timestamp:MMM-dd HH:mm:ss} {Level:u3}] {Message}{NewLine}{Exception}";
+        _packetLogger = new LoggerConfiguration()
+            .WriteTo.File("_Zolian_packets_.txt", LogEventLevel.Verbose, logTemplate, rollingInterval: RollingInterval.Day)
+            .CreateLogger();
     }
 
     public static void ConnectionLogger(string logMessage, LogLevel logLevel = LogLevel.Information)
@@ -106,9 +115,9 @@ public class ServerSetup : IServerContext
         _eventsLogger?.Log(logLevel, "{logMessage}", logMessage);
     }
 
-    public static void PacketLogger(string logMessage, LogLevel logLevel = LogLevel.Information)
+    public static void PacketLogger(string logMessage, LogLevel logLevel = LogLevel.Critical)
     {
-        _eventsLogger?.Log(logLevel, "{logMessage}", logMessage);
+        _packetLogger.Write(LogEventLevel.Error, logMessage);
     }
 
     public static void EventsLogger(string logMessage, LogLevel logLevel = LogLevel.Information)
