@@ -43,6 +43,8 @@ public sealed class Aisling : Player, IAisling
     public DateTime AislingTracker { get; set; }
     public MonsterRace FavoredEnemy = MonsterRace.None;
     public Position HeldPosition { get; set; }
+    public int LastRingSwap { get; set; }
+    public int LastHandSwap { get; set; }
     public Stopwatch LawsOfAosda { get; set; } = new();
     public bool BlessedShield;
     public uint MaximumWeight => GameMaster switch

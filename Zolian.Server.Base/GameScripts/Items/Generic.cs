@@ -19,41 +19,75 @@ public class Generic(Item item) : ItemScript(item)
         if (sprite is not Aisling aisling) return;
         var client = aisling.Client;
         if (!Item.Template.Flags.FlagIsSet(ItemFlags.Equipable)) return;
+        var equipmentSlot = Item.Template.EquipmentSlot;
 
-        if (client.CheckReqs(client, Item))
-            client.Aisling.EquipmentManager.Add(Item.Template.EquipmentSlot, Item);
-
-        switch (Item.Template.EquipmentSlot)
+        switch (equipmentSlot)
         {
             case 7 or 8: // Rings
-                if (client.Aisling.EquipmentManager.Equipment[7] == null)
-                    Item.Template.EquipmentSlot = ItemSlots.LHand;
-                else if (client.Aisling.EquipmentManager.Equipment[8] == null)
-                    Item.Template.EquipmentSlot = ItemSlots.RHand;
+                {
+                    if (client.Aisling.EquipmentManager.Equipment[7] != null && client.Aisling.EquipmentManager.Equipment[8] != null)
+                    {
+                        equipmentSlot = aisling.LastRingSwap switch
+                        {
+                            7 => ItemSlots.RHand,
+                            8 => ItemSlots.LHand,
+                            _ => equipmentSlot
+                        };
+
+                        aisling.LastRingSwap = equipmentSlot;
+                        break;
+                    }
+
+                    if (client.Aisling.EquipmentManager.Equipment[7] == null)
+                        equipmentSlot = ItemSlots.LHand;
+                    else if (client.Aisling.EquipmentManager.Equipment[8] == null)
+                        equipmentSlot = ItemSlots.RHand;
+
+                    aisling.LastRingSwap = equipmentSlot;
+                }
                 break;
             case 9 or 10: // Arms, Bracers, Gauntlets
-                if (client.Aisling.EquipmentManager.Equipment[9] == null)
-                    Item.Template.EquipmentSlot = ItemSlots.LArm;
-                else if (client.Aisling.EquipmentManager.Equipment[10] == null)
-                    Item.Template.EquipmentSlot = ItemSlots.RArm;
+                {
+                    if (client.Aisling.EquipmentManager.Equipment[9] != null && client.Aisling.EquipmentManager.Equipment[10] != null)
+                    {
+                        equipmentSlot = aisling.LastHandSwap switch
+                        {
+                            9 => ItemSlots.RArm,
+                            10 => ItemSlots.LArm,
+                            _ => equipmentSlot
+                        };
+
+                        aisling.LastHandSwap = equipmentSlot;
+                        break;
+                    }
+
+                    if (client.Aisling.EquipmentManager.Equipment[9] == null)
+                        equipmentSlot = ItemSlots.LArm;
+                    else if (client.Aisling.EquipmentManager.Equipment[10] == null)
+                        equipmentSlot = ItemSlots.RArm;
+                    aisling.LastHandSwap = equipmentSlot;
+                }
                 break;
             case 12: // Legs, ShinGuards
                 if (client.Aisling.EquipmentManager.Equipment[12] == null)
-                    Item.Template.EquipmentSlot = ItemSlots.Leg;
+                    equipmentSlot = ItemSlots.Leg;
                 break;
             case 14: // First Accessory
                 if (client.Aisling.EquipmentManager.Equipment[14] == null)
-                    Item.Template.EquipmentSlot = ItemSlots.FirstAcc;
+                    equipmentSlot = ItemSlots.FirstAcc;
                 break;
             case 17: // Second Accessory
                 if (client.Aisling.EquipmentManager.Equipment[17] == null)
-                    Item.Template.EquipmentSlot = ItemSlots.SecondAcc;
+                    equipmentSlot = ItemSlots.SecondAcc;
                 break;
             case 18: // Third Accessory
                 if (client.Aisling.EquipmentManager.Equipment[18] == null)
-                    Item.Template.EquipmentSlot = ItemSlots.ThirdAcc;
+                    equipmentSlot = ItemSlots.ThirdAcc;
                 break;
         }
+
+        if (client.CheckReqs(client, Item))
+            client.Aisling.EquipmentManager.Add(equipmentSlot, Item);
     }
 
     public override void Equipped(Sprite sprite, byte displaySlot)
