@@ -9,19 +9,15 @@ using Chaos.Packets.Abstractions;
 
 using Darkages.Database;
 using Darkages.Meta;
-using Darkages.Models;
 using Darkages.Network.Client;
 using Darkages.Sprites;
 using Darkages.Types;
 using Microsoft.Extensions.Logging;
-using RestSharp;
-
 using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Sockets;
 using Darkages.Managers;
 using JetBrains.Annotations;
-using Newtonsoft.Json;
 using Gender = Darkages.Enums.Gender;
 using Redirect = Chaos.Networking.Entities.Redirect;
 using ServerOptions = Chaos.Networking.Options.ServerOptions;
@@ -39,7 +35,6 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
 {
     private readonly IClientFactory<LoginClient> _clientProvider;
     private readonly Notification _notification;
-    private const string InternalIP = "192.168.50.1"; // Cannot use ServerConfig due to value needing to be constant
     private static readonly string[] GameMastersIPs = ServerSetup.Instance.GameMastersIPs;
     private ConcurrentDictionary<uint, CreateCharInitialArgs> CreateCharRequests { get; }
 
@@ -491,12 +486,13 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
         client.OnDisconnected += OnDisconnect;
         var safe = false;
 
-        foreach (var _ in ServerSetup.Instance.GlobalKnownGoodActorsCache.Values.Where(savedIp => savedIp == ipAddress.ToString()))
+        var foundIp = ServerSetup.Instance.GlobalKnownGoodActorsCache.Values.First(savedIp => savedIp == ipAddress.ToString());
+        if (StringExtensions.IsEmpty(foundIp))
             safe = true;
 
         if (!safe)
         {
-            var badActor = ClientOnBlackList(ipAddress.ToString());
+            var badActor = BadActor.ClientOnBlackList(ipAddress.ToString());
             if (badActor)
             {
                 try
@@ -544,7 +540,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
             ServerSetup.ConnectionLogger("---------Login-Server---------");
             var comment = $"{ipAddress} has been blocked for violating security protocols through improper port access.";
             ServerSetup.ConnectionLogger(comment, LogLevel.Warning);
-            ReportEndpoint(ipAddress.ToString(), comment);
+            BadActor.ReportEndpoint(ipAddress.ToString(), comment);
             return;
         }
 
@@ -558,136 +554,6 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
     {
         var client = (ILoginClient)sender!;
         ClientRegistry.TryRemove(client.Id, out _);
-    }
-
-    private static bool ClientOnBlackList(string remoteIp)
-    {
-        switch (remoteIp)
-        {
-            case "127.0.0.1":
-            case InternalIP:
-                return false;
-        }
-
-        try
-        {
-            var keyCode = ServerSetup.Instance.KeyCode;
-            if (keyCode is null || keyCode.Length == 0)
-            {
-                ServerSetup.ConnectionLogger("Keycode not valid or not set within ServerConfig.json");
-                return false;
-            }
-
-            // BLACKLIST check
-            var request = new RestRequest("", Method.Get);
-            request.AddHeader("Key", keyCode);
-            request.AddHeader("Accept", "application/json");
-            request.AddParameter("ipAddress", remoteIp);
-            request.AddParameter("maxAgeInDays", "90");
-            request.AddParameter("verbose", "");
-            var response = ServerSetup.Instance.RestClient.Execute<Ipdb>(request);
-
-            if (response.IsSuccessful)
-            {
-                var json = response.Content;
-
-                if (json is null || json.Length == 0)
-                {
-                    ServerSetup.ConnectionLogger($"{remoteIp} - API Issue, response is null or length is 0");
-                    return false;
-                }
-
-                var ipdb = JsonConvert.DeserializeObject<Ipdb>(json!);
-                var abuseConfidenceScore = ipdb?.Data?.AbuseConfidenceScore;
-                var tor = ipdb?.Data?.IsTor;
-                var usageType = ipdb?.Data?.UsageType;
-
-                if (tor == true)
-                {
-                    ServerSetup.ConnectionLogger("---------Login-Server---------");
-                    ServerSetup.ConnectionLogger($"{remoteIp} is using tor and automatically blocked", LogLevel.Warning);
-                    SentrySdk.CaptureMessage($"{remoteIp} has a confidence score of {abuseConfidenceScore}, and was using tor, and IP type: {usageType}");
-                    return true;
-                }
-
-                if (usageType == "Reserved")
-                {
-                    ServerSetup.ConnectionLogger("---------Login-Server---------");
-                    ServerSetup.ConnectionLogger($"{remoteIp} was blocked due to being a reserved address (bogon)", LogLevel.Warning);
-                    SentrySdk.CaptureMessage($"{remoteIp} has a confidence score of {abuseConfidenceScore}, and was using a Reserved Address");
-                    return true;
-                }
-
-                if (usageType == "Data Center/Web Hosting/Transit")
-                {
-                    ServerSetup.ConnectionLogger("---------Login-Server---------");
-                    ServerSetup.ConnectionLogger($"{remoteIp} was blocked due to being a data center, web hosting, or transit address", LogLevel.Warning);
-                    SentrySdk.CaptureMessage($"{remoteIp} has a confidence score of {abuseConfidenceScore}, and is a data center, web host, or transit service.");
-                    return true;
-                }
-
-                switch (abuseConfidenceScore)
-                {
-                    case >= 5:
-                        ServerSetup.ConnectionLogger("---------Login-Server---------");
-                        var comment = $"{remoteIp} has been blocked due to a high risk assessment score of {abuseConfidenceScore}, indicating a recognized malicious entity.";
-                        ServerSetup.ConnectionLogger(comment, LogLevel.Warning);
-                        SentrySdk.CaptureMessage($"{remoteIp} has a confidence score of {abuseConfidenceScore}, is using tor: {tor}, and IP type: {usageType}");
-                        ReportEndpoint(remoteIp, comment);
-                        return true;
-                    case >= 0:
-                        return false;
-                    case null:
-                        // Can be null if there is an error in the API, don't want to punish players if its the APIs fault
-                        ServerSetup.ConnectionLogger($"{remoteIp} - API Issue, confidence score was null");
-                        return false;
-                }
-            }
-            else
-            {
-                // Can be null if there is an error in the API, don't want to punish players if its the APIs fault
-                ServerSetup.ConnectionLogger($"{remoteIp} - API Issue, response was not successful");
-                return false;
-            }
-        }
-        catch (Exception ex)
-        {
-            ServerSetup.ConnectionLogger("Unknown issue with IPDB, connections refused", LogLevel.Warning);
-            ServerSetup.ConnectionLogger($"{ex}");
-            SentrySdk.CaptureException(ex);
-            return false;
-        }
-
-        return true;
-    }
-
-    private static void ReportEndpoint(string remoteIp, string comment)
-    {
-        var keyCode = ServerSetup.Instance.KeyCode;
-        if (keyCode is null || keyCode.Length == 0)
-        {
-            ServerSetup.ConnectionLogger("Keycode not valid or not set within ServerConfig.json");
-            return;
-        }
-
-        try
-        {
-            var request = new RestRequest("", Method.Post);
-            request.AddHeader("Key", keyCode);
-            request.AddHeader("Accept", "application/json");
-            request.AddParameter("ip", remoteIp);
-            request.AddParameter("categories", "14, 15, 16, 21");
-            request.AddParameter("comment", comment);
-            var response = ServerSetup.Instance.RestReport.Execute(request);
-
-            if (response.IsSuccessful) return;
-            ServerSetup.ConnectionLogger($"Error reporting {remoteIp} : {comment}");
-            SentrySdk.CaptureMessage($"Error reporting {remoteIp} : {comment}");
-        }
-        catch
-        {
-            // ignore
-        }
     }
 
     private static async Task<bool> SavePassword(Aisling aisling)
