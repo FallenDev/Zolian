@@ -39,9 +39,9 @@ public static class BadActor
             request.AddParameter("verbose", "");
             var response = ExecuteWithRetry(() => ServerSetup.Instance.RestClient.Execute<Ipdb>(request));
 
-            if (response?.IsSuccessful == true)
+            if (response.Result?.IsSuccessful == true)
             {
-                var ipdb = JsonConvert.DeserializeObject<Ipdb>(response.Content!);
+                var ipdb = JsonConvert.DeserializeObject<Ipdb>(response.Result.Content!);
                 var abuseConfidenceScore = ipdb?.Data?.AbuseConfidenceScore;
                 var tor = ipdb?.Data?.IsTor;
                 var usageType = ipdb?.Data?.UsageType;
@@ -80,7 +80,7 @@ public static class BadActor
         return true;
     }
 
-    private static T ExecuteWithRetry<T>(Func<T> operation, int maxRetries = 3)
+    private static async Task<T> ExecuteWithRetry<T>(Func<T> operation, int maxRetries = 3)
     {
         var attempt = 0;
 
@@ -101,7 +101,7 @@ public static class BadActor
                 }
 
                 // Wait before retrying
-                Thread.Sleep(1000); // Retry delay
+                await Task.Delay(300); // Retry delay
             }
         }
 
@@ -143,11 +143,7 @@ public static class BadActor
             request.AddParameter("comment", comment);
             var response = ExecuteWithRetry(() => ServerSetup.Instance.RestReport.Execute(request));
 
-            if (response?.IsSuccessful == true)
-            {
-                return;
-            }
-
+            if (response.Result?.IsSuccessful == true) return;
             ServerSetup.ConnectionLogger($"Error reporting {remoteIp} : {comment}");
             SentrySdk.CaptureMessage($"Error reporting {remoteIp} : {comment}");
         }
