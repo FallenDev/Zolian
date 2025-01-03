@@ -77,7 +77,7 @@ public static class BadActor
             SentrySdk.CaptureException(ex);
         }
 
-        return true;
+        return false;
     }
 
     private static async Task<T> ExecuteWithRetry<T>(Func<T> operation, int maxRetries = 3)
