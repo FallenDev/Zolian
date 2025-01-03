@@ -486,8 +486,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
         client.OnDisconnected += OnDisconnect;
         var safe = false;
 
-        var foundIp = ServerSetup.Instance.GlobalKnownGoodActorsCache.Values.First(savedIp => savedIp == ipAddress.ToString());
-        if (StringExtensions.IsEmpty(foundIp))
+        foreach (var _ in ServerSetup.Instance.GlobalKnownGoodActorsCache.Values.Where(savedIp => savedIp == ipAddress.ToString()))
             safe = true;
 
         if (!safe)

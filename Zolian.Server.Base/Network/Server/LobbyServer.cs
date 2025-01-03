@@ -157,8 +157,7 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
             return;
         }
 
-        var foundIp = ServerSetup.Instance.GlobalKnownGoodActorsCache.Values.First(savedIp => savedIp == ipAddress.ToString());
-        if (!foundIp.IsEmpty())
+        foreach (var _ in ServerSetup.Instance.GlobalKnownGoodActorsCache.Values.Where(savedIp => savedIp == ipAddress.ToString()))
             safe = true;
 
         if (!safe)
@@ -206,7 +205,7 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
         var client = (ILobbyClient)sender!;
         ClientRegistry.TryRemove(client.Id, out _);
     }
-    
+
     private readonly HashSet<string> _bannedIPs = [];
 
     private bool BannedIpCheck(string ip)

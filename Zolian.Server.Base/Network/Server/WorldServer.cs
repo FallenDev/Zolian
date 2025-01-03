@@ -3225,8 +3225,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         client.OnDisconnected += OnDisconnect;
         var safe = false;
 
-        var foundIp = ServerSetup.Instance.GlobalKnownGoodActorsCache.Values.First(savedIp => savedIp == ipAddress.ToString());
-        if (!foundIp.IsEmpty())
+        foreach (var _ in ServerSetup.Instance.GlobalKnownGoodActorsCache.Values.Where(savedIp => savedIp == ipAddress.ToString()))
             safe = true;
 
         if (!safe)
