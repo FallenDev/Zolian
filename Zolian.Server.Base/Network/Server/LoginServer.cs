@@ -539,7 +539,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
             ServerSetup.ConnectionLogger("---------Login-Server---------");
             var comment = $"{ipAddress} has been blocked for violating security protocols through improper port access.";
             ServerSetup.ConnectionLogger(comment, LogLevel.Warning);
-            BadActor.ReportEndpoint(ipAddress.ToString(), comment);
+            BadActor.ReportMaliciousEndpoint(ipAddress.ToString(), comment);
             return;
         }
 

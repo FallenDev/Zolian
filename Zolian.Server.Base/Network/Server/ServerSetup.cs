@@ -103,6 +103,7 @@ public class ServerSetup : IServerContext
         var restSettings = SetupRestClients();
         RestClient = new RestClient(restSettings.Item1);
         RestReport = new RestClient(restSettings.Item2);
+        BadActor.StartProcessingQueue();
 
         const string logTemplate = "[{Timestamp:MMM-dd HH:mm:ss} {Level:u3}] {Message}{NewLine}{Exception}";
         _packetLogger = new LoggerConfiguration()

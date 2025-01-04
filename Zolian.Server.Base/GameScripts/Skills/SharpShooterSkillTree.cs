@@ -145,17 +145,17 @@ public class Snipe(Skill skill) : SkillScript(skill)
 
             Task.Run(async () =>
             {
-                foreach (var i in enemy.Where(i => sprite.Serial != i.Serial))
+                foreach (var i in enemy.Where(i => i != null && sprite.Serial != i.Serial))
                 {
-                    if (!i.Alive) return;
+                    if (!i.Alive) continue;
                     damageDealer.SendAnimationNearby(374, i.Position);
                 }
 
                 await Task.Delay(5000);
 
-                foreach (var i in enemy.Where(i => sprite.Serial != i.Serial))
+                foreach (var i in enemy.Where(i => i != null && sprite.Serial != i.Serial))
                 {
-                    if (!i.Alive) return;
+                    if (!i.Alive) continue;
                     var dmgCalc = DamageCalc(sprite, i);
 
                     if (sprite is Aisling aisling)

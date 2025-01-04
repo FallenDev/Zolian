@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.Collections.Concurrent;
+using System.Net;
 
 using Darkages.Models;
 
@@ -12,9 +13,26 @@ using ServiceStack;
 
 namespace Darkages.Network.Server;
 
+public class ReportInfo
+{
+    public string RemoteIp { get; init; }
+    public string Comment { get; init; }
+    public DateTime FirstAttemptTime { get; init; }
+}
+
 public static class BadActor
 {
+    private static readonly ConcurrentQueue<ReportInfo> RetryQueue = [];
+    private static bool _isProcessingQueue;
     private const string InternalIP = "192.168.50.1"; // Cannot use ServerConfig due to value needing to be constant
+
+    public static void StartProcessingQueue()
+    {
+        if (_isProcessingQueue) return;
+
+        _isProcessingQueue = true;
+        Task.Run(ProcessRetryQueue);
+    }
 
     public static bool ClientOnBlackList(string remoteIp)
     {
@@ -46,16 +64,17 @@ public static class BadActor
                 var tor = ipdb?.Data?.IsTor;
                 var usageType = ipdb?.Data?.UsageType;
 
+                // Block if using tor, potentially malicious
                 if (tor == true)
                 {
-                    LogBadActor(remoteIp, "using tor");
+                    LogBadActor(remoteIp, "using tor, potentially malicious");
                     return true;
                 }
 
-                // Block if known malicious usage type
-                if (IsMaliciousUsageType(usageType))
+                // Block if an unauthorized usage type
+                if (IsBlockedUsageType(usageType))
                 {
-                    LogBadActor(remoteIp, $"using {usageType}");
+                    LogBlockedType(remoteIp, $"using {usageType}");
                     return true;
                 }
 
@@ -112,10 +131,16 @@ public static class BadActor
     {
         ServerSetup.ConnectionLogger($"Blocking {remoteIp} - Reason: {reason}", LogLevel.Warning);
         SentrySdk.CaptureMessage($"{remoteIp} blocked due to {reason}");
-        ReportEndpoint(remoteIp, $"Blocked due to {reason}");
+        ReportMaliciousEndpoint(remoteIp, $"Blocked due to {reason}");
     }
 
-    private static bool IsMaliciousUsageType(string usageType)
+    private static void LogBlockedType(string remoteIp, string reason)
+    {
+        ServerSetup.ConnectionLogger($"Blocking {remoteIp} - Using: {reason}", LogLevel.Warning);
+        ReportSuspiciousEndpoint(remoteIp, "Blocked due to Web Spam, Port Scanning");
+    }
+
+    private static bool IsBlockedUsageType(string usageType)
     {
         return usageType switch
         {
@@ -124,7 +149,7 @@ public static class BadActor
         };
     }
 
-    public static void ReportEndpoint(string remoteIp, string comment)
+    public static void ReportMaliciousEndpoint(string remoteIp, string comment)
     {
         var keyCode = ServerSetup.Instance.KeyCode;
         if (keyCode is null || keyCode.Length == 0)
@@ -147,10 +172,127 @@ public static class BadActor
             ServerSetup.ConnectionLogger($"Error reporting {remoteIp} : {comment}");
             SentrySdk.CaptureMessage($"Error reporting {remoteIp} : {comment}");
         }
+        catch (HttpRequestException httpEx) when (httpEx.Message.Contains("TooManyRequests"))
+        {
+            ServerSetup.ConnectionLogger($"Exception while reporting {remoteIp}: Too many requests.", LogLevel.Warning);
+            // add to queue where we report them also for DDoS (4)
+            AddToRetryQueue(remoteIp, comment);
+        }
         catch (Exception ex)
         {
             ServerSetup.ConnectionLogger($"Exception while reporting {remoteIp}: {ex.Message}", LogLevel.Warning);
             SentrySdk.CaptureException(ex);
+        }
+    }
+
+    private static void ReportSuspiciousEndpoint(string remoteIp, string comment)
+    {
+        var keyCode = ServerSetup.Instance.KeyCode;
+        if (keyCode is null || keyCode.Length == 0)
+        {
+            ServerSetup.ConnectionLogger("Keycode not valid or not set within ServerConfig.json");
+            return;
+        }
+
+        try
+        {
+            var request = new RestRequest("", Method.Post);
+            request.AddHeader("Key", keyCode);
+            request.AddHeader("Accept", "application/json");
+            request.AddParameter("ip", remoteIp);
+            request.AddParameter("categories", "10, 14");
+            request.AddParameter("comment", comment);
+            var response = ExecuteWithRetry(() => ServerSetup.Instance.RestReport.Execute(request));
+
+            if (response.Result?.IsSuccessful == true) return;
+            ServerSetup.ConnectionLogger($"Error reporting {remoteIp} : {comment}");
+            SentrySdk.CaptureMessage($"Error reporting {remoteIp} : {comment}");
+        }
+        catch (HttpRequestException httpEx) when (httpEx.Message.Contains("TooManyRequests"))
+        {
+            ServerSetup.ConnectionLogger($"Exception while reporting {remoteIp}: Too many requests.", LogLevel.Warning);
+            // add to queue where we report them also for DDoS (4)
+            AddToRetryQueue(remoteIp, comment);
+        }
+        catch (Exception ex)
+        {
+            ServerSetup.ConnectionLogger($"Exception while reporting {remoteIp}: {ex.Message}", LogLevel.Warning);
+            SentrySdk.CaptureException(ex);
+        }
+    }
+
+    private static void AddToRetryQueue(string remoteIp, string comment)
+    {
+        RetryQueue.Enqueue(new ReportInfo
+        {
+            RemoteIp = remoteIp,
+            Comment = comment,
+            FirstAttemptTime = DateTime.Now
+        });
+    }
+
+    private static async Task ProcessRetryQueue()
+    {
+        while (_isProcessingQueue)
+        {
+            if (!RetryQueue.IsEmpty)
+            {
+                // Process each report in the queue
+                if (RetryQueue.TryDequeue(out var report))
+                {
+                    var elapsedTime = DateTime.Now - report.FirstAttemptTime;
+
+                    if (elapsedTime.TotalMinutes >= 1)
+                    {
+                        var success = await ReportSuspiciousEndpointWithDDoS(report);
+                        if (success)
+                        {
+                            ServerSetup.ConnectionLogger($"Successfully reported {report.RemoteIp} after retry.");
+                        }
+                        else
+                        {
+                            RetryQueue.Enqueue(report);
+                            ServerSetup.ConnectionLogger($"Retry failed for {report.RemoteIp}, re-queued.");
+                        }
+                    }
+                    else
+                    {
+                        await Task.Delay(TimeSpan.FromMinutes(1) - elapsedTime);
+                        RetryQueue.Enqueue(report);
+                    }
+                }
+            }
+
+            await Task.Delay(5000);
+        }
+    }
+
+    private static async Task<bool> ReportSuspiciousEndpointWithDDoS(ReportInfo report)
+    {
+        var adjustedComment = $"{report.Comment} - DDoS";
+
+        try
+        {
+            var keyCode = ServerSetup.Instance.KeyCode;
+            if (string.IsNullOrEmpty(keyCode))
+            {
+                ServerSetup.ConnectionLogger("Keycode not valid or not set within ServerConfig.json");
+                return false;
+            }
+
+            var request = new RestRequest("", Method.Post);
+            request.AddHeader("Key", keyCode);
+            request.AddHeader("Accept", "application/json");
+            request.AddParameter("ip", report.RemoteIp);
+            request.AddParameter("categories", "4, 10, 14");
+            request.AddParameter("comment", adjustedComment);
+
+            var response = await ServerSetup.Instance.RestReport.ExecuteAsync(request);
+            return response.IsSuccessful;
+        }
+        catch
+        {
+            return false;
         }
     }
 }

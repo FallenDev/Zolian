@@ -1386,8 +1386,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                     return;
                 }
 
-                client.SendServerMessage(ServerMessageType.ActiveMessage,
-                    $"{ServerSetup.Instance.Config.ServerWelcomeMessage}: {client.Aisling.Username}");
+                client.SendServerMessage(ServerMessageType.ActiveMessage, $"{ServerSetup.Instance.Config.ServerWelcomeMessage}: {client.Aisling.Username}");
                 client.SendAttributes(StatUpdateType.Full);
                 client.LoggedIn(true);
 
@@ -1399,10 +1398,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 }
 
                 if (client.Aisling.AreaId == ServerSetup.Instance.Config.TransitionZone)
-                {
-                    var portal = new PortalSession();
                     PortalSession.TransitionToMap(client.Aisling.Client);
-                }
             }
             catch (Exception e)
             {
@@ -3281,7 +3277,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             ServerSetup.ConnectionLogger("---------World-Server---------");
             var comment = $"{ipAddress} has been blocked for violating security protocols through improper port access.";
             ServerSetup.ConnectionLogger(comment, LogLevel.Warning);
-            BadActor.ReportEndpoint(ipAddress.ToString(), comment);
+            BadActor.ReportMaliciousEndpoint(ipAddress.ToString(), comment);
             return;
         }
 
