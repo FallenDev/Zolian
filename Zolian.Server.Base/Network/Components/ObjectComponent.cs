@@ -57,6 +57,7 @@ public class ObjectComponent(WorldServer server) : WorldServerComponent(server)
                 while (user.LoggedIn && user.ObjectsUpdating)
                 {
                     if (user.Client == null) return;
+                    HandleObjectsOutOfView(user);
                     UpdateClientObjects(user);
                     await Task.Delay(50);
                     user.ObjectsUpdating = false;
@@ -75,7 +76,7 @@ public class ObjectComponent(WorldServer server) : WorldServerComponent(server)
         var payload = new List<Sprite>();
 
         // Retrieve and categorize
-        var objects = ObjectManager.GetObjects(user.Map, selector => selector is not null, ObjectManager.Get.All).ToList();
+        var objects = ObjectManager.GetObjects(user.Map, s => s.WithinRangeOf(user, 13), ObjectManager.Get.All).ToList();
 
         foreach (var obj in objects)
         {
@@ -83,14 +84,9 @@ public class ObjectComponent(WorldServer server) : WorldServerComponent(server)
             {
                 case null:
                     continue;
-                case Item item when obj.WithinRangeOf(user, 13) && !user.SpritesInView.ContainsKey(item.ItemVisibilityId):
+                case Item item when !user.SpritesInView.ContainsKey(item.ItemVisibilityId):
                     {
                         payload.Add(obj);
-                        break;
-                    }
-                case Item item when !obj.WithinRangeOf(user, 13) && user.SpritesInView.ContainsKey(item.ItemVisibilityId):
-                    {
-                        RemoveObject(user, obj);
                         break;
                     }
                 case Aisling:
@@ -98,10 +94,8 @@ public class ObjectComponent(WorldServer server) : WorldServerComponent(server)
                 case Mundane:
                 case Money:
                     {
-                        if (obj.WithinRangeOf(user, 13) && !user.SpritesInView.ContainsKey(obj.Serial))
+                        if (!user.SpritesInView.ContainsKey(obj.Serial))
                             payload.Add(obj);
-                        else if (!obj.WithinRangeOf(user, 13) && user.SpritesInView.ContainsKey(obj.Serial))
-                            RemoveObject(user, obj);
                         break;
                     }
             }
@@ -113,6 +107,34 @@ public class ObjectComponent(WorldServer server) : WorldServerComponent(server)
         // If within range, send visible entities
         if (payload.Count <= 0) return;
         user.Client.SendVisibleEntities(toUpdate);
+    }
+
+    private static void HandleObjectsOutOfView(Aisling user)
+    {
+        foreach (var (serial, sprite) in user.SpritesInView)
+        {
+            switch (sprite)
+            {
+                case null:
+                    user.SpritesInView.TryRemove(serial, out _);
+                    continue;
+                case Item item:
+                {
+                    if (user.SpritesInView.ContainsKey(item.ItemVisibilityId) && (item.ItemPane != Item.ItemPanes.Ground || !sprite.WithinRangeOf(user, 13)))
+                        RemoveObject(user, sprite);
+                    break;
+                }
+                case Aisling:
+                case Monster:
+                case Mundane:
+                case Money:
+                {
+                    if (!sprite.WithinRangeOf(user, 13) && user.SpritesInView.ContainsKey(sprite.Serial))
+                        RemoveObject(user, sprite);
+                    break;
+                }
+            }
+        }
     }
 
     private static void RemoveObject(Aisling self, Sprite objectToRemove)
