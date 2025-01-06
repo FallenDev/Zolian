@@ -63,6 +63,7 @@ public static class BadActor
                 var abuseConfidenceScore = ipdb?.Data?.AbuseConfidenceScore;
                 var tor = ipdb?.Data?.IsTor;
                 var usageType = ipdb?.Data?.UsageType;
+                var isp = ipdb?.Data?.Isp;
 
                 // Block if using tor, potentially malicious
                 if (tor == true)
@@ -72,7 +73,7 @@ public static class BadActor
                 }
 
                 // Block if an unauthorized usage type
-                if (IsBlockedUsageType(usageType))
+                if (IsBlockedUsageType(usageType) && IsBlockedIsp(isp))
                 {
                     LogBlockedType(remoteIp, $"using {usageType}");
                     return true;
@@ -146,6 +147,15 @@ public static class BadActor
         {
             "Commercial" or "Organization" or "Government" or "Military" or "Content Delivery Network" or "Data Center/Web Hosting/Transit" => true,
             _ => false
+        };
+    }
+
+    private static bool IsBlockedIsp(string isp)
+    {
+        return isp switch
+        {
+            "Erisco LLC" => false,
+            _ => true
         };
     }
 
