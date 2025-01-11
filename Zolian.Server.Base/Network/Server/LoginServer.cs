@@ -45,11 +45,17 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
         IPacketSerializer packetSerializer,
         ILogger<LoginServer> logger
     )
-        : base(redirectManager, packetSerializer, clientRegistry, Microsoft.Extensions.Options.Options.Create(new ServerOptions
-        {
-            Address = ServerSetup.Instance.IpAddress,
-            Port = ServerSetup.Instance.Config.LOGIN_PORT
-        }), logger)
+        : base(
+            redirectManager,
+            packetSerializer,
+            clientRegistry,
+            Microsoft.Extensions.Options.Options.Create(new ServerOptions
+            {
+                Address = ServerSetup.Instance.IpAddress,
+                Port = ServerSetup.Instance.Config.LOGIN_PORT
+            }),
+            ServerSetup.ServerCertificate,
+            logger)
     {
         ServerSetup.Instance.LoginServer = this;
         _clientProvider = clientProvider;
@@ -262,7 +268,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
                     {
                         var ipLocal = IPAddress.Parse(ServerSetup.Instance.InternalAddress);
 
-                        if (GameMastersIPs.Any(ip => localClient.RemoteIp.Equals(IPAddress.Parse(ip))) 
+                        if (GameMastersIPs.Any(ip => localClient.RemoteIp.Equals(IPAddress.Parse(ip)))
                             || IPAddress.IsLoopback(localClient.RemoteIp) || localClient.RemoteIp.Equals(ipLocal))
                         {
                             _ = Login(result, redirect, localClient);
@@ -273,16 +279,16 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
                         return;
                     }
                 default:
-                {
-                    if (result.Hacked)
                     {
-                        localClient.SendLoginMessage(LoginMessageType.CharacterDoesntExist, "Bruteforce detected, we've locked the account to protect it; If this is your account, please contact the GM.");
-                        return;
-                    }
+                        if (result.Hacked)
+                        {
+                            localClient.SendLoginMessage(LoginMessageType.CharacterDoesntExist, "Bruteforce detected, we've locked the account to protect it; If this is your account, please contact the GM.");
+                            return;
+                        }
 
-                    _ = Login(result, redirect, localClient);
-                    break;
-                }
+                        _ = Login(result, redirect, localClient);
+                        break;
+                    }
             }
         }
     }
@@ -468,7 +474,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
         ClientHandlers[(byte)ClientOpCode.SelfProfileRequest] = OnSelfProfileRequest;
     }
 
-    protected override void OnConnected(SslStream sslStream, Socket clientSocket)
+    protected override void OnConnected(Socket clientSocket)
     {
         ServerSetup.ConnectionLogger($"Login connection from {clientSocket.RemoteEndPoint as IPEndPoint}");
 
@@ -477,24 +483,45 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
             ServerSetup.ConnectionLogger("Socket not a valid endpoint");
             return;
         }
+        var sslStream = new SslStream(new NetworkStream(clientSocket), false);
 
-        var ipAddress = ip.Address;
-        var client = _clientProvider.CreateClient(clientSocket);
-        client.OnDisconnected += OnDisconnect;
-        var safe = false;
-
-        foreach (var _ in ServerSetup.Instance.GlobalKnownGoodActorsCache.Values.Where(savedIp => savedIp == ipAddress.ToString()))
-            safe = true;
-
-        if (!safe)
+        try
         {
-            var badActor = BadActor.ClientOnBlackList(ipAddress.ToString());
-            if (badActor)
+            sslStream.AuthenticateAsServer(ServerCertificate, clientCertificateRequired: false, checkCertificateRevocation: true);
+            var ipAddress = ip.Address;
+            var client = _clientProvider.CreateClient(clientSocket);
+            client.OnDisconnected += OnDisconnect;
+            var safe = false;
+
+            foreach (var _ in ServerSetup.Instance.GlobalKnownGoodActorsCache.Values.Where(savedIp =>
+                         savedIp == ipAddress.ToString()))
+                safe = true;
+
+            if (!safe)
             {
+                var badActor = BadActor.ClientOnBlackList(ipAddress.ToString());
+                if (badActor)
+                {
+                    try
+                    {
+                        client.Disconnect();
+                        ServerSetup.ConnectionLogger($"Disconnected Bad Actor from {ip}");
+                    }
+                    catch
+                    {
+                        // ignored
+                    }
+
+                    return;
+                }
+            }
+
+            if (!ClientRegistry.TryAdd(client))
+            {
+                ServerSetup.ConnectionLogger("Two clients ended up with the same id - newest client disconnected");
                 try
                 {
                     client.Disconnect();
-                    ServerSetup.ConnectionLogger($"Disconnected Bad Actor from {ip}");
                 }
                 catch
                 {
@@ -503,47 +530,38 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
 
                 return;
             }
-        }
 
-        if (!ClientRegistry.TryAdd(client))
+            var lobbyCheck = ServerSetup.Instance.GlobalLobbyConnection.TryGetValue(ipAddress, out _);
+
+            if (!lobbyCheck)
+            {
+                try
+                {
+                    client.Disconnect();
+                }
+                catch
+                {
+                    // ignored
+                }
+
+                ServerSetup.ConnectionLogger("---------Login-Server---------");
+                var comment =
+                    $"{ipAddress} has been blocked for violating security protocols through improper port access.";
+                ServerSetup.ConnectionLogger(comment, LogLevel.Warning);
+                BadActor.ReportMaliciousEndpoint(ipAddress.ToString(), comment);
+                return;
+            }
+
+            ServerSetup.Instance.GlobalLoginConnection.TryAdd(ipAddress, ipAddress);
+            client.BeginReceive();
+            // 0x7E - Handshake
+            client.SendAcceptConnection("CONNECTED SERVER");
+        }
+        catch (Exception e)
         {
-            ServerSetup.ConnectionLogger("Two clients ended up with the same id - newest client disconnected");
-            try
-            {
-                client.Disconnect();
-            }
-            catch
-            {
-                // ignored
-            }
-
-            return;
+            ServerSetup.ConnectionLogger($"Failed to authenticate client using SSL/TLS.");
+            SentrySdk.CaptureException(new Exception($"{e}"));
         }
-
-        var lobbyCheck = ServerSetup.Instance.GlobalLobbyConnection.TryGetValue(ipAddress, out _);
-
-        if (!lobbyCheck)
-        {
-            try
-            {
-                client.Disconnect();
-            }
-            catch
-            {
-                // ignored
-            }
-
-            ServerSetup.ConnectionLogger("---------Login-Server---------");
-            var comment = $"{ipAddress} has been blocked for violating security protocols through improper port access.";
-            ServerSetup.ConnectionLogger(comment, LogLevel.Warning);
-            BadActor.ReportMaliciousEndpoint(ipAddress.ToString(), comment);
-            return;
-        }
-
-        ServerSetup.Instance.GlobalLoginConnection.TryAdd(ipAddress, ipAddress);
-        client.BeginReceive();
-        // 0x7E - Handshake
-        client.SendAcceptConnection("CONNECTED SERVER");
     }
 
     private void OnDisconnect(object sender, EventArgs e)

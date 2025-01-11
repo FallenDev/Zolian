@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using System.Net;
 using System.Net.Security;
 using System.Net.Sockets;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using Chaos.Networking.Abstractions.Definitions;
 using JetBrains.Annotations;
@@ -37,11 +38,19 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
         IRedirectManager redirectManager,
         IPacketSerializer packetSerializer,
         IClientRegistry<ILobbyClient> lobbyRegistry,
-        ILogger<LobbyServer> logger) : base(redirectManager, packetSerializer, lobbyRegistry, Microsoft.Extensions.Options.Options.Create(new ServerOptions
-        {
-            Address = ServerSetup.Instance.IpAddress,
-            Port = ServerSetup.Instance.Config.LOBBY_PORT
-        }), logger)
+        ILogger<LobbyServer> logger
+        )
+            : base(
+                redirectManager,
+                packetSerializer,
+                lobbyRegistry,
+                Microsoft.Extensions.Options.Options.Create(new ServerOptions
+                {
+                    Address = ServerSetup.Instance.IpAddress,
+                    Port = ServerSetup.Instance.Config.LOBBY_PORT
+                }),
+                ServerSetup.ServerCertificate,
+                logger)
     {
         ServerSetup.Instance.LobbyServer = this;
         _clientProvider = clientProvider;
@@ -134,7 +143,7 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
         ClientHandlers[(byte)ClientOpCode.ServerTableRequest] = OnServerTableRequest;
     }
 
-    protected override void OnConnected(SslStream sslStream, Socket clientSocket)
+    protected override void OnConnected(Socket clientSocket)
     {
         ServerSetup.ConnectionLogger($"Lobby connection from {clientSocket.RemoteEndPoint as IPEndPoint}");
 
@@ -144,31 +153,53 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
             return;
         }
 
-        var ipAddress = ip.Address;
-        var client = _clientProvider.CreateClient(clientSocket);
-        client.OnDisconnected += OnDisconnect;
-        var safe = false;
+        var sslStream = new SslStream(new NetworkStream(clientSocket), false);
 
-        var banned = BannedIpCheck(ipAddress.ToString());
-        if (banned)
+        try
         {
-            client.Disconnect();
-            ServerSetup.ConnectionLogger($"Banned connection attempt from {ip}");
-            return;
-        }
+            sslStream.AuthenticateAsServer(ServerCertificate, clientCertificateRequired: false, checkCertificateRevocation: true);
+            var ipAddress = ip.Address;
+            var client = _clientProvider.CreateClient(clientSocket);
+            client.OnDisconnected += OnDisconnect;
+            var safe = false;
 
-        foreach (var _ in ServerSetup.Instance.GlobalKnownGoodActorsCache.Values.Where(savedIp => savedIp == ipAddress.ToString()))
-            safe = true;
-
-        if (!safe)
-        {
-            var badActor = BadActor.ClientOnBlackList(ipAddress.ToString());
-            if (badActor)
+            var banned = BannedIpCheck(ipAddress.ToString());
+            if (banned)
             {
+                client.Disconnect();
+                ServerSetup.ConnectionLogger($"Banned connection attempt from {ip}");
+                return;
+            }
+
+            foreach (var _ in ServerSetup.Instance.GlobalKnownGoodActorsCache.Values.Where(savedIp =>
+                         savedIp == ipAddress.ToString()))
+                safe = true;
+
+            if (!safe)
+            {
+                var badActor = BadActor.ClientOnBlackList(ipAddress.ToString());
+                if (badActor)
+                {
+                    try
+                    {
+                        client.Disconnect();
+                        ServerSetup.ConnectionLogger($"Disconnected Bad Actor from {ip}");
+                    }
+                    catch
+                    {
+                        // ignored
+                    }
+
+                    return;
+                }
+            }
+
+            if (!ClientRegistry.TryAdd(client))
+            {
+                ServerSetup.ConnectionLogger("Two clients ended up with the same id - newest client disconnected");
                 try
                 {
                     client.Disconnect();
-                    ServerSetup.ConnectionLogger($"Disconnected Bad Actor from {ip}");
                 }
                 catch
                 {
@@ -177,27 +208,17 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
 
                 return;
             }
-        }
 
-        if (!ClientRegistry.TryAdd(client))
+            ServerSetup.Instance.GlobalLobbyConnection.TryAdd(ipAddress, ipAddress);
+            client.BeginReceive();
+            // 0x7E - Handshake
+            client.SendAcceptConnection("CONNECTED SERVER");
+        }
+        catch (Exception e)
         {
-            ServerSetup.ConnectionLogger("Two clients ended up with the same id - newest client disconnected");
-            try
-            {
-                client.Disconnect();
-            }
-            catch
-            {
-                // ignored
-            }
-
-            return;
+            ServerSetup.ConnectionLogger($"Failed to authenticate client using SSL/TLS.");
+            SentrySdk.CaptureException(new Exception($"{e}"));
         }
-
-        ServerSetup.Instance.GlobalLobbyConnection.TryAdd(ipAddress, ipAddress);
-        client.BeginReceive();
-        // 0x7E - Handshake
-        client.SendAcceptConnection("CONNECTED SERVER");
     }
 
     private void OnDisconnect(object sender, EventArgs e)

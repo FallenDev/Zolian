@@ -29,6 +29,7 @@ using System.Net;
 using System.Net.Security;
 using System.Net.Sockets;
 using System.Numerics;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using Chaos.Networking.Abstractions.Definitions;
 using Darkages.Managers;
@@ -75,6 +76,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 Address = ServerSetup.Instance.IpAddress,
                 Port = ServerSetup.Instance.Config.SERVER_PORT
             }),
+            ServerSetup.ServerCertificate,
             logger)
     {
         ServerSetup.Instance.Game = this;
@@ -3203,7 +3205,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         ClientHandlers[(byte)ClientOpCode.MetaDataRequest] = OnMetaDataRequest; // 0x7B
     }
 
-    protected override void OnConnected(SslStream sslStream, Socket clientSocket)
+    protected override void OnConnected(Socket clientSocket)
     {
         ServerSetup.ConnectionLogger($"World connection from {clientSocket.RemoteEndPoint as IPEndPoint}");
 
@@ -3213,24 +3215,46 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             return;
         }
 
-        var ipAddress = ip.Address;
-        var client = _clientProvider.CreateClient(clientSocket);
-        client.OnDisconnected += OnDisconnect;
-        var safe = false;
+        var sslStream = new SslStream(new NetworkStream(clientSocket), false);
 
-        foreach (var _ in ServerSetup.Instance.GlobalKnownGoodActorsCache.Values.Where(savedIp => savedIp == ipAddress.ToString()))
-            safe = true;
-
-        if (!safe)
+        try
         {
-            var badActor = BadActor.ClientOnBlackList(ipAddress.ToString());
+            sslStream.AuthenticateAsServer(ServerCertificate, clientCertificateRequired: false, checkCertificateRevocation: true);
+            var ipAddress = ip.Address;
+            var client = _clientProvider.CreateClient(clientSocket);
+            client.OnDisconnected += OnDisconnect;
+            var safe = false;
 
-            if (badActor)
+            foreach (var _ in ServerSetup.Instance.GlobalKnownGoodActorsCache.Values.Where(savedIp => savedIp == ipAddress.ToString()))
+                safe = true;
+
+            if (!safe)
             {
+                var badActor = BadActor.ClientOnBlackList(ipAddress.ToString());
+
+                if (badActor)
+                {
+                    try
+                    {
+                        client.Disconnect();
+                        ServerSetup.ConnectionLogger($"Disconnected Bad Actor from {ip}");
+                    }
+                    catch
+                    {
+                        // ignored
+                    }
+
+                    return;
+                }
+            }
+
+            if (!ClientRegistry.TryAdd(client))
+            {
+                ServerSetup.ConnectionLogger("Two clients ended up with the same id - newest client disconnected");
+
                 try
                 {
                     client.Disconnect();
-                    ServerSetup.ConnectionLogger($"Disconnected Bad Actor from {ip}");
                 }
                 catch
                 {
@@ -3239,47 +3263,36 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
                 return;
             }
-        }
 
-        if (!ClientRegistry.TryAdd(client))
+            var lobbyCheck = ServerSetup.Instance.GlobalLobbyConnection.TryGetValue(ipAddress, out _);
+            var loginCheck = ServerSetup.Instance.GlobalLoginConnection.TryGetValue(ipAddress, out _);
+
+            if (!lobbyCheck || !loginCheck)
+            {
+                try
+                {
+                    client.Disconnect();
+                }
+                catch
+                {
+                    // ignored
+                }
+
+                ServerSetup.ConnectionLogger("---------World-Server---------");
+                var comment = $"{ipAddress} has been blocked for violating security protocols through improper port access.";
+                ServerSetup.ConnectionLogger(comment, LogLevel.Warning);
+                BadActor.ReportMaliciousEndpoint(ipAddress.ToString(), comment);
+                return;
+            }
+
+            ServerSetup.Instance.GlobalWorldConnection.TryAdd(ipAddress, ipAddress);
+            client.BeginReceive();
+        }
+        catch (Exception e)
         {
-            ServerSetup.ConnectionLogger("Two clients ended up with the same id - newest client disconnected");
-
-            try
-            {
-                client.Disconnect();
-            }
-            catch
-            {
-                // ignored
-            }
-
-            return;
+            ServerSetup.ConnectionLogger($"Failed to authenticate client using SSL/TLS.");
+            SentrySdk.CaptureException(new Exception($"{e}"));
         }
-
-        var lobbyCheck = ServerSetup.Instance.GlobalLobbyConnection.TryGetValue(ipAddress, out _);
-        var loginCheck = ServerSetup.Instance.GlobalLoginConnection.TryGetValue(ipAddress, out _);
-
-        if (!lobbyCheck || !loginCheck)
-        {
-            try
-            {
-                client.Disconnect();
-            }
-            catch
-            {
-                // ignored
-            }
-
-            ServerSetup.ConnectionLogger("---------World-Server---------");
-            var comment = $"{ipAddress} has been blocked for violating security protocols through improper port access.";
-            ServerSetup.ConnectionLogger(comment, LogLevel.Warning);
-            BadActor.ReportMaliciousEndpoint(ipAddress.ToString(), comment);
-            return;
-        }
-
-        ServerSetup.Instance.GlobalWorldConnection.TryAdd(ipAddress, ipAddress);
-        client.BeginReceive();
     }
 
     private async void OnDisconnect(object sender, EventArgs e)
