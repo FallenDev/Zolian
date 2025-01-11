@@ -1,6 +1,4 @@
-﻿using Chaos.Cryptography.Abstractions;
-using Chaos.Extensions.Networking;
-using Chaos.Networking.Abstractions;
+﻿using Chaos.Networking.Abstractions;
 using Chaos.Networking.Entities.Server;
 using Chaos.Packets;
 using Chaos.Packets.Abstractions;
@@ -18,18 +16,14 @@ namespace Darkages.Network.Client;
 
 [UsedImplicitly]
 public class LoginClient([NotNull] ILoginServer<ILoginClient> server, [NotNull] Socket socket,
-        [NotNull] ICrypto crypto, [NotNull] IPacketSerializer packetSerializer,
+        [NotNull] IPacketSerializer packetSerializer,
         [NotNull] ILogger<LoginClient> logger)
-    : LoginClientBase(socket, crypto, packetSerializer, logger), ILoginClient
+    : LoginClientBase(socket, packetSerializer, logger), ILoginClient
 {
     protected override ValueTask HandlePacketAsync(Span<byte> span)
     {
         var opCode = span[3];
-        var packet = new Packet(ref span, Crypto.IsClientEncrypted(opCode));
-
-        if (packet.IsEncrypted)
-            Crypto.Decrypt(ref packet);
-
+        var packet = new Packet(opCode);
         return server.HandlePacketAsync(this, in packet);
     }
 

@@ -31,7 +31,6 @@ public class MServerTable : CompressableObject
                     result.InflatedData = stream.ToArray();
                 }
 
-                result.Hash = Chaos.Cryptography.Crc.Generate32(result.InflatedData);
                 result.Compress();
             }
         }

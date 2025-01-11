@@ -1,5 +1,4 @@
 using Chaos.Common.Identity;
-using Chaos.Cryptography;
 using Chaos.Extensions.Common;
 using Chaos.Networking.Abstractions;
 using Chaos.Networking.Entities.Client;
@@ -27,6 +26,7 @@ using System.Collections.Concurrent;
 using System.Collections.Frozen;
 using System.Diagnostics;
 using System.Net;
+using System.Net.Security;
 using System.Net.Sockets;
 using System.Numerics;
 using System.Text;
@@ -1007,8 +1007,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 var redirect = new Redirect(EphemeralRandomIdGenerator<uint>.Shared.NextId,
                     new Chaos.Networking.Options.ConnectionInfo { Address = connectInfo.Address, Port = connectInfo.Port },
                     ServerType.Login,
-                    Encoding.ASCII.GetString(localClient.Crypto.Key),
-                    localClient.Crypto.Seed);
+                    null, 0);
 
                 RedirectManager.Add(redirect);
                 localClient.SendRedirect(redirect);
@@ -1325,8 +1324,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
     private static async ValueTask LoadAislingAsync(IWorldClient client, IRedirect redirect)
     {
-        client.Crypto = new Crypto(redirect.Seed, redirect.Key, redirect.Name);
-
         try
         {
             var exists = await AislingStorage.CheckPassword(redirect.Name);
@@ -3206,7 +3203,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         ClientHandlers[(byte)ClientOpCode.MetaDataRequest] = OnMetaDataRequest; // 0x7B
     }
 
-    protected override void OnConnected(Socket clientSocket)
+    protected override void OnConnected(SslStream sslStream, Socket clientSocket)
     {
         ServerSetup.ConnectionLogger($"World connection from {clientSocket.RemoteEndPoint as IPEndPoint}");
 

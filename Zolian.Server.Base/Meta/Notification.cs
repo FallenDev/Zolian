@@ -16,7 +16,6 @@ public class Notification : CompressableObject
         var message = File.ReadAllText(filename);
 
         result.InflatedData = message.ToByteArray();
-        result.Hash = Chaos.Cryptography.Crc.Generate32(result.InflatedData);
         result.Compress();
 
         return result;

@@ -1,7 +1,6 @@
 ﻿using System.Collections.Frozen;
 
 using Chaos.Common.Synchronization;
-using Chaos.Cryptography;
 
 using Darkages.Enums;
 using Darkages.Network.Server;
@@ -105,7 +104,6 @@ public record AreaStorage
     {
         mapObj.FilePath = mapFile;
         mapObj.Data = File.ReadAllBytes(mapFile);
-        mapObj.Hash = Crc.Generate16(mapObj.Data);
 
         return mapObj.OnLoaded();
     }

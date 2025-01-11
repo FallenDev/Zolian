@@ -1,7 +1,5 @@
 ﻿using System.Collections.Concurrent;
 using Chaos.Common.Identity;
-using Chaos.Cryptography.Abstractions;
-using Chaos.Extensions.Networking;
 using Chaos.Geometry;
 using Chaos.Geometry.Abstractions.Definitions;
 using Chaos.Networking.Abstractions;
@@ -149,8 +147,8 @@ public class WorldClient : WorldClientBase, IWorldClient
     private readonly ConcurrentDictionary<uint, BuffEvent> _buffUpdateQueue = [];
 
     public WorldClient([NotNull] IWorldServer<IWorldClient> server, [NotNull] Socket socket,
-        [NotNull] ICrypto crypto, [NotNull] IPacketSerializer packetSerializer,
-        [NotNull] ILogger<WorldClient> logger) : base(socket, crypto, packetSerializer, logger)
+        [NotNull] IPacketSerializer packetSerializer,
+        [NotNull] ILogger<WorldClient> logger) : base(socket, packetSerializer, logger)
     {
         _server = server;
 
@@ -1329,11 +1327,7 @@ public class WorldClient : WorldClientBase, IWorldClient
     protected override ValueTask HandlePacketAsync(Span<byte> span)
     {
         var opCode = span[3];
-        var packet = new Packet(ref span, Crypto.IsClientEncrypted(opCode));
-
-        if (packet.IsEncrypted)
-            Crypto.Decrypt(ref packet);
-
+        var packet = new Packet(opCode);
         return _server.HandlePacketAsync(this, in packet);
     }
 

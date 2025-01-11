@@ -100,7 +100,6 @@ public partial class App
             serviceCollection.AddSingleton<IServerConstants, ServerConstants>(_ => constants)
                 .AddSingleton<IServerContext, ServerSetup>()
                 .AddSingleton<IServer, Server>();
-            serviceCollection.AddCryptography();
             serviceCollection.AddPacketSerializer();
             serviceCollection.AddSingleton<IRedirectManager, RedirectManager>();
 

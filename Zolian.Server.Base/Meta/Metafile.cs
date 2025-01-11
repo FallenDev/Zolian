@@ -1,6 +1,4 @@
-﻿using Chaos.Cryptography;
-
-using Darkages.Compression;
+﻿using Darkages.Compression;
 using Darkages.IO;
 using Darkages.Models;
 
@@ -32,7 +30,6 @@ public class Metafile : CompressableObject
             }
         }
 
-        Hash = Crc.Generate32(InflatedData);
         Name = Path.GetFileName(Filename);
     }
 

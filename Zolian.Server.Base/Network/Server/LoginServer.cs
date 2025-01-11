@@ -1,5 +1,4 @@
 using Chaos.Common.Identity;
-using Chaos.Cryptography;
 using Chaos.Extensions.Common;
 using Chaos.Networking.Abstractions;
 using Chaos.Networking.Entities.Client;
@@ -15,6 +14,7 @@ using Darkages.Types;
 using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
 using System.Net;
+using System.Net.Security;
 using System.Net.Sockets;
 using Darkages.Managers;
 using JetBrains.Annotations;
@@ -75,12 +75,10 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
 
             if (reservedRedirect != null)
             {
-                localClient.Crypto = new Crypto(localArgs.Seed, localArgs.Key, string.Empty);
                 localClient.SendLoginNotice(false, _notification);
             }
             else if (RedirectManager.TryGetRemove(localArgs.Id, out var redirect))
             {
-                localClient.Crypto = new Crypto(redirect.Seed, redirect.Key, redirect.Name);
                 localClient.SendLoginNotice(false, _notification);
             }
             else
@@ -239,8 +237,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
                 EphemeralRandomIdGenerator<uint>.Shared.NextId,
                 connInfo,
                 ServerType.World,
-                Encoding.ASCII.GetString(localClient.Crypto.Key),
-                localClient.Crypto.Seed,
+                null, 0,
                 localArgs.Name);
 
             switch (localArgs.Name.ToLowerInvariant())
@@ -471,7 +468,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
         ClientHandlers[(byte)ClientOpCode.SelfProfileRequest] = OnSelfProfileRequest;
     }
 
-    protected override void OnConnected(Socket clientSocket)
+    protected override void OnConnected(SslStream sslStream, Socket clientSocket)
     {
         ServerSetup.ConnectionLogger($"Login connection from {clientSocket.RemoteEndPoint as IPEndPoint}");
 

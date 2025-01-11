@@ -7,6 +7,7 @@ using Darkages.Meta;
 using Darkages.Network.Client;
 using Microsoft.Extensions.Logging;
 using System.Net;
+using System.Net.Security;
 using System.Net.Sockets;
 using System.Text;
 using Chaos.Networking.Abstractions.Definitions;
@@ -84,8 +85,7 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
                         EphemeralRandomIdGenerator<uint>.Shared.NextId,
                         new ConnectionInfo { Address = connectInfo.Address, Port = connectInfo.Port },
                         ServerType.Login,
-                        Encoding.ASCII.GetString(client.Crypto.Key),
-                        localClient.Crypto.Seed);
+                        null, 0);
 
                     RedirectManager.Add(redirect);
                     ServerSetup.ConnectionLogger($"Redirecting {client.RemoteIp} to Login Server");
@@ -134,7 +134,7 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
         ClientHandlers[(byte)ClientOpCode.ServerTableRequest] = OnServerTableRequest;
     }
 
-    protected override void OnConnected(Socket clientSocket)
+    protected override void OnConnected(SslStream sslStream, Socket clientSocket)
     {
         ServerSetup.ConnectionLogger($"Lobby connection from {clientSocket.RemoteEndPoint as IPEndPoint}");
 
