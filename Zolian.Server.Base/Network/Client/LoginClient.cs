@@ -18,7 +18,7 @@ namespace Darkages.Network.Client;
 public class LoginClient([NotNull] ILoginServer<ILoginClient> server, [NotNull] Socket socket,
         [NotNull] IPacketSerializer packetSerializer,
         [NotNull] ILogger<LoginClient> logger)
-    : LoginClientBase(socket, ServerSetup.ServerCertificate, packetSerializer, logger), ILoginClient
+    : LoginClientBase(socket, packetSerializer, logger), ILoginClient
 {
     protected override ValueTask HandlePacketAsync(Span<byte> span)
     {

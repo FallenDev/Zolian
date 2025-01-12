@@ -148,7 +148,7 @@ public class WorldClient : WorldClientBase, IWorldClient
 
     public WorldClient([NotNull] IWorldServer<IWorldClient> server, [NotNull] Socket socket,
         [NotNull] IPacketSerializer packetSerializer,
-        [NotNull] ILogger<WorldClient> logger) : base(socket, ServerSetup.ServerCertificate, packetSerializer, logger)
+        [NotNull] ILogger<WorldClient> logger) : base(socket, packetSerializer, logger)
     {
         _server = server;
 

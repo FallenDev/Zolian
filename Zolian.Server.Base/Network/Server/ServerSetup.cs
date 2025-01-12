@@ -14,7 +14,6 @@ using System.Collections.Frozen;
 using System.Data;
 using System.Net;
 using System.Reflection;
-using System.Security.Cryptography.X509Certificates;
 using Chaos.Common.Identity;
 using Darkages.Network.Server.Abstractions;
 using Microsoft.Data.SqlClient;
@@ -34,7 +33,6 @@ public class ServerSetup : IServerContext
     public static IOptions<ServerOptions> ServerOptions;
     public readonly RestClient RestClient;
     public readonly RestClient RestReport;
-    public static X509Certificate2 ServerCertificate { get; private set; }
     public bool Running { get; set; }
     public SqlConnection ServerSaveConnection { get; set; }
     public IServerConstants Config { get; set; }
@@ -101,7 +99,6 @@ public class ServerSetup : IServerContext
         Unlock = ServerOptions.Value.Unlock;
         InternalAddress = ServerOptions.Value.InternalIp;
         GameMastersIPs = ServerOptions.Value.GameMastersIPs;
-        ServerCertificate = LoadCertificateFromStore();
         var restSettings = SetupRestClients();
         RestClient = new RestClient(restSettings.Item1);
         RestReport = new RestClient(restSettings.Item2);
@@ -126,21 +123,6 @@ public class ServerSetup : IServerContext
     public static void EventsLogger(string logMessage, LogLevel logLevel = LogLevel.Information)
     {
         _eventsLogger?.Log(logLevel, "{logMessage}", logMessage);
-    }
-
-    private static X509Certificate2 LoadCertificateFromStore()
-    {
-        using var store = new X509Store(StoreName.My, StoreLocation.LocalMachine);
-        store.Open(OpenFlags.ReadOnly);
-
-        var certs = store.Certificates.Find(X509FindType.FindBySubjectName, "ZolianAuth", validOnly: true);
-
-        if (certs.Count > 0)
-        {
-            return certs[0];
-        }
-
-        throw new Exception("Certificate not found in the store.");
     }
 
     private static (RestClientOptions, RestClientOptions) SetupRestClients()

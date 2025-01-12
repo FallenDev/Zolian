@@ -7,10 +7,7 @@ using Darkages.Meta;
 using Darkages.Network.Client;
 using Microsoft.Extensions.Logging;
 using System.Net;
-using System.Net.Security;
 using System.Net.Sockets;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
 using Chaos.Networking.Abstractions.Definitions;
 using JetBrains.Annotations;
 using ServiceStack;
@@ -49,7 +46,6 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
                     Address = ServerSetup.Instance.IpAddress,
                     Port = ServerSetup.Instance.Config.LOBBY_PORT
                 }),
-                ServerSetup.ServerCertificate,
                 logger)
     {
         ServerSetup.Instance.LobbyServer = this;
@@ -153,11 +149,8 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
             return;
         }
 
-        var sslStream = new SslStream(new NetworkStream(clientSocket), false);
-
         try
         {
-            sslStream.AuthenticateAsServer(ServerCertificate, clientCertificateRequired: false, checkCertificateRevocation: true);
             var ipAddress = ip.Address;
             var client = _clientProvider.CreateClient(clientSocket);
             client.OnDisconnected += OnDisconnect;
@@ -214,10 +207,9 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
             // 0x7E - Handshake
             client.SendAcceptConnection("CONNECTED SERVER");
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            ServerSetup.ConnectionLogger($"Failed to authenticate client using SSL/TLS.");
-            SentrySdk.CaptureException(new Exception($"{e}"));
+            ServerSetup.ConnectionLogger($"Failed to authenticate lobbyServer using SSL/TLS. - {ex}");
         }
     }
 

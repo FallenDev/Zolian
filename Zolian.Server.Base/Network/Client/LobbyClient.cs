@@ -7,7 +7,6 @@ using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 
 using System.Net.Sockets;
-using System.Text;
 using Darkages.Network.Server;
 using ILobbyClient = Darkages.Network.Client.Abstractions.ILobbyClient;
 
@@ -17,7 +16,7 @@ namespace Darkages.Network.Client;
 public class LobbyClient([NotNull] ILobbyServer<ILobbyClient> server, [NotNull] Socket socket,
         [NotNull] IPacketSerializer packetSerializer,
         [NotNull] ILogger<LobbyClient> logger)
-    : LobbyClientBase(socket, ServerSetup.ServerCertificate, packetSerializer, logger), ILobbyClient
+    : LobbyClientBase(socket, packetSerializer, logger), ILobbyClient
 {
     protected override ValueTask HandlePacketAsync(Span<byte> span)
     {

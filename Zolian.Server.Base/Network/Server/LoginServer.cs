@@ -14,7 +14,6 @@ using Darkages.Types;
 using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
 using System.Net;
-using System.Net.Security;
 using System.Net.Sockets;
 using Darkages.Managers;
 using JetBrains.Annotations;
@@ -23,7 +22,6 @@ using Redirect = Chaos.Networking.Entities.Redirect;
 using ServerOptions = Chaos.Networking.Options.ServerOptions;
 using ILoginClient = Darkages.Network.Client.Abstractions.ILoginClient;
 using StringExtensions = ServiceStack.StringExtensions;
-using System.Text;
 using Chaos.Networking.Abstractions.Definitions;
 using Darkages.Common;
 using Darkages.Network.Client.Abstractions;
@@ -54,7 +52,6 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
                 Address = ServerSetup.Instance.IpAddress,
                 Port = ServerSetup.Instance.Config.LOGIN_PORT
             }),
-            ServerSetup.ServerCertificate,
             logger)
     {
         ServerSetup.Instance.LoginServer = this;
@@ -483,11 +480,9 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
             ServerSetup.ConnectionLogger("Socket not a valid endpoint");
             return;
         }
-        var sslStream = new SslStream(new NetworkStream(clientSocket), false);
 
         try
         {
-            sslStream.AuthenticateAsServer(ServerCertificate, clientCertificateRequired: false, checkCertificateRevocation: true);
             var ipAddress = ip.Address;
             var client = _clientProvider.CreateClient(clientSocket);
             client.OnDisconnected += OnDisconnect;
@@ -557,10 +552,9 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
             // 0x7E - Handshake
             client.SendAcceptConnection("CONNECTED SERVER");
         }
-        catch (Exception e)
+        catch
         {
-            ServerSetup.ConnectionLogger($"Failed to authenticate client using SSL/TLS.");
-            SentrySdk.CaptureException(new Exception($"{e}"));
+            ServerSetup.ConnectionLogger($"Failed to authenticate loginServer using SSL/TLS.");
         }
     }
 

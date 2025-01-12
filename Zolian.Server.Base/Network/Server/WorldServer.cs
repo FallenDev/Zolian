@@ -26,11 +26,8 @@ using System.Collections.Concurrent;
 using System.Collections.Frozen;
 using System.Diagnostics;
 using System.Net;
-using System.Net.Security;
 using System.Net.Sockets;
 using System.Numerics;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
 using Chaos.Networking.Abstractions.Definitions;
 using Darkages.Managers;
 using JetBrains.Annotations;
@@ -76,7 +73,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 Address = ServerSetup.Instance.IpAddress,
                 Port = ServerSetup.Instance.Config.SERVER_PORT
             }),
-            ServerSetup.ServerCertificate,
             logger)
     {
         ServerSetup.Instance.Game = this;
@@ -3215,11 +3211,8 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             return;
         }
 
-        var sslStream = new SslStream(new NetworkStream(clientSocket), false);
-
         try
         {
-            sslStream.AuthenticateAsServer(ServerCertificate, clientCertificateRequired: false, checkCertificateRevocation: true);
             var ipAddress = ip.Address;
             var client = _clientProvider.CreateClient(clientSocket);
             client.OnDisconnected += OnDisconnect;
@@ -3290,8 +3283,8 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         }
         catch (Exception e)
         {
-            ServerSetup.ConnectionLogger($"Failed to authenticate client using SSL/TLS.");
-            SentrySdk.CaptureException(new Exception($"{e}"));
+            ServerSetup.ConnectionLogger($"Failed to authenticate worldServer using SSL/TLS.");
+            SentrySdk.CaptureException(new Exception($"{ip.Address} - {e}"));
         }
     }
 
