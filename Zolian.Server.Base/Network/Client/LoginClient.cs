@@ -22,10 +22,23 @@ public class LoginClient([NotNull] ILoginServer<ILoginClient> server, [NotNull] 
 {
     protected override ValueTask HandlePacketAsync(Span<byte> span)
     {
-        var opCode = span[3];
-        var packet = new Packet(opCode);
-        return server.HandlePacketAsync(this, in packet);
+        try
+        {
+            // Fully parse the Packet from the span
+            var packet = new Packet(ref span);
+            Logger.LogInformation("Packet parsed: OpCode={OpCode}, Sequence={Sequence}, Payload Length={PayloadLength}",
+                packet.OpCode, packet.Sequence, packet.Payload.Length);
+
+            // Pass the packet to the server for further handling
+            return server.HandlePacketAsync(this, in packet);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error parsing packet from span: {RawBuffer}", BitConverter.ToString(span.ToArray()));
+            return default;
+        }
     }
+
 
     public void SendLoginControl(LoginControlsType loginControlsType, string message)
     {

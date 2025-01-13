@@ -20,9 +20,28 @@ public class LobbyClient([NotNull] ILobbyServer<ILobbyClient> server, [NotNull] 
 {
     protected override ValueTask HandlePacketAsync(Span<byte> span)
     {
-        var opCode = span[3];
-        var packet = new Packet(opCode);
-        return server.HandlePacketAsync(this, in packet);
+        Logger.LogInformation("Raw Buffer Received: {BufferHex}", BitConverter.ToString(span.ToArray()));
+
+        try
+        {
+            // Fully parse the Packet from the span
+            var packet = new Packet(ref span);
+            Logger.LogInformation("Packet received: OpCode={OpCode}, Sequence={Sequence}, Payload Length={PayloadLength}",
+                packet.OpCode, packet.Sequence, packet.Payload.Length);
+
+            if (packet.Payload.Length == 0)
+            {
+                Logger.LogWarning("Received packet with empty payload. OpCode={OpCode}", packet.OpCode);
+            }
+
+            // Pass the fully constructed Packet to the server for handling
+            return server.HandlePacketAsync(this, in packet);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error parsing packet from span: {RawBuffer}", BitConverter.ToString(span.ToArray()));
+            return default;
+        }
     }
 
     public void SendServerTableResponse(byte[] serverTableData)

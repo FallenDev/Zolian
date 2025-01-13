@@ -8,6 +8,7 @@ using Darkages.Network.Client;
 using Microsoft.Extensions.Logging;
 using System.Net;
 using System.Net.Sockets;
+using System.Text;
 using Chaos.Networking.Abstractions.Definitions;
 using JetBrains.Annotations;
 using ServiceStack;
@@ -120,9 +121,25 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
 
         try
         {
-            if (handler is not null) return handler(client, in packet);
-            ServerSetup.PacketLogger("//////////////// Handled Lobby Server Unknown Packet ////////////////", LogLevel.Error);
-            ServerSetup.PacketLogger($"{opCode} from {client.RemoteIp}", LogLevel.Error);
+            // Log OpCode and validate payload
+            Logger.LogInformation("OpCode: {OpCode}, Sequence: {Sequence}, Payload Length: {PayloadLength}", 
+                packet.OpCode, packet.Sequence, packet.Payload.Length);
+
+            if (packet.Payload.Length > 0)
+            {
+                var payload = packet.Payload;
+                Logger.LogInformation("Payload: {PayloadAscii}", Encoding.ASCII.GetString(payload.ToArray()));
+            }
+            else
+            {
+                Logger.LogWarning("Payload is empty.");
+            }
+
+            if (handler is not null) 
+                return handler(client, in packet);
+
+            // Log unknown packet
+            //ServerSetup.ConnectionLogger($"{opCode} from {client.RemoteIp} - {packet.ToString()}", LogLevel.Error);
         }
         catch (Exception ex)
         {
