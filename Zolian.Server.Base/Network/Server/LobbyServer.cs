@@ -122,21 +122,45 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
         try
         {
             // Log OpCode and validate payload
-            Logger.LogInformation("OpCode: {OpCode}, Sequence: {Sequence}, Payload Length: {PayloadLength}", 
+            Logger.LogInformation("OpCode: {OpCode}, Sequence: {Sequence}, Payload Length: {PayloadLength}",
                 packet.OpCode, packet.Sequence, packet.Payload.Length);
 
-            if (packet.Payload.Length > 0)
+            var payload = packet.Payload;
+
+            switch (packet.OpCode)
             {
-                var payload = packet.Payload;
-                Logger.LogInformation("Payload: {PayloadAscii}", Encoding.ASCII.GetString(payload.ToArray()));
-            }
-            else
-            {
-                Logger.LogWarning("Payload is empty.");
+                case 0x01: // String
+                    Logger.LogInformation("Payload: {PayloadAscii}", Encoding.ASCII.GetString(payload.ToArray()));
+                    break;
+                case 0x02: // Byte
+                    Logger.LogInformation("Received Byte: {Value}", payload[0]);
+                    break;
+                case 0x03: // Int
+                    Logger.LogInformation("Received Int: {Value}", BitConverter.ToInt32(payload));
+                    break;
+                case 0x04: // Long
+                    Logger.LogInformation("Received Long: {Value}", BitConverter.ToInt64(payload));
+                    break;
+                case 0x05: // ULong
+                    Logger.LogInformation("Received ULong: {Value}", BitConverter.ToUInt64(payload));
+                    break;
+                case 0x06: // Float
+                    Logger.LogInformation("Received Float: {Value}", BitConverter.ToSingle(payload));
+                    break;
+                case 0x07: // Double
+                    Logger.LogInformation("Received Double: {Value}", BitConverter.ToDouble(payload));
+                    break;
+                case 0x08: // Bool
+                    Logger.LogInformation("Received Bool: {Value}", payload[0] == 1);
+                    break;
+                default:
+                    Logger.LogWarning("Unknown OpCode: {OpCode}", packet.OpCode);
+                    break;
             }
 
-            if (handler is not null) 
-                return handler(client, in packet);
+            // ToDo: Disable handler for now while we work on implementing new packet types
+            //if (handler is not null) 
+            //    return handler(client, in packet);
 
             // Log unknown packet
             //ServerSetup.ConnectionLogger($"{opCode} from {client.RemoteIp} - {packet.ToString()}", LogLevel.Error);
