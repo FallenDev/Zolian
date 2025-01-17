@@ -4,7 +4,6 @@ namespace Darkages.Network.Client.Abstractions;
 
 public interface ILobbyClient : IConnectedClient
 {
-    void SendConnectionInfo(uint serverTableCheckSum);
-    void SendServerTableResponse(byte[] serverTableData);
+    void SendConnectionInfo(ushort port);
     void SendLoginMessage(LoginMessageType loginMessageType, string message = null);
 }

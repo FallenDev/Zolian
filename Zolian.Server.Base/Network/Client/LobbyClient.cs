@@ -44,21 +44,11 @@ public class LobbyClient([NotNull] ILobbyServer<ILobbyClient> server, [NotNull] 
         }
     }
 
-    public void SendServerTableResponse(byte[] serverTableData)
-    {
-        var args = new ServerTableResponseArgs
-        {
-            ServerTable = serverTableData
-        };
-
-        Send(args);
-    }
-
-    public void SendConnectionInfo(uint serverTableCheckSum)
+    public void SendConnectionInfo(ushort port)
     {
         var args = new ConnectionInfoArgs
         {
-            TableCheckSum = serverTableCheckSum
+            PortNumber = port
         };
 
         Send(args);

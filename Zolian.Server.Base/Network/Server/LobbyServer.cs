@@ -29,7 +29,6 @@ namespace Darkages.Network.Server;
 public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyClient>
 {
     private readonly IClientFactory<LobbyClient> _clientProvider;
-    private readonly MServerTable _serverTable;
 
     public LobbyServer(
         IClientFactory<LobbyClient> clientProvider,
@@ -51,7 +50,6 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
     {
         ServerSetup.Instance.LobbyServer = this;
         _clientProvider = clientProvider;
-        _serverTable = MServerTable.FromFile("MServerTable.xml");
         IndexHandlers();
     }
 
@@ -71,45 +69,11 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
                 return default;
             }
 
-            //localClient.SendConnectionInfo();
+            localClient.SendConnectionInfo((ushort)ServerSetup.Instance.Config.LOGIN_PORT);
             return default;
         }
     }
-
-    public ValueTask OnServerTableRequest(ILobbyClient client, in Packet packet)
-    {
-        var args = PacketSerializer.Deserialize<ServerTableRequestArgs>(in packet);
-        return ExecuteHandler(client, args, InnerOnServerTableRequest);
-
-        ValueTask InnerOnServerTableRequest(ILobbyClient localClient, ServerTableRequestArgs localArgs)
-        {
-            switch (localArgs.ServerTableRequestType)
-            {
-                case ServerTableRequestType.ServerId:
-                    var connectInfo = new IPEndPoint(_serverTable.Servers[0].Address, _serverTable.Servers[0].Port);
-                    var redirect = new Chaos.Networking.Entities.Redirect(
-                        EphemeralRandomIdGenerator<uint>.Shared.NextId,
-                        new ConnectionInfo { Address = connectInfo.Address, Port = connectInfo.Port },
-                        ServerType.Login,
-                        null, 0);
-
-                    RedirectManager.Add(redirect);
-                    ServerSetup.ConnectionLogger($"Redirecting {client.RemoteIp} to Login Server");
-                    localClient.SendRedirect(redirect);
-                    break;
-                case ServerTableRequestType.RequestTable:
-                    localClient.SendServerTableResponse(_serverTable.Data);
-                    break;
-                default:
-                    localClient.SendLoginMessage(LoginMessageType.Confirm, "You're not authorized.");
-                    localClient.Disconnect();
-                    break;
-            }
-
-            return default;
-        }
-    }
-
+    
     #endregion
 
     #region Connection / Handler
@@ -139,7 +103,6 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
     {
         base.IndexHandlers();
         ClientHandlers[(byte)ClientOpCode.Version] = OnVersion;
-        ClientHandlers[(byte)ClientOpCode.ServerTableRequest] = OnServerTableRequest;
     }
 
     protected override void OnConnected(Socket clientSocket)
