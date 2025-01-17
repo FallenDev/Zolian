@@ -5,7 +5,7 @@
 			<Addr>127.0.0.1</Addr>
 			<Port>4201</Port>
 			<Name>Zolian</Name>
-			<Desc>Zolian Beta - Stable</Desc>
+			<Desc>Zolian - Unity Server</Desc>
 		</MServer>
 	</Servers>
 </MServerTable>

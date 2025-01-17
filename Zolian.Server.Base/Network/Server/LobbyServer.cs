@@ -71,7 +71,7 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
                 return default;
             }
 
-            localClient.SendConnectionInfo(_serverTable.Hash);
+            //localClient.SendConnectionInfo();
             return default;
         }
     }
@@ -121,53 +121,11 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
 
         try
         {
-            // Log OpCode and validate payload
-            Logger.LogInformation("OpCode: {OpCode}, Sequence: {Sequence}, Payload Length: {PayloadLength}",
-                packet.OpCode, packet.Sequence, packet.Payload.Length);
-
-            var payload = packet.Payload;
-
-            switch (packet.OpCode)
-            {
-                case 0x01: // String
-                    Logger.LogInformation("Payload: {PayloadAscii}", Encoding.ASCII.GetString(payload.ToArray()));
-                    client.SendLoginMessage(LoginMessageType.Confirm, "Hurray you have successfully logged on! Now let's throw a ton of string data at you to see if you can handle it!" +
-                                                                      "Lorem ipsum odor amet, consectetuer adipiscing elit. Purus mi volutpat donec tellus fames dolor. Purus ac lobortis cras molestie luctus tristique elementum neque. Dictumst aptent ligula neque facilisi ultricies torquent? Bibendum rhoncus id bibendum odio euismod bibendum luctus. Atristique primis inceptos a posuere erat magna diam. Erat id facilisi fames himenaeos mattis mi arcu? Vehicula sociosqu facilisi dictumst sed interdum non eu.\n\nParturient class maximus, interdum hendrerit tristique ad at aliquet cursus. Magnis nibh lorem quis faucibus posuere et leo himenaeos inceptos. Gravida sit suspendisse efficitur lectus odio a quisque. Sollicitudin duis ornare ut primis nam. Curabitur donec cras tortor laoreet inceptos; ad posuere mauris magna. Diam luctus duis elementum sociosqu nec egestas habitant dapibus.\n\nVulputate commodo torquent duis elementum congue sapien libero fringilla. Erat dolor malesuada sagittis himenaeos pulvinar lorem faucibus tempus ornare. Nisl cras aliquet lacinia dapibus felis platea. Pulvinar per litora nam nunc phasellus vel fames. Natoque eleifend condimentum eget parturient dolor; suscipit odio odio. Nulla nullam accumsan eleifend gravida elit nec taciti tincidunt. Ac ut fringilla venenatis sed sociosqu.\n\nLeo auctor elementum odio nunc sodales venenatis adipiscing. Nunc pharetra proin urna posuere nec est. Non auctor mus mus integer senectus commodo taciti molestie. Mattis senectus faucibus nec semper ridiculus sed torquent odio. Elementum magna dui a, semper posuere orci morbi. Vehicula nascetur litora tempor aptent tortor dapibus nascetur pretium.\n\nElementum pellentesque purus elementum nunc adipiscing purus auctor integer laoreet. Ipsum primis sapien pretium fringilla purus; lacus enim. Erat praesent magnis malesuada iaculis maximus nullam? Pretium nunc porta finibus vel convallis. Diam sapien nunc massa a rutrum adipiscing posuere leo! Tellus magnis convallis eros platea placerat aliquam lobortis habitant! Sollicitudin scelerisque purus est sed quisque interdum.");
-
-
-                    break;
-                case 0x02: // Byte
-                    Logger.LogInformation("Received Byte: {Value}", payload[0]);
-                    break;
-                case 0x03: // Int
-                    Logger.LogInformation("Received Int: {Value}", BitConverter.ToInt32(payload));
-                    break;
-                case 0x04: // Long
-                    Logger.LogInformation("Received Long: {Value}", BitConverter.ToInt64(payload));
-                    break;
-                case 0x05: // ULong
-                    Logger.LogInformation("Received ULong: {Value}", BitConverter.ToUInt64(payload));
-                    break;
-                case 0x06: // Float
-                    Logger.LogInformation("Received Float: {Value}", BitConverter.ToSingle(payload));
-                    break;
-                case 0x07: // Double
-                    Logger.LogInformation("Received Double: {Value}", BitConverter.ToDouble(payload));
-                    break;
-                case 0x08: // Bool
-                    Logger.LogInformation("Received Bool: {Value}", payload[0] == 1);
-                    break;
-                default:
-                    Logger.LogWarning("Unknown OpCode: {OpCode}", packet.OpCode);
-                    break;
-            }
-
-            // ToDo: Disable handler for now while we work on implementing new packet types
-            //if (handler is not null) 
-            //    return handler(client, in packet);
+            if (handler is not null)
+                return handler(client, in packet);
 
             // Log unknown packet
-            //ServerSetup.ConnectionLogger($"{opCode} from {client.RemoteIp} - {packet.ToString()}", LogLevel.Error);
+            ServerSetup.ConnectionLogger($"{opCode} from {client.RemoteIp} - {packet.ToString()}", LogLevel.Error);
         }
         catch (Exception ex)
         {

@@ -40,12 +40,13 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Chaos-Networking" Version="2.4.7.5" />
+		<PackageReference Include="ComponentAce.ZLIB.NET" Version="1.0.4" />
 		<PackageReference Include="Dapper.StrongName" Version="2.1.35" />
 		<PackageReference Include="Microsoft.Data.SqlClient" Version="6.0.0" />
 		<PackageReference Include="Microsoft.DependencyValidation.Analyzers" Version="0.11.0" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.1" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-		<PackageReference Include="RestSharp" Version="112.1.0" />
+		<PackageReference Include="RestSharp" Version="112.1.1-alpha.0.4" />
 		<PackageReference Include="Sentry" Version="5.0.1" />
 		<PackageReference Include="Sentry.Extensions.Logging" Version="5.0.1" />
 		<PackageReference Include="Sentry.Profiling" Version="5.0.1" />
@@ -53,6 +54,23 @@
 		<PackageReference Include="ServiceStack" Version="8.5.2" />
 		<PackageReference Include="ServiceStack.Text" Version="8.5.2" />
 		<PackageReference Include="SunCalcNet" Version="1.2.4" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\..\Chaos-Network\Chaos.Common.Abstractions\Chaos.Common.Abstractions.csproj" />
+	  <ProjectReference Include="..\..\Chaos-Network\Chaos.Common\Chaos.Common.csproj" />
+	  <ProjectReference Include="..\..\Chaos-Network\Chaos.DarkAges\Chaos.DarkAges.csproj" />
+	  <ProjectReference Include="..\..\Chaos-Network\Chaos.Extensions.Common\Chaos.Extensions.Common.csproj" />
+	  <ProjectReference Include="..\..\Chaos-Network\Chaos.Geometry.Abstractions\Chaos.Geometry.Abstractions.csproj" />
+	  <ProjectReference Include="..\..\Chaos-Network\Chaos.Geometry\Chaos.Geometry.csproj" />
+	  <ProjectReference Include="..\..\Chaos-Network\Chaos.IO\Chaos.IO.csproj" />
+	  <ProjectReference Include="..\..\Chaos-Network\Chaos.Networking.Abstractions\Chaos.Networking.Abstractions.csproj" />
+	  <ProjectReference Include="..\..\Chaos-Network\Chaos.Networking\Chaos.Networking.csproj" />
+	  <ProjectReference Include="..\..\Chaos-Network\Chaos.NLog.Logging\Chaos.NLog.Logging.csproj" />
+	  <ProjectReference Include="..\..\Chaos-Network\Chaos.Packets.Abstractions\Chaos.Packets.Abstractions.csproj" />
+	  <ProjectReference Include="..\..\Chaos-Network\Chaos.Packets\Chaos.Packets.csproj" />
+	  <ProjectReference Include="..\..\Chaos-Network\Chaos.Time.Abstractions\Chaos.Time.Abstractions.csproj" />
+	  <ProjectReference Include="..\..\Chaos-Network\Chaos.Time\Chaos.Time.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
