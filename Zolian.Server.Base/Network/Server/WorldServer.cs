@@ -452,14 +452,13 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     {
         try
         {
-            Parallel.ForEach(ServerSetup.Instance.GlobalMapCache.Values, area =>
+            foreach (var monsters in ServerSetup.Instance.GlobalMapCache.Values.Select(area => ObjectManager.GetObjects<Monster>(area, i => !i.Skulled).Values.ToList()))
             {
-                var monsters = ObjectManager.GetObjects<Monster>(area, i => !i.Skulled).Values.ToList();
-                if (monsters.Count <= 0) return;
+                if (monsters.Count <= 0) continue;
 
-                Parallel.ForEach(monsters, monster =>
+                foreach (var monster in monsters)
                 {
-                    if (monster.Scripts == null) return;
+                    if (monster.Scripts == null) continue;
 
                     if (monster.CurrentHp <= 0)
                     {
@@ -474,7 +473,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                             monster.Scripts.Values.FirstOrDefault()?.OnDeath();
                         }
 
-                        return;
+                        continue;
                     }
 
                     monster.Scripts.Values.FirstOrDefault()?.Update(elapsedTime);
@@ -483,13 +482,13 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                     if (!monster.MonsterBuffAndDebuffStopWatch.IsRunning)
                         monster.MonsterBuffAndDebuffStopWatch.Start();
 
-                    if (monster.MonsterBuffAndDebuffStopWatch.Elapsed.TotalMilliseconds < 1000) return;
+                    if (monster.MonsterBuffAndDebuffStopWatch.Elapsed.TotalMilliseconds < 1000) continue;
 
                     monster.UpdateBuffs(monster);
                     monster.UpdateDebuffs(monster);
                     monster.MonsterBuffAndDebuffStopWatch.Restart();
-                });
-            });
+                }
+            }
         }
         catch (Exception ex)
         {

@@ -46,9 +46,9 @@
 		<PackageReference Include="Microsoft.DependencyValidation.Analyzers" Version="0.11.0" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 		<PackageReference Include="RestSharp" Version="112.1.0" />
-		<PackageReference Include="Sentry" Version="5.0.0" />
-		<PackageReference Include="Sentry.Extensions.Logging" Version="5.0.0" />
-		<PackageReference Include="Sentry.Profiling" Version="5.0.0" />
+		<PackageReference Include="Sentry" Version="5.0.1" />
+		<PackageReference Include="Sentry.Extensions.Logging" Version="5.0.1" />
+		<PackageReference Include="Sentry.Profiling" Version="5.0.1" />
 		<PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
 		<PackageReference Include="ServiceStack" Version="8.5.2" />
 		<PackageReference Include="ServiceStack.Text" Version="8.5.2" />
