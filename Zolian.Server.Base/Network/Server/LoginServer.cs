@@ -63,9 +63,6 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
 
     #region OnHandlers
 
-    /// <summary>
-    /// 0x57 - Server Table & Redirect
-    /// </summary>
     public ValueTask OnClientRedirected(ILoginClient client, in Packet packet)
     {
         var args = PacketSerializer.Deserialize<ClientRedirectedArgs>(in packet);
@@ -73,22 +70,9 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
 
         ValueTask InnerOnClientRedirect(ILoginClient localClient, ClientRedirectedArgs localArgs)
         {
-            var reservedRedirect = ServerSetup.Instance.Config.ReservedRedirects
-                .FirstOrDefault(rr => rr.Id == localArgs.Id && rr.Name.EqualsI(localArgs.Name));
-
-            if (reservedRedirect != null)
+            if (localArgs.Message == "Redirect Successful")
             {
-                localClient.SendLoginNotice(false, _notification);
-            }
-            else if (RedirectManager.TryGetRemove(localArgs.Id, out var redirect))
-            {
-                localClient.SendLoginNotice(false, _notification);
-            }
-            else
-            {
-                ServerSetup.ConnectionLogger($"Attempt to redirect with invalid redirect details, {localClient.RemoteIp}");
-                SentrySdk.CaptureMessage($"Attempt to redirect with invalid redirect details, {localClient.RemoteIp}");
-                localClient.Disconnect();
+                localClient.SendLoginMessage(LoginMessageType.Confirm, "Redirected.. Welcome!");
             }
 
             return default;
@@ -444,9 +428,11 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
 
         try
         {
-            if (handler is not null) return handler(client, in packet);
-            ServerSetup.PacketLogger("//////////////// Handled Login Server Unknown Packet ////////////////", LogLevel.Error);
-            ServerSetup.PacketLogger($"{opCode} from {client.RemoteIp}", LogLevel.Error);
+            if (handler is not null) 
+                return handler(client, in packet);
+
+            // Log unknown packet
+            ServerSetup.ConnectionLogger($"{opCode} from {client.RemoteIp} - {packet.ToString()}", LogLevel.Error);
         }
         catch (Exception ex)
         {
@@ -550,7 +536,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
             ServerSetup.Instance.GlobalLoginConnection.TryAdd(ipAddress, ipAddress);
             client.BeginReceive();
             // 0x7E - Handshake
-            client.SendAcceptConnection("CONNECTED SERVER");
+            client.SendAcceptConnection("Login Connected");
         }
         catch
         {

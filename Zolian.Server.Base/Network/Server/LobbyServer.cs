@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using Chaos.Extensions.Common;
 using Chaos.Networking.Abstractions.Definitions;
 using JetBrains.Annotations;
 using ServiceStack;
@@ -62,7 +63,7 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
 
         ValueTask InnerOnVersion(ILobbyClient localClient, VersionArgs localArgs)
         {
-            if (localArgs.Version != ServerSetup.Instance.Config.ClientVersion)
+            if (!localArgs.Version.EqualsI(ServerSetup.Instance.Config.ClientVersion))
             {
                 localClient.SendLoginMessage(LoginMessageType.Confirm, "You're not using an authorized client. Please visit https://www.TheBuckNetwork.com/Zolian for the latest client.");
                 localClient.Disconnect();
@@ -171,7 +172,7 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
             ServerSetup.Instance.GlobalLobbyConnection.TryAdd(ipAddress, ipAddress);
             client.BeginReceive();
             // 0x7E - Handshake
-            client.SendAcceptConnection("CONNECTED SERVER");
+            client.SendAcceptConnection("Lobby Connected");
         }
         catch (Exception ex)
         {

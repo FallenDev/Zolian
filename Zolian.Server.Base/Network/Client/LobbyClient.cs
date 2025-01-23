@@ -20,14 +20,10 @@ public class LobbyClient([NotNull] ILobbyServer<ILobbyClient> server, [NotNull] 
 {
     protected override ValueTask HandlePacketAsync(Span<byte> span)
     {
-        Logger.LogInformation("Raw Buffer Received: {BufferHex}", BitConverter.ToString(span.ToArray()));
-
         try
         {
             // Fully parse the Packet from the span
             var packet = new Packet(ref span);
-            Logger.LogInformation("Packet received: OpCode={OpCode}, Sequence={Sequence}, Payload Length={PayloadLength}",
-                packet.OpCode, packet.Sequence, packet.Payload.Length);
 
             if (packet.Payload.Length == 0)
             {

@@ -84,7 +84,7 @@ public class ServerConstants : IServerConstants
     public ReservedRedirectInfo[] ReservedRedirects { get; set; } = [];
 
     // Check Packet 00
-    public int ClientVersion { get; set; }
+    public string ClientVersion { get; set; }
 
     // Default Messages
     public double MessageClearInterval { get; set; }

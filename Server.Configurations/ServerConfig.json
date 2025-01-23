@@ -197,7 +197,7 @@
 
     // Check Packet 00
     // This check sets the current client that should be used
-    "ClientVersion": 914,
+    "ClientVersion": "0.1.0",
 
     // Messages
     // Forces the client to send a clear message every set seconds

@@ -26,8 +26,11 @@ public class LoginClient([NotNull] ILoginServer<ILoginClient> server, [NotNull] 
         {
             // Fully parse the Packet from the span
             var packet = new Packet(ref span);
-            Logger.LogInformation("Packet parsed: OpCode={OpCode}, Sequence={Sequence}, Payload Length={PayloadLength}",
-                packet.OpCode, packet.Sequence, packet.Payload.Length);
+
+            if (packet.Payload.Length == 0)
+            {
+                Logger.LogWarning("Received packet with empty payload. OpCode={OpCode}", packet.OpCode);
+            }
 
             // Pass the packet to the server for further handling
             return server.HandlePacketAsync(this, in packet);

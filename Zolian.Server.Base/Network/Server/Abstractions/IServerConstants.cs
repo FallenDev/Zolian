@@ -17,7 +17,7 @@ public interface IServerConstants
     string CantDropItemMsg { get; }
     string CantUseThat { get; }
     int ClickLootDistance { get; }
-    int ClientVersion { get; }
+    string ClientVersion { get; }
     string ConAddedMessage { get; }
     int ConnectionCapacity { get; }
     string CursedItemMessage { get; }

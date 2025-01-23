@@ -1292,34 +1292,16 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
         ValueTask InnerOnClientRedirected(IWorldClient localClient, ClientRedirectedArgs localArgs)
         {
-            if (!RedirectManager.TryGetRemove(localArgs.Id, out var redirect))
+            if (localArgs.Message != null)
             {
-                SentrySdk.CaptureMessage($"{client.RemoteIp} tried to redirect to the world with invalid details.");
-                localClient.Disconnect();
-                return default;
+                // display welcome message to client.
             }
 
-            //keep this case sensitive
-            if (localArgs.Name != redirect.Name)
-            {
-                SentrySdk.CaptureMessage($"{client.RemoteIp} tried to impersonate a redirect with redirect {redirect.Id}.");
-                localClient.Disconnect();
-                return default;
-            }
-
-            ServerSetup.ConnectionLogger($"Received successful redirect: {redirect.Id}");
-            var existingAisling = Aislings.FirstOrDefault(user => user.Username.EqualsI(redirect.Name));
-
-            //double logon, disconnect both clients
-            if (existingAisling == null && redirect.Type != ServerType.Lobby) return LoadAislingAsync(localClient, redirect);
-            localClient.Disconnect();
-            if (redirect.Type == ServerType.Lobby) return default;
-            ServerSetup.ConnectionLogger($"Duplicate login, player {redirect.Name}, disconnecting both clients.");
-            existingAisling?.Client.Disconnect();
             return default;
         }
     }
 
+    //ToDo: Create a new handler for this, so it can accept usernames and passwords directly from the client. 
     private static async ValueTask LoadAislingAsync(IWorldClient client, IRedirect redirect)
     {
         try
