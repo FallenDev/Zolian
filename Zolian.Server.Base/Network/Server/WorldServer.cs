@@ -239,31 +239,28 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
     private static async Task UpdateMonstersRoutine()
     {
-        var monstersWatch = new Stopwatch();
-        monstersWatch.Start();
-        var variableGameSpeed = 200;
+        var updateInterval = TimeSpan.FromMilliseconds(500);
+        var nextUpdate = DateTime.UtcNow + updateInterval;
 
         while (ServerSetup.Instance.Running)
         {
-            if (monstersWatch.Elapsed.TotalMilliseconds < variableGameSpeed)
+            var elapsed = DateTime.UtcNow;
+            if (elapsed >= nextUpdate)
             {
-                await Task.Delay(1);
-                continue;
+                // Calculate actual elapsed time since the last update
+                var actualElapsed = DateTime.UtcNow - (nextUpdate - updateInterval);
+                UpdateMonsters(actualElapsed);
+
+                // Schedule the next update
+                nextUpdate += updateInterval;
             }
 
-            UpdateMonsters(monstersWatch.Elapsed);
-            var awaiter = (int)(200 - monstersWatch.Elapsed.TotalMilliseconds);
-
-            if (awaiter < 0)
+            // Calculate remaining time and delay
+            var remainingTime = nextUpdate - DateTime.UtcNow;
+            if (remainingTime > TimeSpan.Zero)
             {
-                variableGameSpeed = 200 + awaiter;
-                monstersWatch.Restart();
-                continue;
+                await Task.Delay(remainingTime);
             }
-
-            await Task.Delay(TimeSpan.FromMilliseconds(awaiter));
-            variableGameSpeed = 200;
-            monstersWatch.Restart();
         }
     }
 
@@ -334,52 +331,52 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
     private async Task UpdateClients()
     {
-        const int maxConcurrency = 10;
+        const int baseConcurrency = 10; // Minimum number of concurrent tasks
+        var maxConcurrency = Math.Max(baseConcurrency, Environment.ProcessorCount); // Adjust based on system capabilities
         var semaphore = new SemaphoreSlim(maxConcurrency);
-        var playerUpdateTasks = new List<Task>();
-        var clientWatch = new Stopwatch();
-        clientWatch.Start();
-        var variableGameSpeed = GameSpeed;
+        var updateInterval = TimeSpan.FromMilliseconds(50); // Fixed update interval
+        var nextUpdate = DateTime.UtcNow + updateInterval;
 
         while (ServerSetup.Instance.Running)
         {
-            if (clientWatch.Elapsed.TotalMilliseconds < variableGameSpeed)
-            {
-                await Task.Delay(1);
-                continue;
-            }
+            var players = Aislings.Where(player => player?.Client != null).ToList();
 
-            var players = Aislings.Where(player => player?.Client != null);
+            // Divide players into chunks (batches) for processing
+            var batchSize = 100; // Number of players per batch
+            var playerBatches = players.Chunk(batchSize);
 
-            foreach (var player in players)
+            foreach (var batch in playerBatches)
             {
-                await semaphore.WaitAsync();
-                var task = ProcessClientTask(player)
-                    .ContinueWith(t =>
+                // Process each batch with limited concurrency
+                var playerUpdateTasks = batch.Select(async player =>
+                {
+                    await semaphore.WaitAsync();
+                    try
+                    {
+                        await ProcessClientTask(player);
+                    }
+                    finally
                     {
                         semaphore.Release();
-                    }, TaskScheduler.Default);
-                playerUpdateTasks.Add(task);
+                    }
+                });
+
+                // Wait for all tasks in the current batch to complete
+                await Task.WhenAll(playerUpdateTasks);
             }
 
-            await Task.WhenAll(playerUpdateTasks);
-            playerUpdateTasks.Clear();
-
-            // ToDo: syncCount to ensure clients always update at 50ms, adjusts loop if client lag is present
-            var syncCount = (int)(GameSpeed - clientWatch.Elapsed.TotalMilliseconds);
-
-            if (syncCount < 0)
+            // Calculate remaining time and delay until the next update
+            var remainingTime = nextUpdate - DateTime.UtcNow;
+            if (remainingTime > TimeSpan.Zero)
             {
-                variableGameSpeed = GameSpeed + syncCount;
-                clientWatch.Restart();
-                continue;
+                await Task.Delay(remainingTime);
             }
 
-            await Task.Delay(TimeSpan.FromMilliseconds(syncCount));
-            variableGameSpeed = GameSpeed;
-            clientWatch.Restart();
+            // Schedule the next update
+            nextUpdate += updateInterval;
         }
     }
+
 
     private async Task ProcessClientTask(Aisling player)
     {
@@ -407,20 +404,31 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     {
         try
         {
-            foreach (var area in ServerSetup.Instance.GlobalMapCache)
+            // Process each map area sequentially
+            foreach (var area in ServerSetup.Instance.GlobalMapCache.Values)
             {
-                var items = ObjectManager.GetObjects<Item>(area.Value, i => i.ItemPane == Item.ItemPanes.Ground);
+                // Get all ground items in the current area
+                var items = ObjectManager.GetObjects<Item>(area, i => i.ItemPane == Item.ItemPanes.Ground).ToList();
 
-                foreach (var item in items)
+                // Chunk items into smaller groups for processing
+                const int chunkSize = 100; // Adjust based on expected item counts per area
+                var itemChunks = items.Chunk(chunkSize);
+
+                // Process each chunk in parallel
+                Parallel.ForEach(itemChunks, chunk =>
                 {
-                    var abandonedDiff = DateTime.UtcNow.Subtract(item.Value.AbandonedDate);
+                    foreach (var item in chunk)
+                    {
+                        var abandonedDiff = DateTime.UtcNow.Subtract(item.Value.AbandonedDate);
 
-                    if (abandonedDiff.TotalMinutes > 3 && item.Value.Template.Name == "Corpse")
-                        item.Value.Remove();
+                        // Remove items based on abandonment rules
+                        if (abandonedDiff.TotalMinutes > 3 && item.Value.Template.Name == "Corpse")
+                            item.Value.Remove();
 
-                    if (abandonedDiff.TotalMinutes > 30)
-                        item.Value.Remove();
-                }
+                        if (abandonedDiff.TotalMinutes > 30)
+                            item.Value.Remove();
+                    }
+                });
             }
         }
         catch (Exception ex)
@@ -433,13 +441,34 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     {
         try
         {
-            foreach (var moneyKvp in ServerSetup.Instance.GlobalGroundMoneyCache)
+            // Iterate through all maps in the GlobalMapCache
+            foreach (var area in ServerSetup.Instance.GlobalMapCache.Values)
             {
-                if (moneyKvp.Value == null) continue;
-                var abandonedDiff = DateTime.UtcNow.Subtract(moneyKvp.Value.AbandonedDate);
-                if (abandonedDiff.TotalMinutes <= 30) continue;
-                ServerSetup.Instance.GlobalGroundMoneyCache.TryRemove(moneyKvp.Key, out _);
-                moneyKvp.Value.Remove();
+                // Filter the money drops in the GlobalGroundMoneyCache for the current map
+                var moneyDrops = ServerSetup.Instance.GlobalGroundMoneyCache
+                    .Where(kvp => kvp.Value.Map.ID == area.ID) // Ensure this matches your map ID structure
+                    .Select(kvp => kvp.Value)
+                    .ToList();
+
+                // Chunk the money drops for processing
+                const int chunkSize = 100; // Adjust based on expected number of money drops
+                var moneyChunks = moneyDrops.Chunk(chunkSize);
+
+                // Process each chunk in parallel
+                Parallel.ForEach(moneyChunks, chunk =>
+                {
+                    foreach (var money in chunk)
+                    {
+                        var abandonedDiff = DateTime.UtcNow.Subtract(money.AbandonedDate);
+
+                        // Remove money drops abandoned for more than 30 minutes
+                        if (abandonedDiff.TotalMinutes > 30)
+                        {
+                            ServerSetup.Instance.GlobalGroundMoneyCache.TryRemove(money.MoneyId, out _);
+                            money.Remove();
+                        }
+                    }
+                });
             }
         }
         catch (Exception ex)
@@ -447,48 +476,33 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             SentrySdk.CaptureException(ex);
         }
     }
+
+
 
     private static void UpdateMonsters(TimeSpan elapsedTime)
     {
         try
         {
-            foreach (var monsters in ServerSetup.Instance.GlobalMapCache.Values.Select(area => ObjectManager.GetObjects<Monster>(area, i => !i.Skulled).Values.ToList()))
+            // Divide the GlobalMapCache into chunks of maps
+            var mapChunks = ServerSetup.Instance.GlobalMapCache.Values
+                .Select((area, index) => new { area, index })
+                .GroupBy(x => x.index % Environment.ProcessorCount) // Create chunks based on processor count
+                .Select(group => group.Select(x => x.area).ToList()) // Convert each group to a list of areas
+                .ToList();
+
+            // Process each chunk in parallel
+            Parallel.ForEach(mapChunks, chunk =>
             {
-                if (monsters.Count <= 0) continue;
-
-                foreach (var monster in monsters)
+                foreach (var area in chunk)
                 {
-                    if (monster.Scripts == null) continue;
-
-                    if (monster.CurrentHp <= 0)
+                    // Get monsters in the current map area
+                    var monsters = ObjectManager.GetObjects<Monster>(area, i => !i.Skulled).Values.ToList();
+                    foreach (var monster in monsters)
                     {
-                        monster.Skulled = true;
-
-                        if (monster.Target is Aisling aisling)
-                        {
-                            monster.Scripts.Values.FirstOrDefault()?.OnDeath(aisling.Client);
-                        }
-                        else
-                        {
-                            monster.Scripts.Values.FirstOrDefault()?.OnDeath();
-                        }
-
-                        continue;
+                        ProcessMonster(monster, elapsedTime);
                     }
-
-                    monster.Scripts.Values.FirstOrDefault()?.Update(elapsedTime);
-                    monster.LastUpdated = DateTime.UtcNow;
-
-                    if (!monster.MonsterBuffAndDebuffStopWatch.IsRunning)
-                        monster.MonsterBuffAndDebuffStopWatch.Start();
-
-                    if (monster.MonsterBuffAndDebuffStopWatch.Elapsed.TotalMilliseconds < 1000) continue;
-
-                    monster.UpdateBuffs(monster);
-                    monster.UpdateDebuffs(monster);
-                    monster.MonsterBuffAndDebuffStopWatch.Restart();
                 }
-            }
+            });
         }
         catch (Exception ex)
         {
@@ -496,39 +510,37 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         }
     }
 
-    private static Task ProcessMonsterUpdateTask(Monster monster, TimeSpan elapsedTime)
+    private static void ProcessMonster(Monster monster, TimeSpan elapsedTime)
     {
-        if (monster.Scripts == null) return Task.CompletedTask;
-        if (monster.Skulled) return Task.CompletedTask;
-
         if (monster.CurrentHp <= 0)
         {
             monster.Skulled = true;
 
+            // Handle OnDeath logic
             if (monster.Target is Aisling aisling)
             {
-                monster.Scripts.Values.FirstOrDefault()?.OnDeath(aisling.Client);
+                monster.Scripts?.Values.FirstOrDefault()?.OnDeath(aisling.Client);
             }
             else
             {
-                monster.Scripts.Values.FirstOrDefault()?.OnDeath();
+                monster.Scripts?.Values.FirstOrDefault()?.OnDeath();
             }
 
-            return Task.CompletedTask;
+            return;
         }
 
-        monster.Scripts.Values.FirstOrDefault()?.Update(elapsedTime);
+        // Update monster scripts
+        monster.Scripts?.Values.FirstOrDefault()?.Update(elapsedTime);
         monster.LastUpdated = DateTime.UtcNow;
 
+        // Handle buffs and debuffs
         if (!monster.MonsterBuffAndDebuffStopWatch.IsRunning)
             monster.MonsterBuffAndDebuffStopWatch.Start();
 
-        if (monster.MonsterBuffAndDebuffStopWatch.Elapsed.TotalMilliseconds < 1000) return Task.CompletedTask;
-
+        if (!(monster.MonsterBuffAndDebuffStopWatch.Elapsed.TotalMilliseconds >= 1000)) return;
         monster.UpdateBuffs(monster);
         monster.UpdateDebuffs(monster);
         monster.MonsterBuffAndDebuffStopWatch.Restart();
-        return Task.CompletedTask;
     }
 
     private static void UpdateMundanes(TimeSpan elapsedTime)
@@ -566,7 +578,21 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     {
         try
         {
-            Parallel.ForEach(ServerSetup.Instance.GlobalMapCache.Values, (map) => { map?.Update(elapsedTime); });
+            // Divide the GlobalMapCache into chunks of maps
+            var mapChunks = ServerSetup.Instance.GlobalMapCache.Values
+                .Select((area, index) => new { area, index })
+                .GroupBy(x => x.index % Environment.ProcessorCount) // Create chunks based on processor count
+                .Select(group => group.Select(x => x.area).ToList()) // Convert each group to a list of areas
+                .ToList();
+
+            // Process each chunk in parallel
+            Parallel.ForEach(mapChunks, chunk =>
+            {
+                foreach (var area in chunk)
+                {
+                    area?.Update(elapsedTime);
+                }
+            });
         }
         catch (Exception ex)
         {
