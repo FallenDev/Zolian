@@ -64,6 +64,45 @@ public class DebuffWrathConsequences : Debuff
     }
 }
 
+public class DebuffEclipseSeal : Debuff
+{
+    private static double AcModifer => 0.15; // 85% (Armor * Modifier)
+    public override byte Icon => 226;
+    public override int Length => 600;
+    public override string Name => "Eclipse Seal";
+
+    public override void OnApplied(Sprite affected, Debuff debuff)
+    {
+        if (affected.Debuffs.TryAdd(debuff.Name, debuff))
+        {
+            DebuffSpell = debuff;
+            DebuffSpell.TimeLeft = DebuffSpell.Length;
+            affected.SealedModifier = AcModifer;
+        }
+
+        if (affected is not Aisling aisling) return;
+        InsertDebuff(aisling, debuff);
+        aisling.Client.SendAttributes(StatUpdateType.Secondary);
+    }
+
+    public override void OnEnded(Sprite affected, Debuff debuff)
+    {
+        affected.Debuffs.TryRemove(debuff.Name, out _);
+        affected.SealedModifier = 0;
+
+        if (affected is not Aisling aisling) return;
+        aisling.Client.SendEffect(byte.MinValue, Icon);
+        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "The eclipse has ended");
+        DeleteDebuff(aisling, debuff);
+        aisling.Client.SendAttributes(StatUpdateType.Secondary);
+    }
+
+    public override void OnItemChange(Aisling affected, Debuff debuff)
+    {
+        affected.SealedModifier = AcModifer;
+    }
+}
+
 public class DebuffSunSeal : Debuff
 {
     private static double AcModifer => 0.25; // 75% (Armor * Modifier)
@@ -217,6 +256,45 @@ public class DebuffDarkSeal : Debuff
     public override void OnItemChange(Aisling affected, Debuff debuff)
     {
         affected.SealedModifier = AcModifer;
+    }
+}
+
+public class DebuffUasCradh : Debuff
+{
+    private static StatusOperator AcModifer => new(Operator.Remove, 130);
+    public override byte Icon => 211;
+    public override int Length => 500;
+    public override string Name => "Uas Cradh";
+
+    public override void OnApplied(Sprite affected, Debuff debuff)
+    {
+        if (affected.Debuffs.TryAdd(debuff.Name, debuff))
+        {
+            DebuffSpell = debuff;
+            DebuffSpell.TimeLeft = DebuffSpell.Length;
+            affected.BonusAc -= AcModifer.Value.Item2;
+        }
+
+        if (affected is not Aisling aisling) return;
+        InsertDebuff(aisling, debuff);
+        aisling.Client.SendAttributes(StatUpdateType.Secondary);
+    }
+
+    public override void OnEnded(Sprite affected, Debuff debuff)
+    {
+        affected.Debuffs.TryRemove(debuff.Name, out _);
+        affected.BonusAc += AcModifer.Value.Item2;
+
+        if (affected is not Aisling aisling) return;
+        aisling.Client.SendEffect(byte.MinValue, Icon);
+        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "The curse lifted.");
+        DeleteDebuff(aisling, debuff);
+        aisling.Client.SendAttributes(StatUpdateType.Secondary);
+    }
+
+    public override void OnItemChange(Aisling affected, Debuff debuff)
+    {
+        affected.BonusAc -= AcModifer.Value.Item2;
     }
 }
 
@@ -1675,6 +1753,84 @@ public class DebuffDeadlyPoison : Debuff
         if (affected is Monster monster)
         {
             if (cap > 90000) cap = 90000;
+            monster.CurrentHp -= cap;
+            return;
+        }
+
+        if (cap > 0) affected.CurrentHp -= cap;
+    }
+}
+
+public class DebuffUasPoison : Debuff
+{
+    private static double Modifier => 0.13;
+    public override byte Icon => 201;
+    public override int Length => 400;
+    public override string Name => "Uas Puinsein";
+
+    public override void OnApplied(Sprite affected, Debuff debuff)
+    {
+        if (affected is Aisling { PoisonImmunity: true } immuneCheck)
+        {
+            immuneCheck.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=qYou are immune to Poison");
+            return;
+        }
+
+        if (affected.Debuffs.TryAdd(debuff.Name, debuff))
+        {
+            DebuffSpell = debuff;
+            DebuffSpell.TimeLeft = DebuffSpell.Length;
+        }
+
+        if (affected is Damageable damageable)
+        {
+            damageable.SendAnimationNearby(25, null, affected.Serial);
+            damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(34, false));
+        }
+
+        if (affected is not Aisling aisling) return;
+        aisling.RegenTimerDisabled = true;
+        InsertDebuff(aisling, debuff);
+        aisling.Client.SendAttributes(StatUpdateType.Secondary);
+    }
+
+    public override void OnDurationUpdate(Sprite affected, Debuff debuff)
+    {
+        base.OnDurationUpdate(affected, debuff);
+        ApplyPoison(affected, debuff);
+
+        if (affected is Damageable damageable)
+            damageable.SendAnimationNearby(25, null, affected.Serial);
+
+        if (affected is not Aisling aisling) return;
+        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Poisoned");
+        aisling.Client.SendAttributes(StatUpdateType.Vitality);
+    }
+
+    public override void OnEnded(Sprite affected, Debuff debuff)
+    {
+        affected.Debuffs.TryRemove(debuff.Name, out _);
+        if (affected is not Aisling aisling) return;
+        aisling.RegenTimerDisabled = false;
+        aisling.Client.SendEffect(byte.MinValue, Icon);
+        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You're starting to feel better");
+        DeleteDebuff(aisling, debuff);
+        aisling.Client.SendAttributes(StatUpdateType.Vitality);
+    }
+
+    private static void ApplyPoison(Sprite affected, Debuff debuff)
+    {
+        if (affected.CurrentHp <= affected.MaximumHp * 0.04)
+        {
+            debuff.OnEnded(affected, debuff);
+            return;
+        }
+
+        var cap = (int)(affected.CurrentHp * Modifier);
+
+        if (affected is Monster monster)
+        {
+            if (cap > 65000) cap = 65000;
             monster.CurrentHp -= cap;
             return;
         }

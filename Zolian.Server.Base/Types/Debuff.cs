@@ -34,10 +34,12 @@ public class Debuff
 
         DebuffSpell = debuff.Name switch
         {
+            "Eclipse Seal" => new DebuffEclipseSeal(),
             "Sun Seal" => new DebuffSunSeal(),
             "Penta Seal" => new DebuffPentaSeal(),
             "Moon Seal" => new DebuffMoonSeal(),
             "Dark Seal" => new DebuffDarkSeal(),
+            "Uas Cradh" => new DebuffUasCradh(),
             "Croich Ard Cradh" => new DebuffCriochArdCradh(),
             "Croich Mor Cradh" => new DebuffCriochMorCradh(),
             "Croich Cradh" => new DebuffCriochCradh(),
@@ -60,12 +62,14 @@ public class Debuff
             "Halt" => new DebuffHalt(),
             "Sleep" => new DebuffSleep(),
             "Bleeding" => new DebuffBleeding(),
+            "Uas Puinsein" => new DebuffUasPoison(),
             "Ard Puinsein" => new DebuffArdPoison(),
             "Mor Puinsein" => new DebuffMorPoison(),
             "Puinsein" => new DebuffPoison(),
             "Beag Puinsein" => new DebuffBeagPoison(),
             "Blind" => new DebuffBlind(),
             "Skulled" => new DebuffReaping(),
+            "Decay'n Ruin" => new DebuffHalt(),
             "Decay" => new DebuffDecay(),
             "Dark Chain" => new DebuffDarkChain(),
             "Silence" => new DebuffSilence(),
