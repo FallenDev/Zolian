@@ -1,4 +1,5 @@
-﻿using Chaos.Geometry;
+﻿using System.Diagnostics;
+using Chaos.Geometry;
 using Chaos.Geometry.Abstractions.Definitions;
 
 using Darkages.Common;
@@ -181,10 +182,10 @@ public class ShapeShifter : MonsterScript
                 return;
             }
 
-            if (Monster.BashEnabled)
+            if (Monster.BashEnabled || Monster.NextToTargetFirstAttack)
             {
                 if (!Monster.CantAttack)
-                    if (assail) Bash();
+                    if (assail || Monster.NextToTargetFirstAttack) Bash();
             }
 
             if (Monster.AbilityEnabled)
@@ -268,6 +269,7 @@ public class ShapeShifter : MonsterScript
 
     private void Bash()
     {
+        Monster.NextToTargetFirstAttack = false;
         if (Monster.CantAttack) return;
         // Training Dummy or other enemies who can't attack
         if (Monster.SkillScripts.Count == 0) return;
@@ -295,8 +297,7 @@ public class ShapeShifter : MonsterScript
         // Training Dummy or other enemies who can't attack
         if (Monster.AbilityScripts.Count == 0) return;
 
-        var abilityAttempt = Generator.RandNumGen100();
-        if (abilityAttempt <= 60) return;
+        if (Generator.RandomPercentPrecise() <= 0.70) return;
         var abilityIdx = RandomNumberGenerator.GetInt32(Monster.AbilityScripts.Count);
 
         if (Monster.AbilityScripts[abilityIdx] is null) return;
@@ -313,7 +314,7 @@ public class ShapeShifter : MonsterScript
         // Training Dummy or other enemies who can't attack
         if (Monster.SpellScripts.Count == 0) return;
 
-        if (!(Generator.RandomPercentPrecise() >= 0.70)) return;
+        if (Generator.RandomPercentPrecise() <= 0.70) return;
         var spellIdx = RandomNumberGenerator.GetInt32(Monster.SpellScripts.Count);
 
         if (Monster.SpellScripts[spellIdx] is null) return;
@@ -776,10 +777,10 @@ public class AlertSummon : MonsterScript
                 return;
             }
 
-            if (Monster.BashEnabled)
+            if (Monster.BashEnabled || Monster.NextToTargetFirstAttack)
             {
                 if (!Monster.CantAttack)
-                    if (assail) Bash();
+                    if (assail || Monster.NextToTargetFirstAttack) Bash();
             }
 
             if (Monster.AbilityEnabled)
@@ -834,6 +835,7 @@ public class AlertSummon : MonsterScript
 
     private void Bash()
     {
+        Monster.NextToTargetFirstAttack = false;
         if (Monster.CantAttack) return;
         // Training Dummy or other enemies who can't attack
         if (Monster.SkillScripts.Count == 0) return;
@@ -861,8 +863,7 @@ public class AlertSummon : MonsterScript
         // Training Dummy or other enemies who can't attack
         if (Monster.AbilityScripts.Count == 0) return;
 
-        var abilityAttempt = Generator.RandNumGen100();
-        if (abilityAttempt <= 60) return;
+        if (Generator.RandomPercentPrecise() <= 0.70) return;
         var abilityIdx = RandomNumberGenerator.GetInt32(Monster.AbilityScripts.Count);
 
         if (Monster.AbilityScripts[abilityIdx] is null) return;
@@ -875,7 +876,7 @@ public class AlertSummon : MonsterScript
         if (Monster.CantCast) return;
         if (Monster.Target is null) return;
 
-        if (!(Generator.RandomPercentPrecise() >= 0.70)) return;
+        if (Generator.RandomPercentPrecise() <= 0.70) return;
 
         var monstersNearby = Monster.MonstersOnMap();
 
@@ -1120,7 +1121,7 @@ public class Turret : MonsterScript
         if (Monster.Target is null) return;
         if (!Monster.Target.WithinMonsterSpellRangeOf(Monster)) return;
 
-        if (!(Generator.RandomPercentPrecise() >= 0.70)) return;
+        if (Generator.RandomPercentPrecise() <= 0.70) return;
         var spellIdx = RandomNumberGenerator.GetInt32(Monster.SpellScripts.Count);
 
         if (Monster.SpellScripts[spellIdx] is null) return;
@@ -1303,10 +1304,10 @@ public class GeneralPirate : MonsterScript
                 return;
             }
 
-            if (Monster.BashEnabled)
+            if (Monster.BashEnabled || Monster.NextToTargetFirstAttack)
             {
                 if (!Monster.CantAttack)
-                    if (assail) Bash();
+                    if (assail || Monster.NextToTargetFirstAttack) Bash();
             }
 
             if (Monster.AbilityEnabled)
@@ -1363,6 +1364,7 @@ public class GeneralPirate : MonsterScript
 
     private void Bash()
     {
+        Monster.NextToTargetFirstAttack = false;
         if (Monster.CantAttack) return;
         // Training Dummy or other enemies who can't attack
         if (Monster.SkillScripts.Count == 0) return;
@@ -1390,8 +1392,7 @@ public class GeneralPirate : MonsterScript
         // Training Dummy or other enemies who can't attack
         if (Monster.AbilityScripts.Count == 0) return;
 
-        var abilityAttempt = Generator.RandNumGen100();
-        if (abilityAttempt <= 60) return;
+        if (Generator.RandomPercentPrecise() <= 0.70) return;
         var abilityIdx = RandomNumberGenerator.GetInt32(Monster.AbilityScripts.Count);
 
         if (Monster.AbilityScripts[abilityIdx] is null) return;
@@ -1410,7 +1411,7 @@ public class GeneralPirate : MonsterScript
         // Training Dummy or other enemies who can't attack
         if (Monster.SpellScripts.Count == 0) return;
 
-        if (!(Generator.RandomPercentPrecise() >= 0.70)) return;
+        if (Generator.RandomPercentPrecise() <= 0.70) return;
         var spellIdx = RandomNumberGenerator.GetInt32(Monster.SpellScripts.Count);
 
         if (Monster.SpellScripts[spellIdx] is null) return;
@@ -1593,10 +1594,10 @@ public class PirateOfficer : MonsterScript
                 return;
             }
 
-            if (Monster.BashEnabled)
+            if (Monster.BashEnabled || Monster.NextToTargetFirstAttack)
             {
                 if (!Monster.CantAttack)
-                    if (assail) Bash();
+                    if (assail || Monster.NextToTargetFirstAttack) Bash();
             }
 
             if (Monster.AbilityEnabled)
@@ -1653,6 +1654,7 @@ public class PirateOfficer : MonsterScript
 
     private void Bash()
     {
+        Monster.NextToTargetFirstAttack = false;
         if (Monster.CantAttack) return;
         // Training Dummy or other enemies who can't attack
         if (Monster.SkillScripts.Count == 0) return;
@@ -1689,8 +1691,7 @@ public class PirateOfficer : MonsterScript
         // Training Dummy or other enemies who can't attack
         if (Monster.AbilityScripts.Count == 0) return;
 
-        var abilityAttempt = Generator.RandNumGen100();
-        if (abilityAttempt <= 60) return;
+        if (Generator.RandomPercentPrecise() <= 0.70) return;
         var abilityIdx = RandomNumberGenerator.GetInt32(Monster.AbilityScripts.Count);
 
         if (Monster.AbilityScripts[abilityIdx] is null) return;
@@ -1709,7 +1710,7 @@ public class PirateOfficer : MonsterScript
         // Training Dummy or other enemies who can't attack
         if (Monster.SpellScripts.Count == 0) return;
 
-        if (!(Generator.RandomPercentPrecise() >= 0.70)) return;
+        if (Generator.RandomPercentPrecise() <= 0.70) return;
         var spellIdx = RandomNumberGenerator.GetInt32(Monster.SpellScripts.Count);
 
         if (Monster.SpellScripts[spellIdx] is null) return;
@@ -1902,10 +1903,10 @@ public class AosdaRemnant : MonsterScript
                 return;
             }
 
-            if (Monster.BashEnabled)
+            if (Monster.BashEnabled || Monster.NextToTargetFirstAttack)
             {
                 if (!Monster.CantAttack)
-                    if (assail) Bash();
+                    if (assail || Monster.NextToTargetFirstAttack) Bash();
             }
 
             if (Monster.AbilityEnabled)
@@ -1962,6 +1963,7 @@ public class AosdaRemnant : MonsterScript
 
     private void Bash()
     {
+        Monster.NextToTargetFirstAttack = false;
         if (Monster.CantAttack) return;
         // Training Dummy or other enemies who can't attack
         if (Monster.SkillScripts.Count == 0) return;
@@ -1989,8 +1991,7 @@ public class AosdaRemnant : MonsterScript
         // Training Dummy or other enemies who can't attack
         if (Monster.AbilityScripts.Count == 0) return;
 
-        var abilityAttempt = Generator.RandNumGen100();
-        if (abilityAttempt <= 60) return;
+        if (Generator.RandomPercentPrecise() <= 0.70) return;
         var abilityIdx = RandomNumberGenerator.GetInt32(Monster.AbilityScripts.Count);
 
         if (Monster.AbilityScripts[abilityIdx] is null) return;
@@ -2009,7 +2010,7 @@ public class AosdaRemnant : MonsterScript
         // Training Dummy or other enemies who can't attack
         if (Monster.SpellScripts.Count == 0) return;
 
-        if (!(Generator.RandomPercentPrecise() >= 0.70)) return;
+        if (Generator.RandomPercentPrecise() <= 0.70) return;
         var spellIdx = RandomNumberGenerator.GetInt32(Monster.SpellScripts.Count);
 
         if (Monster.SpellScripts[spellIdx] is null) return;
@@ -2029,6 +2030,7 @@ public class AosdaHero : MonsterScript
     private int Count => GhostChat.Length;
     private int RunCount => GhostChase.Length;
     private bool _deathCry;
+    private readonly Stopwatch _vulnerabilityWatch = new();
 
     public AosdaHero(Monster monster, Area map) : base(monster, map)
     {
@@ -2056,11 +2058,19 @@ public class AosdaHero : MonsterScript
 
             if (Monster.IsVulnerable || Monster.IsPoisoned)
             {
-                var pos = Monster.Pos;
-                Monster.SendAnimationNearby(75, new Position(pos));
+                if (!_vulnerabilityWatch.IsRunning)
+                    _vulnerabilityWatch.Start();
 
-                foreach (var debuff in Monster.Debuffs.Values)
-                    debuff?.OnEnded(Monster, debuff);
+                if (_vulnerabilityWatch.Elapsed.TotalMilliseconds > 1000)
+                {
+                    var pos = Monster.Pos;
+                    Monster.SendAnimationNearby(75, new Position(pos));
+
+                    foreach (var debuff in Monster.Debuffs.Values)
+                        debuff?.OnEnded(Monster, debuff);
+
+                    _vulnerabilityWatch.Restart();
+                }
             }
 
             MonsterState(elapsedTime);
@@ -2199,10 +2209,10 @@ public class AosdaHero : MonsterScript
                 return;
             }
 
-            if (Monster.BashEnabled)
+            if (Monster.BashEnabled || Monster.NextToTargetFirstAttack)
             {
                 if (!Monster.CantAttack)
-                    if (assail) Bash();
+                    if (assail || Monster.NextToTargetFirstAttack) Bash();
             }
 
             if (Monster.AbilityEnabled)
@@ -2259,6 +2269,7 @@ public class AosdaHero : MonsterScript
 
     private void Bash()
     {
+        Monster.NextToTargetFirstAttack = false;
         if (Monster.CantAttack) return;
         // Training Dummy or other enemies who can't attack
         if (Monster.SkillScripts.Count == 0) return;
@@ -2286,8 +2297,7 @@ public class AosdaHero : MonsterScript
         // Training Dummy or other enemies who can't attack
         if (Monster.AbilityScripts.Count == 0) return;
 
-        var abilityAttempt = Generator.RandNumGen100();
-        if (abilityAttempt <= 30) return;
+        if (Generator.RandomPercentPrecise() <= 0.70) return;
         var abilityIdx = RandomNumberGenerator.GetInt32(Monster.AbilityScripts.Count);
 
         if (Monster.AbilityScripts[abilityIdx] is null) return;
@@ -2306,7 +2316,7 @@ public class AosdaHero : MonsterScript
         // Training Dummy or other enemies who can't attack
         if (Monster.SpellScripts.Count == 0) return;
 
-        if (!(Generator.RandomPercentPrecise() >= 0.50)) return;
+        if (Generator.RandomPercentPrecise() <= 0.70) return;
         var spellIdx = RandomNumberGenerator.GetInt32(Monster.SpellScripts.Count);
 
         if (Monster.SpellScripts[spellIdx] is null) return;
@@ -2496,10 +2506,10 @@ public class AncientDragon : MonsterScript
                 return;
             }
 
-            if (Monster.BashEnabled)
+            if (Monster.BashEnabled || Monster.NextToTargetFirstAttack)
             {
                 if (!Monster.CantAttack)
-                    if (assail) Bash();
+                    if (assail || Monster.NextToTargetFirstAttack) Bash();
             }
 
             if (Monster.AbilityEnabled)
@@ -2556,6 +2566,7 @@ public class AncientDragon : MonsterScript
 
     private void Bash()
     {
+        Monster.NextToTargetFirstAttack = false;
         if (Monster.CantAttack) return;
         // Training Dummy or other enemies who can't attack
         if (Monster.SkillScripts.Count == 0) return;
@@ -2583,8 +2594,7 @@ public class AncientDragon : MonsterScript
         // Training Dummy or other enemies who can't attack
         if (Monster.AbilityScripts.Count == 0) return;
 
-        var abilityAttempt = Generator.RandNumGen100();
-        if (abilityAttempt <= 60) return;
+        if (Generator.RandomPercentPrecise() <= 0.70) return;
         var abilityIdx = RandomNumberGenerator.GetInt32(Monster.AbilityScripts.Count);
 
         if (Monster.AbilityScripts[abilityIdx] is null) return;
@@ -2603,7 +2613,7 @@ public class AncientDragon : MonsterScript
         // Training Dummy or other enemies who can't attack
         if (Monster.SpellScripts.Count == 0) return;
 
-        if (!(Generator.RandomPercentPrecise() >= 0.70)) return;
+        if (Generator.RandomPercentPrecise() <= 0.70) return;
         var spellIdx = RandomNumberGenerator.GetInt32(Monster.SpellScripts.Count);
 
         if (Monster.SpellScripts[spellIdx] is null) return;
@@ -2778,10 +2788,10 @@ public class Swarm : MonsterScript
                 return;
             }
 
-            if (Monster.BashEnabled)
+            if (Monster.BashEnabled || Monster.NextToTargetFirstAttack)
             {
                 if (!Monster.CantAttack)
-                    if (assail) Bash();
+                    if (assail || Monster.NextToTargetFirstAttack) Bash();
             }
 
             if (Monster.AbilityEnabled)
@@ -2851,6 +2861,7 @@ public class Swarm : MonsterScript
 
     private void Bash()
     {
+        Monster.NextToTargetFirstAttack = false;
         if (Monster.CantAttack) return;
         // Training Dummy or other enemies who can't attack
         if (Monster.SkillScripts.Count == 0) return;
@@ -2878,8 +2889,7 @@ public class Swarm : MonsterScript
         // Training Dummy or other enemies who can't attack
         if (Monster.AbilityScripts.Count == 0) return;
 
-        var abilityAttempt = Generator.RandNumGen100();
-        if (abilityAttempt <= 60) return;
+        if (Generator.RandomPercentPrecise() <= 0.70) return;
         var abilityIdx = RandomNumberGenerator.GetInt32(Monster.AbilityScripts.Count);
 
         if (Monster.AbilityScripts[abilityIdx] is null) return;
@@ -2896,7 +2906,7 @@ public class Swarm : MonsterScript
         // Training Dummy or other enemies who can't attack
         if (Monster.SpellScripts.Count == 0) return;
 
-        if (!(Generator.RandomPercentPrecise() >= 0.70)) return;
+        if (Generator.RandomPercentPrecise() <= 0.70) return;
         var spellIdx = RandomNumberGenerator.GetInt32(Monster.SpellScripts.Count);
 
         if (Monster.SpellScripts[spellIdx] is null) return;

@@ -44,8 +44,8 @@ public abstract class Sprite : INotifyPropertyChanged
                             HasBuff("Iron Skin") || HasBuff("Wings of Protection");
     public bool Hastened => HasBuff("Hastenga") || HasBuff("Hasten") || HasBuff("Haste");
     public bool SpellReflect => HasBuff("Deireas Faileas") || HasBuff("Secured Position");
-    public bool SpellNegate => HasBuff("Perfect Defense") || this is Aisling { GameMaster: true };
-    public bool SkillReflect => HasBuff("Asgall") || this is Aisling { GameMaster: true };
+    public bool SpellNegate => HasBuff("Perfect Defense")/* || this is Aisling { GameMaster: true }*/;
+    public bool SkillReflect => HasBuff("Asgall")/* || this is Aisling { GameMaster: true }*/;
     public bool IsBlind => HasDebuff("Blind");
     public bool IsConfused => HasDebuff("Confused");
     public bool IsSilenced => HasDebuff("Silence");

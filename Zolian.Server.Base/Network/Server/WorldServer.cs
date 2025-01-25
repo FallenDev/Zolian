@@ -151,7 +151,8 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     {
         var groundWatch = new Stopwatch();
         groundWatch.Start();
-        var variableGameSpeed = 60000;
+        const int defaultGameSpeed = 60000; // Default update interval in milliseconds (1 minute)
+        var variableGameSpeed = defaultGameSpeed;
 
         while (ServerSetup.Instance.Running)
         {
@@ -161,18 +162,23 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 continue;
             }
 
+            // Call the ground items update logic
             UpdateGroundItems();
-            var awaiter = (int)(60000 - groundWatch.Elapsed.TotalMilliseconds);
+
+            // Calculate the remaining time until the next update
+            var awaiter = (int)(defaultGameSpeed - groundWatch.Elapsed.TotalMilliseconds);
 
             if (awaiter < 0)
             {
-                variableGameSpeed = 60000 + awaiter;
+                // Adjust the game speed dynamically to account for delays
+                variableGameSpeed = defaultGameSpeed + awaiter;
                 groundWatch.Restart();
                 continue;
             }
 
+            // Delay for the remaining time, if any
             await Task.Delay(TimeSpan.FromMilliseconds(awaiter));
-            variableGameSpeed = 60000;
+            variableGameSpeed = defaultGameSpeed; // Reset to default interval
             groundWatch.Restart();
         }
     }
@@ -181,7 +187,8 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     {
         var groundWatch = new Stopwatch();
         groundWatch.Start();
-        var variableGameSpeed = 60000;
+        const int defaultGameSpeed = 60000; // Default update interval in milliseconds (1 minute)
+        var variableGameSpeed = defaultGameSpeed;
 
         while (ServerSetup.Instance.Running)
         {
@@ -191,18 +198,23 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 continue;
             }
 
+            // Call the ground money update logic
             UpdateGroundMoney();
-            var awaiter = (int)(60000 - groundWatch.Elapsed.TotalMilliseconds);
+
+            // Calculate the remaining time until the next update
+            var awaiter = (int)(defaultGameSpeed - groundWatch.Elapsed.TotalMilliseconds);
 
             if (awaiter < 0)
             {
-                variableGameSpeed = 60000 + awaiter;
+                // Adjust the game speed dynamically to account for delays
+                variableGameSpeed = defaultGameSpeed + awaiter;
                 groundWatch.Restart();
                 continue;
             }
 
+            // Delay for the remaining time, if any
             await Task.Delay(TimeSpan.FromMilliseconds(awaiter));
-            variableGameSpeed = 60000;
+            variableGameSpeed = defaultGameSpeed; // Reset to default interval
             groundWatch.Restart();
         }
     }
@@ -211,7 +223,8 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     {
         var mundanesWatch = new Stopwatch();
         mundanesWatch.Start();
-        var variableGameSpeed = 1500;
+        const int defaultGameSpeed = 1500; // Default update interval in milliseconds
+        var variableGameSpeed = defaultGameSpeed;
 
         while (ServerSetup.Instance.Running)
         {
@@ -221,46 +234,60 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 continue;
             }
 
+            // Call the mundane update logic
             UpdateMundanes(mundanesWatch.Elapsed);
-            var awaiter = (int)(1500 - mundanesWatch.Elapsed.TotalMilliseconds);
+
+            // Calculate remaining time until the next update
+            var awaiter = (int)(defaultGameSpeed - mundanesWatch.Elapsed.TotalMilliseconds);
 
             if (awaiter < 0)
             {
-                variableGameSpeed = 1500 + awaiter;
+                // Adjust the game speed dynamically to account for processing delays
+                variableGameSpeed = defaultGameSpeed + awaiter;
                 mundanesWatch.Restart();
                 continue;
             }
 
+            // Delay for the remaining time, if any
             await Task.Delay(TimeSpan.FromMilliseconds(awaiter));
-            variableGameSpeed = 1500;
+            variableGameSpeed = defaultGameSpeed; // Reset to default interval
             mundanesWatch.Restart();
         }
     }
 
     private static async Task UpdateMonstersRoutine()
     {
-        var updateInterval = TimeSpan.FromMilliseconds(500);
-        var nextUpdate = DateTime.UtcNow + updateInterval;
+        var monstersWatch = new Stopwatch();
+        monstersWatch.Start();
+        const int defaultGameSpeed = 250; // Default update interval in milliseconds
+        var variableGameSpeed = defaultGameSpeed;
 
         while (ServerSetup.Instance.Running)
         {
-            var elapsed = DateTime.UtcNow;
-            if (elapsed >= nextUpdate)
+            if (monstersWatch.Elapsed.TotalMilliseconds < variableGameSpeed)
             {
-                // Calculate actual elapsed time since the last update
-                var actualElapsed = DateTime.UtcNow - (nextUpdate - updateInterval);
-                UpdateMonsters(actualElapsed);
-
-                // Schedule the next update
-                nextUpdate += updateInterval;
+                await Task.Delay(1);
+                continue;
             }
 
-            // Calculate remaining time and delay
-            var remainingTime = nextUpdate - DateTime.UtcNow;
-            if (remainingTime > TimeSpan.Zero)
+            // Update monsters with the elapsed time
+            UpdateMonsters(monstersWatch.Elapsed);
+
+            // Calculate the remaining time for the next update
+            var awaiter = (int)(defaultGameSpeed - monstersWatch.Elapsed.TotalMilliseconds);
+
+            if (awaiter < 0)
             {
-                await Task.Delay(remainingTime);
+                // Adjust the game speed dynamically to compensate for overrun
+                variableGameSpeed = defaultGameSpeed + awaiter;
+                monstersWatch.Restart();
+                continue;
             }
+
+            // Delay for the remainder of the interval
+            await Task.Delay(TimeSpan.FromMilliseconds(awaiter));
+            variableGameSpeed = defaultGameSpeed;
+            monstersWatch.Restart();
         }
     }
 
@@ -268,7 +295,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     {
         var gameWatch = new Stopwatch();
         gameWatch.Start();
-        var variableGameSpeed = GameSpeed;
+        var variableGameSpeed = GameSpeed; // Use the constant directly
 
         while (ServerSetup.Instance.Running)
         {
@@ -278,18 +305,23 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 continue;
             }
 
+            // Call the maps update logic
             UpdateMaps(gameWatch.Elapsed);
+
+            // Calculate the remaining time until the next update
             var awaiter = (int)(GameSpeed - gameWatch.Elapsed.TotalMilliseconds);
 
             if (awaiter < 0)
             {
+                // Adjust the game speed dynamically to account for delays
                 variableGameSpeed = GameSpeed + awaiter;
                 gameWatch.Restart();
                 continue;
             }
 
+            // Delay for the remaining time, if any
             await Task.Delay(TimeSpan.FromMilliseconds(awaiter));
-            variableGameSpeed = GameSpeed;
+            variableGameSpeed = GameSpeed; // Reset to default interval
             gameWatch.Restart();
         }
     }
@@ -332,51 +364,65 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     private async Task UpdateClients()
     {
         const int baseConcurrency = 10; // Minimum number of concurrent tasks
+        const int batchSize = 100; // Number of players per batch
         var maxConcurrency = Math.Max(baseConcurrency, Environment.ProcessorCount); // Adjust based on system capabilities
         var semaphore = new SemaphoreSlim(maxConcurrency);
-        var updateInterval = TimeSpan.FromMilliseconds(50); // Fixed update interval
-        var nextUpdate = DateTime.UtcNow + updateInterval;
+        var clientWatch = new Stopwatch();
+        clientWatch.Start();
+        var variableGameSpeed = GameSpeed; // Base interval
 
         while (ServerSetup.Instance.Running)
         {
+            if (clientWatch.ElapsedMilliseconds < variableGameSpeed)
+            {
+                await Task.Delay(1);
+                continue;
+            }
+
             var players = Aislings.Where(player => player?.Client != null).ToList();
 
             // Divide players into chunks (batches) for processing
-            var batchSize = 100; // Number of players per batch
-            var playerBatches = players.Chunk(batchSize);
+            var playerBatches = players.Chunk(batchSize).ToList();
 
-            foreach (var batch in playerBatches)
-            {
-                // Process each batch with limited concurrency
-                var playerUpdateTasks = batch.Select(async player =>
+            // Process batches concurrently
+            var batchTasks = playerBatches.Select(batch =>
+                Task.Run(async () =>
                 {
-                    await semaphore.WaitAsync();
-                    try
+                    foreach (var player in batch)
                     {
-                        await ProcessClientTask(player);
+                        await semaphore.WaitAsync();
+                        try
+                        {
+                            // Process the player inline to reduce task overhead
+                            await ProcessClientTask(player);
+                        }
+                        finally
+                        {
+                            semaphore.Release();
+                        }
                     }
-                    finally
-                    {
-                        semaphore.Release();
-                    }
-                });
+                })
+            );
 
-                // Wait for all tasks in the current batch to complete
-                await Task.WhenAll(playerUpdateTasks);
-            }
+            // Wait for all batches to complete
+            await Task.WhenAll(batchTasks);
 
-            // Calculate remaining time and delay until the next update
-            var remainingTime = nextUpdate - DateTime.UtcNow;
-            if (remainingTime > TimeSpan.Zero)
+            // Calculate the remaining time for the next update
+            var syncCount = (int)(GameSpeed - clientWatch.ElapsedMilliseconds);
+
+            if (syncCount < 0)
             {
-                await Task.Delay(remainingTime);
+                // Adjust GameSpeed dynamically to account for delays
+                variableGameSpeed = GameSpeed + syncCount;
+                clientWatch.Restart();
+                continue;
             }
 
-            // Schedule the next update
-            nextUpdate += updateInterval;
+            await Task.Delay(TimeSpan.FromMilliseconds(syncCount));
+            variableGameSpeed = GameSpeed; // Reset to default interval
+            clientWatch.Restart();
         }
     }
-
 
     private async Task ProcessClientTask(Aisling player)
     {

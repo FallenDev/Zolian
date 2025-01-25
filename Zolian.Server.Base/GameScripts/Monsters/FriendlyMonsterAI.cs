@@ -175,10 +175,10 @@ public class BaseFriendlyMonster : MonsterScript
                 return;
             }
 
-            if (Monster.BashEnabled)
+            if (Monster.BashEnabled || Monster.NextToTargetFirstAttack)
             {
                 if (!Monster.CantAttack)
-                    if (assail) Bash();
+                    if (assail || Monster.NextToTargetFirstAttack) Bash();
             }
 
             if (Monster.AbilityEnabled)
@@ -257,6 +257,7 @@ public class BaseFriendlyMonster : MonsterScript
 
     private void Bash()
     {
+        Monster.NextToTargetFirstAttack = false;
         if (Monster.CantAttack) return;
         // Training Dummy or other enemies who can't attack
         if (Monster.SkillScripts.Count == 0) return;
@@ -282,8 +283,8 @@ public class BaseFriendlyMonster : MonsterScript
         if (Monster.CantAttack) return;
         // Training Dummy or other enemies who can't attack
         if (Monster.AbilityScripts.Count == 0) return;
-        var abilityAttempt = Generator.RandNumGen100();
-        if (abilityAttempt <= 60) return;
+        if (Generator.RandomPercentPrecise() <= 0.70) return;
+
         var abilityIdx = RandomNumberGenerator.GetInt32(Monster.AbilityScripts.Count);
         if (Monster.AbilityScripts[abilityIdx] is null) return;
         Monster.AbilityScripts[abilityIdx].OnUse(Monster);
@@ -297,7 +298,7 @@ public class BaseFriendlyMonster : MonsterScript
         if (!Monster.Target.WithinMonsterSpellRangeOf(Monster)) return;
         // Training Dummy or other enemies who can't attack
         if (Monster.SpellScripts.Count == 0) return;
-        if (!(Generator.RandomPercentPrecise() >= 0.70)) return;
+        if (Generator.RandomPercentPrecise() <= 0.70) return;
         var spellIdx = RandomNumberGenerator.GetInt32(Monster.SpellScripts.Count);
         if (Monster.SpellScripts[spellIdx] is null) return;
         Monster.SpellScripts[spellIdx].OnUse(Monster, Monster.Target);

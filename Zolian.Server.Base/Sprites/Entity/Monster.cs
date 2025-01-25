@@ -59,6 +59,7 @@ public sealed class Monster : Damageable
     public string Size { get; set; }
     public ushort Image { get; set; }
     public bool WalkEnabled { get; set; }
+    public bool NextToTargetFirstAttack { get; set; }
     public WorldServerTimer BashTimer { get; init; }
     public WorldServerTimer AbilityTimer { get; init; }
     public WorldServerTimer CastTimer { get; init; }
@@ -557,6 +558,7 @@ public sealed class Monster : Damageable
     public void NextToTarget()
     {
         if (Target == null) return;
+        NextToTargetFirstAttack = true;
 
         if (Facing((int)Target.Pos.X, (int)Target.Pos.Y, out var direction))
         {
