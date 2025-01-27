@@ -64,7 +64,7 @@ public static class NpcShopExtensions
                 new(0x20, ServerSetup.Instance.Config.MerchantCancelMessage)
             };
 
-            client.SendOptionsDialog(mundane, $"It will cost you a total of {cost} coins for {{=c1 {{=q{itemName}s{{=a. Is that a deal?", opts.ToArray());
+            client.SendOptionsDialog(mundane, $"It will cost you a total of {cost} coins for {{=c1 {{=q{itemName}{{=a. Is that a deal?", opts.ToArray());
         }
     }
 

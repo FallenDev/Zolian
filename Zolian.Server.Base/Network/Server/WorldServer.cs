@@ -1292,10 +1292,10 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
         ValueTask InnerOnClientRedirected(IWorldClient localClient, ClientRedirectedArgs localArgs)
         {
-            if (localArgs.Message != null)
-            {
-                // display welcome message to client.
-            }
+            //if (localArgs.Message != null)
+            //{
+            //    // display welcome message to client.
+            //}
 
             return default;
         }

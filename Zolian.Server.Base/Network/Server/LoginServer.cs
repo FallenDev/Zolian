@@ -142,7 +142,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
                     localClient.SendLoginMessage(LoginMessageType.Confirm, string.Empty);
                     break;
                 case true:
-                    localClient.SendLoginMessage(LoginMessageType.ClearNameMessage, "Slow down on character creation.");
+                    localClient.SendLoginMessage(LoginMessageType.Confirm, "Slow down on character creation.");
                     break;
             }
         }
@@ -167,7 +167,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
         var args = PacketSerializer.Deserialize<LoginArgs>(in packet);
         if (ServerSetup.Instance.Running) return ExecuteHandler(client, args, InnerOnLogin);
 
-        client.SendLoginMessage(LoginMessageType.CharacterDoesntExist, "Server is down for maintenance");
+        client.SendLoginMessage(LoginMessageType.Confirm, "Server is down for maintenance");
         return default;
 
         async ValueTask InnerOnLogin(ILoginClient localClient, LoginArgs localArgs)
@@ -178,7 +178,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
             {
                 if (attempts >= 5)
                 {
-                    localClient.SendLoginMessage(LoginMessageType.CharacterDoesntExist, "Your IP has been restricted for too many incorrect password attempts.");
+                    localClient.SendLoginMessage(LoginMessageType.Confirm, "Your IP has been restricted for too many incorrect password attempts.");
                     ServerSetup.EventsLogger($"{localClient.RemoteIp} has attempted {attempts} and has been restricted.");
                     SentrySdk.CaptureException(new Exception($"{localClient.RemoteIp} has been restricted due to password attempts."));
                     return;
@@ -199,12 +199,12 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
                     result.Hacked = false;
                     result.Password = "abc123";
                     await SavePassword(result);
-                    localClient.SendLoginMessage(LoginMessageType.CharacterDoesntExist, "Account was unlocked!");
+                    localClient.SendLoginMessage(LoginMessageType.Confirm, "Account was unlocked!");
                     return;
                 }
 
                 ServerSetup.Instance.GlobalPasswordAttempt.AddOrUpdate(localClient.RemoteIp, 1, (remoteIp, creations) => creations += 1);
-                localClient.SendLoginMessage(LoginMessageType.CharacterDoesntExist, "GM Action, denied access and IP logged.");
+                localClient.SendLoginMessage(LoginMessageType.Confirm, "GM Action, denied access and IP logged.");
                 ServerSetup.EventsLogger($"{localClient.RemoteIp} has attempted to use the unlock command.");
                 SentrySdk.CaptureException(new Exception($"{localClient.RemoteIp} has attempted to use the unlock command"));
                 return;
@@ -230,7 +230,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
             switch (localArgs.Name.ToLowerInvariant())
             {
                 case "asdf":
-                    localClient.SendLoginMessage(LoginMessageType.CharacterDoesntExist, "Locked Account, denied access");
+                    localClient.SendLoginMessage(LoginMessageType.Confirm, "Locked Account, denied access");
                     return;
                 case "death":
                     {
@@ -242,7 +242,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
                             return;
                         }
 
-                        localClient.SendLoginMessage(LoginMessageType.CharacterDoesntExist, "GM Account, denied access");
+                        localClient.SendLoginMessage(LoginMessageType.Confirm, "GM Account, denied access");
                         return;
                     }
                 case "scythe":
@@ -256,14 +256,14 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
                             return;
                         }
 
-                        localClient.SendLoginMessage(LoginMessageType.CharacterDoesntExist, "GM Account, denied access");
+                        localClient.SendLoginMessage(LoginMessageType.Confirm, "GM Account, denied access");
                         return;
                     }
                 default:
                     {
                         if (result.Hacked)
                         {
-                            localClient.SendLoginMessage(LoginMessageType.CharacterDoesntExist, "Bruteforce detected, we've locked the account to protect it; If this is your account, please contact the GM.");
+                            localClient.SendLoginMessage(LoginMessageType.Confirm, "Bruteforce detected, we've locked the account to protect it; If this is your account, please contact the GM.");
                             return;
                         }
 
@@ -323,7 +323,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
         var args = PacketSerializer.Deserialize<PasswordChangeArgs>(in packet);
         if (ServerSetup.Instance.Running) return ExecuteHandler(client, args, InnerOnPasswordChange);
 
-        client.SendLoginMessage(LoginMessageType.CharacterDoesntExist, "Server is down for maintenance");
+        client.SendLoginMessage(LoginMessageType.Confirm, "Server is down for maintenance");
         return default;
 
         async ValueTask InnerOnPasswordChange(ILoginClient localClient, PasswordChangeArgs localArgs)
@@ -334,7 +334,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
             {
                 if (attempts >= 5)
                 {
-                    localClient.SendLoginMessage(LoginMessageType.CharacterDoesntExist, "Your IP has been restricted for too many incorrect password attempts.");
+                    localClient.SendLoginMessage(LoginMessageType.Confirm, "Your IP has been restricted for too many incorrect password attempts.");
                     ServerSetup.EventsLogger($"{localClient.RemoteIp} has attempted {attempts} and has been restricted.");
                     SentrySdk.CaptureException(new Exception($"{localClient.RemoteIp} has been restricted due to password attempts."));
                     return;
@@ -347,7 +347,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
 
             if (localArgs.NewPassword.Length < 6)
             {
-                localClient.SendLoginMessage(LoginMessageType.CharacterDoesntExist, "New password was not accepted. Keep it between 6 to 8 characters.");
+                localClient.SendLoginMessage(LoginMessageType.Confirm, "New password was not accepted. Keep it between 6 to 8 characters.");
                 return;
             }
 
@@ -362,13 +362,13 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
     {
         if (aisling == null)
         {
-            localClient.SendLoginMessage(LoginMessageType.CharacterDoesntExist, $"{{=q'{localArgsName}' {{=adoes not currently exist on this server. You can make this hero by clicking on 'Create'");
+            localClient.SendLoginMessage(LoginMessageType.Confirm, $"{{=q'{localArgsName}' {{=adoes not currently exist on this server. You can make this hero by clicking on 'Create'");
             return false;
         }
 
         if (aisling.Hacked)
         {
-            localClient.SendLoginMessage(LoginMessageType.CharacterDoesntExist, "Hacking detected, we've locked the account; If this is your account, please contact the GM.");
+            localClient.SendLoginMessage(LoginMessageType.Confirm, "Hacking detected, we've locked the account; If this is your account, please contact the GM.");
             return false;
         }
 
@@ -388,7 +388,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
         }
 
         ServerSetup.ConnectionLogger($"{aisling.Username} was locked to protect their account.");
-        localClient.SendLoginMessage(LoginMessageType.CharacterDoesntExist, "Hacking detected, the player has been locked.");
+        localClient.SendLoginMessage(LoginMessageType.Confirm, "Hacking detected, the player has been locked.");
         aisling.Hacked = true;
         await SavePasswordAttempt(aisling);
         return false;
@@ -596,22 +596,22 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
             if (regex.IsMatch(name))
             {
                 SentrySdk.CaptureMessage($"Player attempted to create an unsupported username. {name} : {client.RemoteIp}");
-                client.SendLoginMessage(LoginMessageType.ClearNameMessage, "Unsupported username, please try again.");
+                client.SendLoginMessage(LoginMessageType.CheckName, "Unsupported username, please try again.");
                 return false;
             }
 
             if (name.Length is < 3 or > 12)
             {
-                client.SendLoginMessage(LoginMessageType.ClearNameMessage, "{=eYour {=qUserName {=emust be within 3 to 12 characters in length.");
+                client.SendLoginMessage(LoginMessageType.CheckName, "{=eYour {=qUserName {=emust be within 3 to 12 characters in length.");
                 return false;
             }
 
             if (password.Length > 5) return true;
-            client.SendLoginMessage(LoginMessageType.ClearPswdMessage, "{=eYour {=qPassword {=edoes not meet the minimum requirement of 6 characters.");
+            client.SendLoginMessage(LoginMessageType.CheckPassword, "{=eYour {=qPassword {=edoes not meet the minimum requirement of 6 characters.");
             return false;
         }
 
-        client.SendLoginMessage(LoginMessageType.ClearNameMessage, "Character already exists.");
+        client.SendLoginMessage(LoginMessageType.Confirm, "Character already exists.");
         return false;
     }
 
