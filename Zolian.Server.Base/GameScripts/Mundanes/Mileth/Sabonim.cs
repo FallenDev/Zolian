@@ -139,6 +139,11 @@ public class Sabonim(WorldServer server, Mundane mundane) : MundaneScript(server
                 break;
             case 0x12:
                 if (!args.Equals("Yellow")) return;
+                if (client.Aisling.ExpLevel < 20)
+                {
+                    client.SendOptionsDialog(Mundane, "You are not ready for this attainment yet.");
+                    return;
+                }
                 client.Aisling.QuestManager.BeltQuest = "Yellow";
                 client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=bGoblin Soldier");
                 client.SendOptionsDialog(Mundane, "In Eastern Woodlands, search and kill a Goblin Soldier. Return to me when you've completed your task");
@@ -181,6 +186,11 @@ public class Sabonim(WorldServer server, Mundane mundane) : MundaneScript(server
                 break;
             case 0x13:
                 if (!args.Equals("Orange")) return;
+                if (client.Aisling.ExpLevel < 40)
+                {
+                    client.SendOptionsDialog(Mundane, "You are not ready for this attainment yet.");
+                    return;
+                }
                 client.Aisling.QuestManager.BeltQuest = "Orange";
                 client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=bPolyp x2");
                 client.SendOptionsDialog(Mundane, "In Abel Dungeon, search and kill two Polyps. Return to me when you've completed your task");
@@ -223,6 +233,11 @@ public class Sabonim(WorldServer server, Mundane mundane) : MundaneScript(server
                 break;
             case 0x14:
                 if (!args.Equals("Green")) return;
+                if (client.Aisling.ExpLevel < 60)
+                {
+                    client.SendOptionsDialog(Mundane, "You are not ready for this attainment yet.");
+                    return;
+                }
                 client.Aisling.QuestManager.BeltQuest = "Green";
                 client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=bGrimlok Worker x3");
                 client.SendOptionsDialog(Mundane, "In Pravat Mines, search and kill three Grimlok Workers. Return to me when you've completed your task");
@@ -265,6 +280,11 @@ public class Sabonim(WorldServer server, Mundane mundane) : MundaneScript(server
                 break;
             case 0x15:
                 if (!args.Equals("Purple")) return;
+                if (client.Aisling.ExpLevel < 80)
+                {
+                    client.SendOptionsDialog(Mundane, "You are not ready for this attainment yet.");
+                    return;
+                }
                 client.Aisling.QuestManager.BeltQuest = "Purple";
                 client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=bMarauder x5");
                 client.SendOptionsDialog(Mundane, "Deep in Mileth's Crypt, search and kill five Marauders. Return to me when you've completed your task");
@@ -307,6 +327,11 @@ public class Sabonim(WorldServer server, Mundane mundane) : MundaneScript(server
                 break;
             case 0x16:
                 if (!args.Equals("Blue")) return;
+                if (client.Aisling.ExpLevel < 99)
+                {
+                    client.SendOptionsDialog(Mundane, "You are not ready for this attainment yet.");
+                    return;
+                }
                 client.Aisling.QuestManager.BeltQuest = "Blue";
                 client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=bWisp x2");
                 client.SendOptionsDialog(Mundane, "Travel to either Western or Eastern Woodlands, search and kill two Wisps. Return to me when you've completed your task");
@@ -349,6 +374,11 @@ public class Sabonim(WorldServer server, Mundane mundane) : MundaneScript(server
                 break;
             case 0x17:
                 if (!args.Equals("Brown")) return;
+                if (client.Aisling.ExpLevel < 110)
+                {
+                    client.SendOptionsDialog(Mundane, "You are not ready for this attainment yet.");
+                    return;
+                }
                 client.Aisling.QuestManager.BeltQuest = "Brown";
                 client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=bFlies");
                 client.SendOptionsDialog(Mundane, "Don't you just hate flies? Search and kill a group of them. Return to me when you've completed your task");
@@ -391,6 +421,11 @@ public class Sabonim(WorldServer server, Mundane mundane) : MundaneScript(server
                 break;
             case 0x18:
                 if (!args.Equals("Red")) return;
+                if (client.Aisling.ExpLevel < 125)
+                {
+                    client.SendOptionsDialog(Mundane, "You are not ready for this attainment yet.");
+                    return;
+                }
                 client.Aisling.QuestManager.BeltQuest = "Red";
                 client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=bLich Lord");
                 client.SendOptionsDialog(Mundane, "I promise this will be the last run to the crypt I send you on. I need you to kill a Lich Lord. Return to me when you've completed your task");
@@ -433,6 +468,11 @@ public class Sabonim(WorldServer server, Mundane mundane) : MundaneScript(server
                 break;
             case 0x19:
                 if (!args.Equals("Black")) return;
+                if (client.Aisling.ExpLevel < 200)
+                {
+                    client.SendOptionsDialog(Mundane, "You are not ready for this attainment yet.");
+                    return;
+                }
                 client.Aisling.QuestManager.BeltQuest = "Black";
                 client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=bOld One");
                 client.SendOptionsDialog(Mundane, "Soon I will call you my equal, my brother. Go find and kill an ancient one called -Old One-, return to me when you've completed your task");
