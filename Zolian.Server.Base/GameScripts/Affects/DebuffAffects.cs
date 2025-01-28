@@ -1477,13 +1477,6 @@ public class DebuffReaping : Debuff
     public override void OnApplied(Sprite affected, Debuff debuff)
     {
         if (affected is Aisling { GameMaster: true }) return;
-        if (affected is Aisling mapCheck && mapCheck.Map.ID is >= 800 and <= 810)
-        {
-            mapCheck.Client.TransitionToMap(188, new Position(12, 22));
-            mapCheck.CurrentHp = 1;
-            mapCheck.Client.SendAttributes(StatUpdateType.Full);
-            return;
-        }
         
         if (affected.Debuffs.TryAdd(debuff.Name, debuff))
         {
@@ -1562,6 +1555,18 @@ public class DebuffReaping : Debuff
 
     public override void OnEnded(Sprite affected, Debuff debuff)
     {
+        if (affected is Aisling mapCheck && mapCheck.Map.ID is >= 800 and <= 810)
+        {
+            mapCheck.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You were knocked out of the rift.");
+            mapCheck.Client.TransitionToMap(188, new Position(12, 22));
+            mapCheck.Client.Recover();
+            mapCheck.Resting = Enums.RestPosition.Standing;
+            mapCheck.Client.SendAttributes(StatUpdateType.Full);
+            mapCheck.Client.UpdateDisplay();
+            mapCheck.Client.SendDisplayAisling(mapCheck);
+            return;
+        }
+
         switch (affected)
         {
             case Aisling aisling when !debuff.Cancelled:

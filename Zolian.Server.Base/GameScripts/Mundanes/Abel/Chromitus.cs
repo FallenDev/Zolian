@@ -114,20 +114,35 @@ public class Chromitus : MundaneScript
                 SpawnSize = Random.Shared.Next(10, 20),
                 MoodType = MoodQualifer.Aggressive,
                 MonsterType = MonsterType.Rift,
-                MonsterArmorType = Enum.GetValues<MonsterArmorType>().RandomIEnum(),
+                MonsterArmorType = MonsterArmorType.Caster,
                 MonsterRace = Enum.GetValues<MonsterRace>().RandomIEnum(),
                 IgnoreCollision = false,
                 Waypoints = [],
                 MovementSpeed = 1000,
                 EngagedWalkingSpeed = Random.Shared.Next(800, 1400),
-                AttackSpeed = Random.Shared.Next(500, 1000),
-                CastSpeed = Random.Shared.Next(3000, 6000),
+                AttackSpeed = Random.Shared.Next(800, 1200),
+                CastSpeed = Random.Shared.Next(5000, 8000),
                 LootType = LootQualifer.RandomGold,
-                Level = (ushort)(client.Aisling.ExpLevel + client.Aisling.AbpLevel + Random.Shared.Next(1, 15)),
+                Level = (ushort)(client.Aisling.ExpLevel + client.Aisling.AbpLevel + Random.Shared.Next(1, 10)),
                 SkillScripts = [],
                 AbilityScripts = [],
                 SpellScripts = []
             };
+
+            var randArmor = Random.Shared.Next(0, 1);
+            temp.MonsterArmorType = randArmor == 0 ? MonsterArmorType.Caster : MonsterArmorType.Tank;
+
+            if (temp.OffenseElement == ElementManager.Element.Terror)
+                temp.OffenseElement = Enum.GetValues<ElementManager.Element>().RandomIEnum();
+
+            if (temp.MonsterRace == MonsterRace.Bahamut)
+                temp.MonsterRace = MonsterRace.Dragon;
+
+            if (temp.MonsterRace == MonsterRace.HigherBeing)
+                temp.MonsterRace = MonsterRace.Aberration;
+
+            if (temp.MonsterRace == MonsterRace.LowerBeing)
+                temp.MonsterRace = MonsterRace.Rodent;
 
             if (temp.MonsterRace.MonsterRaceIsSet(MonsterRace.HigherBeing))
                 temp.IgnoreCollision = true;
