@@ -1,19 +1,15 @@
-using Chaos.Common.Identity;
 using Chaos.Networking.Abstractions;
 using Chaos.Networking.Entities.Client;
 using Chaos.Packets;
 using Chaos.Packets.Abstractions;
-using Darkages.Meta;
 using Darkages.Network.Client;
 using Microsoft.Extensions.Logging;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
 using Chaos.Extensions.Common;
 using Chaos.Networking.Abstractions.Definitions;
 using JetBrains.Annotations;
 using ServiceStack;
-using ConnectionInfo = Chaos.Networking.Options.ConnectionInfo;
 using ServerOptions = Chaos.Networking.Options.ServerOptions;
 using ILobbyClient = Darkages.Network.Client.Abstractions.ILobbyClient;
 using Darkages.Network.Client.Abstractions;
@@ -54,8 +50,6 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
         IndexHandlers();
     }
 
-    #region OnHandlers
-
     public ValueTask OnVersion(ILobbyClient client, in Packet packet)
     {
         var args = PacketSerializer.Deserialize<VersionArgs>(in packet);
@@ -74,8 +68,6 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
             return default;
         }
     }
-    
-    #endregion
 
     #region Connection / Handler
 

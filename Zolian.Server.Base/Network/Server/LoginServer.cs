@@ -91,33 +91,33 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
         {
             if (CreateCharRequests.TryGetValue(localClient.Id, out var requestArgs))
             {
-                var readyTime = DateTime.UtcNow;
-                var maximumHp = Random.Shared.Next(128, 165);
-                var maximumMp = Random.Shared.Next(30, 45);
-                var user = new Aisling
-                {
-                    Created = readyTime,
-                    Username = requestArgs.Name,
-                    Password = requestArgs.Password,
-                    LastLogged = readyTime,
-                    CurrentHp = maximumHp,
-                    BaseHp = maximumHp,
-                    CurrentMp = maximumMp,
-                    BaseMp = maximumMp,
-                    Gender = (Gender)localArgs.Gender,
-                    HairColor = (byte)localArgs.HairColor,
-                    HairStyle = localArgs.HairStyle,
-                    BodyColor = 0,
-                    SkillBook = new SkillBook(),
-                    SpellBook = new SpellBook(),
-                    Inventory = new InventoryManager(),
-                    BankManager = new BankManager(),
-                    EquipmentManager = new EquipmentManager(null)
-                };
+                //var readyTime = DateTime.UtcNow;
+                //var maximumHp = Random.Shared.Next(128, 165);
+                //var maximumMp = Random.Shared.Next(30, 45);
+                //var user = new Aisling
+                //{
+                //    Created = readyTime,
+                //    Username = requestArgs.Name,
+                //    Password = requestArgs.Password,
+                //    LastLogged = readyTime,
+                //    CurrentHp = maximumHp,
+                //    BaseHp = maximumHp,
+                //    CurrentMp = maximumMp,
+                //    BaseMp = maximumMp,
+                //    Gender = (Gender)localArgs.Gender,
+                //    HairColor = (byte)localArgs.HairColor,
+                //    HairStyle = localArgs.HairStyle,
+                //    BodyColor = 0,
+                //    SkillBook = new SkillBook(),
+                //    SpellBook = new SpellBook(),
+                //    Inventory = new InventoryManager(),
+                //    BankManager = new BankManager(),
+                //    EquipmentManager = new EquipmentManager(null)
+                //};
 
-                await StorageManager.AislingBucket.Create(user).ConfigureAwait(true);
-                ServerSetup.Instance.GlobalCreationCount.AddOrUpdate(localClient.RemoteIp, 1, (remoteIp, creations) => creations += 1);
-                localClient.SendLoginMessage(LoginMessageType.Confirm);
+                //await StorageManager.AislingBucket.Create(user).ConfigureAwait(true);
+                //ServerSetup.Instance.GlobalCreationCount.AddOrUpdate(localClient.RemoteIp, 1, (remoteIp, creations) => creations += 1);
+                //localClient.SendLoginMessage(LoginMessageType.Confirm);
             }
         }
     }
@@ -132,19 +132,19 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
 
         async ValueTask InnerOnCreateCharRequest(ILoginClient localClient, CreateCharInitialArgs localArgs)
         {
-            ServerSetup.Instance.GlobalCreationCount.TryGetValue(localClient.RemoteIp, out var created);
-            var result = await ValidateUsernameAndPassword(localClient, localArgs.Name, localArgs.Password);
+            //ServerSetup.Instance.GlobalCreationCount.TryGetValue(localClient.RemoteIp, out var created);
+            //var result = await ValidateUsernameAndPassword(localClient, localArgs.Name, localArgs.Password);
 
-            switch (result)
-            {
-                case true when created <= 2:
-                    CreateCharRequests.AddOrUpdate(localClient.Id, localArgs, (_, _) => localArgs);
-                    localClient.SendLoginMessage(LoginMessageType.Confirm, string.Empty);
-                    break;
-                case true:
-                    localClient.SendLoginMessage(LoginMessageType.Confirm, "Slow down on character creation.");
-                    break;
-            }
+            //switch (result)
+            //{
+            //    case true when created <= 2:
+            //        CreateCharRequests.AddOrUpdate(localClient.Id, localArgs, (_, _) => localArgs);
+            //        localClient.SendLoginMessage(LoginMessageType.Confirm, string.Empty);
+            //        break;
+            //    case true:
+            //        localClient.SendLoginMessage(LoginMessageType.Confirm, "Slow down on character creation.");
+            //        break;
+            //}
         }
     }
 
@@ -154,7 +154,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
 
         static ValueTask InnerOnHomepageRequest(ILoginClient localClient)
         {
-            localClient.SendLoginControl(LoginControlsType.Homepage, "https://www.darkages.com");
+            //localClient.SendLoginControl(LoginControlsType.Homepage, "https://www.darkages.com");
             return default;
         }
     }
@@ -213,20 +213,6 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
             var passed = await OnSecurityCheck(result, localClient, localArgs.Name, localArgs.Password);
             if (!passed) return;
 
-            var connInfo = new ConnectionInfo
-            {
-                Address = IPAddress.Parse(ServerSetup.ServerOptions.Value.ServerIp),
-                HostName = "Zolian",
-                Port = ServerSetup.Instance.Config.SERVER_PORT
-            };
-
-            var redirect = new Redirect(
-                EphemeralRandomIdGenerator<uint>.Shared.NextId,
-                connInfo,
-                ServerType.World,
-                null, 0,
-                localArgs.Name);
-
             switch (localArgs.Name.ToLowerInvariant())
             {
                 case "asdf":
@@ -238,7 +224,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
 
                         if (IPAddress.IsLoopback(localClient.RemoteIp) || localClient.RemoteIp.Equals(ipLocal))
                         {
-                            _ = Login(result, redirect, localClient);
+                            Login(result, localClient);
                             return;
                         }
 
@@ -252,7 +238,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
                         if (GameMastersIPs.Any(ip => localClient.RemoteIp.Equals(IPAddress.Parse(ip)))
                             || IPAddress.IsLoopback(localClient.RemoteIp) || localClient.RemoteIp.Equals(ipLocal))
                         {
-                            _ = Login(result, redirect, localClient);
+                            Login(result, localClient);
                             return;
                         }
 
@@ -267,23 +253,21 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
                             return;
                         }
 
-                        _ = Login(result, redirect, localClient);
+                        Login(result, localClient);
                         break;
                     }
             }
         }
     }
 
-    private async Task Login(Aisling player, Redirect redirect, ILoginClient loginClient)
+    private void Login(Aisling player, ILoginClient loginClient)
     {
         player.LastAttemptIP = loginClient.RemoteIp.ToString();
         player.LastIP = loginClient.RemoteIp.ToString();
         player.PasswordAttempts = 0;
         player.Hacked = false;
-        await SavePassword(player);
-        RedirectManager.Add(redirect);
-        loginClient.SendLoginMessage(LoginMessageType.Confirm);
-        loginClient.SendRedirect(redirect);
+        _ = SavePassword(player);
+        loginClient.SendLoginMessage(LoginMessageType.Confirm, "Logged in!");
     }
 
     /// <summary>
@@ -296,7 +280,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
 
         static ValueTask InnerOnMetaDataRequest(ILoginClient localClient, MetaDataRequestArgs localArgs)
         {
-            localClient.SendMetaData(localArgs.MetaDataRequestType, ServerSetup.Instance.Game.MetafileManager, localArgs.Name);
+            //localClient.SendMetaData(localArgs.MetaDataRequestType, ServerSetup.Instance.Game.MetafileManager, localArgs.Name);
             return default;
         }
     }
@@ -310,7 +294,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
 
         ValueTask InnerOnNoticeRequest(ILoginClient localClient)
         {
-            localClient.SendLoginNotice(true, _notification);
+            //localClient.SendLoginNotice(true, _notification);
             return default;
         }
     }
@@ -328,33 +312,33 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
 
         async ValueTask InnerOnPasswordChange(ILoginClient localClient, PasswordChangeArgs localArgs)
         {
-            if (StringExtensions.IsNullOrEmpty(localArgs.Name) || StringExtensions.IsNullOrEmpty(localArgs.CurrentPassword) || StringExtensions.IsNullOrEmpty(localArgs.NewPassword)) return;
+            //if (StringExtensions.IsNullOrEmpty(localArgs.Name) || StringExtensions.IsNullOrEmpty(localArgs.CurrentPassword) || StringExtensions.IsNullOrEmpty(localArgs.NewPassword)) return;
 
-            if (ServerSetup.Instance.GlobalPasswordAttempt.TryGetValue(localClient.RemoteIp, out var attempts))
-            {
-                if (attempts >= 5)
-                {
-                    localClient.SendLoginMessage(LoginMessageType.Confirm, "Your IP has been restricted for too many incorrect password attempts.");
-                    ServerSetup.EventsLogger($"{localClient.RemoteIp} has attempted {attempts} and has been restricted.");
-                    SentrySdk.CaptureException(new Exception($"{localClient.RemoteIp} has been restricted due to password attempts."));
-                    return;
-                }
-            }
+            //if (ServerSetup.Instance.GlobalPasswordAttempt.TryGetValue(localClient.RemoteIp, out var attempts))
+            //{
+            //    if (attempts >= 5)
+            //    {
+            //        localClient.SendLoginMessage(LoginMessageType.Confirm, "Your IP has been restricted for too many incorrect password attempts.");
+            //        ServerSetup.EventsLogger($"{localClient.RemoteIp} has attempted {attempts} and has been restricted.");
+            //        SentrySdk.CaptureException(new Exception($"{localClient.RemoteIp} has been restricted due to password attempts."));
+            //        return;
+            //    }
+            //}
 
-            var aisling = await AislingStorage.CheckPassword(localArgs.Name);
-            var passed = await OnSecurityCheck(aisling, localClient, localArgs.Name, localArgs.CurrentPassword);
-            if (!passed) return;
+            //var aisling = await AislingStorage.CheckPassword(localArgs.Name);
+            //var passed = await OnSecurityCheck(aisling, localClient, localArgs.Name, localArgs.CurrentPassword);
+            //if (!passed) return;
 
-            if (localArgs.NewPassword.Length < 6)
-            {
-                localClient.SendLoginMessage(LoginMessageType.Confirm, "New password was not accepted. Keep it between 6 to 8 characters.");
-                return;
-            }
+            //if (localArgs.NewPassword.Length < 6)
+            //{
+            //    localClient.SendLoginMessage(LoginMessageType.Confirm, "New password was not accepted. Keep it between 6 to 8 characters.");
+            //    return;
+            //}
 
-            aisling.Password = localArgs.NewPassword;
-            aisling.LastIP = localClient.RemoteIp.ToString();
-            aisling.LastAttemptIP = localClient.RemoteIp.ToString();
-            await SavePassword(aisling).ConfigureAwait(false);
+            //aisling.Password = localArgs.NewPassword;
+            //aisling.LastIP = localClient.RemoteIp.ToString();
+            //aisling.LastAttemptIP = localClient.RemoteIp.ToString();
+            //await SavePassword(aisling).ConfigureAwait(false);
         }
     }
 
@@ -362,7 +346,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
     {
         if (aisling == null)
         {
-            localClient.SendLoginMessage(LoginMessageType.Confirm, $"{{=q'{localArgsName}' {{=adoes not currently exist on this server. You can make this hero by clicking on 'Create'");
+            localClient.SendLoginMessage(LoginMessageType.Confirm, $"'{localArgsName}' does not currently exist. You must first create an account!");
             return false;
         }
 
@@ -445,11 +429,14 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
     protected override void IndexHandlers()
     {
         base.IndexHandlers();
+        ClientHandlers[(byte)ClientOpCode.ClientRedirected] = OnClientRedirected;
+        ClientHandlers[(byte)ClientOpCode.OnClientLogin] = OnLogin;
+
+
+
         ClientHandlers[(byte)ClientOpCode.CreateCharInitial] = OnCreateCharInitial;
         ClientHandlers[(byte)ClientOpCode.CreateCharFinalize] = OnCreateCharFinalize;
-        ClientHandlers[(byte)ClientOpCode.ClientRedirected] = OnClientRedirected;
         ClientHandlers[(byte)ClientOpCode.HomepageRequest] = OnHomepageRequest;
-        ClientHandlers[(byte)ClientOpCode.Login] = OnLogin;
         ClientHandlers[(byte)ClientOpCode.MetaDataRequest] = OnMetaDataRequest;
         ClientHandlers[(byte)ClientOpCode.NoticeRequest] = OnNoticeRequest;
         ClientHandlers[(byte)ClientOpCode.PasswordChange] = OnPasswordChange;
