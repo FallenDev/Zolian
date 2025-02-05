@@ -1557,6 +1557,11 @@ public class DebuffReaping : Debuff
     {
         if (affected is Aisling mapCheck && mapCheck.Map.ID is >= 800 and <= 810)
         {
+            if (mapCheck.Debuffs.TryRemove(debuff.Name, out var saved))
+            {
+                saved.DeleteDebuff(mapCheck, saved);
+                mapCheck.Client.SendEffect(byte.MinValue, saved.Icon);
+            }
             mapCheck.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You were knocked out of the rift.");
             mapCheck.Client.TransitionToMap(188, new Position(12, 22));
             mapCheck.Client.Recover();
