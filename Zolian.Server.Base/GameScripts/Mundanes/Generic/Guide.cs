@@ -409,9 +409,9 @@ public class Guide(WorldServer server, Mundane mundane) : MundaneScript(server, 
                         "   {=qRegen{=g: {=aThe strength of your mana and health regeneration\n" +
                         "   {=qSupport Defense(Secondary){=g: {=aThis is your secondary equipped element for defense\n\n" +
                         "{=cSaving Throws{=g:\n" +
-                        "   {=qFortitude{=g: {=aIs the percentage of hits you take that are mitigated by 33% (10% of Con) up to 85%\n" +
-                        "   {=qReflex{=g: {=aIs the percentage of physical attacks you completely dodge and receive no damage up to 70%\n" +
-                        "   {=qWill{=g: {=aIs the percentage of magical attacks you mitigate and reduce their effectiveness up to 80%\n" +
+                        "   {=qFortitude{=g: {=aIs the percentage of hits you take that are mitigated by 33% (10% of Con)\n" +
+                        "   {=qReflex{=g: {=aIs the percentage of physical attacks you completely dodge and receive no damage\n" +
+                        "   {=qWill{=g: {=aIs the percentage of magical attacks you mitigate and reduce their effectiveness by 50%\n" +
                         "{=cEnhancements{=g: {=aThese are various equipment enhancements which grant you bonuses or effects.");
                     client.SendOptionsDialog(Mundane, "Scroll through the window to see the details of each attribute", options.ToArray());
                     break;

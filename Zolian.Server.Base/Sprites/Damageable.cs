@@ -251,7 +251,6 @@ public class Damageable : Movable
         }
 
         dmg = MagicVulnerable(dmg);
-        if (dmg == 0) return;
         VarianceProc(damageDealingSprite, dmg);
 
         // Re-balance -- reduces spell damage to players in half or 75% in pvp
@@ -490,7 +489,7 @@ public class Damageable : Movable
 
             if (fort <= Fortitude)
             {
-                dmg = (int)(dmg * 0.33);
+                dmg = (long)(dmg * 0.33);
             }
 
             return dmg;
@@ -526,13 +525,21 @@ public class Damageable : Movable
         if (!IsVulnerable)
         {
             double wis = Generator.RandNumGen100();
+            double fort = Generator.RandNumGen100();
 
             if (wis <= Will)
             {
                 SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendHealthBar(this));
                 SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.Aisling.SendAnimationNearby(340, Position));
-                return 0;
+                return (long)(dmg * 0.50);
             }
+
+            if (fort <= Fortitude)
+            {
+                dmg = (long)(dmg * 0.33);
+            }
+
+            return dmg;
         }
 
         // Unbreakable Frozen returns damage
