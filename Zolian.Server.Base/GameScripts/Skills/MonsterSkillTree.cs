@@ -238,7 +238,7 @@ public class CorrosiveTouch(Skill skill) : SkillScript(skill)
     {
         _crit = false;
         if (sprite is not Monster damageMonster) return 0;
-        var dmg = damageMonster.Str * 20 + damageMonster.Con * 12;
+        var dmg = damageMonster.Str * 15 + damageMonster.Con * 12;
         var critCheck = GlobalSkillMethods.OnCrit(dmg);
         _crit = critCheck.Item1;
         return critCheck.Item2;
@@ -295,7 +295,7 @@ public class Stomp(Skill skill) : SkillScript(skill)
     {
         _crit = false;
         if (sprite is not Monster damageMonster) return 0;
-        var dmg = damageMonster.Str * 30;
+        var dmg = damageMonster.Str * 18;
         var critCheck = GlobalSkillMethods.OnCrit(dmg);
         _crit = critCheck.Item1;
         return critCheck.Item2;
@@ -352,7 +352,7 @@ public class HeadButt(Skill skill) : SkillScript(skill)
     {
         _crit = false;
         if (sprite is not Monster damageMonster) return 0;
-        var dmg = damageMonster.Str * 20 + damageMonster.Dex * 4 * damageMonster.Hit;
+        var dmg = damageMonster.Str * 15 + damageMonster.Dex * 4 * damageMonster.Hit;
         var critCheck = GlobalSkillMethods.OnCrit(dmg);
         _crit = critCheck.Item1;
         return critCheck.Item2;
@@ -414,7 +414,7 @@ public class Claw(Skill skill) : SkillScript(skill)
     {
         _crit = false;
         if (sprite is not Monster damageMonster) return 0;
-        var dmg = damageMonster.Dex * 50 + damageMonster.Con * 20 * damageMonster.Dmg;
+        var dmg = damageMonster.Dex * 20 + damageMonster.Con * 15 * damageMonster.Dmg;
         var critCheck = GlobalSkillMethods.OnCrit(dmg);
         _crit = critCheck.Item1;
         return critCheck.Item2;
@@ -533,7 +533,7 @@ public class TailSlap(Skill skill) : SkillScript(skill)
     {
         _crit = false;
         if (sprite is not Monster damageMonster) return 0;
-        var dmg = damageMonster.Str * 25 + damageMonster.Dex * 32 * damageMonster.Dmg;
+        var dmg = damageMonster.Str * 20 + damageMonster.Dex * 20 * damageMonster.Dmg;
         if (damageMonster.Template.BaseName == "Bahamut")
             dmg *= 250;
         var critCheck = GlobalSkillMethods.OnCrit(dmg);

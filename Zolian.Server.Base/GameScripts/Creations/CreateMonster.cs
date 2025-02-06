@@ -115,7 +115,7 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
         obj.CurrentMp = obj.MaximumMp;
 
         Monster.InitScripting(template, map, obj);
-
+        CapOutMonsterBonuses(obj);
         return obj;
     }
 
@@ -1153,6 +1153,17 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
         {
             boostAction(obj);
         }
+    }
+
+    private static void CapOutMonsterBonuses(Monster obj)
+    {
+        obj.BonusStr = Math.Min(obj.BonusStr, 1000);
+        obj.BonusInt = Math.Min(obj.BonusInt, 1000);
+        obj.BonusWis = Math.Min(obj.BonusWis, 1000);
+        obj.BonusCon = Math.Min(obj.BonusCon, 1000);
+        obj.BonusDex = Math.Min(obj.BonusDex, 1000);
+        obj.BonusHit = Math.Min(obj.BonusHit, 1000);
+        obj.BonusDmg = Math.Min(obj.BonusDmg, 1000);
     }
 
     private void LoadSkillScript(string skillScriptStr, Monster obj)

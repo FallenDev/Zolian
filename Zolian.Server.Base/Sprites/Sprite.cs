@@ -112,12 +112,12 @@ public abstract class Sprite : INotifyPropertyChanged
 
     private int AcFromDex => (Dex / 15).IntClamp(0, 500);
     private int Ac => (_ac + BonusAc + AcFromDex).IntClamp(-200, 500);
-    private double _fortitude => (Con * 0.1).DoubleClamp(0, 90);
-    public double Fortitude => Math.Round(_fortitude + BonusFortitude, 2);
-    private double _reflex => (Hit * 0.1).DoubleClamp(0, 90);
-    public double Reflex => Math.Round(_reflex, 2);
+    private double _fortitude => (Con * 0.1).DoubleClamp(0, 85);
+    public double Fortitude => Math.Min(Math.Round(_fortitude + BonusFortitude, 2), 85);
+    private double _reflex => (Hit * 0.1).DoubleClamp(0, 70);
+    public double Reflex => Math.Min(Math.Round(_reflex, 2), 70);
     private double _will => (Mr * 0.14).DoubleClamp(0, 80);
-    public double Will => Math.Round(_will, 2);
+    public double Will => Math.Min(Math.Round(_will, 2), 80);
     public int Hit => _Hit + BonusHit;
     private int Mr => _Mr + BonusMr;
     public int Str => (_Str + BonusStr).IntClamp(0, ServerSetup.Instance.Config.StatCap);

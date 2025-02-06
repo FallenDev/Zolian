@@ -100,6 +100,7 @@ public class Damageable : Movable
 
         // Check vulnerable and proc variances
         dmg = Vulnerable(dmg);
+        if (dmg == 0) return;
         VarianceProc(damageDealingSprite, dmg);
 
         // Apply modifiers for defender
@@ -249,7 +250,8 @@ public class Damageable : Movable
                 dmg *= 2;
         }
 
-        dmg = Vulnerable(dmg);
+        dmg = MagicVulnerable(dmg);
+        if (dmg == 0) return;
         VarianceProc(damageDealingSprite, dmg);
 
         // Re-balance -- reduces spell damage to players in half or 75% in pvp
@@ -482,8 +484,8 @@ public class Damageable : Movable
             if (hit <= Reflex)
             {
                 SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendHealthBar(this));
-                if (this is not Aisling aisling) return dmg;
-                aisling.SendAnimationNearby(92, aisling.Position);
+                SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.Aisling.SendAnimationNearby(337, Position));
+                return 0;
             }
 
             if (fort <= Fortitude)
@@ -495,6 +497,43 @@ public class Damageable : Movable
         }
 
         dmg *= 2;
+
+        // Unbreakable Frozen returns damage
+        if (HasDebuff("Adv Frozen")) return dmg;
+
+        // Sleep gets removed on hit
+        if (IsSleeping) RemoveDebuff("Sleep");
+
+        // Weak Frozen status gets removed after five successful hits
+        if (!IsFrozen) return dmg;
+
+        _frozenStack += 1;
+        if (_frozenStack <= 4) return dmg;
+
+        if (HasDebuff("Frozen"))
+            RemoveDebuff("Frozen");
+        if (HasDebuff("Dark Chain"))
+            RemoveDebuff("Dark Chain");
+
+        // Reset Frozen Stack
+        _frozenStack = 0;
+
+        return dmg;
+    }
+
+    private long MagicVulnerable(long dmg)
+    {
+        if (!IsVulnerable)
+        {
+            double wis = Generator.RandNumGen100();
+
+            if (wis <= Will)
+            {
+                SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendHealthBar(this));
+                SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.Aisling.SendAnimationNearby(340, Position));
+                return 0;
+            }
+        }
 
         // Unbreakable Frozen returns damage
         if (HasDebuff("Adv Frozen")) return dmg;
