@@ -480,16 +480,23 @@ public class Damageable : Movable
             double hit = Generator.RandNumGen100();
             double fort = Generator.RandNumGen100();
 
-            if (hit <= Reflex)
+            // Player Saving Throws
+            if (hit <= Reflex && this is Aisling)
             {
                 SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendHealthBar(this));
-                SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.Aisling.SendAnimationNearby(337, Position));
                 return 0;
+            }
+            
+            // Monster Saving Throws
+            if (hit <= Reflex && this is Monster)
+            {
+                SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendHealthBar(this));
+                return (long)(dmg * 0.25);
             }
 
             if (fort <= Fortitude)
             {
-                dmg = (long)(dmg * 0.33);
+                return (long)(dmg * 0.77);
             }
 
             return dmg;
@@ -527,16 +534,23 @@ public class Damageable : Movable
             double wis = Generator.RandNumGen100();
             double fort = Generator.RandNumGen100();
 
-            if (wis <= Will)
+            // Player Magic Saving Throws
+            if (wis <= Will && this is Aisling)
             {
                 SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendHealthBar(this));
-                SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.Aisling.SendAnimationNearby(340, Position));
                 return (long)(dmg * 0.50);
+            }
+
+            // Monster Magic Saving Throws
+            if (wis <= Will && this is Monster)
+            {
+                SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendHealthBar(this));
+                return (long)(dmg * 0.25);
             }
 
             if (fort <= Fortitude)
             {
-                dmg = (long)(dmg * 0.33);
+                return (long)(dmg * 0.77);
             }
 
             return dmg;
