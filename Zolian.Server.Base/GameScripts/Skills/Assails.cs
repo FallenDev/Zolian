@@ -1258,10 +1258,7 @@ public class AdvancedStaffTraining(Skill skill) : SkillScript(skill)
         if (sprite is Aisling aisling)
         {
             if (aisling.EquipmentManager.Equipment[1]?.Item == null) return;
-            if (!aisling.EquipmentManager.Equipment[1].Item.Template.Flags.FlagIsSet(ItemFlags.TwoHanded) || aisling.EquipmentManager.Equipment[1].Item.Template.Flags.FlagIsSet(ItemFlags.TwoHandedStaff))
-            {
-                return;
-            }
+            if (!aisling.EquipmentManager.Equipment[1].Item.Template.Flags.FlagIsSet(ItemFlags.TwoHandedStaff)) return;
 
             var success = GlobalSkillMethods.OnUse(aisling, Skill);
 

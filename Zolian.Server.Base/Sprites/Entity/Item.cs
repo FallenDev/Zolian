@@ -789,6 +789,8 @@ public sealed class Item : Identifiable
     {
         if (client?.Aisling == null) return;
         ItemPane = ItemPanes.Equip;
+        var hp = client.Aisling.CurrentHp;
+        var mp = client.Aisling.CurrentMp;
 
         lock (client.SyncModifierRemovalLock)
         {
@@ -816,6 +818,14 @@ public sealed class Item : Identifiable
 
                 // Reapplies Removed Buffs/Debuffs
                 BuffDebuffCalc(client);
+
+                client.Aisling.CurrentHp = hp;
+                if (client.Aisling.CurrentHp > client.Aisling.MaximumHp)
+                    client.Aisling.CurrentHp = client.Aisling.MaximumHp;
+
+                client.Aisling.CurrentMp = mp;
+                if (client.Aisling.CurrentMp > client.Aisling.MaximumMp)
+                    client.Aisling.CurrentMp = client.Aisling.MaximumMp;
             }
             catch (Exception e)
             {

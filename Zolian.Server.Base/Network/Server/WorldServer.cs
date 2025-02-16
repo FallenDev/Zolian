@@ -450,32 +450,26 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     {
         try
         {
-            // Process each map area sequentially
-            foreach (var area in ServerSetup.Instance.GlobalMapCache.Values)
-            {
-                // Get all ground items in the current area
-                var items = ObjectManager.GetObjects<Item>(area, i => i.ItemPane == Item.ItemPanes.Ground).ToList();
+            // Flatten all ground items from every map area into a single list
+            var items = ServerSetup.Instance.GlobalMapCache.Values
+                .SelectMany(area => ObjectManager.GetObjects<Item>(area, i => i.ItemPane == Item.ItemPanes.Ground))
+                .ToList();
 
-                // Chunk items into smaller groups for processing
-                const int chunkSize = 100; // Adjust based on expected item counts per area
-                var itemChunks = items.Chunk(chunkSize);
-
-                // Process each chunk in parallel
-                Parallel.ForEach(itemChunks, chunk =>
+            // Process each item in parallel using PLINQ
+            items.AsParallel()
+                .WithDegreeOfParallelism(Environment.ProcessorCount)
+                .ForAll(item =>
                 {
-                    foreach (var item in chunk)
-                    {
-                        var abandonedDiff = DateTime.UtcNow.Subtract(item.Value.AbandonedDate);
+                    var abandonedDiff = DateTime.UtcNow - item.Value.AbandonedDate;
 
-                        // Remove items based on abandonment rules
-                        if (abandonedDiff.TotalMinutes > 3 && item.Value.Template.Name == "Corpse")
-                            item.Value.Remove();
+                    // For corpses: remove if abandoned for more than 3 minutes
+                    if (abandonedDiff.TotalMinutes > 3 && item.Value.Template.Name == "Corpse")
+                        item.Value.Remove();
 
-                        if (abandonedDiff.TotalMinutes > 30)
-                            item.Value.Remove();
-                    }
+                    // For all items: remove if abandoned for more than 30 minutes
+                    if (abandonedDiff.TotalMinutes > 30)
+                        item.Value.Remove();
                 });
-            }
         }
         catch (Exception ex)
         {
@@ -487,35 +481,23 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     {
         try
         {
-            // Iterate through all maps in the GlobalMapCache
-            foreach (var area in ServerSetup.Instance.GlobalMapCache.Values)
-            {
-                // Filter the money drops in the GlobalGroundMoneyCache for the current map
-                var moneyDrops = ServerSetup.Instance.GlobalGroundMoneyCache
-                    .Where(kvp => kvp.Value.Map.ID == area.ID) // Ensure this matches your map ID structure
-                    .Select(kvp => kvp.Value)
-                    .ToList();
+            // Flatten all money drops into a list
+            var moneyDrops = ServerSetup.Instance.GlobalGroundMoneyCache.Values.ToList();
 
-                // Chunk the money drops for processing
-                const int chunkSize = 100; // Adjust based on expected number of money drops
-                var moneyChunks = moneyDrops.Chunk(chunkSize);
-
-                // Process each chunk in parallel
-                Parallel.ForEach(moneyChunks, chunk =>
+            // Process each money drop in parallel
+            moneyDrops.AsParallel()
+                .WithDegreeOfParallelism(Environment.ProcessorCount)
+                .ForAll(money =>
                 {
-                    foreach (var money in chunk)
-                    {
-                        var abandonedDiff = DateTime.UtcNow.Subtract(money.AbandonedDate);
+                    var abandonedDiff = DateTime.UtcNow - money.AbandonedDate;
 
-                        // Remove money drops abandoned for more than 30 minutes
-                        if (abandonedDiff.TotalMinutes > 30)
-                        {
-                            ServerSetup.Instance.GlobalGroundMoneyCache.TryRemove(money.MoneyId, out _);
-                            money.Remove();
-                        }
+                    // Remove money drops abandoned for more than 30 minutes
+                    if (!(abandonedDiff.TotalMinutes > 30)) return;
+                    if (ServerSetup.Instance.GlobalGroundMoneyCache.TryRemove(money.MoneyId, out _))
+                    {
+                        money.Remove();
                     }
                 });
-            }
         }
         catch (Exception ex)
         {
@@ -523,32 +505,16 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         }
     }
 
-
-
     private static void UpdateMonsters(TimeSpan elapsedTime)
     {
         try
         {
-            // Divide the GlobalMapCache into chunks of maps
-            var mapChunks = ServerSetup.Instance.GlobalMapCache.Values
-                .Select((area, index) => new { area, index })
-                .GroupBy(x => x.index % Environment.ProcessorCount) // Create chunks based on processor count
-                .Select(group => group.Select(x => x.area).ToList()) // Convert each group to a list of areas
-                .ToList();
+            var monsters = ServerSetup.Instance.GlobalMapCache.Values
+                .SelectMany(area => ObjectManager.GetObjects<Monster>(area, i => !i.Skulled).Values);
 
-            // Process each chunk in parallel
-            Parallel.ForEach(mapChunks, chunk =>
-            {
-                foreach (var area in chunk)
-                {
-                    // Get monsters in the current map area
-                    var monsters = ObjectManager.GetObjects<Monster>(area, i => !i.Skulled).Values.ToList();
-                    foreach (var monster in monsters)
-                    {
-                        ProcessMonster(monster, elapsedTime);
-                    }
-                }
-            });
+            monsters.AsParallel()
+                .WithDegreeOfParallelism(Environment.ProcessorCount)
+                .ForAll(monster => ProcessMonster(monster, elapsedTime));
         }
         catch (Exception ex)
         {
@@ -593,17 +559,24 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     {
         try
         {
-            Parallel.ForEach(ServerSetup.Instance.GlobalMundaneCache.Values, (mundane) =>
-            {
-                if (mundane == null) return;
-                mundane.Update(elapsedTime);
-                mundane.LastUpdated = DateTime.UtcNow;
-            });
+            var mundanes = ServerSetup.Instance.GlobalMapCache.Values
+                .SelectMany(area => ObjectManager.GetObjects<Mundane>(area, mundane => mundane != null).Values);
+
+            mundanes.AsParallel()
+                .WithDegreeOfParallelism(Environment.ProcessorCount)
+                .ForAll(mundane => ProcessMundane(mundane, elapsedTime));
         }
         catch (Exception ex)
         {
             SentrySdk.CaptureException(ex);
         }
+    }
+
+    private static void ProcessMundane(Mundane mundane, TimeSpan elapsedTime)
+    {
+        if (mundane == null) return;
+        mundane.Update(elapsedTime);
+        mundane.LastUpdated = DateTime.UtcNow;
     }
 
     private void CheckTraps(TimeSpan elapsedTime)
@@ -612,7 +585,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
         try
         {
-            Parallel.ForEach(ServerSetup.Instance.Traps.Values, (trap) => { trap?.Update(); });
+            foreach (var trap in ServerSetup.Instance.Traps.Values) { trap?.Update(); }
         }
         catch (Exception ex)
         {
@@ -624,21 +597,11 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     {
         try
         {
-            // Divide the GlobalMapCache into chunks of maps
-            var mapChunks = ServerSetup.Instance.GlobalMapCache.Values
-                .Select((area, index) => new { area, index })
-                .GroupBy(x => x.index % Environment.ProcessorCount) // Create chunks based on processor count
-                .Select(group => group.Select(x => x.area).ToList()) // Convert each group to a list of areas
-                .ToList();
-
-            // Process each chunk in parallel
-            Parallel.ForEach(mapChunks, chunk =>
-            {
-                foreach (var area in chunk)
-                {
-                    area?.Update(elapsedTime);
-                }
-            });
+            // Process each area in parallel directly
+            Parallel.ForEach(
+                ServerSetup.Instance.GlobalMapCache.Values,
+                new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount },
+                area => area?.Update(elapsedTime));
         }
         catch (Exception ex)
         {

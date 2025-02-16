@@ -52,7 +52,7 @@ public class Banker(WorldServer server, Mundane mundane) : MundaneScript(server,
         }
 
         if (client.Aisling.ActionUsed != "Remote Bank")
-            options.Add(new Dialog.OptionsDataItem(0x99, "Pawn"));
+            options.Add(new Dialog.OptionsDataItem(0x99, "Pawn Banked Items"));
 
         client.SendOptionsDialog(Mundane, "Don't mind the goblins, they help around here", options.ToArray());
     }
@@ -275,8 +275,10 @@ public class Banker(WorldServer server, Mundane mundane) : MundaneScript(server,
             case 0x99:
                 {
                     var options = new List<Dialog.OptionsDataItem> { new(0x991, "Let's proceed") };
-                    client.SendOptionsDialog(Mundane, $"You wish to use our Goblin pawning resources? That's great! What we'll do is sell all of your items of damaged or common quality that aren't stackable resources to Gobleregan. " +
+                    client.SendOptionsDialog(Mundane, $"You wish to use our Goblin pawning resources? That's great! What we'll do is {{=csell all of your items of damaged or common quality {{=ato Gobleregan. " +
                                                       $"Note that what the goblins give us, is up to debate.. Are you certain you want to proceed?", options.ToArray());
+                    client.SendServerMessage(ServerMessageType.NonScrollWindow, $"Armor, Helmets, Quest Related, and items that aren't sellable or droppable will be {{=bignored{{=a.\n\n" +
+                                                                                $"Additionally items that have been enhanced to an advanced level will be {{=bignored{{=a.");
                 }
                 break;
             case 0x991:
@@ -291,18 +293,20 @@ public class Banker(WorldServer server, Mundane mundane) : MundaneScript(server,
                         if (!item.Template.Flags.FlagIsSet(ItemFlags.Dropable)) continue;
                         if (!item.Template.Flags.FlagIsSet(ItemFlags.Sellable)) continue;
                         if (item.Template.Flags.FlagIsSet(ItemFlags.QuestRelated)) continue;
+                        if (item.Template.ScriptName is "Armor" or "Helmet") continue;
+                        if (item.ItemMaterial != Item.ItemMaterials.None) continue;
+                        if (item.GearEnhancement != Item.GearEnhancements.None) continue;
 
                         offer += item.Template.Value / 5;
                         client.Aisling.BankManager.Items.TryRemove(item.ItemId, out _);
                         itemsToDelete.Add(item);
                     }
-                    
+
                     BankManager.RemoveFromBank(client, itemsToDelete);
                     client.Aisling.BankedGold += offer;
                     client.SendOptionsDialog(Mundane, $"They're going to send over your {offer} gold and we'll store it here in the bank.");
                 }
                 break;
-
         }
     }
 
