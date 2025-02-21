@@ -1,4 +1,5 @@
-﻿using Darkages.Network.Client;
+﻿using Darkages.Enums;
+using Darkages.Network.Client;
 using Darkages.Network.Server;
 using Darkages.ScriptingBase;
 using Darkages.Sprites.Entity;
@@ -11,7 +12,13 @@ public class Pravat : AreaScript
 {
     public Pravat(Area area) : base(area) => Area = area;
     public override void Update(TimeSpan elapsedTime) { }
-    public override void OnMapEnter(WorldClient client) { }
+
+    public override void OnMapEnter(WorldClient client)
+    {
+        if (client.Aisling.Path == Class.Peasant)
+            client.TransitionToMap(720, new Position(15, 10));
+    }
+
     public override void OnMapExit(WorldClient client) { }
 
     public override void OnMapClick(WorldClient client, int x, int y)

@@ -1,4 +1,5 @@
 ﻿using Darkages.Common;
+using Darkages.Enums;
 using Darkages.GameScripts.Formulas;
 using Darkages.Network.Client;
 using Darkages.ScriptingBase;
@@ -26,7 +27,13 @@ public class Undine : AreaScript
 
     public Undine(Area area) : base(area) => Area = area;
     public override void Update(TimeSpan elapsedTime) { }
-    public override void OnMapEnter(WorldClient client) { }
+
+    public override void OnMapEnter(WorldClient client)
+    {
+        if (client.Aisling.Path == Class.Peasant)
+            client.TransitionToMap(720, new Position(15, 10));
+    }
+
     public override void OnMapExit(WorldClient client) { }
     public override void OnPlayerWalk(WorldClient client, Position oldLocation, Position newLocation) { }
 

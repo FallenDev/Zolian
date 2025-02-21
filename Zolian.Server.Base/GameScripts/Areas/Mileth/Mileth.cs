@@ -1,4 +1,5 @@
 ﻿using Darkages.Common;
+using Darkages.Enums;
 using Darkages.GameScripts.Formulas;
 using Darkages.Network.Client;
 using Darkages.Network.Server;
@@ -43,7 +44,12 @@ public class Mileth : AreaScript
     public override void Update(TimeSpan elapsedTime) { }
     public override void OnMapEnter(WorldClient client) { }
     public override void OnMapExit(WorldClient client) { }
-    public override void OnPlayerWalk(WorldClient client, Position oldLocation, Position newLocation) { }
+
+    public override void OnPlayerWalk(WorldClient client, Position oldLocation, Position newLocation)
+    {
+        if (client.Aisling.Path == Class.Peasant)
+            client.TransitionToMap(720, new Position(15, 10));
+    }
 
     public override void OnItemDropped(WorldClient client, Item itemDropped, Position locationDropped)
     {
