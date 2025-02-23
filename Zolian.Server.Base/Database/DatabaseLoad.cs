@@ -423,6 +423,7 @@ public abstract class DatabaseLoad
             }
 
             ItemStorage.CacheFromDatabaseOffenseJobs(conn);
+            ItemStorage.CacheFromDatabaseDefenseJobs(conn);
         }
         catch (Exception e)
         {

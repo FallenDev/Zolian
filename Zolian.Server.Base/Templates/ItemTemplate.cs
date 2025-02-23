@@ -67,7 +67,9 @@ public class ItemTemplate : Template
         var category = string.IsNullOrEmpty(Group) ? "Other" : Group;
 
         if (category == "Other" && EquipmentSlot is 0 or 2)
-            category = Class.ToString();
+        {
+            category = JobRequired != Job.None ? JobRequired.ToString() : Class.ToString();
+        }
 
         if (category == "Other" && EquipmentSlot != 0)
             category = ItemSlots.ItemSlotMetaValuesStoresBank(EquipmentSlot);
@@ -75,13 +77,21 @@ public class ItemTemplate : Template
         if (Gender == 0)
             Gender = Gender.Unisex;
 
-        var stage = 0;
         if (StageRequired >= ClassStage.Master)
-            stage = 1;
+        {
+            return
+            [
+                $"{LevelRequired}/{JobLevelRequired}\n",
+                $"{ClassStrings.ItemClassToIntMetaData(Class.ToString())}\n",
+                $"{CarryWeight}\n",
+                category,
+                $"{Gender}\n{Description}"
+            ];
+        }
 
         return
         [
-            $"{LevelRequired}/{stage}/{JobLevelRequired}\n",
+            $"{LevelRequired}\n",
             $"{ClassStrings.ItemClassToIntMetaData(Class.ToString())}\n",
             $"{CarryWeight}\n",
             category,
@@ -505,6 +515,98 @@ public static class ItemStorage
                     IsPositiveSpellLines = (int)reader["IsPositiveSpellLines"],
                     SpellMinValue = (int)reader["SpellMinValue"],
                     SpellMaxValue = (int)reader["SpellMaxValue"]
+                };
+
+                if (temp.Name == null) continue;
+                ServerSetup.Instance.TempGlobalItemTemplateCache[temp.Name] = temp;
+            }
+
+            reader.Close();
+            sConn.Close();
+        }
+        catch (SqlException e)
+        {
+            ServerSetup.EventsLogger(e.ToString());
+            SentrySdk.CaptureException(e);
+        }
+    }
+
+    public static void CacheFromDatabaseDefenseJobs(string conn)
+    {
+        try
+        {
+            var sConn = new SqlConnection(conn);
+            const string sql = $"SELECT * FROM Zolian.dbo.ArmorJobs";
+
+            sConn.Open();
+
+            var cmd = new SqlCommand(sql, sConn);
+            cmd.CommandTimeout = 5;
+
+            var reader = cmd.ExecuteReader();
+
+            while (reader.Read())
+            {
+                var image = (int)reader["Image"];
+                var disImage = (int)reader["DisplayImage"];
+                var flags = ServiceStack.AutoMappingUtils.ConvertTo<ItemFlags>(reader["Flags"]);
+                var gender = ServiceStack.AutoMappingUtils.ConvertTo<Gender>(reader["Gender"]);
+                var animations = ServiceStack.AutoMappingUtils.ConvertTo<ArmorAnimationFlags>(reader["AnimFlags"]);
+                var weight = (int)reader["CarryWeight"];
+                var maxDura = (int)reader["MaxDurability"];
+                var worth = (int)reader["Worth"];
+                var itemClass = ServiceStack.AutoMappingUtils.ConvertTo<Class>(reader["Class"]);
+                var level = (int)reader["LevelRequired"];
+                var job = ServiceStack.AutoMappingUtils.ConvertTo<Job>(reader["JobRequired"]);
+                var jobLevel = (int)reader["JobLevelRequired"];
+                var drop = (decimal)reader["DropRate"];
+                var classStage = ServiceStack.AutoMappingUtils.ConvertTo<ClassStage>(reader["StageRequired"]);
+                var color = ServiceStack.AutoMappingUtils.ConvertTo<ItemColor>(reader["Color"]);
+                var temp = new ItemTemplate
+                {
+                    Image = (ushort)image,
+                    DisplayImage = (ushort)disImage,
+                    ScriptName = reader["ScriptName"].ToString(),
+                    Flags = flags,
+                    AnimFlags = animations,
+                    Gender = gender,
+                    OffenseElement = Element.None,
+                    DefenseElement = Element.None,
+                    CarryWeight = (byte)weight,
+                    Enchantable = (bool)reader["Enchantable"],
+                    MaxDurability = (uint)maxDura,
+                    Value = (uint)worth,
+                    EquipmentSlot = (int)reader["EquipmentSlot"],
+                    NpcKey = "",
+                    Class = itemClass,
+                    LevelRequired = (ushort)level,
+                    JobRequired = job,
+                    JobLevelRequired = (ushort)jobLevel,
+                    DmgMin = 0,
+                    DmgMax = 0,
+                    DropRate = (double)drop,
+                    StageRequired = classStage,
+                    HasPants = (bool)reader["HasPants"],
+                    Color = color,
+                    WeaponScript = reader["ArmorScript"].ToString(),
+                    Name = reader["Name"].ToString(),
+                    Group = reader["GroupIn"].ToString(),
+                    HealthModifer = (int)reader["HP"],
+                    ManaModifer = (int)reader["MP"],
+                    AcModifer = (int)reader["ArmorClass"],
+                    StrModifer = (int)reader["Strength"],
+                    IntModifer = (int)reader["Intelligence"],
+                    WisModifer = (int)reader["Wisdom"],
+                    ConModifer = (int)reader["Constitution"],
+                    DexModifer = (int)reader["Dexterity"],
+                    MrModifer = (int)reader["MagicResistance"],
+                    HitModifer = (int)reader["Hit"],
+                    DmgModifer = (int)reader["Dmg"],
+                    RegenModifer = (int)reader["Regen"],
+                    SpellLinesModifier = 0,
+                    IsPositiveSpellLines = 0,
+                    SpellMinValue = 0,
+                    SpellMaxValue = 0
                 };
 
                 if (temp.Name == null) continue;
