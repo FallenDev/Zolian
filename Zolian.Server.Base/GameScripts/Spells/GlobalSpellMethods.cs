@@ -14,29 +14,41 @@ public class GlobalSpellMethods
 
     public static bool Execute(WorldClient client, Spell spell)
     {
-        if (client.Aisling.CantCast)
+        try
         {
-            if (spell.Template.Name is not ("Ao Suain" or "Ao Sith"))
+            if (client.Aisling.CantCast)
             {
-                return false;
+                if (spell.Template.Name is not ("Ao Suain" or "Ao Sith"))
+                {
+                    return false;
+                }
             }
+
+            var success = Generator.RandNumGen100();
+
+            const int minEffective = 5;
+            const int maxEffective = 100;
+            const int requiredRollAtMin = 30;
+            const int requiredRollAtMax = 5;
+
+            // Clamp the level for interpolation.
+            var effectiveLevel = Math.Clamp((int)spell.Level, minEffective, maxEffective);
+
+            // Compute the fraction within the effective range.
+            var fraction = (effectiveLevel - minEffective) / (double)(maxEffective - minEffective);
+
+            // Linearly interpolate the required roll.
+            var requiredRoll = (int)Math.Ceiling(requiredRollAtMin + (requiredRollAtMax - requiredRollAtMin) * fraction);
+
+            return success >= requiredRoll;
+        }
+        catch (Exception e)
+        {
+            ServerSetup.EventsLogger($"Issue with Attempt called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}");
+            SentrySdk.CaptureMessage($"Issue with Attempt called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
         }
 
-        var success = Generator.RandNumGen100();
-
-        if (spell.Level >= 100)
-        {
-            return success >= 3;
-        }
-
-        return success switch
-        {
-            <= 20 when spell.Level <= 29 => false,
-            <= 10 when spell.Level <= 49 => false,
-            <= 7 when spell.Level <= 74 => false,
-            <= 3 when spell.Level <= 99 => false,
-            _ => true
-        };
+        return true;
     }
 
     private static bool CritStrike()

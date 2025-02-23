@@ -21,19 +21,21 @@ public static class GlobalSkillMethods
 
             var success = Generator.RandNumGen100();
 
-            return skill.Level switch
-            {
-                >= 350 => success >= 1,
-                >= 100 => success >= 2,
-                _ => success switch
-                {
-                    <= 25 when skill.Level <= 29 => false,
-                    <= 15 when skill.Level <= 49 => false,
-                    <= 10 when skill.Level <= 74 => false,
-                    <= 5 when skill.Level <= 99 => false,
-                    _ => true
-                }
-            };
+            const int minEffective = 5;
+            const int maxEffective = 350;
+            const int requiredRollAtMin = 30;
+            const int requiredRollAtMax = 1;
+
+            // Clamp the level for interpolation.
+            var effectiveLevel = Math.Clamp(skill.Level, minEffective, maxEffective);
+
+            // Compute the fraction within the effective range.
+            var fraction = (effectiveLevel - minEffective) / (double)(maxEffective - minEffective);
+
+            // Linearly interpolate the required roll.
+            var requiredRoll = (int)Math.Ceiling(requiredRollAtMin + (requiredRollAtMax - requiredRollAtMin) * fraction);
+
+            return success >= requiredRoll;
         }
         catch
         {
