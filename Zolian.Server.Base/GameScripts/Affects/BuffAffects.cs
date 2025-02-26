@@ -323,18 +323,6 @@ public class buff_Dia_Haste : Buff
         aisling.Client.SkillSpellTimer.Delay = TimeSpan.FromMilliseconds(750);
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Everything starts to slow down around you");
         InsertBuff(aisling, buff);
-
-        foreach (var (_, skill) in aisling.SkillBook.Skills)
-        {
-            if (skill == null) continue;
-            aisling.Client.SendCooldown(true, skill.Slot, skill.CurrentCooldown);
-        }
-
-        foreach (var (_, spell) in aisling.SpellBook.Spells)
-        {
-            if (spell == null) continue;
-            aisling.Client.SendCooldown(false, spell.Slot, spell.CurrentCooldown);
-        }
     }
 
     public override void OnDurationUpdate(Sprite affected, Buff buff)
@@ -359,18 +347,6 @@ public class buff_Dia_Haste : Buff
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Time goes back to normal");
         aisling.Client.SendEffect(byte.MinValue, Icon);
         DeleteBuff(aisling, buff);
-
-        foreach (var (_, skill) in aisling.SkillBook.Skills)
-        {
-            if (skill == null) continue;
-            aisling.Client.SendCooldown(true, skill.Slot, skill.CurrentCooldown);
-        }
-
-        foreach (var (_, spell) in aisling.SpellBook.Spells)
-        {
-            if (spell == null) continue;
-            aisling.Client.SendCooldown(false, spell.Slot, spell.CurrentCooldown);
-        }
     }
 }
 
@@ -400,18 +376,6 @@ public class buff_Hastenga : Buff
         aisling.Client.SkillSpellTimer.Delay = TimeSpan.FromMilliseconds(500);
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Everything starts to slow down around you");
         InsertBuff(aisling, buff);
-
-        foreach (var (_, skill) in aisling.SkillBook.Skills)
-        {
-            if (skill == null) continue;
-            aisling.Client.SendCooldown(true, skill.Slot, skill.CurrentCooldown);
-        }
-
-        foreach (var (_, spell) in aisling.SpellBook.Spells)
-        {
-            if (spell == null) continue;
-            aisling.Client.SendCooldown(false, spell.Slot, spell.CurrentCooldown);
-        }
     }
 
     public override void OnDurationUpdate(Sprite affected, Buff buff)
@@ -436,18 +400,6 @@ public class buff_Hastenga : Buff
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Time goes back to normal");
         aisling.Client.SendEffect(byte.MinValue, Icon);
         DeleteBuff(aisling, buff);
-
-        foreach (var (_, skill) in aisling.SkillBook.Skills)
-        {
-            if (skill == null) continue;
-            aisling.Client.SendCooldown(true, skill.Slot, skill.CurrentCooldown);
-        }
-
-        foreach (var (_, spell) in aisling.SpellBook.Spells)
-        {
-            if (spell == null) continue;
-            aisling.Client.SendCooldown(false, spell.Slot, spell.CurrentCooldown);
-        }
     }
 }
 
@@ -476,18 +428,6 @@ public class buff_Hasten : Buff
         aisling.Client.SkillSpellTimer.Delay = TimeSpan.FromMilliseconds(500);
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Everything starts to slow down around you");
         InsertBuff(aisling, buff);
-
-        foreach (var (_, skill) in aisling.SkillBook.Skills)
-        {
-            if (skill == null) continue;
-            aisling.Client.SendCooldown(true, skill.Slot, skill.CurrentCooldown);
-        }
-
-        foreach (var (_, spell) in aisling.SpellBook.Spells)
-        {
-            if (spell == null) continue;
-            aisling.Client.SendCooldown(false, spell.Slot, spell.CurrentCooldown);
-        }
     }
 
     public override void OnDurationUpdate(Sprite affected, Buff buff)
@@ -512,18 +452,6 @@ public class buff_Hasten : Buff
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Time goes back to normal");
         aisling.Client.SendEffect(byte.MinValue, Icon);
         DeleteBuff(aisling, buff);
-
-        foreach (var (_, skill) in aisling.SkillBook.Skills)
-        {
-            if (skill == null) continue;
-            aisling.Client.SendCooldown(true, skill.Slot, skill.CurrentCooldown);
-        }
-
-        foreach (var (_, spell) in aisling.SpellBook.Spells)
-        {
-            if (spell == null) continue;
-            aisling.Client.SendCooldown(false, spell.Slot, spell.CurrentCooldown);
-        }
     }
 }
 
@@ -552,18 +480,6 @@ public class buff_Haste : Buff
         aisling.Client.SkillSpellTimer.Delay = TimeSpan.FromMilliseconds(750);
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Everything starts to slow down around you");
         InsertBuff(aisling, buff);
-
-        foreach (var (_, skill) in aisling.SkillBook.Skills)
-        {
-            if (skill == null) continue;
-            aisling.Client.SendCooldown(true, skill.Slot, skill.CurrentCooldown);
-        }
-
-        foreach (var (_, spell) in aisling.SpellBook.Spells)
-        {
-            if (spell == null) continue;
-            aisling.Client.SendCooldown(false, spell.Slot, spell.CurrentCooldown);
-        }
     }
 
     public override void OnDurationUpdate(Sprite affected, Buff buff)
@@ -588,18 +504,6 @@ public class buff_Haste : Buff
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Time goes back to normal");
         aisling.Client.SendEffect(byte.MinValue, Icon);
         DeleteBuff(aisling, buff);
-
-        foreach (var (_, skill) in aisling.SkillBook.Skills)
-        {
-            if (skill == null) continue;
-            aisling.Client.SendCooldown(true, skill.Slot, skill.CurrentCooldown);
-        }
-
-        foreach (var (_, spell) in aisling.SpellBook.Spells)
-        {
-            if (spell == null) continue;
-            aisling.Client.SendCooldown(false, spell.Slot, spell.CurrentCooldown);
-        }
     }
 }
 

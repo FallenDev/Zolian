@@ -75,26 +75,30 @@ public class PlayerSkillSpellCooldownComponent(WorldServer server) : WorldServer
     private static void ProcessSkills(Aisling player, Skill skill, bool hasteFlag)
     {
         if (skill == null) return;
-        if (skill.CurrentCooldown == 0) return;
 
-        skill.CurrentCooldown--;
+        if (skill.CurrentCooldown >= 1)
+            skill.CurrentCooldown--;
+
         if (hasteFlag)
             player.Client.SendCooldown(true, skill.Slot, skill.CurrentCooldown);
 
-        if (skill.CurrentCooldown < 0)
-            skill.CurrentCooldown = 0;
+        if (skill.CurrentCooldown >= 0) return;
+        skill.CurrentCooldown = 0;
+        player.Client.SendCooldown(true, skill.Slot, skill.CurrentCooldown);
     }
 
     private static void ProcessSpells(Aisling player, Spell spell, bool hasteFlag)
     {
         if (spell == null) return;
-        if (spell.CurrentCooldown == 0) return;
 
-        spell.CurrentCooldown--;
+        if (spell.CurrentCooldown >= 1)
+            spell.CurrentCooldown--;
+        
         if (hasteFlag)
             player.Client.SendCooldown(false, spell.Slot, spell.CurrentCooldown);
 
-        if (spell.CurrentCooldown < 0)
-            spell.CurrentCooldown = 0;
+        if (spell.CurrentCooldown >= 0) return;
+        spell.CurrentCooldown = 0;
+        player.Client.SendCooldown(false, spell.Slot, spell.CurrentCooldown);
     }
 }

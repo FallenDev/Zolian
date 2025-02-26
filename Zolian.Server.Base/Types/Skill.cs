@@ -25,14 +25,7 @@ public class Skill
     public string SkillName { get; init; }
     public int CurrentCooldown { get; set; }
 
-    public bool Ready
-    {
-        get
-        {
-            var readyTime = DateTime.UtcNow;
-            return readyTime.Subtract(LastUsedSkill).TotalSeconds >= Template.Cooldown;
-        }
-    }
+    public bool Ready => CurrentCooldown <= 0;
 
     public ConcurrentDictionary<string, SkillScript> Scripts { get; set; }
 
