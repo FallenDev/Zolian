@@ -1792,11 +1792,6 @@ public class WorldClient : WorldClientBase, IWorldClient
         {
             cooldownSeconds *= 2;
         }
-        else
-        {
-            var haste = Haste(Aisling);
-            cooldownSeconds = (int)(cooldownSeconds * haste);
-        }
 
         var args = new CooldownArgs
         {
@@ -1806,17 +1801,6 @@ public class WorldClient : WorldClientBase, IWorldClient
         };
 
         Send(args);
-    }
-
-    private static double Haste(Aisling player)
-    {
-        if (!player.Hastened) return 1;
-        return player.Client.SkillSpellTimer.Delay.TotalMilliseconds switch
-        {
-            500 => 0.50,
-            750 => 0.75,
-            _ => 1
-        };
     }
 
     /// <summary>

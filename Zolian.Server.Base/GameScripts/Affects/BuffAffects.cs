@@ -319,6 +319,7 @@ public class buff_Dia_Haste : Buff
         }
 
         if (affected is not Aisling aisling) return;
+        aisling.HasteFlag = true;
         aisling.Client.SkillSpellTimer.Delay = TimeSpan.FromMilliseconds(750);
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Everything starts to slow down around you");
         InsertBuff(aisling, buff);
@@ -340,8 +341,9 @@ public class buff_Dia_Haste : Buff
     {
         base.OnDurationUpdate(affected, buff);
 
-        if (affected is Aisling aisling)
-            aisling.Client.SkillSpellTimer.Delay = TimeSpan.FromMilliseconds(750);
+        if (affected is not Aisling aisling) return;
+        aisling.HasteFlag = true;
+        aisling.Client.SkillSpellTimer.Delay = TimeSpan.FromMilliseconds(750);
     }
 
     public override void OnEnded(Sprite affected, Buff buff)
@@ -352,6 +354,7 @@ public class buff_Dia_Haste : Buff
             damageable.SendAnimationNearby(190, affected.Position);
 
         if (affected is not Aisling aisling) return;
+        aisling.HasteFlag = true;
         aisling.Client.SkillSpellTimer.Delay = TimeSpan.FromMilliseconds(1000);
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Time goes back to normal");
         aisling.Client.SendEffect(byte.MinValue, Icon);
@@ -393,6 +396,7 @@ public class buff_Hastenga : Buff
         }
 
         if (affected is not Aisling aisling) return;
+        aisling.HasteFlag = true;
         aisling.Client.SkillSpellTimer.Delay = TimeSpan.FromMilliseconds(500);
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Everything starts to slow down around you");
         InsertBuff(aisling, buff);
@@ -410,6 +414,15 @@ public class buff_Hastenga : Buff
         }
     }
 
+    public override void OnDurationUpdate(Sprite affected, Buff buff)
+    {
+        base.OnDurationUpdate(affected, buff);
+
+        if (affected is not Aisling aisling) return;
+        aisling.HasteFlag = true;
+        aisling.Client.SkillSpellTimer.Delay = TimeSpan.FromMilliseconds(500);
+    }
+
     public override void OnEnded(Sprite affected, Buff buff)
     {
         affected.Buffs.TryRemove(buff.Name, out _);
@@ -418,6 +431,7 @@ public class buff_Hastenga : Buff
             damageable.SendAnimationNearby(190, affected.Position);
 
         if (affected is not Aisling aisling) return;
+        aisling.HasteFlag = true;
         aisling.Client.SkillSpellTimer.Delay = TimeSpan.FromMilliseconds(1000);
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Time goes back to normal");
         aisling.Client.SendEffect(byte.MinValue, Icon);
@@ -458,6 +472,7 @@ public class buff_Hasten : Buff
         }
 
         if (affected is not Aisling aisling) return;
+        aisling.HasteFlag = true;
         aisling.Client.SkillSpellTimer.Delay = TimeSpan.FromMilliseconds(500);
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Everything starts to slow down around you");
         InsertBuff(aisling, buff);
@@ -475,6 +490,15 @@ public class buff_Hasten : Buff
         }
     }
 
+    public override void OnDurationUpdate(Sprite affected, Buff buff)
+    {
+        base.OnDurationUpdate(affected, buff);
+
+        if (affected is not Aisling aisling) return;
+        aisling.HasteFlag = true;
+        aisling.Client.SkillSpellTimer.Delay = TimeSpan.FromMilliseconds(500);
+    }
+
     public override void OnEnded(Sprite affected, Buff buff)
     {
         affected.Buffs.TryRemove(buff.Name, out _);
@@ -483,6 +507,7 @@ public class buff_Hasten : Buff
             damageable.SendAnimationNearby(190, affected.Position);
 
         if (affected is not Aisling aisling) return;
+        aisling.HasteFlag = true;
         aisling.Client.SkillSpellTimer.Delay = TimeSpan.FromMilliseconds(1000);
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Time goes back to normal");
         aisling.Client.SendEffect(byte.MinValue, Icon);
@@ -523,6 +548,7 @@ public class buff_Haste : Buff
         }
 
         if (affected is not Aisling aisling) return;
+        aisling.HasteFlag = true;
         aisling.Client.SkillSpellTimer.Delay = TimeSpan.FromMilliseconds(750);
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Everything starts to slow down around you");
         InsertBuff(aisling, buff);
@@ -540,6 +566,15 @@ public class buff_Haste : Buff
         }
     }
 
+    public override void OnDurationUpdate(Sprite affected, Buff buff)
+    {
+        base.OnDurationUpdate(affected, buff);
+
+        if (affected is not Aisling aisling) return;
+        aisling.HasteFlag = true;
+        aisling.Client.SkillSpellTimer.Delay = TimeSpan.FromMilliseconds(750);
+    }
+
     public override void OnEnded(Sprite affected, Buff buff)
     {
         affected.Buffs.TryRemove(buff.Name, out _);
@@ -548,6 +583,7 @@ public class buff_Haste : Buff
             damageable.SendAnimationNearby(190, affected.Position);
 
         if (affected is not Aisling aisling) return;
+        aisling.HasteFlag = true;
         aisling.Client.SkillSpellTimer.Delay = TimeSpan.FromMilliseconds(1000);
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Time goes back to normal");
         aisling.Client.SendEffect(byte.MinValue, Icon);

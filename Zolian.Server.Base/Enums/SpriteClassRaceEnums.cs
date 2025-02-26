@@ -84,16 +84,7 @@ public enum Afflictions
 {
     Normal = 1,
     Lycanisim = 1 << 1,
-    Vampirisim = 1 << 2,
-    Plagued = 1 << 3, // -500 hp -500 mp -5 all stats
-    TheShakes = 1 << 4, // -5 Con, -5 Dex, -50 dmg
-    Stricken = 1 << 5, // -1500 mp, -10 Wis, -10 Regen
-    Rabies = 1 << 6, // Death if not cured in an hour
-    LockJoint = 1 << 7, // -30 dmg, random beag suain
-    NumbFall = 1 << 8, // -20 dmg, -20 hit
-    Diseased = Plagued | TheShakes,
-    Hallowed = Plagued | Stricken,
-    Petrified = LockJoint | NumbFall
+    Vampirisim = 1 << 2
 }
 
 [Flags]
@@ -250,15 +241,6 @@ public static class ClassStrings
             Afflictions.Normal => "Normal",
             Afflictions.Lycanisim => "Lycanisim",
             Afflictions.Vampirisim => "Vampirisim",
-            Afflictions.Plagued => "Plagued",
-            Afflictions.TheShakes => "The Shakes",
-            Afflictions.Stricken => "Stricken",
-            Afflictions.Rabies => "Rabies",
-            Afflictions.LockJoint => "Lock Joint",
-            Afflictions.NumbFall => "Numb Fall",
-            Afflictions.Diseased => "Diseased",
-            Afflictions.Hallowed => "Hallowed",
-            Afflictions.Petrified => "Petrified",
             _ => "Normal"
         };
     }

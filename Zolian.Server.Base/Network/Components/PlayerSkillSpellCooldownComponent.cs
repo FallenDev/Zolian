@@ -1,5 +1,8 @@
 ﻿using System.Diagnostics;
+
 using Darkages.Network.Server;
+using Darkages.Sprites;
+using Darkages.Types;
 
 namespace Darkages.Network.Components;
 
@@ -37,6 +40,9 @@ public class PlayerSkillSpellCooldownComponent(WorldServer server) : WorldServer
         }
     }
 
+    /// <summary>
+    /// Updates cooldowns based on normal or haste conditions, if a haste is cast. It refreshes the cooldown of every skill & spell
+    /// </summary>
     private static void UpdatePlayerSkillSpellCooldowns()
     {
         if (!ServerSetup.Instance.Running || !Server.Aislings.Any()) return;
@@ -47,32 +53,48 @@ public class PlayerSkillSpellCooldownComponent(WorldServer server) : WorldServer
             if (!player.LoggedIn) continue;
             if (!player.Client.CooldownControl.IsRunning)
                 player.Client.CooldownControl.Start();
-            
+
             if (player.Client.CooldownControl.Elapsed.TotalMilliseconds < player.Client.SkillSpellTimer.Delay.TotalMilliseconds) continue;
+            var hasteFlag = player.HasteFlag;
 
-            Parallel.ForEach(player.SkillBook.Skills.Values, (skill) =>
-            {
-                if (skill == null) return;
-                if (skill.CurrentCooldown == 0) return;
+            var skills = player.SkillBook.Skills.Values;
+            skills.AsParallel()
+                .WithDegreeOfParallelism(Environment.ProcessorCount)
+                .ForAll(skill => ProcessSkills(player, skill, hasteFlag));
 
-                skill.CurrentCooldown--;
+            var spells = player.SpellBook.Spells.Values;
+            spells.AsParallel()
+                .WithDegreeOfParallelism(Environment.ProcessorCount)
+                .ForAll(spell => ProcessSpells(player, spell, hasteFlag));
 
-                if (skill.CurrentCooldown < 0)
-                    skill.CurrentCooldown = 0;
-            });
-
-            Parallel.ForEach(player.SpellBook.Spells.Values, (spell) =>
-            {
-                if (spell == null) return;
-                if (spell.CurrentCooldown == 0) return;
-
-                spell.CurrentCooldown--;
-
-                if (spell.CurrentCooldown < 0)
-                    spell.CurrentCooldown = 0;
-            });
-
+            player.HasteFlag = false;
             player.Client.CooldownControl.Restart();
         }
+    }
+
+    private static void ProcessSkills(Aisling player, Skill skill, bool hasteFlag)
+    {
+        if (skill == null) return;
+        if (skill.CurrentCooldown == 0) return;
+
+        skill.CurrentCooldown--;
+        if (hasteFlag)
+            player.Client.SendCooldown(true, skill.Slot, skill.CurrentCooldown);
+
+        if (skill.CurrentCooldown < 0)
+            skill.CurrentCooldown = 0;
+    }
+
+    private static void ProcessSpells(Aisling player, Spell spell, bool hasteFlag)
+    {
+        if (spell == null) return;
+        if (spell.CurrentCooldown == 0) return;
+
+        spell.CurrentCooldown--;
+        if (hasteFlag)
+            player.Client.SendCooldown(false, spell.Slot, spell.CurrentCooldown);
+
+        if (spell.CurrentCooldown < 0)
+            spell.CurrentCooldown = 0;
     }
 }

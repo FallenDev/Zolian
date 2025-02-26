@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 
 using Darkages.Network.Server;
+using Darkages.Sprites;
 
 namespace Darkages.Network.Components;
 
@@ -22,7 +23,11 @@ public class PingComponent(WorldServer server) : WorldServerComponent(server)
                 continue;
             }
 
-            Ping();
+            var players = Server.Aislings;
+            players.AsParallel()
+                .WithDegreeOfParallelism(Environment.ProcessorCount)
+                .ForAll(Ping);
+
             var awaiter = (int)(ComponentSpeed - componentStopWatch.Elapsed.TotalMilliseconds);
 
             if (awaiter < 0)
@@ -38,13 +43,10 @@ public class PingComponent(WorldServer server) : WorldServerComponent(server)
         }
     }
 
-    private static void Ping()
+    private static void Ping(Aisling player)
     {
-        Parallel.ForEach(Server.Aislings, (player) =>
-        {
-            if (player?.Client == null) return;
-            if (!player.LoggedIn) return;
-            player.Client.SendHeartBeat(0x20, 0x14);
-        });
+        if (player?.Client == null) return;
+        if (!player.LoggedIn) return;
+        player.Client.SendHeartBeat(0x20, 0x14);
     }
 }

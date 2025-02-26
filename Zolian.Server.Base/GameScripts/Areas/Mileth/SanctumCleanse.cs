@@ -33,15 +33,13 @@ public class SanctumCleansingPool : AreaScript
         foreach (var debuff in client.Aisling.Debuffs.Values)
         {
             debuff?.OnEnded(client.Aisling, debuff);
-
-            if (debuff?.Name == "Rabies")
-            {
-                client.Aisling.Afflictions &= ~Afflictions.Rabies;
-            }
         }
 
         if (!client.Aisling.Afflictions.AfflictionFlagIsSet(Afflictions.Normal))
+        {
             client.Aisling.Afflictions |= Afflictions.Normal;
+            client.SendServerMessage(ServerMessageType.ActiveMessage, "Your afflictions have been removed!");
+        }
 
         client.Aisling.SendAnimationNearby(195, new Position(vectorMap));
     }

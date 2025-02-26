@@ -128,6 +128,7 @@ public sealed class Aisling : Player, IAisling
     public ConcurrentDictionary<string, string> ExplorePositions { get; set; }
     public Vector2 DeathLocation { get; set; }
     public int DeathMapId { get; set; }
+    public bool HasteFlag { get; set; }
 
     public NationTemplate PlayerNation => ServerSetup.Instance.GlobalNationTemplateCache[SpriteMaker.NationValue(Nation)];
 
@@ -150,16 +151,6 @@ public sealed class Aisling : Player, IAisling
     public bool CraneStance => SkillBook.HasSkill("Crane Stance");
     public bool Lycanisim => Afflictions.AfflictionFlagIsSet(Afflictions.Lycanisim);
     public bool Vampirisim => Afflictions.AfflictionFlagIsSet(Afflictions.Vampirisim);
-    public bool Plagued => Afflictions.AfflictionFlagIsSet(Afflictions.Plagued);
-    public bool TheShakes => Afflictions.AfflictionFlagIsSet(Afflictions.TheShakes);
-    public bool Stricken => Afflictions.AfflictionFlagIsSet(Afflictions.Stricken);
-    public bool Rabies => Afflictions.AfflictionFlagIsSet(Afflictions.Rabies);
-    public int RabiesCountDown { get; set; }
-    public bool LockJoint => Afflictions.AfflictionFlagIsSet(Afflictions.LockJoint);
-    public bool NumbFall => Afflictions.AfflictionFlagIsSet(Afflictions.NumbFall);
-    public bool Diseased => Afflictions.AfflictionFlagIsSet(Afflictions.Plagued) && Afflictions.AfflictionFlagIsSet(Afflictions.TheShakes);
-    public bool Hallowed => Afflictions.AfflictionFlagIsSet(Afflictions.Plagued) && Afflictions.AfflictionFlagIsSet(Afflictions.Stricken);
-    public bool Petrified => Afflictions.AfflictionFlagIsSet(Afflictions.LockJoint) && Afflictions.AfflictionFlagIsSet(Afflictions.NumbFall);
 
     public bool Poisoned
     {
