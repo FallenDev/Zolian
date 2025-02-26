@@ -25,14 +25,8 @@ public class Spell
     public string SpellName { get; init; }
     public int CurrentCooldown { get; set; }
 
-    private bool Ready
-    {
-        get
-        {
-            var readyTime = DateTime.UtcNow;
-            return readyTime.Subtract(LastUsedSpell).TotalSeconds >= Template.Cooldown;
-        }
-    }
+    private bool Ready => CurrentCooldown <= 0;
+    public bool Refreshed { get; set; }
 
     public ConcurrentDictionary<string, SpellScript> Scripts { get; set; }
 

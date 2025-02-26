@@ -1793,6 +1793,9 @@ public class WorldClient : WorldClientBase, IWorldClient
             cooldownSeconds *= 2;
         }
 
+        if (cooldownSeconds <= 0)
+            cooldownSeconds = 0;
+
         var args = new CooldownArgs
         {
             IsSkill = skill,

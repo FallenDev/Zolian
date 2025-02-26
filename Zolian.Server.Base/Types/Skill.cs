@@ -26,6 +26,7 @@ public class Skill
     public int CurrentCooldown { get; set; }
 
     public bool Ready => CurrentCooldown <= 0;
+    public bool Refreshed { get; set; }
 
     public ConcurrentDictionary<string, SkillScript> Scripts { get; set; }
 
