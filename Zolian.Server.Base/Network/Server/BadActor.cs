@@ -38,6 +38,8 @@ public static class BadActor
     {
         if (remoteIp.IsNullOrEmpty() || !IPAddress.TryParse(remoteIp, out _)) return true;
         if (remoteIp is "127.0.0.1" or InternalIP) return false;
+        // ToDo: Disabled due to API acting up
+        return false;
 
         try
         {
