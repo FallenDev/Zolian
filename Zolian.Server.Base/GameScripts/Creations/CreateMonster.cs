@@ -1157,13 +1157,18 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
 
     private static void CapOutMonsterBonuses(Monster obj)
     {
-        obj.BonusStr = Math.Min(obj.BonusStr, 1000);
-        obj.BonusInt = Math.Min(obj.BonusInt, 1000);
+        // Damage
+        obj.BonusStr = Math.Min(obj.BonusStr, 850);
+        obj.BonusInt = Math.Min(obj.BonusInt, 850);
+        obj.BonusDex = Math.Min(obj.BonusDex, 850);
+        obj.BonusDmg = Math.Min(obj.BonusDmg, 500);
+
+        // Vitality
         obj.BonusWis = Math.Min(obj.BonusWis, 1000);
-        obj.BonusCon = Math.Min(obj.BonusCon, 1000);
-        obj.BonusDex = Math.Min(obj.BonusDex, 1000);
-        obj.BonusHit = Math.Min(obj.BonusHit, 1000);
-        obj.BonusDmg = Math.Min(obj.BonusDmg, 1000);
+        obj.BonusCon = Math.Min(obj.BonusCon, 550);
+
+        // Saving Throw
+        obj.BonusHit = Math.Min(obj.BonusHit, 450);
     }
 
     private void LoadSkillScript(string skillScriptStr, Monster obj)
