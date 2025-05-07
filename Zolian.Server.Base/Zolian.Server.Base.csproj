@@ -41,17 +41,17 @@
 
 	<ItemGroup>
 		<PackageReference Include="Chaos-Networking" Version="2.4.3" />
-		<PackageReference Include="Dapper.StrongName" Version="2.1.35" />
-		<PackageReference Include="Microsoft.Data.SqlClient" Version="6.0.0-preview3.24332.3" />
+		<PackageReference Include="Dapper.StrongName" Version="2.1.66" />
+		<PackageReference Include="Microsoft.Data.SqlClient" Version="6.0.2" />
 		<PackageReference Include="Microsoft.DependencyValidation.Analyzers" Version="0.11.0" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 		<PackageReference Include="RestSharp" Version="112.1.0" />
-		<PackageReference Include="Sentry" Version="5.0.1" />
-		<PackageReference Include="Sentry.Extensions.Logging" Version="5.0.1" />
-		<PackageReference Include="Sentry.Profiling" Version="5.0.1" />
-		<PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
-		<PackageReference Include="ServiceStack" Version="8.5.2" />
-		<PackageReference Include="ServiceStack.Text" Version="8.5.2" />
+		<PackageReference Include="Sentry" Version="5.6.0" />
+		<PackageReference Include="Sentry.Extensions.Logging" Version="5.6.0" />
+		<PackageReference Include="Sentry.Profiling" Version="5.6.0" />
+		<PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
+		<PackageReference Include="ServiceStack" Version="8.7.2" />
+		<PackageReference Include="ServiceStack.Text" Version="8.7.2" />
 		<PackageReference Include="SunCalcNet" Version="1.2.4" />
 	</ItemGroup>
 
