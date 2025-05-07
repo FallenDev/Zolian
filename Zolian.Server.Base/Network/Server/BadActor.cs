@@ -1,15 +1,10 @@
 ﻿using System.Collections.Concurrent;
 using System.Net;
-
-using Darkages.Models;
-
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
-
 using Newtonsoft.Json;
-
 using RestSharp;
-
-using ServiceStack;
+using Darkages.Models;
 
 namespace Darkages.Network.Server;
 
@@ -17,79 +12,84 @@ public class ReportInfo
 {
     public string RemoteIp { get; init; }
     public string Comment { get; init; }
-    public DateTime FirstAttemptTime { get; init; }
+    public DateTime AttemptTime { get; set; }
 }
 
 public static class BadActor
 {
+    private static readonly IMemoryCache IpCache = new MemoryCache(new MemoryCacheOptions());
+    private static readonly TimeSpan CacheDuration = TimeSpan.FromMinutes(10);
+
     private static readonly ConcurrentQueue<ReportInfo> RetryQueue = [];
     private static bool _isProcessingQueue;
-    private const string InternalIP = "192.168.50.1"; // Cannot use ServerConfig due to value needing to be constant
 
-    public static void StartProcessingQueue()
+    private const string InternalIp = "192.168.50.1";
+
+    private const string CategoryWebSpam = "10";
+    private const string CategorySsh = "14";
+    private const string CategoryPortScan = "15";
+    private const string CategoryHacking = "16";
+    private const string CategoryDDoS = "4";
+
+    private readonly struct IpCacheEntry
     {
-        if (_isProcessingQueue) return;
-
-        _isProcessingQueue = true;
-        Task.Run(ProcessRetryQueue);
+        public bool IsBlocked { get; init; }
     }
 
-    public static bool ClientOnBlackList(string remoteIp)
+    public static async Task<bool> ClientOnBlackListAsync(string remoteIp)
     {
-        if (remoteIp.IsNullOrEmpty() || !IPAddress.TryParse(remoteIp, out _)) return true;
-        if (remoteIp is "127.0.0.1" or InternalIP) return false;
+        if (string.IsNullOrWhiteSpace(remoteIp) || !IPAddress.TryParse(remoteIp, out _)) return true;
+        if (remoteIp is "127.0.0.1" or InternalIp) return false;
+        if (IpCache.TryGetValue(remoteIp, out IpCacheEntry entry)) return entry.IsBlocked;
 
         try
         {
             var keyCode = ServerSetup.Instance.KeyCode;
-            if (keyCode is null || keyCode.Length == 0)
+            if (!IsKeyCodeValid(keyCode))
             {
                 ServerSetup.ConnectionLogger("Keycode not valid or not set within ServerConfig.json");
                 return false;
             }
 
-            // BLACKLIST check
             var request = new RestRequest("", Method.Get);
             request.AddHeader("Key", keyCode);
             request.AddHeader("Accept", "application/json");
             request.AddParameter("ipAddress", remoteIp);
             request.AddParameter("maxAgeInDays", "90");
             request.AddParameter("verbose", "");
-            var response = ExecuteWithRetry(() => ServerSetup.Instance.RestClient.Execute<Ipdb>(request));
 
-            if (response.Result?.IsSuccessful == true)
+            var response = await ServerSetup.Instance.RestClient.ExecuteAsync(request);
+
+            if (response.IsSuccessful)
             {
-                var ipdb = JsonConvert.DeserializeObject<Ipdb>(response.Result.Content!);
-                var abuseConfidenceScore = ipdb?.Data?.AbuseConfidenceScore;
-                var tor = ipdb?.Data?.IsTor;
+                var ipdb = JsonConvert.DeserializeObject<Ipdb>(response.Content!);
+                var abuseScore = ipdb?.Data?.AbuseConfidenceScore ?? 0;
+                var tor = ipdb?.Data?.IsTor ?? false;
                 var usageType = ipdb?.Data?.UsageType;
                 var isp = ipdb?.Data?.Isp;
+                var shouldBlock = false;
 
-                // Block if using tor, potentially malicious
-                if (tor == true)
+                if (tor)
                 {
-                    LogBadActor(remoteIp, "using tor, potentially malicious");
-                    return true;
+                    LogBadActor(remoteIp, "using Tor");
+                    shouldBlock = true;
                 }
-
-                // Block if an unauthorized usage type
-                if (IsBlockedUsageType(usageType) && IsBlockedIsp(isp))
+                else if (IsBlockedUsageType(usageType) && IsBlockedIsp(isp))
                 {
                     LogBlockedType(remoteIp, $"using {usageType}");
-                    return true;
+                    shouldBlock = true;
+                }
+                else if (abuseScore >= 5)
+                {
+                    LogBadActor(remoteIp, $"abuse score {abuseScore}");
+                    shouldBlock = true;
                 }
 
-                // Block based on abuse confidence score
-                if (abuseConfidenceScore >= 5)
-                {
-                    LogBadActor(remoteIp, $"high risk score of {abuseConfidenceScore}");
-                    return true;
-                }
+                IpCache.Set(remoteIp, new IpCacheEntry { IsBlocked = shouldBlock }, CacheDuration);
+                return shouldBlock;
             }
-            else
-            {
-                ServerSetup.ConnectionLogger($"{remoteIp} - API Issue or Failed response");
-            }
+
+            ServerSetup.ConnectionLogger($"{remoteIp} - API Issue or Failed response");
         }
         catch (Exception ex)
         {
@@ -97,72 +97,90 @@ public static class BadActor
             SentrySdk.CaptureException(ex);
         }
 
+        IpCache.Set(remoteIp, new IpCacheEntry { IsBlocked = false }, TimeSpan.FromMinutes(1));
         return false;
     }
 
-    private static async Task<T> ExecuteWithRetry<T>(Func<T> operation, int maxRetries = 3)
+    public static void StartProcessingQueue()
     {
-        var attempt = 0;
+        if (_isProcessingQueue) return;
+        _isProcessingQueue = true;
+        _ = Task.Run(ProcessRetryQueueAsync);
+    }
 
-        while (attempt < maxRetries)
+    private static async Task ProcessRetryQueueAsync()
+    {
+        try
         {
-            try
+            while (!RetryQueue.IsEmpty)
             {
-                return operation();
-            }
-            catch (Exception ex)
-            {
-                attempt++;
-                if (attempt >= maxRetries)
+                if (RetryQueue.TryDequeue(out var report))
                 {
-                    ServerSetup.ConnectionLogger($"Max retries reached. Operation failed: {ex.Message}", LogLevel.Warning);
-                    SentrySdk.CaptureException(ex);
-                    return default(T);
+                    var elapsed = DateTime.UtcNow - report.AttemptTime;
+
+                    if (elapsed.TotalMinutes >= 1)
+                    {
+                        var success = await ReportSuspiciousEndpointWithDDoS(report);
+                        if (success)
+                        {
+                            ServerSetup.ConnectionLogger($"Successfully reported {report.RemoteIp} after retry.");
+                        }
+                        else
+                        {
+                            report.AttemptTime = DateTime.UtcNow;
+                            RetryQueue.Enqueue(report);
+                            ServerSetup.ConnectionLogger($"Retry failed for {report.RemoteIp}, re-queued.");
+                        }
+                    }
+                    else
+                    {
+                        report.AttemptTime = DateTime.UtcNow;
+                        RetryQueue.Enqueue(report);
+                    }
                 }
 
-                // Wait before retrying
-                await Task.Delay(300); // Retry delay
+                await Task.Delay(5000);
             }
         }
-
-        return default(T);
-    }
-
-    private static void LogBadActor(string remoteIp, string reason)
-    {
-        ServerSetup.ConnectionLogger($"Blocking {remoteIp} - Reason: {reason}", LogLevel.Warning);
-        SentrySdk.CaptureMessage($"{remoteIp} blocked due to {reason}");
-        ReportMaliciousEndpoint(remoteIp, $"Blocked due to {reason}");
-    }
-
-    private static void LogBlockedType(string remoteIp, string reason)
-    {
-        ServerSetup.ConnectionLogger($"Blocking {remoteIp} - Using: {reason}", LogLevel.Warning);
-        ReportSuspiciousEndpoint(remoteIp, "Blocked due to Web Spam, Port Scanning");
-    }
-
-    private static bool IsBlockedUsageType(string usageType)
-    {
-        return usageType switch
+        finally
         {
-            "Commercial" or "Organization" or "Government" or "Military" or "Content Delivery Network" or "Data Center/Web Hosting/Transit" => true,
-            _ => false
-        };
+            _isProcessingQueue = false;
+        }
     }
 
-    private static bool IsBlockedIsp(string isp)
+    private static async Task<bool> ReportSuspiciousEndpointWithDDoS(ReportInfo report)
     {
-        return isp switch
+        var comment = $"{report.Comment} - DDoS";
+
+        try
         {
-            "Erisco LLC" => false,
-            _ => true
-        };
+            if (!IsKeyCodeValid(ServerSetup.Instance.KeyCode))
+            {
+                ServerSetup.ConnectionLogger("Keycode not valid or not set within ServerConfig.json");
+                return false;
+            }
+
+            var request = new RestRequest("", Method.Post);
+            request.AddHeader("Key", ServerSetup.Instance.KeyCode);
+            request.AddHeader("Accept", "application/json");
+            request.AddParameter("ip", report.RemoteIp);
+            request.AddParameter("categories", $"{CategoryDDoS}, {CategoryWebSpam}, {CategorySsh}");
+            request.AddParameter("comment", comment);
+
+            var response = await ServerSetup.Instance.RestReport.ExecuteAsync(request);
+            return response.IsSuccessful;
+        }
+        catch (Exception ex)
+        {
+            ServerSetup.ConnectionLogger($"Retry DDoS report failed: {ex.Message}", LogLevel.Warning);
+            SentrySdk.CaptureException(ex);
+            return false;
+        }
     }
 
     public static void ReportMaliciousEndpoint(string remoteIp, string comment)
     {
-        var keyCode = ServerSetup.Instance.KeyCode;
-        if (keyCode is null || keyCode.Length == 0)
+        if (!IsKeyCodeValid(ServerSetup.Instance.KeyCode))
         {
             ServerSetup.ConnectionLogger("Keycode not valid or not set within ServerConfig.json");
             return;
@@ -171,21 +189,21 @@ public static class BadActor
         try
         {
             var request = new RestRequest("", Method.Post);
-            request.AddHeader("Key", keyCode);
+            request.AddHeader("Key", ServerSetup.Instance.KeyCode);
             request.AddHeader("Accept", "application/json");
             request.AddParameter("ip", remoteIp);
-            request.AddParameter("categories", "14, 15, 16, 21");
+            request.AddParameter("categories", $"{CategorySsh}, {CategoryPortScan}, {CategoryHacking}, {CategoryWebSpam}");
             request.AddParameter("comment", comment);
-            var response = ExecuteWithRetry(() => ServerSetup.Instance.RestReport.Execute(request));
 
-            if (response.Result?.IsSuccessful == true) return;
+            var response = ServerSetup.Instance.RestReport.Execute(request);
+
+            if (response.IsSuccessful) return;
             ServerSetup.ConnectionLogger($"Error reporting {remoteIp} : {comment}");
             SentrySdk.CaptureMessage($"Error reporting {remoteIp} : {comment}");
         }
         catch (HttpRequestException httpEx) when (httpEx.Message.Contains("TooManyRequests"))
         {
-            ServerSetup.ConnectionLogger($"Exception while reporting {remoteIp}: Too many requests.", LogLevel.Warning);
-            // add to queue where we report them also for DDoS (4)
+            ServerSetup.ConnectionLogger($"Too many requests when reporting {remoteIp}", LogLevel.Warning);
             AddToRetryQueue(remoteIp, comment);
         }
         catch (Exception ex)
@@ -197,8 +215,7 @@ public static class BadActor
 
     private static void ReportSuspiciousEndpoint(string remoteIp, string comment)
     {
-        var keyCode = ServerSetup.Instance.KeyCode;
-        if (keyCode is null || keyCode.Length == 0)
+        if (!IsKeyCodeValid(ServerSetup.Instance.KeyCode))
         {
             ServerSetup.ConnectionLogger("Keycode not valid or not set within ServerConfig.json");
             return;
@@ -207,21 +224,21 @@ public static class BadActor
         try
         {
             var request = new RestRequest("", Method.Post);
-            request.AddHeader("Key", keyCode);
+            request.AddHeader("Key", ServerSetup.Instance.KeyCode);
             request.AddHeader("Accept", "application/json");
             request.AddParameter("ip", remoteIp);
-            request.AddParameter("categories", "10, 14");
+            request.AddParameter("categories", $"{CategoryWebSpam}, {CategorySsh}");
             request.AddParameter("comment", comment);
-            var response = ExecuteWithRetry(() => ServerSetup.Instance.RestReport.Execute(request));
 
-            if (response.Result?.IsSuccessful == true) return;
+            var response = ServerSetup.Instance.RestReport.Execute(request);
+
+            if (response.IsSuccessful) return;
             ServerSetup.ConnectionLogger($"Error reporting {remoteIp} : {comment}");
             SentrySdk.CaptureMessage($"Error reporting {remoteIp} : {comment}");
         }
         catch (HttpRequestException httpEx) when (httpEx.Message.Contains("TooManyRequests"))
         {
-            ServerSetup.ConnectionLogger($"Exception while reporting {remoteIp}: Too many requests.", LogLevel.Warning);
-            // add to queue where we report them also for DDoS (4)
+            ServerSetup.ConnectionLogger($"Too many requests when reporting {remoteIp}", LogLevel.Warning);
             AddToRetryQueue(remoteIp, comment);
         }
         catch (Exception ex)
@@ -237,72 +254,37 @@ public static class BadActor
         {
             RemoteIp = remoteIp,
             Comment = comment,
-            FirstAttemptTime = DateTime.Now
+            AttemptTime = DateTime.UtcNow
         });
+
+        StartProcessingQueue();
     }
 
-    private static async Task ProcessRetryQueue()
+    private static void LogBadActor(string remoteIp, string reason)
     {
-        while (_isProcessingQueue)
-        {
-            if (!RetryQueue.IsEmpty)
-            {
-                // Process each report in the queue
-                if (RetryQueue.TryDequeue(out var report))
-                {
-                    var elapsedTime = DateTime.Now - report.FirstAttemptTime;
-
-                    if (elapsedTime.TotalMinutes >= 1)
-                    {
-                        var success = await ReportSuspiciousEndpointWithDDoS(report);
-                        if (success)
-                        {
-                            ServerSetup.ConnectionLogger($"Successfully reported {report.RemoteIp} after retry.");
-                        }
-                        else
-                        {
-                            RetryQueue.Enqueue(report);
-                            ServerSetup.ConnectionLogger($"Retry failed for {report.RemoteIp}, re-queued.");
-                        }
-                    }
-                    else
-                    {
-                        await Task.Delay(TimeSpan.FromMinutes(1) - elapsedTime);
-                        RetryQueue.Enqueue(report);
-                    }
-                }
-            }
-
-            await Task.Delay(5000);
-        }
+        ServerSetup.ConnectionLogger($"Blocking {remoteIp} - Reason: {reason}", LogLevel.Warning);
+        SentrySdk.CaptureMessage($"{remoteIp} blocked due to {reason}");
+        ReportMaliciousEndpoint(remoteIp, $"Blocked due to {reason}");
     }
 
-    private static async Task<bool> ReportSuspiciousEndpointWithDDoS(ReportInfo report)
+    private static void LogBlockedType(string remoteIp, string reason)
     {
-        var adjustedComment = $"{report.Comment} - DDoS";
-
-        try
-        {
-            var keyCode = ServerSetup.Instance.KeyCode;
-            if (string.IsNullOrEmpty(keyCode))
-            {
-                ServerSetup.ConnectionLogger("Keycode not valid or not set within ServerConfig.json");
-                return false;
-            }
-
-            var request = new RestRequest("", Method.Post);
-            request.AddHeader("Key", keyCode);
-            request.AddHeader("Accept", "application/json");
-            request.AddParameter("ip", report.RemoteIp);
-            request.AddParameter("categories", "4, 10, 14");
-            request.AddParameter("comment", adjustedComment);
-
-            var response = await ServerSetup.Instance.RestReport.ExecuteAsync(request);
-            return response.IsSuccessful;
-        }
-        catch
-        {
-            return false;
-        }
+        ServerSetup.ConnectionLogger($"Blocking {remoteIp} - Usage: {reason}", LogLevel.Warning);
+        ReportSuspiciousEndpoint(remoteIp, "Blocked due to Web Spam or Port Scanning");
     }
+
+    private static bool IsBlockedUsageType(string? usageType) => usageType switch
+    {
+        "Commercial" or "Organization" or "Government" or "Military" or
+        "Content Delivery Network" or "Data Center/Web Hosting/Transit" => true,
+        _ => false
+    };
+
+    private static bool IsBlockedIsp(string? isp) => isp switch
+    {
+        "Erisco LLC" => false,
+        _ => true
+    };
+
+    private static bool IsKeyCodeValid(string? keyCode) => !string.IsNullOrWhiteSpace(keyCode);
 }

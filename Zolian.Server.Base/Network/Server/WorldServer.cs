@@ -3260,9 +3260,9 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
         if (!safe)
         {
-            var badActor = BadActor.ClientOnBlackList(ipAddress.ToString());
+            var isBadActor = Task.Run(() => BadActor.ClientOnBlackListAsync(ipAddress.ToString())).Result;
 
-            if (badActor)
+            if (isBadActor)
             {
                 try
                 {
@@ -3311,7 +3311,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             ServerSetup.ConnectionLogger("---------World-Server---------");
             var comment = $"{ipAddress} has been blocked for violating security protocols through improper port access.";
             ServerSetup.ConnectionLogger(comment, LogLevel.Warning);
-            BadActor.ReportMaliciousEndpoint(ipAddress.ToString(), comment);
+            Task.Run(() => BadActor.ReportMaliciousEndpoint(ipAddress.ToString(), comment));
             return;
         }
 

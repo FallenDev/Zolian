@@ -491,8 +491,9 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
 
         if (!safe)
         {
-            var badActor = BadActor.ClientOnBlackList(ipAddress.ToString());
-            if (badActor)
+            var isBadActor = Task.Run(() => BadActor.ClientOnBlackListAsync(ipAddress.ToString())).Result;
+
+            if (isBadActor)
             {
                 try
                 {
@@ -539,7 +540,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
             ServerSetup.ConnectionLogger("---------Login-Server---------");
             var comment = $"{ipAddress} has been blocked for violating security protocols through improper port access.";
             ServerSetup.ConnectionLogger(comment, LogLevel.Warning);
-            BadActor.ReportMaliciousEndpoint(ipAddress.ToString(), comment);
+            Task.Run(() => BadActor.ReportMaliciousEndpoint(ipAddress.ToString(), comment));
             return;
         }
 

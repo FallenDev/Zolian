@@ -162,8 +162,9 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
 
         if (!safe)
         {
-            var badActor = BadActor.ClientOnBlackList(ipAddress.ToString());
-            if (badActor)
+            var isBadActor = Task.Run(() => BadActor.ClientOnBlackListAsync(ipAddress.ToString())).Result;
+
+            if (isBadActor)
             {
                 try
                 {
