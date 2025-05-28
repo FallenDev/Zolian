@@ -375,7 +375,8 @@ CREATE TABLE PlayersQuests
     [CthonicDepthsCleansing] BIT NULL,
     [CthonicRuinsAccess] BIT NULL,
     [CthonicRemainsExplorationLevel] INT NULL,
-    [EndedOmegasRein] BIT NULL
+    [EndedOmegasRein] BIT NULL,
+    [CraftedMoonArmor] BIT NULL
 )
 
 CREATE TABLE PlayersIgnoreList

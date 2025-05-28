@@ -2,7 +2,8 @@
 
 namespace Darkages.Models;
 
-public abstract record ReservedRedirectInfo : IEqualityOperators<ReservedRedirectInfo, ReservedRedirectInfo, bool>
+// Cannot make abstract due to compiler error
+public record ReservedRedirectInfo : IEqualityOperators<ReservedRedirectInfo, ReservedRedirectInfo, bool>
 {
     public byte Id { get; set; }
     public string Name { get; set; }
