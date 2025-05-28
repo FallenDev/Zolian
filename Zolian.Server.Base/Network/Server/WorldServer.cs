@@ -103,7 +103,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             Task.Factory.StartNew(() => GroundMoneyUpdateLoop(linkedCts.Token), TaskCreationOptions.LongRunning);
             Task.Factory.StartNew(() => MapsUpdateLoop(linkedCts.Token), TaskCreationOptions.LongRunning);
             Task.Factory.StartNew(() => TrapsUpdateLoop(linkedCts.Token), TaskCreationOptions.LongRunning);
-            Task.Factory.StartNew(() => ClientsUpdateLoop(linkedCts.Token), TaskCreationOptions.LongRunning);
+            Task.Factory.StartNew(ClientsUpdateLoop, TaskCreationOptions.LongRunning);
         }
         catch (Exception ex)
         {
@@ -222,45 +222,88 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         }, GameSpeed, ct).ConfigureAwait(false);
     }
 
-    private async Task ClientsUpdateLoop(CancellationToken ct)
+    private async Task ClientsUpdateLoop()
     {
-        var updateInterval = TimeSpan.FromMilliseconds(GameSpeed);
+        const int baseConcurrency = 10; // Minimum number of concurrent tasks
+        const int batchSize = 100; // Number of players per batch
+        var maxConcurrency = Math.Max(baseConcurrency, Environment.ProcessorCount); // Adjust based on system capabilities
+        var semaphore = new SemaphoreSlim(maxConcurrency);
+        var clientWatch = new Stopwatch();
+        clientWatch.Start();
+        var variableGameSpeed = GameSpeed; // Base interval
 
-        while (!ct.IsCancellationRequested)
+        while (ServerSetup.Instance.Running)
         {
-            var loopStart = DateTime.UtcNow;
+            if (clientWatch.ElapsedMilliseconds < variableGameSpeed)
+            {
+                await Task.Delay(1);
+                continue;
+            }
 
             var players = Aislings.Where(player => player?.Client != null).ToList();
 
-            // Remove not-logged-in players (single-threaded for safety)
-            foreach (var player in players.Where(p => !p.LoggedIn))
+            // Divide players into chunks (batches) for processing
+            var playerBatches = players.Chunk(batchSize).ToList();
+
+            // Process batches concurrently
+            var batchTasks = playerBatches.Select(batch =>
+                Task.Run(async () =>
+                {
+                    foreach (var player in batch)
+                    {
+                        await semaphore.WaitAsync();
+                        try
+                        {
+                            // Process the player inline to reduce task overhead
+                            await ProcessClientTask(player);
+                        }
+                        finally
+                        {
+                            semaphore.Release();
+                        }
+                    }
+                })
+            );
+
+            // Wait for all batches to complete
+            await Task.WhenAll(batchTasks);
+
+            // Calculate the remaining time for the next update
+            var syncCount = (int)(GameSpeed - clientWatch.ElapsedMilliseconds);
+
+            if (syncCount < 0)
             {
-                if (player.Client != null)
-                    ClientRegistry.TryRemove(player.Client.Id, out _);
+                // Adjust GameSpeed dynamically to account for delays
+                variableGameSpeed = GameSpeed + syncCount;
+                clientWatch.Restart();
+                continue;
             }
 
-            // Only update logged-in players
-            var activePlayers = players.Where(p => p.LoggedIn).ToList();
+            await Task.Delay(TimeSpan.FromMilliseconds(syncCount));
+            variableGameSpeed = GameSpeed; // Reset to default interval
+            clientWatch.Restart();
+        }
+    }
 
-            Parallel.ForEach(activePlayers, new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount }, player =>
+    private async Task ProcessClientTask(Aisling player)
+    {
+        if (player?.Client == null) return;
+
+        try
+        {
+            if (!player.LoggedIn)
             {
-                try
-                {
-                    player.Client.Update();
-                }
-                catch (Exception ex)
-                {
-                    SentrySdk.CaptureException(ex);
-                    player.Client?.Disconnect();
-                    if (player.Client != null)
-                        ClientRegistry.TryRemove(player.Client.Id, out _);
-                }
-            });
+                ClientRegistry.TryRemove(player.Client.Id, out _);
+                return;
+            }
 
-            var elapsed = DateTime.UtcNow - loopStart;
-            var delay = updateInterval - elapsed;
-            if (delay > TimeSpan.Zero)
-                await Task.Delay(delay, ct);
+            await player.Client.Update();
+        }
+        catch (Exception ex)
+        {
+            SentrySdk.CaptureException(ex);
+            player.Client.Disconnect();
+            ClientRegistry.TryRemove(player.Client.Id, out _);
         }
     }
 

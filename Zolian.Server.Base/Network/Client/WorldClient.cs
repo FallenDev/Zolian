@@ -155,12 +155,12 @@ public class WorldClient : WorldClientBase, IWorldClient
         _server = server;
 
         // Event-Driven Tasks
-        Task.Run(ProcessExperienceEvents);
-        Task.Run(ProcessAbilityEvents);
-        Task.Run(ProcessApplyingBuffsEvents);
-        Task.Run(ProcessApplyingDebuffsEvents);
-        Task.Run(ProcessUpdatingBuffsEvents);
-        Task.Run(ProcessUpdatingDebuffsEvents);
+        Task.Factory.StartNew(ProcessExperienceEvents, TaskCreationOptions.LongRunning);
+        Task.Factory.StartNew(ProcessAbilityEvents, TaskCreationOptions.LongRunning);
+        Task.Factory.StartNew(ProcessApplyingBuffsEvents, TaskCreationOptions.LongRunning);
+        Task.Factory.StartNew(ProcessApplyingDebuffsEvents, TaskCreationOptions.LongRunning);
+        Task.Factory.StartNew(ProcessUpdatingBuffsEvents, TaskCreationOptions.LongRunning);
+        Task.Factory.StartNew(ProcessUpdatingDebuffsEvents, TaskCreationOptions.LongRunning);
 
         foreach (var stopwatch in _clientStopwatches.Values)
             stopwatch.Start();
