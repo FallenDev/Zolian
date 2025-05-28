@@ -95,14 +95,15 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         try
         {
             ServerSetup.Instance.Running = true;
-            Task.Run(UpdateComponentsRoutine, stoppingToken);
-            Task.Run(UpdateMundanesRoutine, stoppingToken);
-            Task.Run(UpdateMonstersRoutine, stoppingToken);
-            Task.Run(UpdateGroundItemsRoutine, stoppingToken);
-            Task.Run(UpdateGroundMoneyRoutine, stoppingToken);
-            Task.Run(UpdateMapsRoutine, stoppingToken);
-            Task.Run(UpdateTrapsRoutine, stoppingToken);
-            Task.Run(UpdateClients, stoppingToken);
+            var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken);
+            UpdateComponentsRoutine(linkedCts.Token);
+            Task.Factory.StartNew(() => MundanesUpdateLoop(linkedCts.Token), TaskCreationOptions.LongRunning);
+            Task.Factory.StartNew(() => MonstersUpdateLoop(linkedCts.Token), TaskCreationOptions.LongRunning);
+            Task.Factory.StartNew(() => GroundItemsUpdateLoop(linkedCts.Token), TaskCreationOptions.LongRunning);
+            Task.Factory.StartNew(() => GroundMoneyUpdateLoop(linkedCts.Token), TaskCreationOptions.LongRunning);
+            Task.Factory.StartNew(() => MapsUpdateLoop(linkedCts.Token), TaskCreationOptions.LongRunning);
+            Task.Factory.StartNew(() => TrapsUpdateLoop(linkedCts.Token), TaskCreationOptions.LongRunning);
+            Task.Factory.StartNew(() => ClientsUpdateLoop(linkedCts.Token), TaskCreationOptions.LongRunning);
         }
         catch (Exception ex)
         {
@@ -141,308 +142,125 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
     #region Server Loop
 
-    private void UpdateComponentsRoutine()
+    private void UpdateComponentsRoutine(CancellationToken ct)
     {
         foreach (var component in _serverComponents.Values)
-            Task.Run(component.Update);
+            Task.Factory.StartNew(() => component.Update(), TaskCreationOptions.LongRunning);
     }
 
-    private static async Task UpdateGroundItemsRoutine()
+    private static class PeriodicTaskRunner
     {
-        var groundWatch = new Stopwatch();
-        groundWatch.Start();
-        const int defaultGameSpeed = 60000; // Default update interval in milliseconds (1 minute)
-        var variableGameSpeed = defaultGameSpeed;
-
-        while (ServerSetup.Instance.Running)
+        public static async Task RunPeriodicAsync(Func<CancellationToken, Task> action, int intervalMs, CancellationToken ct)
         {
-            if (groundWatch.Elapsed.TotalMilliseconds < variableGameSpeed)
+            var sw = new Stopwatch();
+            while (!ct.IsCancellationRequested)
             {
-                await Task.Delay(1);
-                continue;
-            }
+                sw.Restart();
+                await action(ct);
 
-            // Call the ground items update logic
+                var elapsed = (int)sw.ElapsedMilliseconds;
+                var delay = intervalMs - elapsed;
+                if (delay > 0)
+                    await Task.Delay(delay, ct);
+            }
+        }
+    }
+
+    private static async Task GroundItemsUpdateLoop(CancellationToken ct)
+    {
+        await PeriodicTaskRunner.RunPeriodicAsync(_ =>
+        {
             UpdateGroundItems();
-
-            // Calculate the remaining time until the next update
-            var awaiter = (int)(defaultGameSpeed - groundWatch.Elapsed.TotalMilliseconds);
-
-            if (awaiter < 0)
-            {
-                // Adjust the game speed dynamically to account for delays
-                variableGameSpeed = defaultGameSpeed + awaiter;
-                groundWatch.Restart();
-                continue;
-            }
-
-            // Delay for the remaining time, if any
-            await Task.Delay(TimeSpan.FromMilliseconds(awaiter));
-            variableGameSpeed = defaultGameSpeed; // Reset to default interval
-            groundWatch.Restart();
-        }
+            return Task.CompletedTask;
+        }, 60000, ct).ConfigureAwait(false);
     }
 
-    private static async Task UpdateGroundMoneyRoutine()
+    private static async Task GroundMoneyUpdateLoop(CancellationToken ct)
     {
-        var groundWatch = new Stopwatch();
-        groundWatch.Start();
-        const int defaultGameSpeed = 60000; // Default update interval in milliseconds (1 minute)
-        var variableGameSpeed = defaultGameSpeed;
-
-        while (ServerSetup.Instance.Running)
+        await PeriodicTaskRunner.RunPeriodicAsync(_ =>
         {
-            if (groundWatch.Elapsed.TotalMilliseconds < variableGameSpeed)
-            {
-                await Task.Delay(1);
-                continue;
-            }
-
-            // Call the ground money update logic
             UpdateGroundMoney();
-
-            // Calculate the remaining time until the next update
-            var awaiter = (int)(defaultGameSpeed - groundWatch.Elapsed.TotalMilliseconds);
-
-            if (awaiter < 0)
-            {
-                // Adjust the game speed dynamically to account for delays
-                variableGameSpeed = defaultGameSpeed + awaiter;
-                groundWatch.Restart();
-                continue;
-            }
-
-            // Delay for the remaining time, if any
-            await Task.Delay(TimeSpan.FromMilliseconds(awaiter));
-            variableGameSpeed = defaultGameSpeed; // Reset to default interval
-            groundWatch.Restart();
-        }
+            return Task.CompletedTask;
+        }, 60000, ct).ConfigureAwait(false);
     }
 
-    private static async Task UpdateMundanesRoutine()
+    private static async Task MundanesUpdateLoop(CancellationToken ct)
     {
-        var mundanesWatch = new Stopwatch();
-        mundanesWatch.Start();
-        const int defaultGameSpeed = 1500; // Default update interval in milliseconds
-        var variableGameSpeed = defaultGameSpeed;
-
-        while (ServerSetup.Instance.Running)
+        const int intervalMs = 1500; // 1.5 seconds
+        await PeriodicTaskRunner.RunPeriodicAsync(_ =>
         {
-            if (mundanesWatch.Elapsed.TotalMilliseconds < variableGameSpeed)
-            {
-                await Task.Delay(1);
-                continue;
-            }
-
-            // Call the mundane update logic
-            UpdateMundanes(mundanesWatch.Elapsed);
-
-            // Calculate remaining time until the next update
-            var awaiter = (int)(defaultGameSpeed - mundanesWatch.Elapsed.TotalMilliseconds);
-
-            if (awaiter < 0)
-            {
-                // Adjust the game speed dynamically to account for processing delays
-                variableGameSpeed = defaultGameSpeed + awaiter;
-                mundanesWatch.Restart();
-                continue;
-            }
-
-            // Delay for the remaining time, if any
-            await Task.Delay(TimeSpan.FromMilliseconds(awaiter));
-            variableGameSpeed = defaultGameSpeed; // Reset to default interval
-            mundanesWatch.Restart();
-        }
+            UpdateMundanes(TimeSpan.FromMilliseconds(intervalMs));
+            return Task.CompletedTask;
+        }, intervalMs, ct).ConfigureAwait(false);
     }
 
-    private static async Task UpdateMonstersRoutine()
+    private static async Task MonstersUpdateLoop(CancellationToken ct)
     {
-        var monstersWatch = new Stopwatch();
-        monstersWatch.Start();
-        const int defaultGameSpeed = 250; // Default update interval in milliseconds
-        var variableGameSpeed = defaultGameSpeed;
-
-        while (ServerSetup.Instance.Running)
+        const int intervalMs = 250; // .250 of a second
+        await PeriodicTaskRunner.RunPeriodicAsync(_ =>
         {
-            if (monstersWatch.Elapsed.TotalMilliseconds < variableGameSpeed)
-            {
-                await Task.Delay(1);
-                continue;
-            }
-
-            // Update monsters with the elapsed time
-            UpdateMonsters(monstersWatch.Elapsed);
-
-            // Calculate the remaining time for the next update
-            var awaiter = (int)(defaultGameSpeed - monstersWatch.Elapsed.TotalMilliseconds);
-
-            if (awaiter < 0)
-            {
-                // Adjust the game speed dynamically to compensate for overrun
-                variableGameSpeed = defaultGameSpeed + awaiter;
-                monstersWatch.Restart();
-                continue;
-            }
-
-            // Delay for the remainder of the interval
-            await Task.Delay(TimeSpan.FromMilliseconds(awaiter));
-            variableGameSpeed = defaultGameSpeed;
-            monstersWatch.Restart();
-        }
+            UpdateMonsters(TimeSpan.FromMilliseconds(intervalMs));
+            return Task.CompletedTask;
+        }, intervalMs, ct).ConfigureAwait(false);
     }
 
-    private static async Task UpdateMapsRoutine()
+    private static async Task MapsUpdateLoop(CancellationToken ct)
     {
-        var gameWatch = new Stopwatch();
-        gameWatch.Start();
-        var variableGameSpeed = GameSpeed; // Use the constant directly
-
-        while (ServerSetup.Instance.Running)
+        await PeriodicTaskRunner.RunPeriodicAsync(_ =>
         {
-            if (gameWatch.Elapsed.TotalMilliseconds < variableGameSpeed)
-            {
-                await Task.Delay(1);
-                continue;
-            }
-
-            // Call the maps update logic
-            UpdateMaps(gameWatch.Elapsed);
-
-            // Calculate the remaining time until the next update
-            var awaiter = (int)(GameSpeed - gameWatch.Elapsed.TotalMilliseconds);
-
-            if (awaiter < 0)
-            {
-                // Adjust the game speed dynamically to account for delays
-                variableGameSpeed = GameSpeed + awaiter;
-                gameWatch.Restart();
-                continue;
-            }
-
-            // Delay for the remaining time, if any
-            await Task.Delay(TimeSpan.FromMilliseconds(awaiter));
-            variableGameSpeed = GameSpeed; // Reset to default interval
-            gameWatch.Restart();
-        }
+            UpdateMaps(TimeSpan.FromMilliseconds(GameSpeed));
+            return Task.CompletedTask;
+        }, GameSpeed, ct).ConfigureAwait(false);
     }
 
-    private async Task UpdateTrapsRoutine()
+    private async Task TrapsUpdateLoop(CancellationToken ct)
     {
-        var gameWatch = new Stopwatch();
-        gameWatch.Start();
-        var variableGameSpeed = GameSpeed;
-
-        while (ServerSetup.Instance.Running)
+        await PeriodicTaskRunner.RunPeriodicAsync(_ =>
         {
-            // if total time is less than variable speed adj - delay 1 mil second
-            if (gameWatch.Elapsed.TotalMilliseconds < variableGameSpeed)
-            {
-                await Task.Delay(1);
-                continue;
-            }
-
-            // execute
-            CheckTraps(gameWatch.Elapsed);
-            // time to complete
-            var awaiter = (int)(GameSpeed - gameWatch.Elapsed.TotalMilliseconds);
-
-            // if less than, reduce next run time
-            if (awaiter < 0)
-            {
-                variableGameSpeed = GameSpeed + awaiter;
-                gameWatch.Restart();
-                continue;
-            }
-
-            // if early await the difference then reset the clock
-            await Task.Delay(TimeSpan.FromMilliseconds(awaiter));
-            variableGameSpeed = GameSpeed;
-            gameWatch.Restart();
-        }
+            CheckTraps(TimeSpan.FromMilliseconds(GameSpeed));
+            return Task.CompletedTask;
+        }, GameSpeed, ct).ConfigureAwait(false);
     }
 
-    private async Task UpdateClients()
+    private async Task ClientsUpdateLoop(CancellationToken ct)
     {
-        const int baseConcurrency = 10; // Minimum number of concurrent tasks
-        const int batchSize = 100; // Number of players per batch
-        var maxConcurrency = Math.Max(baseConcurrency, Environment.ProcessorCount); // Adjust based on system capabilities
-        var semaphore = new SemaphoreSlim(maxConcurrency);
-        var clientWatch = new Stopwatch();
-        clientWatch.Start();
-        var variableGameSpeed = GameSpeed; // Base interval
+        var updateInterval = TimeSpan.FromMilliseconds(GameSpeed);
 
-        while (ServerSetup.Instance.Running)
+        while (!ct.IsCancellationRequested)
         {
-            if (clientWatch.ElapsedMilliseconds < variableGameSpeed)
-            {
-                await Task.Delay(1);
-                continue;
-            }
+            var loopStart = DateTime.UtcNow;
 
             var players = Aislings.Where(player => player?.Client != null).ToList();
 
-            // Divide players into chunks (batches) for processing
-            var playerBatches = players.Chunk(batchSize).ToList();
+            // Remove not-logged-in players (single-threaded for safety)
+            foreach (var player in players.Where(p => !p.LoggedIn))
+            {
+                if (player.Client != null)
+                    ClientRegistry.TryRemove(player.Client.Id, out _);
+            }
 
-            // Process batches concurrently
-            var batchTasks = playerBatches.Select(batch =>
-                Task.Run(async () =>
+            // Only update logged-in players
+            var activePlayers = players.Where(p => p.LoggedIn).ToList();
+
+            Parallel.ForEach(activePlayers, new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount }, player =>
+            {
+                try
                 {
-                    foreach (var player in batch)
-                    {
-                        await semaphore.WaitAsync();
-                        try
-                        {
-                            // Process the player inline to reduce task overhead
-                            await ProcessClientTask(player);
-                        }
-                        finally
-                        {
-                            semaphore.Release();
-                        }
-                    }
-                })
-            );
+                    player.Client.Update();
+                }
+                catch (Exception ex)
+                {
+                    SentrySdk.CaptureException(ex);
+                    player.Client?.Disconnect();
+                    if (player.Client != null)
+                        ClientRegistry.TryRemove(player.Client.Id, out _);
+                }
+            });
 
-            // Wait for all batches to complete
-            await Task.WhenAll(batchTasks);
-
-            // Calculate the remaining time for the next update
-            var syncCount = (int)(GameSpeed - clientWatch.ElapsedMilliseconds);
-
-            if (syncCount < 0)
-            {
-                // Adjust GameSpeed dynamically to account for delays
-                variableGameSpeed = GameSpeed + syncCount;
-                clientWatch.Restart();
-                continue;
-            }
-
-            await Task.Delay(TimeSpan.FromMilliseconds(syncCount));
-            variableGameSpeed = GameSpeed; // Reset to default interval
-            clientWatch.Restart();
-        }
-    }
-
-    private async Task ProcessClientTask(Aisling player)
-    {
-        if (player?.Client == null) return;
-
-        try
-        {
-            if (!player.LoggedIn)
-            {
-                ClientRegistry.TryRemove(player.Client.Id, out _);
-                return;
-            }
-
-            await player.Client.Update();
-        }
-        catch (Exception ex)
-        {
-            SentrySdk.CaptureException(ex);
-            player.Client.Disconnect();
-            ClientRegistry.TryRemove(player.Client.Id, out _);
+            var elapsed = DateTime.UtcNow - loopStart;
+            var delay = updateInterval - elapsed;
+            if (delay > TimeSpan.Zero)
+                await Task.Delay(delay, ct);
         }
     }
 
