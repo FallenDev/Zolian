@@ -38,28 +38,21 @@ public partial class App
 {
     private CancellationTokenSource ServerCtx { get; set; }
 
-    protected override async void OnStartup(StartupEventArgs e)
+    protected override void OnStartup(StartupEventArgs e)
     {
         DispatcherUnhandledException += App_DispatcherUnhandledException;
         AppDomain.CurrentDomain.UnhandledException += GlobalUnhandledException;
 
         base.OnStartup(e);
         ServerCtx = new CancellationTokenSource();
-        var path = Directory.GetCurrentDirectory() + "\\SentrySecrets.txt";
+        var path = Path.Combine(Directory.GetCurrentDirectory(), "SentrySecrets.txt");
         var secret = File.ReadLines(path).First();
 
         SentrySdk.Init(o =>
         {
-            // Tells which project in Sentry to send events to:
             o.Dsn = secret;
-            // When configuring for the first time, to see what the SDK is doing:
             o.Debug = false;
-            // Set TracesSampleRate to 1.0 to capture 100% of transactions for performance monitoring.
-            // We recommend adjusting this value in production.
             o.TracesSampleRate = 1.0;
-            // Sample rate for profiling, applied on top of the TracesSampleRate,
-            // e.g. 0.2 means we want to profile 20 % of the captured transactions.
-            // We recommend adjusting this value in production.
             o.ProfilesSampleRate = 0.2;
         });
 
@@ -72,8 +65,8 @@ public partial class App
             .CreateLogger();
 
         Win32.AllocConsole();
-
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+
         var builder = new ConfigurationBuilder()
             .SetBasePath(Directory.GetCurrentDirectory())
             .AddJsonFile("ServerConfig.json");
@@ -83,16 +76,15 @@ public partial class App
             var config = builder.Build();
             var constants = config.GetSection("ServerConfig").Get<ServerConstants>();
             var serviceCollection = new ServiceCollection();
+
             serviceCollection.AddOptions()
                 .AddSingleton(providers)
                 .AddSingleton<ILoggerFactory>(sc =>
                 {
                     var providerCollection = sc.GetService<LoggerProviderCollection>();
                     var factory = new SerilogLoggerFactory(null, true, providerCollection);
-
                     foreach (var provider in sc.GetServices<ILoggerProvider>())
                         factory.AddProvider(provider);
-
                     return factory;
                 })
                 .AddLogging(l => l.AddConsole().SetMinimumLevel(LogLevel.Trace))
@@ -121,13 +113,21 @@ public partial class App
 
             var serviceProvider = serviceCollection.BuildServiceProvider();
             serviceProvider.GetService<IServer>();
-
             var hostedServices = serviceProvider.GetServices<IHostedService>().ToArray();
-            await Task.Run(async () =>
+
+            // Start the hosted services in a dedicated long-running task
+            Task.Factory.StartNew(async () =>
             {
-                await Task.WhenAll(hostedServices.Select(svc => svc.StartAsync(ServerCtx.Token)));
-                await ServerCtx.Token.WaitTillCanceled().ConfigureAwait(false);
-            });
+                try
+                {
+                    await Task.WhenAll(hostedServices.Select(svc => svc.StartAsync(ServerCtx.Token)));
+                    await ServerCtx.Token.WaitTillCanceled().ConfigureAwait(false);
+                }
+                catch (Exception exception)
+                {
+                    SentrySdk.CaptureException(exception);
+                }
+            }, ServerCtx.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
         }
         catch (Exception exception)
         {

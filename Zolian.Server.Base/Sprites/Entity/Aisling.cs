@@ -743,27 +743,32 @@ public sealed class Aisling : Player, IAisling
         Target = monster;
 
         const int maxConcurrency = 8;
-        var semaphore = new SemaphoreSlim(maxConcurrency);
-        var tasks = new List<Task>();
+        using var semaphore = new SemaphoreSlim(maxConcurrency);
 
         try
         {
             while (NextTo(Target!.X, Target!.Y) && Client.Connected)
             {
                 await Task.Delay((int)Client.SkillSpellTimer.Delay.TotalMilliseconds);
-                var skills = SkillBook.Skills.Values.Where(s => s != null && s.Level < s.Template.MaxLevel && s.Template.MaxLevel != 1).ToList();
 
-                foreach (var skill in skills.Where(skill => skill.CanUse()).Where(skill => skill.Scripts is not null && !skill.Scripts.IsEmpty))
+                // Only select valid skills once per loop
+                var skills = SkillBook.Skills.Values
+                    .Where(s => s != null && s.Level < s.Template.MaxLevel && s.Template.MaxLevel != 1)
+                    .Where(skill => skill.CanUse())
+                    .Where(skill => skill.Scripts is not null && !skill.Scripts.IsEmpty)
+                    .ToList();
+
+                var tasks = new List<Task>(skills.Count);
+
+                foreach (var skill in skills)
                 {
-                    if (skill.Template.Cooldown == 0)
-                        if (!skill.CanUseZeroLineAbility) continue;
+                    if (skill.Template.Cooldown == 0 && !skill.CanUseZeroLineAbility) continue;
                     await semaphore.WaitAsync();
-                    var task = ProcessSkillAsync(skill, semaphore);
-                    tasks.Add(task);
+                    tasks.Add(ProcessSkill(skill, semaphore));
                 }
 
+                // Only await the current batch of tasks, then clear
                 await Task.WhenAll(tasks);
-                tasks.Clear();
             }
         }
         catch (Exception e)
@@ -772,7 +777,7 @@ public sealed class Aisling : Player, IAisling
         }
     }
 
-    private Task ProcessSkillAsync(Skill skill, SemaphoreSlim semaphore)
+    private Task ProcessSkill(Skill skill, SemaphoreSlim semaphore)
     {
         try
         {
@@ -780,15 +785,17 @@ public sealed class Aisling : Player, IAisling
 
             var script = skill.Scripts.Values.FirstOrDefault();
             if (script == null) return Task.CompletedTask;
+
             script.OnUse(this);
+
             skill.CurrentCooldown = skill.Template.Cooldown;
             Client.SendCooldown(true, skill.Slot, skill.CurrentCooldown);
             skill.LastUsedSkill = DateTime.UtcNow;
 
             if (skill.Template.SkillType == SkillScope.Assail)
                 Client.LastAssail = DateTime.UtcNow;
-            script.OnCleanup();
 
+            script.OnCleanup();
             skill.InUse = false;
         }
         catch (Exception ex)
@@ -803,34 +810,39 @@ public sealed class Aisling : Player, IAisling
         return Task.CompletedTask;
     }
 
-    public async void AutoCastRoutine()
+    public async Task AutoCastRoutine()
     {
-        var pos = Pos;
+        var initialPos = Pos;
         var spells = SetSpellsToCast();
 
         const int maxConcurrency = 5;
-        var semaphore = new SemaphoreSlim(maxConcurrency);
-        var tasks = new List<Task>();
+        using var semaphore = new SemaphoreSlim(maxConcurrency);
 
         try
         {
-            while (pos == Pos && Client.Connected)
+            while (initialPos == Pos && Client.Connected)
             {
                 await Task.Delay((int)Client.SkillSpellTimer.Delay.TotalMilliseconds);
+
                 var monster = MonstersNearby().RandomIEnum();
                 if (monster == null) return;
                 Target = monster;
 
-                foreach (var spell in from spell in spells where spell is not null where spell.CanUse() where spell.Scripts is not null && !spell.Scripts.IsEmpty select spell)
+                // Only select usable
+                var validSpells = spells
+                    .Where(spell => spell != null && spell.CanUse() && spell.Scripts is not null && !spell.Scripts.IsEmpty)
+                    .ToList();
+
+                var tasks = new List<Task>(validSpells.Count);
+
+                foreach (var spell in validSpells)
                 {
                     await semaphore.WaitAsync();
-                    var task = ProcessSpellAsync(spell, semaphore);
-                    tasks.Add(task);
+                    tasks.Add(ProcessSpellAsync(spell, semaphore));
                     await Task.Delay(spell.Lines * 500);
                 }
 
                 await Task.WhenAll(tasks);
-                tasks.Clear();
             }
         }
         catch (Exception e)
@@ -843,30 +855,14 @@ public sealed class Aisling : Player, IAisling
     {
         var spells = new List<Spell>();
 
-        if (!SpellTrainOne.IsEmpty())
-        {
-            if (SpellBook.HasSpell(SpellTrainOne))
-            {
-                var spell = GetSpell(SpellTrainOne);
-                spells.Add(spell);
-            }
-        }
+        if (!SpellTrainOne.IsEmpty() && SpellBook.HasSpell(SpellTrainOne))
+            spells.Add(GetSpell(SpellTrainOne));
 
-        if (!SpellTrainTwo.IsEmpty())
-        {
-            if (SpellBook.HasSpell(SpellTrainTwo))
-            {
-                var spell = GetSpell(SpellTrainTwo);
-                spells.Add(spell);
-            }
-        }
+        if (!SpellTrainTwo.IsEmpty() && SpellBook.HasSpell(SpellTrainTwo))
+            spells.Add(GetSpell(SpellTrainTwo));
 
-        if (SpellTrainThree.IsEmpty()) return spells;
-        {
-            if (!SpellBook.HasSpell(SpellTrainThree)) return spells;
-            var spell = GetSpell(SpellTrainThree);
-            spells.Add(spell);
-        }
+        if (!SpellTrainThree.IsEmpty() && SpellBook.HasSpell(SpellTrainThree))
+            spells.Add(GetSpell(SpellTrainThree));
 
         return spells;
     }
@@ -876,10 +872,11 @@ public sealed class Aisling : Player, IAisling
         try
         {
             spell.InUse = true;
-
             var script = spell.Scripts.Values.FirstOrDefault();
             if (script == null) return Task.CompletedTask;
+
             script.OnUse(this, spell.Template.TargetType == SpellTemplate.SpellUseType.NoTarget ? this : Target);
+
             spell.CurrentCooldown = spell.Template.Cooldown;
             Client.SendCooldown(false, spell.Slot, spell.CurrentCooldown);
             spell.LastUsedSpell = DateTime.UtcNow;
@@ -894,7 +891,6 @@ public sealed class Aisling : Player, IAisling
         {
             semaphore.Release();
         }
-
         return Task.CompletedTask;
     }
 }

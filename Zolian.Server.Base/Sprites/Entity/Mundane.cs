@@ -145,7 +145,7 @@ public sealed class Mundane : Movable
 
             if (Template.ChatTimer.Elapsed && Template.Speech.Count > 0)
             {
-                if (speak >= .85)
+                if (speak >= .70)
                 {
                     var idx = Random.Shared.Next(Template.Speech.Count);
                     var msg = Template.Speech[idx];

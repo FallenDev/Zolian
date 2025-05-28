@@ -17,7 +17,7 @@ public class CthonicGuard(WorldServer server, Mundane mundane) : MundaneScript(s
     public override void OnApproach(WorldClient client)
     {
         if (Mundane.GuardModeActivated) return;
-        Task.Run(ActivateGuardMode);
+        Task.Factory.StartNew(ActivateGuardMode, TaskCreationOptions.LongRunning);
     }
 
     private void ActivateGuardMode()

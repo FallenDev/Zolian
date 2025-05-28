@@ -297,11 +297,11 @@ public class MilethTrainer(WorldServer server, Mundane mundane) : MundaneScript(
 
     private static void StartAutoRoutine(WorldClient client)
     {
-        Task.Run(() => client.Aisling.AutoRoutine());
+        Task.Factory.StartNew(client.Aisling.AutoRoutine, TaskCreationOptions.LongRunning);
     }
 
     private static void StartAutoCastRoutine(WorldClient client)
     {
-        Task.Run(() => client.Aisling.AutoCastRoutine());
+        Task.Factory.StartNew(client.Aisling.AutoCastRoutine, TaskCreationOptions.LongRunning);
     }
 }
