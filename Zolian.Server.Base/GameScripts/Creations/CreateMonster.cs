@@ -111,11 +111,13 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
 
         obj.AbandonedDate = DateTime.UtcNow;
         obj.Image = template.Image;
-        obj.CurrentHp = obj.MaximumHp;
-        obj.CurrentMp = obj.MaximumMp;
 
         Monster.InitScripting(template, map, obj);
-        CapOutMonsterBonuses(obj);
+        CapOutMonsterBonusesAndDiminishingReturns(obj);
+
+        // Set Vitality after Calculations
+        obj.CurrentHp = obj.MaximumHp;
+        obj.CurrentMp = obj.MaximumMp;
         return obj;
     }
 
@@ -898,220 +900,6 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
                 monster.BonusWis += (int)(monster._Wis * 1.2);
                 monster.BonusMr += (int)(monster._Mr * 1.2);
             },
-            [MonsterType.GodlyStr] = monster =>
-            {
-                monster.BonusStr += monster._Str * 5;
-                monster.BonusDex += (int)(monster._Dex * 2.4);
-                monster.BonusDmg += monster._Dmg * 5;
-            },
-            [MonsterType.GodlyInt] = monster =>
-            {
-                monster.BonusInt += monster._Int * 5;
-                monster.BonusWis += (int)(monster._Wis * 2.4);
-                monster.BonusMr += monster._Mr * 5;
-            },
-            [MonsterType.GodlyWis] = monster =>
-            {
-                monster.BonusWis += monster._Wis * 5;
-                monster.BonusMp += monster.BaseMp * 5;
-            },
-            [MonsterType.GodlyCon] = monster =>
-            {
-                monster.BonusCon += monster._Con * 5;
-                monster.BonusHp += monster.BaseHp * 5;
-            },
-            [MonsterType.GodlyDex] = monster =>
-            {
-                monster.BonusDex += monster._Dex * 5;
-                monster.BonusHit += monster._Hit * 5;
-                monster.BonusDmg += monster._Dmg * 5;
-            },
-            [MonsterType.Above99P] = monster =>
-            {
-                monster.BonusStr += monster._Str * 5;
-                monster.BonusDex += monster._Dex * 5;
-                monster.BonusDmg += monster._Dmg * 5;
-                monster.BonusHp += (long)(monster.MaximumHp * 0.03);
-            },
-            [MonsterType.Above99M] = monster =>
-            {
-                monster.BonusInt += monster._Int * 5;
-                monster.BonusWis += monster._Wis * 5;
-                monster.BonusMr += monster._Mr * 5;
-            },
-            [MonsterType.Above150P] = monster =>
-            {
-                monster.BonusStr += monster._Str * 7;
-                monster.BonusDex += monster._Dex * 7;
-                monster.BonusDmg += monster._Dmg * 7;
-                monster.BonusHp += (long)(monster.MaximumHp * 0.05);
-            },
-            [MonsterType.Above150M] = monster =>
-            {
-                monster.BonusInt += monster._Int * 7;
-                monster.BonusWis += monster._Wis * 7;
-                monster.BonusMr += monster._Mr * 7;
-            },
-            [MonsterType.Above200P] = monster =>
-            {
-                monster.BonusStr += monster._Str * 9;
-                monster.BonusDex += monster._Dex * 9;
-                monster.BonusDmg += monster._Dmg * 9;
-                monster.BonusHp += (long)(monster.MaximumHp * 0.07);
-            },
-            [MonsterType.Above200M] = monster =>
-            {
-                monster.BonusInt += monster._Int * 9;
-                monster.BonusWis += monster._Wis * 9;
-                monster.BonusMr += monster._Mr * 9;
-            },
-            [MonsterType.Above250P] = monster =>
-            {
-                monster.BonusStr += monster._Str * 10;
-                monster.BonusDex += monster._Dex * 10;
-                monster.BonusDmg += monster._Dmg * 10;
-                monster.BonusHp += (long)(monster.MaximumHp * 0.08);
-            },
-            [MonsterType.Above250M] = monster =>
-            {
-                monster.BonusInt += monster._Int * 10;
-                monster.BonusWis += monster._Wis * 10;
-                monster.BonusMr += monster._Mr * 10;
-            },
-            [MonsterType.MasterStr] = monster =>
-            {
-                monster.BonusStr += monster._Str * 11;
-                monster.BonusDex += monster._Dex * 10;
-                monster.BonusDmg += monster._Dmg * 11;
-            },
-            [MonsterType.MasterInt] = monster =>
-            {
-                monster.BonusInt += monster._Int * 11;
-                monster.BonusWis += monster._Wis * 10;
-                monster.BonusMr += monster._Mr * 11;
-            },
-            [MonsterType.MasterWis] = monster =>
-            {
-                monster.BonusWis += monster._Wis * 11;
-                monster.BonusMp += monster.BaseMp * 11;
-            },
-            [MonsterType.MasterCon] = monster =>
-            {
-                monster.BonusCon += monster._Con * 11;
-                monster.BonusHp += monster.BaseHp * 11;
-            },
-            [MonsterType.MasterDex] = monster =>
-            {
-                monster.BonusDex += monster._Dex * 11;
-                monster.BonusHit += monster._Hit * 11;
-                monster.BonusDmg += monster._Dmg * 11;
-            },
-            [MonsterType.Forsaken] = monster =>
-            {
-                monster.BonusStr += monster._Str * 12;
-                monster.BonusInt += monster._Int * 12;
-                monster.BonusWis += monster._Wis * 12;
-                monster.BonusCon += monster._Con * 12;
-                monster.BonusDex += monster._Dex * 12;
-                monster.BonusMr += monster._Mr * 12;
-                monster.BonusHit += monster._Hit * 12;
-                monster.BonusDmg += monster._Dmg * 12;
-                monster.BonusHp += monster.BaseHp * 12;
-                monster.BonusMp += monster.BaseMp * 12;
-            },
-            [MonsterType.Above300P] = monster =>
-            {
-                monster.BonusStr += monster._Str * 13;
-                monster.BonusDex += monster._Dex * 13;
-                monster.BonusDmg += monster._Dmg * 13;
-                monster.BonusHp += (long)(monster.MaximumHp * 0.11);
-            },
-            [MonsterType.Above300M] = monster =>
-            {
-                monster.BonusInt += monster._Int * 13;
-                monster.BonusWis += monster._Wis * 13;
-                monster.BonusMr += monster._Mr * 13;
-            },
-            [MonsterType.Above350P] = monster =>
-            {
-                monster.BonusStr += monster._Str * 14;
-                monster.BonusDex += monster._Dex * 14;
-                monster.BonusDmg += monster._Dmg * 14;
-                monster.BonusHp += (long)(monster.MaximumHp * 0.13);
-            },
-            [MonsterType.Above350M] = monster =>
-            {
-                monster.BonusInt += monster._Int * 14;
-                monster.BonusWis += monster._Wis * 14;
-                monster.BonusMr += monster._Mr * 14;
-            },
-            [MonsterType.Above400P] = monster =>
-            {
-                monster.BonusStr += monster._Str * 16;
-                monster.BonusDex += monster._Dex * 16;
-                monster.BonusDmg += monster._Dmg * 16;
-                monster.BonusHp += (long)(monster.MaximumHp * 0.15);
-            },
-            [MonsterType.Above400M] = monster =>
-            {
-                monster.BonusInt += monster._Int * 16;
-                monster.BonusWis += monster._Wis * 16;
-                monster.BonusMr += monster._Mr * 16;
-            },
-            [MonsterType.Above450P] = monster =>
-            {
-                monster.BonusStr += monster._Str * 19;
-                monster.BonusDex += monster._Dex * 19;
-                monster.BonusDmg += monster._Dmg * 19;
-                monster.BonusHp += (long)(monster.MaximumHp * 0.17);
-            },
-            [MonsterType.Above450M] = monster =>
-            {
-                monster.BonusInt += monster._Int * 19;
-                monster.BonusWis += monster._Wis * 19;
-                monster.BonusMr += monster._Mr * 19;
-            },
-            [MonsterType.Above500P] = monster =>
-            {
-                monster.BonusStr += monster._Str * 21;
-                monster.BonusDex += monster._Dex * 21;
-                monster.BonusDmg += monster._Dmg * 21;
-                monster.BonusHp += (long)(monster.MaximumHp * 0.20);
-            },
-            [MonsterType.Above500M] = monster =>
-            {
-                monster.BonusInt += monster._Int * 21;
-                monster.BonusWis += monster._Wis * 21;
-                monster.BonusMr += monster._Mr * 21;
-            },
-            [MonsterType.DivineStr] = monster =>
-            {
-                monster.BonusStr += monster._Str * 25;
-                monster.BonusDex += monster._Dex * 22;
-                monster.BonusDmg += monster._Dmg * 22;
-            },
-            [MonsterType.DivineInt] = monster =>
-            {
-                monster.BonusInt += monster._Int * 25;
-                monster.BonusWis += monster._Wis * 22;
-                monster.BonusMr += monster._Mr * 25;
-            },
-            [MonsterType.DivineWis] = monster =>
-            {
-                monster.BonusWis += monster._Wis * 25;
-                monster.BonusMp += monster.BaseMp * 25;
-            },
-            [MonsterType.DivineCon] = monster =>
-            {
-                monster.BonusCon += monster._Con * 25;
-                monster.BonusHp += monster.BaseHp * 25;
-            },
-            [MonsterType.DivineDex] = monster =>
-            {
-                monster.BonusDex += monster._Dex * 25;
-                monster.BonusHit += monster._Hit * 25;
-                monster.BonusDmg += monster._Dmg * 25;
-            },
             [MonsterType.MiniBoss] = monster =>
             {
                 monster.BonusStr += monster._Str * 20;
@@ -1155,20 +943,55 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
         }
     }
 
-    private static void CapOutMonsterBonuses(Monster obj)
+    private static void CapOutMonsterBonusesAndDiminishingReturns(Monster obj)
     {
-        // Damage
-        obj.BonusStr = Math.Min(obj.BonusStr, 850);
-        obj.BonusInt = Math.Min(obj.BonusInt, 850);
-        obj.BonusDex = Math.Min(obj.BonusDex, 850);
+        if (obj.Level < 20) return;
+
+        // Diminishing Returns Curve for Scaling
+        // --- Stats ---
+        obj.BonusStr = DiminishInt(obj._Str, obj.BonusStr, obj.Level);
+        obj.BonusInt = DiminishInt(obj._Int, obj.BonusInt, obj.Level);
+        obj.BonusDex = DiminishInt(obj._Dex, obj.BonusDex, obj.Level);
+        obj.BonusWis = DiminishInt(obj._Wis, obj.BonusWis, obj.Level);
+        obj.BonusCon = DiminishInt(obj._Con, obj.BonusCon, obj.Level);
+        // --- Damage & Vitality ---
+        obj.BonusDmg = DiminishInt(obj._Dmg, obj.BonusDmg, obj.Level);
+        obj.BonusHp = DiminishLong(obj.BaseHp, obj.BonusHp, obj.Level);
+        obj.BonusMp = DiminishLong(obj.BaseMp, obj.BonusMp, obj.Level);
+        // --- Saving Throw ---
+        obj.BonusHit = DiminishInt(obj._Hit, obj.BonusHit, obj.Level);
+        obj.BonusMr = DiminishInt(obj._Mr, obj.BonusMr, obj.Level);
+        obj.BonusAc = DiminishInt(obj._ac, obj.BonusAc, obj.Level);
+
+        // --- Caps for Balance ---
+        // --- Damage & Vitality
         obj.BonusDmg = Math.Min(obj.BonusDmg, 500);
-
-        // Vitality
-        obj.BonusWis = Math.Min(obj.BonusWis, 1000);
-        obj.BonusCon = Math.Min(obj.BonusCon, 550);
-
-        // Saving Throw
+        obj.BonusWis = Math.Min(obj.BonusWis, 750);
+        obj.BonusCon = Math.Min(obj.BonusCon, 750);
+        // --- Saving Throw
         obj.BonusHit = Math.Min(obj.BonusHit, 450);
+        obj.BonusMr = Math.Min(obj.BonusMr, 450);
+        obj.BonusAc = Math.Min(obj.BonusAc, 450);
+    }
+
+    private static int DiminishInt(int baseVal, int bonusVal, int level)
+    {
+        if (bonusVal <= baseVal) return bonusVal; // Never diminish below base
+        double excess = bonusVal - baseVal;
+        // The higher the level, the stronger the reduction curve
+        var curve = 0.88 - (Math.Min((level - 20) * 0.0003, 0.12)); // Min 0.76 at level 460+
+        var diminished = baseVal + (int)Math.Round(Math.Pow(excess, curve));
+        return diminished;
+    }
+
+    private static long DiminishLong(long baseVal, long bonusVal, int level)
+    {
+        if (bonusVal <= baseVal) return bonusVal; // Never diminish below base
+        double excess = bonusVal - baseVal;
+        // The higher the level, the stronger the reduction curve
+        var curve = 0.88 - (Math.Min((level - 20) * 0.0003, 0.12)); // Min 0.76 at level 460+
+        var diminished = baseVal + (long)Math.Round(Math.Pow(excess, curve));
+        return diminished;
     }
 
     private void LoadSkillScript(string skillScriptStr, Monster obj)
