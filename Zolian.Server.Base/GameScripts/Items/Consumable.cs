@@ -300,6 +300,17 @@ public class Consumable(Item item) : ItemScript(item)
                     }
                     return;
                 }
+            case "Chaos Ore":
+                {
+                    foreach (var npc in ServerSetup.Instance.GlobalMundaneCache)
+                    {
+                        if (npc.Value.Scripts is null) continue;
+                        if (!npc.Value.Scripts.TryGetValue("ChaosOre", out var scriptObj)) continue;
+                        scriptObj.OnClick(client, npc.Value.Serial);
+                        break;
+                    }
+                    return;
+                }
 
             #endregion
             #region Botony

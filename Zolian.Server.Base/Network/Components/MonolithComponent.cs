@@ -94,8 +94,10 @@ public class MonolithComponent(WorldServer server) : WorldServerComponent(server
             {
                 Template: { Name: "Raw Dark Iron" } or { Name: "Raw Copper" } or { Name: "Raw Obsidian" }
                 or { Name: "Raw Cobalt Steel" } or { Name: "Raw Hybrasyl" } or { Name: "Raw Talos" }
-            }).Count();
+                or { Name: "Chaos Ore" }
+            }).Count;
 
+            if (map.MiningNodesCount >= 20) return;
             if (map.MiningNodesCount >= map.Height * map.Width / 200) return;
 
             var node = MiningNode(map);
@@ -172,6 +174,13 @@ public class MonolithComponent(WorldServer server) : WorldServerComponent(server
                 return new Item().Create(map, ServerSetup.Instance.GlobalItemTemplateCache["Raw Obsidian"]);
         }
 
+        if (map.MiningNodes.MapNodeFlagIsSet(MiningNodes.ChaosOre))
+        {
+            var nodeChance = Generator.RandomPercentPrecise();
+            if (nodeChance >= .50)
+                return new Item().Create(map, ServerSetup.Instance.GlobalItemTemplateCache["Chaos Ore"]);
+        }
+
         return null;
     }
 
@@ -189,7 +198,7 @@ public class MonolithComponent(WorldServer server) : WorldServerComponent(server
             {
                 Template: { Name: "Gloom Bloom" } or { Name: "Betrayal Blossom" } or { Name: "Bocan Branch" }
                 or { Name: "Cactus Lilium" } or { Name: "Prahed Bellis" } or { Name: "Aiten Bloom" } or { Name: "Reict Weed" }
-            }).Count();
+            }).Count;
 
             if (map.WildFlowersCount >= 2) return;
 

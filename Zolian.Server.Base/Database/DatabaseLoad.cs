@@ -455,7 +455,7 @@ public abstract class DatabaseLoad
                 "EasternWoods", "WesternWoodlands", "EnchantedGarden", "GMIsland", "Mileth", "Abel",
                 "Piet", "Tutorial", "Wastelands", "Tagor", "Pravat", "OrenJungle", "OrenSewers", "NobisRuins", "TempleOfChaos",
                 "NorthPole", "Dubhaim", "MehadiSwamp", "Astrid", "Lynith", "HouseMacabre", "CthonicRemains", "CthonicDepths",
-                "Summoned", "FilthForest", "LouresSewers"
+                "Summoned", "FilthForest", "LouresSewers", "Chaos"
             ];
 
             foreach (var table in dbTables)

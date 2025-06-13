@@ -38,6 +38,7 @@ public enum MiningNodes : byte
     Hybrasyl = 1 << 4,
     CobaltSteel = 1 << 5,
     Obsidian = 1 << 6,
+    ChaosOre = 1 << 7,
 
     CopperMine = Talos | Copper,
     DarkIronMine = Copper | DarkIron,
