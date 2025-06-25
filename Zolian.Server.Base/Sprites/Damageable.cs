@@ -161,9 +161,10 @@ public class Damageable : Movable
 
     public void ApplyTrapDamage(Sprite damageDealingSprite, long dmg, byte sound)
     {
-        if (Immunity)
+        if (RasenShoheki || Immunity)
         {
             SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendHealthBar(this, sound));
+            RasenShohekiShield += dmg; // Accumulate damage for Rasen Shoheki shield
             return;
         }
 
@@ -313,9 +314,10 @@ public class Damageable : Movable
                 dmg = (long)(dmg * .90);
         }
 
-        if (Immunity && !forced)
+        if (RasenShoheki || (Immunity && !forced))
         {
             SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendHealthBar(this, sound));
+            RasenShohekiShield += dmg; // Accumulate damage for Rasen Shoheki shield
             return false;
         }
 
@@ -397,9 +399,10 @@ public class Damageable : Movable
                 dmg = (long)(dmg * .90);
         }
 
-        if (Immunity && !forced)
+        if (RasenShoheki || (Immunity && !forced))
         {
             SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendHealthBar(this, sound));
+            RasenShohekiShield += dmg; // Accumulate damage for Rasen Shoheki shield
             return false;
         }
 

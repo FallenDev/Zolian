@@ -74,6 +74,7 @@ public class Buff
             "Triple XP" => new BuffTripleExperience(),
             "Secured Position" => new aura_SecuredPosition(),
             "Hardened Hands" => new BuffHardenedHands(),
+            "Rasen Shoheki" => new buff_RasenShoheki(),
             _ => BuffSpell
         };
 

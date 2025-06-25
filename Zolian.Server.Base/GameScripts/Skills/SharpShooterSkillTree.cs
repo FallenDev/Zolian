@@ -94,7 +94,7 @@ public class Bang(Skill skill) : SkillScript(skill)
         {
             var client = damageDealingAisling.Client;
             var imp = 10 + Skill.Level;
-            dmg = client.Aisling.Str * 16 + client.Aisling.Dex * 20 * Math.Max(damageDealingAisling.Position.DistanceFrom(target.Position), 9);
+            dmg = client.Aisling.Str * 20 + client.Aisling.Dex * 25 * Math.Max(damageDealingAisling.Position.DistanceFrom(target.Position), 9);
             dmg += dmg * imp / 100;
         }
         else
@@ -210,7 +210,7 @@ public class Snipe(Skill skill) : SkillScript(skill)
         {
             var client = damageDealingAisling.Client;
             var imp = 50 + Skill.Level;
-            dmg = client.Aisling.Str * 25 + client.Aisling.Dex * 20 * Math.Max(damageDealingAisling.Position.DistanceFrom(target.Position), 9);
+            dmg = client.Aisling.Str * 100 + client.Aisling.Dex * 130 * Math.Max(damageDealingAisling.Position.DistanceFrom(target.Position), 9);
             dmg += dmg * imp / 100;
         }
         else
@@ -326,7 +326,7 @@ public class Volley(Skill skill) : SkillScript(skill)
         {
             var client = damageDealingAisling.Client;
             var imp = 50 + Skill.Level;
-            dmg = client.Aisling.Str * 10 + client.Aisling.Dex * 14 * Math.Max(damageDealingAisling.Position.DistanceFrom(target.Position), 9);
+            dmg = client.Aisling.Str * 65 + client.Aisling.Dex * 70 * Math.Max(damageDealingAisling.Position.DistanceFrom(target.Position), 9);
             dmg += dmg * imp / 100;
         }
         else

@@ -111,7 +111,7 @@ public class IronSprint(Skill skill) : SkillScript(skill)
         {
             var client = damageDealingAisling.Client;
             var imp = Skill.Level * 3;
-            dmg = client.Aisling.Str * 15 + client.Aisling.Dex * 15;
+            dmg = client.Aisling.Str * 75 + client.Aisling.Dex * 55;
             dmg += dmg * imp / 100;
         }
         else
@@ -219,8 +219,8 @@ public class IronFang(Skill skill) : SkillScript(skill)
             {
                 var dmgCalc = DamageCalc(sprite, i);
                 GlobalSkillMethods.OnSuccessWithoutActionAnimation(i, damageDealer, Skill, dmgCalc, _crit);
-                GlobalSkillMethods.OnSuccessWithoutActionAnimation(i, damageDealer, Skill, dmgCalc, _crit);
-                GlobalSkillMethods.OnSuccessWithoutActionAnimation(i, damageDealer, Skill, dmgCalc, _crit);
+                GlobalSkillMethods.OnSuccessWithoutActionAnimation(i, damageDealer, Skill, dmgCalc * 2, _crit);
+                GlobalSkillMethods.OnSuccessWithoutActionAnimation(i, damageDealer, Skill, dmgCalc * 3, _crit);
                 damageDealer.SendAnimationNearby(Skill.Template.TargetAnimation, null, i.Serial);
             }
 
@@ -243,7 +243,7 @@ public class IronFang(Skill skill) : SkillScript(skill)
         {
             var client = damageDealingAisling.Client;
             var imp = 50 + Skill.Level + damageDealingAisling.ExpLevel + damageDealingAisling.AbpLevel;
-            dmg = client.Aisling.Str * 30 + client.Aisling.Con * 20 * Math.Max(damageDealingAisling.Position.DistanceFrom(target.Position), 3);
+            dmg = client.Aisling.Str * 60 + client.Aisling.Con * 80 * Math.Max(damageDealingAisling.Position.DistanceFrom(target.Position), 3);
             dmg += dmg * imp / 100;
         }
         else
@@ -302,7 +302,7 @@ public class GoldenDragonPalm(Skill skill) : SkillScript(skill)
                 if (i is not Damageable damageable) continue;
                 var dmgCalc = DamageCalc(sprite, i);
                 damageable.ApplyElementalSkillDamage(damageDealer, dmgCalc, ElementManager.Element.Holy, Skill);
-                damageable.ApplyElementalSkillDamage(damageDealer, dmgCalc, ElementManager.Element.Holy, Skill);
+                damageable.ApplyElementalSkillDamage(damageDealer, dmgCalc * 2, ElementManager.Element.Holy, Skill);
                 damageDealer.SendAnimationNearby(Skill.Template.TargetAnimation, null, i.Serial);
             }
 
@@ -325,7 +325,7 @@ public class GoldenDragonPalm(Skill skill) : SkillScript(skill)
         {
             var client = damageDealingAisling.Client;
             var imp = 50 + Skill.Level + damageDealingAisling.ExpLevel + damageDealingAisling.AbpLevel;
-            dmg = client.Aisling.Str * 35 + client.Aisling.Con * 30 * Math.Max(damageDealingAisling.Position.DistanceFrom(target.Position), 3);
+            dmg = client.Aisling.Str * 65 + client.Aisling.Con * 70 * Math.Max(damageDealingAisling.Position.DistanceFrom(target.Position), 3);
             dmg += dmg * imp / 100;
         }
         else
@@ -377,7 +377,7 @@ public class SnakeWhip(Skill skill) : SkillScript(skill)
             {
                 var dmgCalc = DamageCalc(sprite);
                 GlobalSkillMethods.OnSuccessWithoutAction(i, damageDealer, Skill, dmgCalc, _crit);
-                GlobalSkillMethods.OnSuccessWithoutActionAnimation(i, damageDealer, Skill, dmgCalc, _crit);
+                GlobalSkillMethods.OnSuccessWithoutActionAnimation(i, damageDealer, Skill, dmgCalc * 2, _crit);
                 ThrowBack(damageDealer, i);
             }
 
@@ -400,7 +400,7 @@ public class SnakeWhip(Skill skill) : SkillScript(skill)
         {
             var client = damageDealingAisling.Client;
             var imp = 50 + Skill.Level + damageDealingAisling.ExpLevel + damageDealingAisling.AbpLevel;
-            dmg = client.Aisling.Dex * 55 + client.Aisling.Con * 30;
+            dmg = client.Aisling.Dex * 55 + client.Aisling.Con * 65;
             dmg += dmg * imp / 100;
         }
         else
@@ -517,7 +517,7 @@ public class TigerSwipe(Skill skill) : SkillScript(skill)
         {
             var client = damageDealingAisling.Client;
             var imp = 50 + Skill.Level + damageDealingAisling.ExpLevel + damageDealingAisling.AbpLevel;
-            dmg = client.Aisling.Str * 40 + client.Aisling.Dex * 40 * Math.Max(damageDealingAisling.Position.DistanceFrom(target.Position), 3);
+            dmg = client.Aisling.Str * 65 + client.Aisling.Dex * 65 * Math.Max(damageDealingAisling.Position.DistanceFrom(target.Position), 3);
             dmg += dmg * imp / 100;
         }
         else

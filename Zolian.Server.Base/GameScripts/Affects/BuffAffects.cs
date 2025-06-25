@@ -711,6 +711,69 @@ public class buff_berserk : Buff
     }
 }
 
+public class buff_RasenShoheki : Buff
+{
+    public override byte Icon => 21;
+    public override int Length => 30;
+    public override string Name => "Rasen Shoheki";
+
+    public override void OnApplied(Sprite affected, Buff buff)
+    {
+        if (affected is Aisling berserkDebuff && affected.HasDebuff("Berserker Rage"))
+        {
+            berserkDebuff.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You are unsure of your actions");
+            return;
+        }
+
+        if (affected.Buffs.TryAdd(buff.Name, buff))
+        {
+            BuffSpell = buff;
+            BuffSpell.TimeLeft = BuffSpell.Length;
+        }
+
+        if (affected is Damageable damageable)
+        {
+            damageable.SendAnimationNearby(185, null, affected.Serial);
+            damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(30, false));
+        }
+
+
+        if (affected is not Aisling aisling) return;
+        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Swirling Wind surrounds you, protecting you!");
+        InsertBuff(aisling, buff);
+    }
+
+    public override void OnDurationUpdate(Sprite affected, Buff buff)
+    {
+        base.OnDurationUpdate(affected, buff);
+        var vitality = affected.CurrentHp + affected.CurrentMp;
+        if (affected.RasenShohekiShield >= vitality)
+        {
+            if (affected is Aisling aisling)
+                aisling.SendAnimationNearby(129, aisling.Position);
+            OnEnded(affected, buff);
+            return;
+        }
+        
+        if (affected is not Aisling berserkDebuff) return;
+        // Display Rasen Shoheki animation
+        berserkDebuff.SendAnimationNearby(299, berserkDebuff.Position);
+        if (!affected.HasBuff("Berserker Rage")) return;
+        berserkDebuff.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You are unsure of your actions");
+        OnEnded(berserkDebuff, buff);
+    }
+
+    public override void OnEnded(Sprite affected, Buff buff)
+    {
+        affected.Buffs.TryRemove(buff.Name, out _);
+        affected.RasenShohekiShield = 0;
+        if (affected is not Aisling aisling) return;
+        aisling.Client.SendEffect(byte.MinValue, Icon);
+        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "The protection fades");
+        DeleteBuff(aisling, buff);
+    }
+}
+
 public class buff_wingsOfProtect : Buff
 {
     public override byte Icon => 194;

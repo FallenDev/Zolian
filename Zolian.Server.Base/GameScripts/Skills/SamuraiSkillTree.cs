@@ -146,7 +146,7 @@ public class Iaido(Skill skill) : SkillScript(skill)
         {
             var client = damageDealingAisling.Client;
             var imp = (Skill.Level + 50 + damageDealingAisling.AbpLevel) * 2;
-            dmg = client.Aisling.Str * 45 + client.Aisling.Dex * 43;
+            dmg = client.Aisling.Str * 80 + client.Aisling.Dex * 90;
             dmg += dmg * imp / 100;
         }
         else
@@ -289,7 +289,7 @@ public class MugaiRyu(Skill skill) : SkillScript(skill)
         {
             var client = damageDealingAisling.Client;
             var imp = (Skill.Level + 50 + damageDealingAisling.AbpLevel) * 2;
-            dmg = client.Aisling.Int * 135 + client.Aisling.Wis * 150;
+            dmg = client.Aisling.Int * 150 + client.Aisling.Wis * 175;
             dmg += dmg * imp / 100;
         }
         else
@@ -345,11 +345,11 @@ public class NitenIchiRyu(Skill skill) : SkillScript(skill)
                 damageable.ApplyElementalSkillDamage(damageDealer, dmgCalc, ElementManager.Element.Wind, Skill);
                 damageable.ApplyElementalSkillDamage(damageDealer, dmgCalc, ElementManager.Element.Earth, Skill);
                 damageable.ApplyElementalSkillDamage(damageDealer, dmgCalc, ElementManager.Element.Water, Skill);
-                damageable.ApplyElementalSkillDamage(damageDealer, dmgCalc, ElementManager.Element.Fire, Skill);
-                damageable.ApplyElementalSkillDamage(damageDealer, dmgCalc, ElementManager.Element.Wind, Skill);
-                damageable.ApplyElementalSkillDamage(damageDealer, dmgCalc, ElementManager.Element.Earth, Skill);
-                damageable.ApplyElementalSkillDamage(damageDealer, dmgCalc, ElementManager.Element.Water, Skill);
-                GlobalSkillMethods.OnSuccessWithoutAction(i, damageDealer, Skill, dmgCalc, _crit);
+                damageable.ApplyElementalSkillDamage(damageDealer, dmgCalc * 2, ElementManager.Element.Fire, Skill);
+                damageable.ApplyElementalSkillDamage(damageDealer, dmgCalc * 2, ElementManager.Element.Wind, Skill);
+                damageable.ApplyElementalSkillDamage(damageDealer, dmgCalc * 2, ElementManager.Element.Earth, Skill);
+                damageable.ApplyElementalSkillDamage(damageDealer, dmgCalc * 2, ElementManager.Element.Water, Skill);
+                GlobalSkillMethods.OnSuccessWithoutAction(i, damageDealer, Skill, dmgCalc * 2, _crit);
             }
 
             damageDealer.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
@@ -371,7 +371,7 @@ public class NitenIchiRyu(Skill skill) : SkillScript(skill)
         {
             var client = damageDealingAisling.Client;
             var imp = (Skill.Level + 50 + damageDealingAisling.AbpLevel) * 2;
-            dmg = client.Aisling.Str * 30 + client.Aisling.Con * 40;
+            dmg = client.Aisling.Str * 55 + client.Aisling.Con * 40 + client.Aisling.Int * 35;
             dmg += dmg * imp / 100;
         }
         else
@@ -435,8 +435,8 @@ public class ShintoRyu(Skill skill) : SkillScript(skill)
 
             foreach (var i in chain.Where(i => sprite.Serial != i.Serial))
             {
-                damageable.ApplyElementalSkillDamage(damageDealer, dmgCalc, ElementManager.Element.Wind, Skill);
-                damageable.ApplyElementalSkillDamage(damageDealer, dmgCalc, ElementManager.Element.Void, Skill);
+                damageable.ApplyElementalSkillDamage(damageDealer, dmgCalc * 2, ElementManager.Element.Wind, Skill);
+                damageable.ApplyElementalSkillDamage(damageDealer, dmgCalc * 2, ElementManager.Element.Void, Skill);
                 GlobalSkillMethods.OnSuccessWithoutAction(i, damageDealer, Skill, dmgCalc, _crit);
             }
 
@@ -447,8 +447,8 @@ public class ShintoRyu(Skill skill) : SkillScript(skill)
 
             foreach (var i in chain2.Where(i => sprite.Serial != i.Serial))
             {
-                damageable.ApplyElementalSkillDamage(damageDealer, dmgCalc, ElementManager.Element.Wind, Skill);
-                damageable.ApplyElementalSkillDamage(damageDealer, dmgCalc, ElementManager.Element.Void, Skill);
+                damageable.ApplyElementalSkillDamage(damageDealer, dmgCalc * 3, ElementManager.Element.Wind, Skill);
+                damageable.ApplyElementalSkillDamage(damageDealer, dmgCalc * 3, ElementManager.Element.Void, Skill);
                 GlobalSkillMethods.OnSuccessWithoutAction(i, damageDealer, Skill, dmgCalc, _crit);
             }
 
@@ -459,8 +459,8 @@ public class ShintoRyu(Skill skill) : SkillScript(skill)
 
             foreach (var i in chain3.Where(i => sprite.Serial != i.Serial))
             {
-                damageable.ApplyElementalSkillDamage(damageDealer, dmgCalc, ElementManager.Element.Wind, Skill);
-                damageable.ApplyElementalSkillDamage(damageDealer, dmgCalc, ElementManager.Element.Void, Skill);
+                damageable.ApplyElementalSkillDamage(damageDealer, dmgCalc * 4, ElementManager.Element.Wind, Skill);
+                damageable.ApplyElementalSkillDamage(damageDealer, dmgCalc * 4, ElementManager.Element.Void, Skill);
                 GlobalSkillMethods.OnSuccessWithoutAction(i, damageDealer, Skill, dmgCalc, _crit);
             }
         }
@@ -481,7 +481,7 @@ public class ShintoRyu(Skill skill) : SkillScript(skill)
         {
             var client = damageDealingAisling.Client;
             var imp = (Skill.Level + 50 + damageDealingAisling.AbpLevel) * 2;
-            dmg = client.Aisling.Int * 70 + client.Aisling.Str * 45;
+            dmg = client.Aisling.Int * 70 + client.Aisling.Dex * 80;
             dmg += dmg * imp / 100;
         }
         else
@@ -634,7 +634,7 @@ public class TamiyaRyu(Skill skill) : SkillScript(skill)
         {
             var client = damageDealingAisling.Client;
             var imp = (Skill.Level + 50 + damageDealingAisling.AbpLevel) * 2;
-            dmg = client.Aisling.Str * 30 + client.Aisling.Dex * 54;
+            dmg = client.Aisling.Str * 50 + client.Aisling.Dex * 54;
             dmg += dmg * imp / 100;
         }
         else

@@ -67,6 +67,9 @@ public abstract class Sprite : INotifyPropertyChanged
 
     public bool ClawFistEmpowerment { get; set; }
     public bool HardenedHands => HasBuff("Hardened Hands");
+    public bool RasenShoheki => HasBuff("Rasen Shoheki");
+    public long RasenShohekiShield = 0;
+
     public bool CanSeeInvisible
     {
         get

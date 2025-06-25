@@ -75,6 +75,7 @@ public class Debuff
             "Silence" => new DebuffSilence(),
             "Wrath Consequences" => new DebuffWrathConsequences(),
             "Deadly Poison" => new DebuffDeadlyPoison(),
+            "Amaterasu" => new DebuffAmaterasu(),
             _ => DebuffSpell
         };
 

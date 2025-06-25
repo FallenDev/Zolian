@@ -1623,6 +1623,102 @@ public class DebuffReaping : Debuff
 
 #region DoT
 
+public class DebuffAmaterasu : Debuff
+{
+    private static double Modifier => 0.15;
+    public override byte Icon => 18;
+    public override int Length => 250;
+    public override string Name => "Amaterasu";
+
+    public override void OnApplied(Sprite affected, Debuff debuff)
+    {
+        if (affected is Aisling { FireImmunity: true } immuneCheck)
+        {
+            immuneCheck.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=qYou are immune to Fire");
+            return;
+        }
+
+        if (affected.Debuffs.TryAdd(debuff.Name, debuff))
+        {
+            DebuffSpell = debuff;
+            DebuffSpell.TimeLeft = DebuffSpell.Length;
+        }
+
+        if (affected is Damageable damageable)
+        {
+            damageable.SendAnimationNearby(293, affected.Position);
+            damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(34, false));
+        }
+
+        if (affected is not Aisling aisling) return;
+        aisling.RegenTimerDisabled = true;
+        InsertDebuff(aisling, debuff);
+        aisling.Client.SendAttributes(StatUpdateType.Secondary);
+    }
+
+    public override void OnDurationUpdate(Sprite affected, Debuff debuff)
+    {
+        base.OnDurationUpdate(affected, debuff);
+
+        ApplyBurn(affected);
+
+        if (affected is Damageable damageable)
+            damageable.SendAnimationNearby(217, null, affected.Serial);
+
+        if (affected is not Aisling aisling) return;
+        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You're on fire!");
+        aisling.Client.SendAttributes(StatUpdateType.Vitality);
+    }
+
+    public override void OnEnded(Sprite affected, Debuff debuff)
+    {
+        affected.Debuffs.TryRemove(debuff.Name, out _);
+        if (affected is not Aisling aisling) return;
+        aisling.RegenTimerDisabled = false;
+        aisling.Client.SendEffect(byte.MinValue, Icon);
+        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "The burning has stopped");
+        DeleteDebuff(aisling, debuff);
+        aisling.Client.SendAttributes(StatUpdateType.Vitality);
+    }
+
+    private static void ApplyBurn(Sprite affected)
+    {
+        if (affected is Aisling { FireImmunity: true } immuneCheck)
+        {
+            immuneCheck.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=qYou are immune to Fire");
+            return;
+        }
+
+        var cap = (int)(affected.CurrentHp * Modifier);
+
+        if (affected is Monster monster)
+        {
+            int level = monster.Level;
+            int maxCap;
+
+            if (level >= 500)
+            {
+                // Clamp level between 500 and 1000
+                level = Math.Clamp(level, 500, 1000);
+
+                // Linear scale from 1,000,000 at level 500 to 20,000,000 at level 1000
+                var t = (level - 500) / 500.0;
+                maxCap = (int)(1_000_000 + t * (20_000_000 - 1_000_000));
+            }
+            else
+            {
+                maxCap = 500_000;
+            }
+
+            if (cap > maxCap) cap = maxCap;
+            monster.CurrentHp -= cap;
+            return;
+        }
+
+        if (cap > 0) affected.CurrentHp -= cap;
+    }
+}
+
 public class DebuffBleeding : Debuff
 {
     private static double Modifier => .07;
