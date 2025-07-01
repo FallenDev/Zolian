@@ -178,6 +178,11 @@ public static class GlobalSkillMethods
                     shadowFade.OnEnded(client.Aisling, shadowFade);
                 }
 
+                if (client.Aisling.Buffs.TryRemove("Blend", out var blend))
+                {
+                    blend.OnEnded(client.Aisling, blend);
+                }
+
                 client.UpdateDisplay();
                 return Attempt(client, skill);
             }

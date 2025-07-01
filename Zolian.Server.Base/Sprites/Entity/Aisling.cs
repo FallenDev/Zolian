@@ -354,6 +354,11 @@ public sealed class Aisling : Player, IAisling
                                 shadowFade.OnEnded(Client.Aisling, shadowFade);
                             }
 
+                            if (Buffs.TryRemove("Blend", out var blend))
+                            {
+                                blend.OnEnded(Client.Aisling, blend);
+                            }
+
                             Client.UpdateDisplay();
                         }
 

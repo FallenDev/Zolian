@@ -55,6 +55,7 @@ public class Buff
             "Hasten" => new buff_Hasten(),
             "Haste" => new buff_Haste(),
             "Hide" => new buff_hide(),
+            "Blend" => new buff_advHide(),
             "Shadowfade" => new buff_ShadowFade(),
             "Gryphons Grace" => new buff_GryphonsGrace(),
             "Orcish Strength" => new buff_OrcishStrength(),

@@ -54,7 +54,7 @@ public abstract class Sprite : INotifyPropertyChanged
     public bool IsBeagParalyzed => HasDebuff("Beag Suain");
     public bool IsPoisoned => HasDebuff(i => i.Name.Contains("Puinsein") || HasDebuff("Deadly Poison"));
     public bool IsSleeping => HasDebuff("Sleep");
-    public bool IsInvisible => HasBuff("Hide") || HasBuff("Shadowfade");
+    public bool IsInvisible => HasBuff("Hide") || HasBuff("Shadowfade") || HasBuff("Blend");
     public bool DrunkenFist => HasBuff("Drunken Fist");
     public bool NinthGateReleased => HasBuff("Ninth Gate Release");
     public bool Berserk => HasBuff("Berserker Rage");

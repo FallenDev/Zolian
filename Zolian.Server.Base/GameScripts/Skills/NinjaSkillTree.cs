@@ -284,7 +284,7 @@ public class ShadowShuriken(Skill skill) : SkillScript(skill)
                 if (aisling.HasBuff("Rasen Shoheki"))
                     dmgCalc *= 2; // Rasen Shoheki doubles damage dealt
 
-                aisling.ActionUsed = "Aim";
+                aisling.ActionUsed = "Shadow Shuriken";
                 const int thrown = 10011; // Animation for throwing the shuriken
 
                 _animationArgs = new AnimationArgs
@@ -412,4 +412,123 @@ public class Amaterasu(Skill skill) : SkillScript(skill)
         _crit = critCheck.Item1;
         return critCheck.Item2;
     }
+}
+
+// Kunai for throwing a shuriken at the target, massive assail damage
+[Script("Kunai")]
+public class Kunai(Skill skill) : SkillScript(skill)
+{
+    private bool _crit;
+    private AnimationArgs _animationArgs;
+
+    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
+
+    protected override void OnSuccess(Sprite sprite)
+    {
+        if (sprite is not Aisling aisling) return;
+        aisling.ActionUsed = "Kunai";
+
+        var action = new BodyAnimationArgs
+        {
+            AnimationSpeed = 30,
+            BodyAnimation = BodyAnimation.Assail,
+            Sound = null,
+            SourceId = sprite.Serial
+        };
+
+        try
+        {
+            var enemy = aisling.DamageableGetInFront(5);
+
+            if (enemy.Count == 0)
+            {
+                OnFailed(sprite);
+                return;
+            }
+
+            foreach (var i in enemy.Where(i => sprite.Serial != i.Serial))
+            {
+                var dmgCalc = DamageCalc(sprite, i);
+                if (aisling.HasBuff("Rasen Shoheki"))
+                    dmgCalc *= 2; // Rasen Shoheki doubles damage dealt
+
+                aisling.ActionUsed = "Kunai";
+                const int thrown = 10011; // Animation for throwing the shuriken
+
+                _animationArgs = new AnimationArgs
+                {
+                    AnimationSpeed = 100,
+                    SourceAnimation = thrown,
+                    SourceId = aisling.Serial,
+                    TargetAnimation = thrown,
+                    TargetId = i.Serial
+                };
+
+                GlobalSkillMethods.OnSuccessWithoutAction(i, sprite, Skill, dmgCalc, _crit);
+                aisling.SendAnimationNearby(_animationArgs.TargetAnimation, null, _animationArgs.TargetId ?? 0, _animationArgs.AnimationSpeed, _animationArgs.SourceAnimation, _animationArgs.SourceId ?? 0);
+            }
+
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
+        }
+        catch
+        {
+            ServerSetup.EventsLogger($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}");
+            SentrySdk.CaptureMessage($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
+        }
+    }
+
+    public override void OnCleanup() { }
+
+    private long DamageCalc(Sprite sprite, Sprite target)
+    {
+        _crit = false;
+        long dmg;
+        if (sprite is Aisling damageDealingAisling)
+        {
+            var client = damageDealingAisling.Client;
+            var imp = 10 + Skill.Level;
+            dmg = client.Aisling.Str * 30 + client.Aisling.Dex * 70 * Math.Max(damageDealingAisling.Position.DistanceFrom(target.Position), 5);
+            dmg += dmg * imp / 100;
+        }
+        else
+        {
+            if (sprite is not Monster damageMonster) return 0;
+            dmg = damageMonster.Str * 3 + damageMonster.Dex * 3 * Math.Max(damageMonster.Position.DistanceFrom(target.Position), 3);
+        }
+
+        var critCheck = GlobalSkillMethods.OnCrit(dmg);
+        _crit = critCheck.Item1;
+        return critCheck.Item2;
+    }
+}
+
+// Blend in with the environment, becoming invisible for eight hours
+[Script("Blend")]
+public class Blend(Skill skill) : SkillScript(skill)
+{
+    protected override void OnFailed(Sprite sprite)
+    {
+        if (sprite is not Aisling damageDealingAisling) return;
+        damageDealingAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Failed to blend in.");
+    }
+
+    protected override void OnSuccess(Sprite sprite)
+    {
+        if (sprite is not Damageable damageDealer) return;
+
+        if (!sprite.Alive || sprite.IsInvisible)
+        {
+            OnFailed(sprite);
+            return;
+        }
+
+        var buff = new buff_advHide();
+        GlobalSkillMethods.ApplyPhysicalBuff(damageDealer, buff);
+        damageDealer.SendAnimationNearby(319, null, damageDealer.Serial);
+
+        if (damageDealer is Aisling aisling)
+            GlobalSkillMethods.Train(aisling.Client, Skill);
+    }
+
+    public override void OnCleanup() { }
 }

@@ -1133,6 +1133,56 @@ public class buff_hide : Buff
     }
 }
 
+public class buff_advHide : Buff
+{
+    public override byte Icon => 10;
+    public override string Name => "Blend";
+
+    public override void OnApplied(Sprite affected, Buff buff)
+    {
+        if (affected is Aisling berserkDebuff && affected.HasBuff("Berserker Rage"))
+        {
+            berserkDebuff.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You are unsure of your actions");
+            return;
+        }
+
+        if (affected.Buffs.TryAdd(buff.Name, buff))
+        {
+            BuffSpell = buff;
+            BuffSpell.TimeLeft = 30000;
+        }
+
+        if (affected is Damageable damageable)
+            damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(43, false));
+
+        if (affected is not Aisling aisling) return;
+        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Blended into a mist of fog");
+        InsertBuff(aisling, buff);
+        aisling.Client.UpdateDisplay();
+    }
+
+    public override void OnDurationUpdate(Sprite affected, Buff buff)
+    {
+        base.OnDurationUpdate(affected, buff);
+        if (affected is not Aisling berserkDebuff) return;
+        if (!affected.HasBuff("Berserker Rage")) return;
+        berserkDebuff.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You are unsure of your actions");
+        OnEnded(berserkDebuff, buff);
+    }
+
+    public override void OnEnded(Sprite affected, Buff buff)
+    {
+        affected.Buffs.TryRemove(buff.Name, out _);
+
+        if (affected is not Aisling aisling) return;
+
+        aisling.Client.SendEffect(byte.MinValue, Icon);
+        aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Emerged from the mist");
+        DeleteBuff(aisling, buff);
+        aisling.Client.UpdateDisplay();
+    }
+}
+
 public class buff_ShadowFade : Buff
 {
     public override byte Icon => 10;
