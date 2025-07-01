@@ -25,6 +25,7 @@ public static class BadActor
 
     private const string InternalIp = "192.168.50.1";
 
+    private const string CategoryOpenProxy = "9";
     private const string CategoryWebSpam = "10";
     private const string CategorySsh = "14";
     private const string CategoryPortScan = "15";
@@ -68,21 +69,37 @@ public static class BadActor
                 var usageType = ipdb?.Data?.UsageType;
                 var isp = ipdb?.Data?.Isp;
                 var shouldBlock = false;
+                var isBlocked = tor || abuseScore >= 5;
+                var isDisallowed = IsDisallowedUsageType(usageType);
+                var isVpnBot = IsVpnBotUsageType(usageType) && abuseScore >= 3;
 
-                if (tor)
-                {
-                    LogBadActor(remoteIp, "using Tor");
+                // Block disallowed, no need to report
+                if (isDisallowed)
                     shouldBlock = true;
+
+                if (isVpnBot)
+                {
+                    shouldBlock = true;
+
+                    if (IsWhiteListed(isp))
+                        shouldBlock = false;
                 }
-                else if (IsBlockedUsageType(usageType) && IsBlockedIsp(isp))
+
+                if (isBlocked)
                 {
-                    LogBlockedType(remoteIp, $"using {usageType}");
                     shouldBlock = true;
-                }
-                else if (abuseScore >= 5)
-                {
-                    LogBadActor(remoteIp, $"abuse score {abuseScore}");
-                    shouldBlock = true;
+
+                    if (tor)
+                    {
+                        LogTor(remoteIp, "using the onion network.");
+                    }
+                    else
+                    {
+                        if (IsWhiteListed(isp))
+                            shouldBlock = false;
+                        else
+                            LogBadActor(remoteIp, $"abuse score {abuseScore}");
+                    }
                 }
 
                 IpCache.Set(remoteIp, new IpCacheEntry { IsBlocked = shouldBlock }, CacheDuration);
@@ -248,6 +265,43 @@ public static class BadActor
         }
     }
 
+    private static void ReportTorEndpoint(string remoteIp, string comment)
+    {
+        if (!IsKeyCodeValid(ServerSetup.Instance.KeyCode))
+        {
+            ServerSetup.ConnectionLogger("Keycode not valid or not set within ServerConfig.json");
+            return;
+        }
+
+        try
+        {
+            comment = "Attempted to access restricted space with Tor";
+            var request = new RestRequest("", Method.Post);
+            request.AddHeader("Key", ServerSetup.Instance.KeyCode);
+            request.AddHeader("Accept", "application/json");
+            request.AddParameter("ip", remoteIp);
+            request.AddParameter("categories", $"{CategoryOpenProxy}, {CategoryWebSpam}");
+            request.AddParameter("comment", comment);
+
+            var response = ServerSetup.Instance.RestReport.Execute(request);
+
+            if (response.IsSuccessful) return;
+            ServerSetup.ConnectionLogger($"Error reporting {remoteIp} : {comment}");
+            SentrySdk.CaptureMessage($"Error reporting {remoteIp} : {comment}");
+        }
+        catch (HttpRequestException httpEx) when (httpEx.Message.Contains("TooManyRequests"))
+        {
+            ServerSetup.ConnectionLogger($"Too many requests when reporting {remoteIp}", LogLevel.Warning);
+            AddToRetryQueue(remoteIp, comment);
+        }
+        catch (Exception ex)
+        {
+            ServerSetup.ConnectionLogger($"Exception while reporting {remoteIp}: {ex.Message}", LogLevel.Warning);
+            SentrySdk.CaptureException(ex);
+        }
+    }
+
+
     private static void AddToRetryQueue(string remoteIp, string comment)
     {
         RetryQueue.Enqueue(new ReportInfo
@@ -267,23 +321,41 @@ public static class BadActor
         ReportMaliciousEndpoint(remoteIp, $"Blocked due to {reason}");
     }
 
+    private static void LogTor(string remoteIp, string reason)
+    {
+        ServerSetup.ConnectionLogger($"Blocking {remoteIp} - Reason: {reason}", LogLevel.Warning);
+        SentrySdk.CaptureMessage($"{remoteIp} blocked due to {reason}");
+        ReportTorEndpoint(remoteIp, $"Blocked due to {reason}");
+    }
+
     private static void LogBlockedType(string remoteIp, string reason)
     {
         ServerSetup.ConnectionLogger($"Blocking {remoteIp} - Usage: {reason}", LogLevel.Warning);
         ReportSuspiciousEndpoint(remoteIp, "Blocked due to Web Spam or Port Scanning");
     }
 
-    private static bool IsBlockedUsageType(string? usageType) => usageType switch
+    private static bool IsDisallowedUsageType(string? usageType)
     {
-        "Commercial" or "Organization" or "Government" or "Military" or
-        "Content Delivery Network" or "Data Center/Web Hosting/Transit" => true,
-        _ => false
-    };
+        return usageType switch
+        {
+            "Commercial" or "Organization" or "Government" or "Military" or "Content Delivery Network" => true,
+            _ => false
+        };
+    }
 
-    private static bool IsBlockedIsp(string? isp) => isp switch
+    private static bool IsVpnBotUsageType(string? usageType)
     {
-        "Erisco LLC" => false,
-        _ => true
+        return usageType switch
+        {
+            "Data Center/Web Hosting/Transit" => true,
+            _ => false
+        };
+    }
+
+    private static bool IsWhiteListed(string? isp) => isp switch
+    {
+        "Erisco LLC" => true,
+        _ => false
     };
 
     private static bool IsKeyCodeValid(string? keyCode) => !string.IsNullOrWhiteSpace(keyCode);
