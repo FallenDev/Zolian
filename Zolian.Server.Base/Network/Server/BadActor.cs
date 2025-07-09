@@ -64,6 +64,8 @@ public static class BadActor
             if (response.IsSuccessful)
             {
                 var ipdb = JsonConvert.DeserializeObject<Ipdb>(response.Content!);
+                var isPublic = ipdb?.Data?.IsPublic ?? false;
+                var ipVersion = ipdb?.Data?.IpVersion ?? 4;
                 var abuseScore = ipdb?.Data?.AbuseConfidenceScore ?? 0;
                 var tor = ipdb?.Data?.IsTor ?? false;
                 var usageType = ipdb?.Data?.UsageType;
@@ -74,8 +76,11 @@ public static class BadActor
                 var isVpnBot = IsVpnBotUsageType(usageType) && abuseScore >= 3;
 
                 // Block disallowed, no need to report
-                if (isDisallowed)
-                    shouldBlock = true;
+                if (ipVersion == 6 || isPublic == false || isDisallowed || IsBlackListed(isp))
+                {
+                    IpCache.Set(remoteIp, new IpCacheEntry { IsBlocked = true }, CacheDuration);
+                    return true;
+                }
 
                 if (isVpnBot)
                 {
@@ -328,12 +333,6 @@ public static class BadActor
         ReportTorEndpoint(remoteIp, $"Blocked due to {reason}");
     }
 
-    private static void LogBlockedType(string remoteIp, string reason)
-    {
-        ServerSetup.ConnectionLogger($"Blocking {remoteIp} - Usage: {reason}", LogLevel.Warning);
-        ReportSuspiciousEndpoint(remoteIp, "Blocked due to Web Spam or Port Scanning");
-    }
-
     private static bool IsDisallowedUsageType(string? usageType)
     {
         return usageType switch
@@ -355,6 +354,12 @@ public static class BadActor
     private static bool IsWhiteListed(string? isp) => isp switch
     {
         "Erisco LLC" => true,
+        _ => false
+    };
+
+    private static bool IsBlackListed(string? isp) => isp switch
+    {
+        "Driftnet Ltd" or "DigitalOcean, LLC" => true,
         _ => false
     };
 

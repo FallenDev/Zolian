@@ -80,12 +80,6 @@ public class Data
     public string CountryCode { get; set; }
 
     /// <summary>
-    /// Name for the country of address
-    /// </summary>
-    [JsonProperty("countryName")]
-    public string CountryName { get; set; }
-
-    /// <summary>
     /// Usage type - (Reserved, Data Center, Web Hosting, Transit, etc)
     /// </summary>
     [JsonProperty("usageType")]
@@ -111,6 +105,12 @@ public class Data
     /// </summary>
     [JsonProperty("isTor")]
     public bool IsTor { get; set; }
+
+    /// <summary>
+    /// Name for the country of address
+    /// </summary>
+    [JsonProperty("countryName")]
+    public string CountryName { get; set; }
 
     /// <summary>
     /// Number of reports against the Address
