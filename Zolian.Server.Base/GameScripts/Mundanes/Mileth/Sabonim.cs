@@ -596,6 +596,13 @@ public class Sabonim(WorldServer server, Mundane mundane) : MundaneScript(server
                     client.SendOptionsDialog(Mundane, "I happened to find this one near a beggar, is it yours?");
                     break;
                 }
+            case 0x999:
+                {
+                    if (client.Aisling.LegendBook.Has("White Belt Attainment"))
+                        client.GiveItem("White Belt");
+                    client.SendOptionsDialog(Mundane, "I happened to find this one near a beggar, is it yours?");
+                    break;
+                }
         }
     }
 
@@ -605,6 +612,8 @@ public class Sabonim(WorldServer server, Mundane mundane) : MundaneScript(server
     {
         var options = new List<Dialog.OptionsDataItem>();
 
+        if (client.Aisling.LegendBook.Has("White Belt Attainment"))
+            options.Add(new(0x999, "White Belt"));
         if (client.Aisling.LegendBook.Has("Yellow Belt Attainment"))
             options.Add(new(0x991, "Yellow Belt"));
         if (client.Aisling.LegendBook.Has("Orange Belt Attainment"))
