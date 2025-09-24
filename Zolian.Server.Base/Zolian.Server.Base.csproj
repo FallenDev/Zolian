@@ -17,6 +17,7 @@
 		<SelfContained>false</SelfContained>
 		<RuntimeIdentifier>win-x64</RuntimeIdentifier>
 		<TieredPGO>true</TieredPGO>
+		<ServerGarbageCollection>true</ServerGarbageCollection>
 		<ErrorReport>send</ErrorReport>
 		<RunAnalyzersDuringLiveAnalysis>True</RunAnalyzersDuringLiveAnalysis>
 		<EnablePreviewFeatures>true</EnablePreviewFeatures>
@@ -57,7 +58,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Using Include="Chaos.DarkAges.Definitions;" />
+		<Using Include="Chaos.DarkAges.Definitions;" />
 	</ItemGroup>
 
 	<Import Project="..\Server.Configurations\Server.Configurations.projitems" Label="Shared" />
