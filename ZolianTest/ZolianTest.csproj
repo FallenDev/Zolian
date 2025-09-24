@@ -15,17 +15,18 @@
 		<SelfContained>false</SelfContained>
 		<RuntimeIdentifier>win-x64</RuntimeIdentifier>
 		<EnablePreviewFeatures>true</EnablePreviewFeatures>
+		<SatelliteResourceLanguages>en</SatelliteResourceLanguages>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Chaos-Networking" Version="2.4.3" />
-		<PackageReference Include="Microsoft.Data.SqlClient" Version="6.0.2" />
+		<PackageReference Include="Chaos-Networking" Version="2.5.0" />
+		<PackageReference Include="Microsoft.Data.SqlClient" Version="7.0.0-preview1.25257.1" />
 		<PackageReference Include="Microsoft.DependencyValidation.Analyzers" Version="0.11.0" />
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
-		<PackageReference Include="NUnit" Version="4.3.2" />
-		<PackageReference Include="Sentry" Version="5.11.2" />
-		<PackageReference Include="Sentry.Extensions.Logging" Version="5.11.2" />
-		<PackageReference Include="Sentry.Profiling" Version="5.11.2" />
+		<PackageReference Include="NUnit" Version="4.4.0" />
+		<PackageReference Include="Sentry" Version="5.15.1" />
+		<PackageReference Include="Sentry.Extensions.Logging" Version="5.15.1" />
+		<PackageReference Include="Sentry.Profiling" Version="5.15.1" />
 		<PackageReference Include="ServiceStack" Version="8.8.0" />
 		<PackageReference Include="ServiceStack.Text" Version="8.8.0" />
 	</ItemGroup>
