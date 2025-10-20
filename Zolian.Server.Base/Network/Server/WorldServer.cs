@@ -3033,7 +3033,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             client.Aisling.AislingTracker = DateTime.UtcNow;
 
         // ToDo: Packet logging
-        //ServerSetup.PacketLogger($"{packet.OpCode}");
+        //ServerSetup.ConnectionLogger($"Server: {packet.OpCode}");
 
         try
         {

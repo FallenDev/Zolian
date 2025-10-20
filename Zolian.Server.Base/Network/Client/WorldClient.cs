@@ -1334,6 +1334,9 @@ public class WorldClient : WorldClientBase, IWorldClient
         if (packet.IsEncrypted)
             Crypto.Decrypt(ref packet);
 
+        // ToDo: Packet logging
+        //ServerSetup.ConnectionLogger($"Client: {packet.OpCode}");
+
         return _server.HandlePacketAsync(this, in packet);
     }
 

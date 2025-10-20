@@ -256,20 +256,13 @@ public sealed class Aisling : Player, IAisling
 
     public void CancelExchange()
     {
-        if (Exchange?.Trader == null)
-            return;
+        if (Exchange?.Trader == null) return;
 
         var trader = Exchange.Trader;
-
         var exchangeA = Exchange;
         var exchangeB = trader.Exchange;
-
         var itemsA = exchangeA.Items.ToArray();
-        var weightCheckA = itemsA.Aggregate(0, (current, item) => current + item.Template.CarryWeight);
-
         var itemsB = exchangeB.Items.ToArray();
-        var weightCheckB = itemsB.Aggregate(0, (current, item) => current + item.Template.CarryWeight);
-
         var goldA = exchangeA.Gold;
         var goldB = exchangeB.Gold;
 
@@ -277,14 +270,10 @@ public sealed class Aisling : Player, IAisling
         trader.Exchange = null;
 
         foreach (var item in itemsB)
-            if (item.GiveTo(trader))
-            {
-            }
+            item.GiveTo(trader);
 
         foreach (var item in itemsA)
-            if (item.GiveTo(this))
-            {
-            }
+            item.GiveTo(this);
 
         GoldPoints += goldA;
         trader.GoldPoints += goldB;
@@ -302,7 +291,7 @@ public sealed class Aisling : Player, IAisling
 
     public bool CanSeeGhosts()
     {
-        return IsDead();
+        return IsDead() || GameMaster;
     }
 
     public void UsedSkill(Skill skill)
