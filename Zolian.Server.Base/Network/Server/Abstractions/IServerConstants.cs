@@ -34,6 +34,7 @@ public interface IServerConstants
     double GlobalBaseSkillDelay { get; }
     double GlobalSpawnTimer { get; }
     double GroupExpBonus { get; set; }
+    double HolidayExpBonus { get; set; }
     string GroupRequestDeclinedMsg { get; }
     int HelperMenuId { get; }
     string HelperMenuTemplateKey { get; }

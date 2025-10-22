@@ -126,6 +126,8 @@
     // Bonus given to players in groups
     // Default: 1.0 (100%)
     "GroupExpBonus": 1.0,
+    // Bonus given to players during holiday
+    "HolidayExpBonus": 1.0,
     // Max gold a player can carry on them
     // Default: 4294967295
     "MaxCarryGold": 4294967295,

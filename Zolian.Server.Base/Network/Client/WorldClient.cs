@@ -4150,6 +4150,11 @@ public class WorldClient : WorldClientBase, IWorldClient
     {
         if (exp <= 0) exp = 1;
 
+        if (ServerSetup.Instance.Config.HolidayExpBonus > 1.0)
+        {
+            exp *= (long)ServerSetup.Instance.Config.HolidayExpBonus;
+        }
+
         if (hunting)
         {
             if (player.HasBuff("Double XP"))
@@ -4276,6 +4281,11 @@ public class WorldClient : WorldClientBase, IWorldClient
     private static void HandleAp(Aisling player, int exp, bool hunting)
     {
         if (exp <= 0) exp = 1;
+
+        if (ServerSetup.Instance.Config.HolidayExpBonus > 1.0)
+        {
+            exp *= (int)ServerSetup.Instance.Config.HolidayExpBonus;
+        }
 
         if (hunting)
         {
