@@ -24,7 +24,7 @@ public class IsleShopPort(WorldServer server, Mundane mundane) : MundaneScript(s
         if (client.Aisling.CurrentMapId == 6600)
         {
             options.Add(new(0x01, $"Guide me to the {{=qShop"));
-            client.SendOptionsDialog(Mundane, "She's eccentric and likes to live out in the wild, but I'll take you to him.", options.ToArray());
+            client.SendOptionsDialog(Mundane, "She's eccentric and likes to live out in the wild, but I'll take you to her.", options.ToArray());
         }
         else
         {
