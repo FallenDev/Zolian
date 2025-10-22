@@ -4146,128 +4146,120 @@ public class WorldClient : WorldClientBase, IWorldClient
         EnqueueExperienceEvent(Aisling, exp, false);
     }
 
-    private static void HandleExp(Aisling player, long exp, bool hunting)
+    private static void HandleExp(Aisling player, long baseExp, bool hunting)
     {
-        if (exp <= 0) exp = 1;
-
-        if (ServerSetup.Instance.Config.HolidayExpBonus > 1.0)
-        {
-            exp *= (long)ServerSetup.Instance.Config.HolidayExpBonus;
-        }
-
-        if (hunting)
-        {
-            if (player.HasBuff("Double XP"))
-                exp *= 2;
-
-            if (player.HasBuff("Triple XP"))
-                exp *= 3;
-
-            if (player.GroupParty != null)
-            {
-                var groupSize = player.GroupParty.PartyMembers.Count;
-                var adjustment = ServerSetup.Instance.Config.GroupExpBonus;
-
-                if (groupSize > 7)
-                {
-                    adjustment = ServerSetup.Instance.Config.GroupExpBonus = (groupSize - 7) * 0.05;
-                    if (adjustment < 0.75)
-                    {
-                        adjustment = 0.75;
-                    }
-                }
-
-                var bonus = exp * (1 + player.GroupParty.PartyMembers.Count - 1) * adjustment / 100;
-                if (bonus > 0)
-                    exp += (int)bonus;
-            }
-        }
-
-        if (long.MaxValue - player.ExpTotal < exp)
-        {
-            player.ExpTotal = long.MaxValue;
-            player.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Your experience box is full, ascend to carry more");
-        }
+        if (baseExp <= 0) baseExp = 1;
 
         try
         {
-            if (player.ExpLevel >= 500)
+            // --- 1. Compute total exp gain after all bonuses ---
+            double total = baseExp;
+
+            // Holiday multiplier
+            double holiday = ServerSetup.Instance.Config.HolidayExpBonus;
+            if (holiday > 1.0)
+                total *= holiday;
+
+            // Hunting buffs
+            if (hunting)
             {
-                player.ExpNext = 0;
-                player.ExpTotal += exp;
-                player.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"Received {exp:n0} experience points!");
+                if (player.HasBuff("Double XP")) total *= 2;
+                if (player.HasBuff("Triple XP")) total *= 3;
+
+                // Group multiplier
+                if (player.GroupParty != null)
+                {
+                    int groupSize = player.GroupParty.PartyMembers.Count;
+                    double adjustment = ServerSetup.Instance.Config.GroupExpBonus;
+
+                    if (groupSize > 7)
+                    {
+                        double dyn = (groupSize - 7) * 0.05;
+                        if (dyn < 0.75) dyn = 0.75;
+                        adjustment = dyn;
+                    }
+
+                    total *= (1.0 + (groupSize - 1) * (adjustment / 100.0));
+                }
+            }
+
+            // Clamp to safe long
+            long totalExp = (long)Math.Min(total, long.MaxValue);
+
+            // --- 2. Hard cap check ---
+            if (long.MaxValue - player.ExpTotal < totalExp)
+            {
+                player.ExpTotal = long.MaxValue;
+                player.Client.SendServerMessage(ServerMessageType.ActiveMessage,
+                    "Your experience box is full, ascend to carry more");
                 player.Client.SendAttributes(StatUpdateType.ExpGold);
                 return;
             }
 
-            player.ExpNext -= exp;
+            // --- 3. Apply single-pass level-up logic ---
+            long expToApply = totalExp;
+            long currentNext = player.ExpNext;
+            long totalAdded = 0;
+            int levelsGained = 0;
 
-            if (player.ExpNext <= 0)
+            while (expToApply >= currentNext && player.ExpLevel < ServerSetup.Instance.Config.PlayerLevelCap)
             {
-                var extraExp = Math.Abs(player.ExpNext);
-                var expToTotal = exp - extraExp;
-                player.ExpTotal += expToTotal;
-                player.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"Received {expToTotal:n0} experience points!");
-                player.Client.LevelUp(player, extraExp);
+                expToApply -= currentNext;
+                totalAdded += currentNext;
+                player.ExpLevel++;
+                levelsGained++;
+
+                // recalc ExpNext for the new level (reuse your seed logic)
+                double seed = player.ExpLevel * 0.1 + 0.5;
+                if (player.ExpLevel > 99)
+                {
+                    int levelsAboveMaster = player.ExpLevel - 120;
+                    int scalingFactor = Math.Min(5000 + levelsAboveMaster * 237, 100000);
+                    currentNext = (long)(player.ExpLevel * seed * scalingFactor);
+                }
+                else
+                {
+                    currentNext = (long)(player.ExpLevel * seed * 5000);
+                }
+
+                if (currentNext <= 0)
+                {
+                    player.Client.SendServerMessage(ServerMessageType.ActiveMessage,
+                        "Issue leveling up; Error: Mt. Everest");
+                    return;
+                }
+
+                // apply stat gains inline (no recursion)
+                player.StatPoints += (player.ExpLevel >= 250)
+                    ? (short)1
+                    : (short)ServerSetup.Instance.Config.StatsPerLevel;
+
+                player.BaseHp += ((int)(ServerSetup.Instance.Config.HpGainFactor * player._Con * 0.65)).IntClamp(0, 300);
+                player.BaseMp += ((int)(ServerSetup.Instance.Config.MpGainFactor * player._Wis * 0.45)).IntClamp(0, 300);
             }
-            else
+
+            // apply remaining exp to next level progress
+            player.ExpNext = currentNext - expToApply;
+            player.ExpTotal += totalAdded + expToApply;
+
+            // --- 4. Output feedback ---
+            player.Client.SendServerMessage(ServerMessageType.ActiveMessage,
+                $"Received {totalExp:n0} experience points!");
+
+            if (levelsGained > 0)
             {
-                player.ExpTotal += exp;
-                player.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"Received {exp:n0} experience points!");
-                player.Client.SendAttributes(StatUpdateType.ExpGold);
+                player.Client.SendServerMessage(ServerMessageType.ActiveMessage,
+                    $"You leveled up {levelsGained} time(s)! New Insight: {player.ExpLevel}");
+                player.SendAnimationNearby(79, null, player.Serial, 64);
             }
+
+            player.Client.SendAttributes(StatUpdateType.Full);
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
             ServerSetup.EventsLogger($"Issue giving {player.Username} experience.");
-            SentrySdk.CaptureException(e);
+            SentrySdk.CaptureException(ex);
         }
-    }
-
-    private void LevelUp(Aisling player, long extraExp)
-    {
-        // Set next level
-        player.ExpLevel++;
-
-        var seed = player.ExpLevel * 0.1 + 0.5;
-        {
-            if (player.ExpLevel > ServerSetup.Instance.Config.PlayerLevelCap) return;
-        }
-
-        // 237 is a rounded up calculation of 500 - 99 = 401 
-        // Then that by 95000 / 401 = 236.9
-        if (player.ExpLevel > 99)
-        {
-            var levelsAboveMaster = player.ExpLevel - 120;
-            var scalingFactor = Math.Min(5000 + levelsAboveMaster * 237, 100000);
-            player.ExpNext = (long)(player.ExpLevel * seed * scalingFactor);
-        }
-        else
-            player.ExpNext = (long)(player.ExpLevel * seed * 5000);
-
-        if (player.ExpNext <= 0)
-        {
-            player.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Issue leveling up; Error: Mt. Everest");
-            return;
-        }
-
-        if (player.ExpLevel >= 250)
-            player.StatPoints += 1;
-        else
-            player.StatPoints += (short)ServerSetup.Instance.Config.StatsPerLevel;
-
-        // Set vitality
-        player.BaseHp += ((int)(ServerSetup.Instance.Config.HpGainFactor * player._Con * 0.65)).IntClamp(0, 300);
-        player.BaseMp += ((int)(ServerSetup.Instance.Config.MpGainFactor * player._Wis * 0.45)).IntClamp(0, 300);
-        player.CurrentHp = player.MaximumHp;
-        player.CurrentMp = player.MaximumMp;
-        player.Client.SendAttributes(StatUpdateType.Full);
-
-        player.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{ServerSetup.Instance.Config.LevelUpMessage}, Insight:{player.ExpLevel}");
-        player.SendAnimationNearby(79, null, player.Serial, 64);
-
-        if (extraExp > 0)
-            GiveExp(extraExp);
     }
 
     public void GiveAp(int exp)
@@ -4278,115 +4270,136 @@ public class WorldClient : WorldClientBase, IWorldClient
         EnqueueAbilityEvent(Aisling, exp, false);
     }
 
-    private static void HandleAp(Aisling player, int exp, bool hunting)
+    private static void HandleAp(Aisling player, long baseAp, bool hunting)
     {
-        if (exp <= 0) exp = 1;
-
-        if (ServerSetup.Instance.Config.HolidayExpBonus > 1.0)
-        {
-            exp *= (int)ServerSetup.Instance.Config.HolidayExpBonus;
-        }
-
-        if (hunting)
-        {
-            if (player.HasBuff("Double XP"))
-                exp *= 2;
-
-            if (player.HasBuff("Triple XP"))
-                exp *= 3;
-
-            if (player.GroupParty != null)
-            {
-                var groupSize = player.GroupParty.PartyMembers.Count;
-                var adjustment = ServerSetup.Instance.Config.GroupExpBonus;
-
-                if (groupSize > 7)
-                {
-                    adjustment = ServerSetup.Instance.Config.GroupExpBonus = (groupSize - 7) * 0.05;
-                    if (adjustment < 0.75)
-                    {
-                        adjustment = 0.75;
-                    }
-                }
-
-                var bonus = exp * (1 + player.GroupParty.PartyMembers.Count - 1) * adjustment / 100;
-                if (bonus > 0)
-                    exp += (int)bonus;
-            }
-        }
-
-        if (long.MaxValue - player.AbpTotal < exp)
-        {
-            player.AbpTotal = long.MaxValue;
-            player.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Your ability box is full, ascend to carry more");
-        }
+        if (baseAp <= 0) baseAp = 1;
 
         try
         {
-            if (player.AbpLevel >= 500)
+            // -------- 1) Compute final AP after all bonuses (once) --------
+            double total = baseAp;
+
+            // Holiday multiplier
+            double holiday = ServerSetup.Instance.Config.HolidayExpBonus;
+            if (holiday > 1.0)
+                total *= holiday;
+
+            // Hunting buffs and group bonus
+            if (hunting)
             {
-                player.AbpNext = 0;
-                player.AbpTotal += exp;
-                player.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"Received {exp:n0} ability points!");
+                if (player.HasBuff("Double XP")) total *= 2.0;
+                if (player.HasBuff("Triple XP")) total *= 3.0;
+
+                if (player.GroupParty != null)
+                {
+                    int groupSize = player.GroupParty.PartyMembers.Count;
+                    double adjustment = ServerSetup.Instance.Config.GroupExpBonus; // % value
+
+                    if (groupSize > 7)
+                    {
+                        double dyn = (groupSize - 7) * 0.05;
+                        if (dyn < 0.75) dyn = 0.75;
+                        adjustment = dyn;
+                    }
+
+                    // multiply once: (1 + (groupSize-1) * %bonus)
+                    total *= (1.0 + (groupSize - 1) * (adjustment / 100.0));
+                }
+            }
+
+            // clamp to long
+            long totalAp = (long)Math.Min(total, long.MaxValue);
+
+            // -------- 2) Hard cap behavior --------
+            if (long.MaxValue - player.AbpTotal < totalAp)
+            {
+                player.AbpTotal = long.MaxValue;
+                player.Client.SendServerMessage(ServerMessageType.ActiveMessage,
+                    "Your ability box is full, ascend to carry more");
                 player.Client.SendAttributes(StatUpdateType.ExpGold);
                 return;
             }
 
-            player.AbpNext -= exp;
-
-            if (player.AbpNext <= 0)
+            // -------- 3) Paragon-style: 500+ just accrues --------
+            if (player.AbpLevel >= 500)
             {
-                var extraExp = Math.Abs(player.AbpNext);
-                var expToTotal = exp - extraExp;
-                player.AbpTotal += expToTotal;
-                player.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"Received {expToTotal:n0} ability points!");
-                player.Client.JobRankUp(player, extraExp);
-            }
-            else
-            {
-                player.AbpTotal += exp;
-                player.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"Received {exp:n0} ability points!");
+                player.AbpNext = 0;
+                player.AbpTotal += totalAp;
+                player.Client.SendServerMessage(ServerMessageType.ActiveMessage,
+                    $"Received {totalAp:n0} ability points!");
                 player.Client.SendAttributes(StatUpdateType.ExpGold);
+                return;
             }
+
+            // -------- 4) Single-pass rank ups --------
+            long apToApply = totalAp;
+            long currentNext = Math.Max(player.AbpNext, 1); // safety
+            long totalAdded = 0;
+            int ranksGained = 0;
+
+            // local function for your AP next calc
+            static long CalcApNext(int level)
+            {
+                // seed: L*0.5 + 0.8; Next = L * seed * 5000
+                double seed = level * 0.5 + 0.8;
+                double dnext = level * seed * 5000.0;
+                long next = (long)Math.Round(Math.Clamp(dnext, 1.0, int.MaxValue)); // AbpNext is int
+                return next;
+            }
+
+            while (apToApply >= currentNext && player.AbpLevel < ServerSetup.Instance.Config.PlayerLevelCap)
+            {
+                apToApply -= currentNext;
+                totalAdded += currentNext;
+
+                // apply AP rank gains inline (no recursion)
+                player.AbpLevel++;
+                ranksGained++;
+
+                player.StatPoints += 1;
+
+                player.BaseHp += ((int)(ServerSetup.Instance.Config.HpGainFactor * player._Con * 1.23)).IntClamp(0, 1000);
+                player.BaseMp += ((int)(ServerSetup.Instance.Config.MpGainFactor * player._Wis * 0.90)).IntClamp(0, 1000);
+
+                // compute next threshold for the NEW level
+                currentNext = CalcApNext(player.AbpLevel);
+
+                if (currentNext <= 0)
+                {
+                    player.Client.SendServerMessage(ServerMessageType.ActiveMessage,
+                        "Issue leveling up; Error: Mt. Everest");
+                    return;
+                }
+            }
+
+            // leftover progress toward next rank
+            long remainingTowardNext = apToApply;              // what we didn't spend leveling
+            player.AbpNext = (int)Math.Clamp(currentNext - remainingTowardNext, 1, int.MaxValue);
+
+            // total AP always increases by everything earned
+            player.AbpTotal += totalAdded + remainingTowardNext;
+
+            // -------- 5) Feedback (one message for AP, one summary for levels) --------
+            player.Client.SendServerMessage(ServerMessageType.ActiveMessage,
+                $"Received {totalAp:n0} ability points!");
+
+            if (ranksGained > 0)
+            {
+                player.Client.SendServerMessage(ServerMessageType.ActiveMessage,
+                    $"{ServerSetup.Instance.Config.AbilityUpMessage}, Job Level: {player.AbpLevel} " +
+                    $"(+{ranksGained} rank{(ranksGained == 1 ? "" : "s")})");
+                player.SendAnimationNearby(385, null, player.Serial, 75);
+            }
+
+            player.CurrentHp = player.MaximumHp;
+            player.CurrentMp = player.MaximumMp;
+            player.Client.SendAttributes(StatUpdateType.Full);
         }
         catch (Exception e)
         {
             ServerSetup.EventsLogger($"Issue giving {player.Username} ability points.");
             SentrySdk.CaptureException(e);
         }
-    }
-
-    private void JobRankUp(Aisling player, int extraExp)
-    {
-        player.AbpLevel++;
-
-        var seed = player.AbpLevel * 0.5 + 0.8;
-        {
-            if (player.AbpLevel > ServerSetup.Instance.Config.PlayerLevelCap) return;
-        }
-        player.AbpNext = (int)(player.AbpLevel * seed * 5000);
-
-        if (player.AbpNext <= 0)
-        {
-            player.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Issue leveling up; Error: Mt. Everest");
-            return;
-        }
-
-        // Set next level
-        player.StatPoints += 1;
-
-        // Set vitality
-        player.BaseHp += ((int)(ServerSetup.Instance.Config.HpGainFactor * player._Con * 1.23)).IntClamp(0, 1000);
-        player.BaseMp += ((int)(ServerSetup.Instance.Config.MpGainFactor * player._Wis * 0.90)).IntClamp(0, 1000);
-        player.CurrentHp = player.MaximumHp;
-        player.CurrentMp = player.MaximumMp;
-        player.Client.SendAttributes(StatUpdateType.Full);
-
-        player.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{ServerSetup.Instance.Config.AbilityUpMessage}, Job Level:{player.AbpLevel}");
-        player.SendAnimationNearby(385, null, player.Serial, 75);
-
-        if (extraExp > 0)
-            GiveAp(extraExp);
     }
 
     #endregion
