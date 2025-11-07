@@ -6,16 +6,18 @@ using Darkages.Enums;
 using Darkages.Managers;
 using Darkages.Models;
 using Darkages.Network.Client;
+using Darkages.Network.Server;
+using Darkages.Object;
+using Darkages.Sprites.Abstractions;
+using Darkages.Sprites.Entity;
 using Darkages.Templates;
 using Darkages.Types;
+
+using ServiceStack;
+
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Numerics;
-using Darkages.Sprites.Abstractions;
-using ServiceStack;
-using Darkages.Network.Server;
-using Darkages.Object;
-using Darkages.Sprites.Entity;
 
 namespace Darkages.Sprites;
 
@@ -429,8 +431,8 @@ public sealed class Aisling : Player, IAisling
         Client?.SendAttributes(StatUpdateType.Primary);
 
         // Save
-        trader.Client?.Save();
-        Client?.Save();
+        _ = trader.Client?.Save();
+        _ = Client?.Save();
     }
 
     public IEnumerable<Skill> GetAssails()

@@ -773,6 +773,7 @@ public abstract class Sprite : INotifyPropertyChanged
                 var buffObj = Buffs.TryGetValue(buff, out var foundBuff);
                 if (buffObj)
                 {
+                    if (foundBuff.Name.Contains("XP")) return false;
                     foundBuff.OnEnded(this, foundBuff);
                 }
             }
