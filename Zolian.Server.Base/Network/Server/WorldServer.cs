@@ -1652,7 +1652,11 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
             if (!activated) return default;
             if (!item.Template.Flags.FlagIsSet(ItemFlags.Consumable)) return default;
-            if (item.Template.Name == "Chakra Stone") return default; // Amenotejikara is a special case, it does not get consumed on use
+            if (item.Template.Name == "Chakra Stone" || item.Template.Name == "Cleric's Feather")
+            {
+                localClient.SendServerMessage(ServerMessageType.ActiveMessage, "I can't use this in that way.");
+                return default;
+            }
 
             localClient.Aisling.Inventory.RemoveRange(localClient.Aisling.Client, item, 1);
             return default;
