@@ -1652,7 +1652,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
             if (!activated) return default;
             if (!item.Template.Flags.FlagIsSet(ItemFlags.Consumable)) return default;
-            if (item.Template.Name == "Chakra Stone" || item.Template.Name == "Cleric's Feather")
+            if (item.Template.Name is "Chakra Stone" or "Cleric's Feather")
             {
                 localClient.SendServerMessage(ServerMessageType.ActiveMessage, "I can't use this in that way.");
                 return default;

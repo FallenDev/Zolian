@@ -1575,8 +1575,22 @@ public class DebuffReaping : Debuff
         switch (affected)
         {
             case Aisling aisling when !debuff.Cancelled:
+                foreach (var (_, value) in aisling.Debuffs)
+                {
+                    if (!aisling.Debuffs.TryRemove(value.Name, out var debuffs)) continue;
+                    debuffs.DeleteDebuff(aisling, value);
+                    aisling.Client.SendEffect(byte.MinValue, value.Icon);
+                }
+                foreach (var (_, value) in aisling.Buffs)
+                {
+                    if (!aisling.Buffs.TryRemove(value.Name, out var buffs)) continue;
+                    buffs.DeleteBuff(aisling, value);
+                    aisling.Client.SendEffect(byte.MinValue, value.Icon);
+                }
+
                 aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your soul has been ripped from your mortal coil.");
                 aisling.SendTargetedClientMethod(PlayerScope.AislingsOnSameMap, client => client.SendSound(5, false));
+                
                 aisling.PrepareForHell();
                 aisling.CastDeath();
                 aisling.Resting = Enums.RestPosition.Standing;
