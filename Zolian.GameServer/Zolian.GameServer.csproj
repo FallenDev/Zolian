@@ -41,10 +41,10 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Chaos-Networking" Version="2.5.1" />
-		<PackageReference Include="Microsoft.Data.SqlClient" Version="7.0.0-preview1.25257.1" />
+		<PackageReference Include="Chaos-Networking" Version="2.5.2" />
+		<PackageReference Include="Microsoft.Data.SqlClient" Version="7.0.0-preview2.25289.6" />
 		<PackageReference Include="Microsoft.DependencyValidation.Analyzers" Version="0.11.0" />
-		<PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.0-rc.1.25451.107">
+		<PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.0-rc.2.25502.107">
 			<TreatAsUsed>true</TreatAsUsed>
 		</PackageReference>
 		<PackageReference Include="Sentry" Version="5.16.2" />
@@ -52,7 +52,7 @@
 		<PackageReference Include="Sentry.Profiling" Version="5.16.2" />
 		<PackageReference Include="Serilog.Extensions.Logging" Version="9.0.2" />
 		<PackageReference Include="Serilog.Sinks.Async" Version="2.1.0" />
-		<PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
+		<PackageReference Include="Serilog.Sinks.Console" Version="6.1.1" />
 		<PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
 		<PackageReference Include="ServiceStack" Version="8.9.0" />
 		<PackageReference Include="ServiceStack.Text" Version="8.9.0" />
