@@ -104,7 +104,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     {
         // Start base server 
         _ = base.ExecuteAsync(stoppingToken);
-        
+
         try
         {
             ServerSetup.Instance.Running = true;
@@ -181,21 +181,19 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
     private void TickWorld(double dtMs, CancellationToken ct)
     {
-        if (ct.IsCancellationRequested || !ServerSetup.Instance.Running)
-            return;
-
+        if (ct.IsCancellationRequested || !ServerSetup.Instance.Running) return;
         var dt = TimeSpan.FromMilliseconds(dtMs);
 
         try
         {
-            // 1. Players – every 50 ms
+            // Players – every 50 ms
             UpdateClients();
 
-            // 2. High-frequency systems – every 50 ms
+            // High-frequency systems – every 50 ms
             UpdateMaps(dt);
             CheckTraps(dt);
 
-            // 3. Monsters – every 250 ms
+            // Monsters – every 250 ms
             _monsterAccumulatorMs += dtMs;
             while (_monsterAccumulatorMs >= MonstersIntervalMs)
             {
@@ -203,7 +201,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 _monsterAccumulatorMs -= MonstersIntervalMs;
             }
 
-            // 4. Mundanes – every 1500 ms
+            // Mundanes – every 1500 ms
             _mundaneAccumulatorMs += dtMs;
             while (_mundaneAccumulatorMs >= MundanesIntervalMs)
             {
@@ -211,25 +209,24 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 _mundaneAccumulatorMs -= MundanesIntervalMs;
             }
 
-            // 5. Ground items – every 60 seconds
+            // Ground items – every 60 seconds
             _groundItemsAccumulatorMs += dtMs;
             while (_groundItemsAccumulatorMs >= GroundItemsIntervalMs)
             {
-                UpdateGroundItems(); // already has its own try/catch
+                UpdateGroundItems();
                 _groundItemsAccumulatorMs -= GroundItemsIntervalMs;
             }
 
-            // 6. Ground money – every 60 seconds
+            // Ground money – every 60 seconds
             _groundMoneyAccumulatorMs += dtMs;
             while (_groundMoneyAccumulatorMs >= GroundMoneyIntervalMs)
             {
-                UpdateGroundMoney(); // already has its own try/catch
+                UpdateGroundMoney();
                 _groundMoneyAccumulatorMs -= GroundMoneyIntervalMs;
             }
         }
         catch (Exception ex)
         {
-            // World tick is NEVER allowed to die – log and keep going
             SentrySdk.CaptureException(ex);
         }
     }
