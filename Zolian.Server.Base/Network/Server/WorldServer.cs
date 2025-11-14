@@ -54,6 +54,18 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     private readonly WorldServerTimer _trapTimer = new(TimeSpan.FromSeconds(1));
     private const int GameSpeed = 50;
 
+    // Subsystem intervals (ms)
+    private const int MonstersIntervalMs = 250;    // 4x per second
+    private const int MundanesIntervalMs = 1500;   // 1.5 seconds
+    private const int GroundItemsIntervalMs = 60000;  // 60 seconds
+    private const int GroundMoneyIntervalMs = 60000;  // 60 seconds
+
+    // Accumulators for fixed-step scheduling
+    private double _monsterAccumulatorMs;
+    private double _mundaneAccumulatorMs;
+    private double _groundItemsAccumulatorMs;
+    private double _groundMoneyAccumulatorMs;
+
     public IEnumerable<Aisling> Aislings => ClientRegistry
         .Where(c => c is { Aisling.LoggedIn: true }).Select(c => c.Aisling);
 
@@ -88,20 +100,49 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
     #region Server Init
 
-    protected override Task ExecuteAsync(CancellationToken stoppingToken)
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        // Start base server 
+        _ = base.ExecuteAsync(stoppingToken);
+        
         try
         {
             ServerSetup.Instance.Running = true;
             var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken);
             UpdateComponentsRoutine(linkedCts.Token);
-            Task.Factory.StartNew(() => MundanesUpdateLoop(linkedCts.Token), TaskCreationOptions.LongRunning);
-            Task.Factory.StartNew(() => MonstersUpdateLoop(linkedCts.Token), TaskCreationOptions.LongRunning);
-            Task.Factory.StartNew(() => GroundItemsUpdateLoop(linkedCts.Token), TaskCreationOptions.LongRunning);
-            Task.Factory.StartNew(() => GroundMoneyUpdateLoop(linkedCts.Token), TaskCreationOptions.LongRunning);
-            Task.Factory.StartNew(() => MapsUpdateLoop(linkedCts.Token), TaskCreationOptions.LongRunning);
-            Task.Factory.StartNew(() => TrapsUpdateLoop(linkedCts.Token), TaskCreationOptions.LongRunning);
-            Task.Factory.StartNew(ClientsUpdateLoop, TaskCreationOptions.LongRunning);
+
+            // Fixed-step world loop
+            var sw = Stopwatch.StartNew();
+            const double fixedStepMs = GameSpeed;
+            var lastTimeMs = sw.Elapsed.TotalMilliseconds;
+            double accumulatorMs = 0;
+
+            while (!linkedCts.IsCancellationRequested && ServerSetup.Instance.Running)
+            {
+                var nowMs = sw.Elapsed.TotalMilliseconds;
+                var deltaMs = nowMs - lastTimeMs;
+
+                // Clamp delta to avoid spiral-of-death
+                if (deltaMs < 0) deltaMs = 0;
+                if (deltaMs > 200) deltaMs = 200;
+
+                lastTimeMs = nowMs;
+                accumulatorMs += deltaMs;
+
+                // Catch-up: run one or more fixed steps if we fell behind
+                while (accumulatorMs >= fixedStepMs)
+                {
+                    accumulatorMs -= fixedStepMs;
+                    TickWorld(fixedStepMs, linkedCts.Token);
+                }
+
+                // Prevent busy waiting
+                await Task.Delay(1, linkedCts.Token).ConfigureAwait(false);
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // Normal shutdown
         }
         catch (Exception ex)
         {
@@ -109,8 +150,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             ServerSetup.ConnectionLogger(ex.StackTrace, LogLevel.Error);
             SentrySdk.CaptureException(ex);
         }
-
-        return base.ExecuteAsync(stoppingToken);
     }
 
     private void RegisterServerComponents()
@@ -140,6 +179,61 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
     #region Server Loop
 
+    private void TickWorld(double dtMs, CancellationToken ct)
+    {
+        if (ct.IsCancellationRequested || !ServerSetup.Instance.Running)
+            return;
+
+        var dt = TimeSpan.FromMilliseconds(dtMs);
+
+        try
+        {
+            // 1. Players – every 50 ms
+            UpdateClients();
+
+            // 2. High-frequency systems – every 50 ms
+            UpdateMaps(dt);
+            CheckTraps(dt);
+
+            // 3. Monsters – every 250 ms
+            _monsterAccumulatorMs += dtMs;
+            while (_monsterAccumulatorMs >= MonstersIntervalMs)
+            {
+                UpdateMonsters(TimeSpan.FromMilliseconds(MonstersIntervalMs));
+                _monsterAccumulatorMs -= MonstersIntervalMs;
+            }
+
+            // 4. Mundanes – every 1500 ms
+            _mundaneAccumulatorMs += dtMs;
+            while (_mundaneAccumulatorMs >= MundanesIntervalMs)
+            {
+                UpdateMundanes(TimeSpan.FromMilliseconds(MundanesIntervalMs));
+                _mundaneAccumulatorMs -= MundanesIntervalMs;
+            }
+
+            // 5. Ground items – every 60 seconds
+            _groundItemsAccumulatorMs += dtMs;
+            while (_groundItemsAccumulatorMs >= GroundItemsIntervalMs)
+            {
+                UpdateGroundItems(); // already has its own try/catch
+                _groundItemsAccumulatorMs -= GroundItemsIntervalMs;
+            }
+
+            // 6. Ground money – every 60 seconds
+            _groundMoneyAccumulatorMs += dtMs;
+            while (_groundMoneyAccumulatorMs >= GroundMoneyIntervalMs)
+            {
+                UpdateGroundMoney(); // already has its own try/catch
+                _groundMoneyAccumulatorMs -= GroundMoneyIntervalMs;
+            }
+        }
+        catch (Exception ex)
+        {
+            // World tick is NEVER allowed to die – log and keep going
+            SentrySdk.CaptureException(ex);
+        }
+    }
+
     private void UpdateComponentsRoutine(CancellationToken ct)
     {
         foreach (var component in _serverComponents.Values)
@@ -164,126 +258,20 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         }
     }
 
-    private static async Task GroundItemsUpdateLoop(CancellationToken ct)
+    private void UpdateClients()
     {
-        await PeriodicTaskRunner.RunPeriodicAsync(_ =>
-        {
-            UpdateGroundItems();
-            return Task.CompletedTask;
-        }, 60000, ct).ConfigureAwait(false);
+        // Snapshot to avoid concurrent modifications
+        var players = Aislings.Where(p => p?.Client != null).ToList();
+        if (players.Count == 0)
+            return;
+
+        Parallel.ForEach(
+            players,
+            new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount },
+            ProcessClientSafely);
     }
 
-    private static async Task GroundMoneyUpdateLoop(CancellationToken ct)
-    {
-        await PeriodicTaskRunner.RunPeriodicAsync(_ =>
-        {
-            UpdateGroundMoney();
-            return Task.CompletedTask;
-        }, 60000, ct).ConfigureAwait(false);
-    }
-
-    private static async Task MundanesUpdateLoop(CancellationToken ct)
-    {
-        const int intervalMs = 1500; // 1.5 seconds
-        await PeriodicTaskRunner.RunPeriodicAsync(_ =>
-        {
-            UpdateMundanes(TimeSpan.FromMilliseconds(intervalMs));
-            return Task.CompletedTask;
-        }, intervalMs, ct).ConfigureAwait(false);
-    }
-
-    private static async Task MonstersUpdateLoop(CancellationToken ct)
-    {
-        const int intervalMs = 250; // .250 of a second
-        await PeriodicTaskRunner.RunPeriodicAsync(_ =>
-        {
-            UpdateMonsters(TimeSpan.FromMilliseconds(intervalMs));
-            return Task.CompletedTask;
-        }, intervalMs, ct).ConfigureAwait(false);
-    }
-
-    private static async Task MapsUpdateLoop(CancellationToken ct)
-    {
-        await PeriodicTaskRunner.RunPeriodicAsync(_ =>
-        {
-            UpdateMaps(TimeSpan.FromMilliseconds(GameSpeed));
-            return Task.CompletedTask;
-        }, GameSpeed, ct).ConfigureAwait(false);
-    }
-
-    private async Task TrapsUpdateLoop(CancellationToken ct)
-    {
-        await PeriodicTaskRunner.RunPeriodicAsync(_ =>
-        {
-            CheckTraps(TimeSpan.FromMilliseconds(GameSpeed));
-            return Task.CompletedTask;
-        }, GameSpeed, ct).ConfigureAwait(false);
-    }
-
-    private async Task ClientsUpdateLoop()
-    {
-        const int baseConcurrency = 10; // Minimum number of concurrent tasks
-        const int batchSize = 100; // Number of players per batch
-        var maxConcurrency = Math.Max(baseConcurrency, Environment.ProcessorCount); // Adjust based on system capabilities
-        var semaphore = new SemaphoreSlim(maxConcurrency);
-        var clientWatch = new Stopwatch();
-        clientWatch.Start();
-        var variableGameSpeed = GameSpeed; // Base interval
-
-        while (ServerSetup.Instance.Running)
-        {
-            if (clientWatch.ElapsedMilliseconds < variableGameSpeed)
-            {
-                await Task.Delay(1);
-                continue;
-            }
-
-            var players = Aislings.Where(player => player?.Client != null).ToList();
-
-            // Divide players into chunks (batches) for processing
-            var playerBatches = players.Chunk(batchSize).ToList();
-
-            // Process batches concurrently
-            var batchTasks = playerBatches.Select(batch =>
-                Task.Run(async () =>
-                {
-                    foreach (var player in batch)
-                    {
-                        await semaphore.WaitAsync();
-                        try
-                        {
-                            // Process the player inline to reduce task overhead
-                            await ProcessClientTask(player);
-                        }
-                        finally
-                        {
-                            semaphore.Release();
-                        }
-                    }
-                })
-            );
-
-            // Wait for all batches to complete
-            await Task.WhenAll(batchTasks);
-
-            // Calculate the remaining time for the next update
-            var syncCount = (int)(GameSpeed - clientWatch.ElapsedMilliseconds);
-
-            if (syncCount < 0)
-            {
-                // Adjust GameSpeed dynamically to account for delays
-                variableGameSpeed = GameSpeed + syncCount;
-                clientWatch.Restart();
-                continue;
-            }
-
-            await Task.Delay(TimeSpan.FromMilliseconds(syncCount));
-            variableGameSpeed = GameSpeed; // Reset to default interval
-            clientWatch.Restart();
-        }
-    }
-
-    private async Task ProcessClientTask(Aisling player)
+    private void ProcessClientSafely(Aisling player)
     {
         if (player?.Client == null) return;
 
@@ -295,12 +283,23 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 return;
             }
 
-            await player.Client.Update();
+            var updateTask = player.Client.Update();
+            if (!updateTask.IsCompleted)
+                updateTask.GetAwaiter().GetResult();
         }
         catch (Exception ex)
         {
             SentrySdk.CaptureException(ex);
-            player.Client.Disconnect();
+
+            try
+            {
+                player.Client.Disconnect();
+            }
+            catch
+            {
+                // ignore secondary failures
+            }
+
             ClientRegistry.TryRemove(player.Client.Id, out _);
         }
     }
