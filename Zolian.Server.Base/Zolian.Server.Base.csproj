@@ -42,7 +42,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Chaos-Networking" Version="2.6.1" />
+		<PackageReference Include="Chaos-Networking" Version="2.6.3" />
 		<PackageReference Include="Dapper.StrongName" Version="2.1.66" />
 		<PackageReference Include="Microsoft.Data.SqlClient" Version="7.0.0-preview2.25289.6" />
 		<PackageReference Include="Microsoft.DependencyValidation.Analyzers" Version="0.11.0" />

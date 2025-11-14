@@ -1,26 +1,3 @@
-using Chaos.Cryptography;
-using Chaos.Networking.Abstractions;
-using Chaos.Networking.Entities.Client;
-using Chaos.Packets;
-using Chaos.Packets.Abstractions;
-
-using Darkages.CommandSystem;
-using Darkages.Common;
-using Darkages.Database;
-using Darkages.Enums;
-using Darkages.GameScripts.Mundanes.Generic;
-using Darkages.Meta;
-using Darkages.Models;
-using Darkages.Network.Client;
-using Darkages.Network.Components;
-using Darkages.Object;
-using Darkages.ScriptingBase;
-using Darkages.Sprites;
-using Darkages.Templates;
-using Darkages.Types;
-using Microsoft.Extensions.Logging;
-using ServiceStack;
-
 using System.Collections.Concurrent;
 using System.Collections.Frozen;
 using System.Diagnostics;
@@ -28,15 +5,37 @@ using System.Net;
 using System.Net.Sockets;
 using System.Numerics;
 using System.Text;
+using Chaos.Cryptography;
+using Chaos.Networking.Abstractions;
 using Chaos.Networking.Abstractions.Definitions;
+using Chaos.Networking.Entities.Client;
+using Chaos.Packets;
+using Chaos.Packets.Abstractions;
+using Darkages.CommandSystem;
+using Darkages.Common;
+using Darkages.Database;
+using Darkages.Enums;
+using Darkages.GameScripts.Mundanes.Generic;
+using Darkages.GameScripts.Spells;
 using Darkages.Managers;
+using Darkages.Meta;
+using Darkages.Models;
+using Darkages.Network.Client;
+using Darkages.Network.Client.Abstractions;
+using Darkages.Network.Components;
+using Darkages.Object;
+using Darkages.ScriptingBase;
+using Darkages.Sprites;
+using Darkages.Sprites.Entity;
+using Darkages.Templates;
+using Darkages.Types;
 using JetBrains.Annotations;
-using Redirect = Chaos.Networking.Entities.Redirect;
-using ServerOptions = Chaos.Networking.Options.ServerOptions;
+using Microsoft.Extensions.Logging;
+using ServiceStack;
 using IWorldClient = Darkages.Network.Client.Abstractions.IWorldClient;
 using MapFlags = Darkages.Enums.MapFlags;
-using Darkages.Network.Client.Abstractions;
-using Darkages.Sprites.Entity;
+using Redirect = Chaos.Networking.Entities.Redirect;
+using ServerOptions = Chaos.Networking.Options.ServerOptions;
 
 namespace Darkages.Network.Server;
 
@@ -1396,6 +1395,8 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
             // Skill animation and execute
             ExecuteAssail(lpClient, skill);
+            // Stress Test
+            //AnimationOnAssailStressTest(lpClient);
 
             // Skill cleanup
             skill.CurrentCooldown = skill.Template.Cooldown;
@@ -1410,6 +1411,16 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         if (lpClient.Aisling.Overburden)
             lpClient.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=bOverburdened!");
     }
+
+    // Stress test
+    //private async static void AnimationOnAssailStressTest(IWorldClient lpClient)
+    //{
+    //    while (true)
+    //    {
+    //        lpClient.Aisling.SendAnimationNearby((ushort)Random.Shared.Next(0, 300), null, lpClient.Aisling.Serial);
+    //        await Task.Delay(50);
+    //    }
+    //}
 
     private static void ExecuteAssail(IWorldClient lpClient, Skill lpSkill, bool optExecuteScript = true)
     {
