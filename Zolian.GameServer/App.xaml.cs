@@ -1,6 +1,4 @@
-﻿using Chaos.Extensions.Common;
-using Chaos.Extensions.DependencyInjection;
-using Chaos.Networking;
+﻿using Chaos.Networking;
 using Chaos.Networking.Abstractions;
 using Chaos.Networking.Entities;
 using Darkages.Models;
@@ -31,6 +29,7 @@ using ILoginClient = Darkages.Network.Client.Abstractions.ILoginClient;
 using IWorldClient = Darkages.Network.Client.Abstractions.IWorldClient;
 using Darkages.Network.Client.Abstractions;
 using Darkages.Network.Server.Abstractions;
+using Zolian.GameServer.DependencyInjection;
 
 namespace Zolian.GameServer;
 
@@ -98,36 +97,52 @@ public partial class App
 
             // Lobby
             serviceCollection.AddSingleton<IClientFactory<LobbyClient>, ClientFactory<LobbyClient>>();
-            serviceCollection.AddSingleton<ILobbyServer<ILobbyClient>, IHostedService, LobbyServer>();
             serviceCollection.AddSingleton<IClientRegistry<ILobbyClient>, ClientRegistry<ILobbyClient>>();
+            serviceCollection.AddSingleton<LobbyServer>();
+            serviceCollection.AddSingleton<ILobbyServer<ILobbyClient>>(sp => sp.GetRequiredService<LobbyServer>());
+            serviceCollection.AddSingleton<IHostedService>(sp => sp.GetRequiredService<LobbyServer>());
 
             // Login
             serviceCollection.AddSingleton<IClientFactory<LoginClient>, ClientFactory<LoginClient>>();
-            serviceCollection.AddSingleton<ILoginServer<ILoginClient>, IHostedService, LoginServer>();
             serviceCollection.AddSingleton<IClientRegistry<ILoginClient>, ClientRegistry<ILoginClient>>();
+            serviceCollection.AddSingleton<LoginServer>();
+            serviceCollection.AddSingleton<ILoginServer<ILoginClient>>(sp => sp.GetRequiredService<LoginServer>());
+            serviceCollection.AddSingleton<IHostedService>(sp => sp.GetRequiredService<LoginServer>());
 
             // World
             serviceCollection.AddSingleton<IClientFactory<WorldClient>, ClientFactory<WorldClient>>();
-            serviceCollection.AddSingleton<IWorldServer<IWorldClient>, IHostedService, WorldServer>();
             serviceCollection.AddSingleton<IClientRegistry<IWorldClient>, ClientRegistry<IWorldClient>>();
+            serviceCollection.AddSingleton<WorldServer>();
+            serviceCollection.AddSingleton<IWorldServer<IWorldClient>>(sp => sp.GetRequiredService<WorldServer>());
+            serviceCollection.AddSingleton<IHostedService>(sp => sp.GetRequiredService<WorldServer>());
 
             var serviceProvider = serviceCollection.BuildServiceProvider();
             serviceProvider.GetService<IServer>();
             var hostedServices = serviceProvider.GetServices<IHostedService>().ToArray();
 
             // Start the hosted services in a dedicated long-running task
-            Task.Factory.StartNew(async () =>
+            _ = Task.Run(async () =>
             {
                 try
                 {
+                    // Start all hosted services
                     await Task.WhenAll(hostedServices.Select(svc => svc.StartAsync(ServerCtx.Token)));
-                    await ServerCtx.Token.WaitTillCanceled().ConfigureAwait(false);
+
+                    // Then wait until the token is cancelled
+                    try
+                    {
+                        await Task.Delay(Timeout.Infinite, ServerCtx.Token);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        // Expected when the token is canceled
+                    }
                 }
                 catch (Exception exception)
                 {
                     SentrySdk.CaptureException(exception);
                 }
-            }, ServerCtx.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+            }, ServerCtx.Token);
         }
         catch (Exception exception)
         {

@@ -3,11 +3,11 @@ using Darkages.Network.Client;
 using Darkages.ScriptingBase;
 using Darkages.Types;
 
-using Microsoft.IdentityModel.Tokens;
 using System.Numerics;
 using Darkages.Object;
 using Darkages.Network.Server;
 using Darkages.Sprites.Entity;
+using ServiceStack;
 
 namespace Darkages.GameScripts.Areas.ShadowTower;
 

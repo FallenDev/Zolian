@@ -1,5 +1,4 @@
 ﻿using System.Collections.Concurrent;
-using Chaos.Common.Identity;
 using Chaos.Cryptography.Abstractions;
 using Chaos.Extensions.Networking;
 using Chaos.Geometry;

@@ -1,5 +1,4 @@
-﻿using Chaos.Common.Identity;
-using Dapper;
+﻿using Dapper;
 
 using Darkages.Database;
 using Darkages.Enums;
@@ -15,6 +14,7 @@ using Darkages.GameScripts.Formulas;
 using Darkages.Network.Server;
 using Darkages.Object;
 using ServiceStack;
+using Darkages.Common;
 
 namespace Darkages.Sprites.Entity;
 
@@ -767,18 +767,19 @@ public sealed class Item : Identifiable
     public async Task DeleteFromAislingDb()
     {
         var itemId = ItemId;
-        await StorageManager.AislingBucket.SaveLock.WaitAsync(TimeSpan.FromSeconds(10));
-
-        try
+        using (await StorageManager.AislingBucket.SaveLock.LockAsync())
         {
-            var sConn = ServerSetup.Instance.ServerSaveConnection;
-            const string cmd = "DELETE FROM ZolianPlayers.dbo.PlayersItems WHERE ItemId = @ItemId";
-            sConn.Execute(cmd, new { itemId });
-        }
-        catch (Exception e)
-        {
-            ServerSetup.EventsLogger($"Failed to delete {ItemId}:{Name} from Player: {Serial}");
-            SentrySdk.CaptureException(e);
+            try
+            {
+                var sConn = ServerSetup.Instance.ServerSaveConnection;
+                const string cmd = "DELETE FROM ZolianPlayers.dbo.PlayersItems WHERE ItemId = @ItemId";
+                sConn.Execute(cmd, new { itemId });
+            }
+            catch (Exception e)
+            {
+                ServerSetup.EventsLogger($"Failed to delete {ItemId}:{Name} from Player: {Serial}", LogLevel.Error);
+                SentrySdk.CaptureException(e);
+            }
         }
     }
 

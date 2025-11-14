@@ -1,7 +1,7 @@
-﻿using Chaos.Common.Identity;
-using Darkages.Common;
+﻿using Darkages.Common;
 using Darkages.Enums;
 using Darkages.Network.Server;
+using Darkages.Object;
 using Darkages.ScriptingBase;
 using Darkages.Templates;
 using Darkages.Types;
@@ -11,7 +11,6 @@ using ServiceStack;
 using System.Collections.Concurrent;
 using System.Numerics;
 using System.Security.Cryptography;
-using Darkages.Object;
 
 namespace Darkages.Sprites.Entity;
 

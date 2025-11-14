@@ -1,4 +1,4 @@
-﻿using Chaos.Common.Identity;
+﻿using Darkages.Common;
 using Darkages.Enums;
 using Darkages.Network.Server;
 using Darkages.Types;

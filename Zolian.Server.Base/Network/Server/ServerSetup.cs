@@ -1,4 +1,5 @@
-﻿using Darkages.CommandSystem;
+﻿using Darkages.Common;
+using Darkages.CommandSystem;
 using Darkages.CommandSystem.CLI;
 using Darkages.Database;
 using Darkages.Models;
@@ -14,7 +15,6 @@ using System.Collections.Frozen;
 using System.Data;
 using System.Net;
 using System.Reflection;
-using Chaos.Common.Identity;
 using Darkages.Network.Server.Abstractions;
 using Microsoft.Data.SqlClient;
 using RestSharp;

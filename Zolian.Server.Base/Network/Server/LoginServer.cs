@@ -1,12 +1,11 @@
-using Chaos.Common.Identity;
 using Chaos.Cryptography;
-using Chaos.Extensions.Common;
 using Chaos.Networking.Abstractions;
 using Chaos.Networking.Entities.Client;
 using Chaos.Networking.Options;
 using Chaos.Packets;
 using Chaos.Packets.Abstractions;
 
+using Darkages.Common;
 using Darkages.Database;
 using Darkages.Meta;
 using Darkages.Network.Client;

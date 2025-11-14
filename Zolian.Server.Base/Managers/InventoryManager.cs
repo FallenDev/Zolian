@@ -1,5 +1,4 @@
-﻿using Chaos.Extensions.Common;
-
+﻿using Darkages.Common;
 using Darkages.Enums;
 using Darkages.Network.Client;
 using Darkages.Network.Server;

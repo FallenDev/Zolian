@@ -18,7 +18,7 @@ public static class SClassDictionary
     private static Dictionary<(Race race, Class path, Class pastClass, Job job), string> GenerateSkillMap()
     {
         var skillMap = new Dictionary<(Race race, Class path, Class pastClass, Job job), string>();
-        var sClassCounter = 1; // Starting number for SClass
+        var sClassCounter = 50; // Starting number for SClass
         var races = Enum.GetValues<Race>().Where(race => race != Race.UnDecided);
         var paths = Enum.GetValues<SClassMapper>();
         var pastClasses = Enum.GetValues<SClassMapper>();
@@ -33,6 +33,7 @@ public static class SClassDictionary
                     // Handle cases where path equals pastClass
                     if (path == pastClass)
                     {
+                        // ToDo: If path and pastClass are the same, skill pane will not populate if a job is specified 
                         AddSkillMapEntry(skillMap, (race, (Class)path, (Class)pastClass, Job.None), ref sClassCounter);
                         continue;
                     }
