@@ -16,7 +16,6 @@ using Darkages.Common;
 using Darkages.Database;
 using Darkages.Enums;
 using Darkages.GameScripts.Mundanes.Generic;
-using Darkages.GameScripts.Spells;
 using Darkages.Managers;
 using Darkages.Meta;
 using Darkages.Models;
@@ -101,43 +100,112 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        // Start base server 
+        // Start base server (socket accept / recv loop)
         _ = base.ExecuteAsync(stoppingToken);
+
+        var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken);
 
         try
         {
             ServerSetup.Instance.Running = true;
-            var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken);
+
+            // Components keep their own internal loops
             UpdateComponentsRoutine(linkedCts.Token);
 
-            // Fixed-step world loop
-            var sw = Stopwatch.StartNew();
-            const double fixedStepMs = GameSpeed;
-            var lastTimeMs = sw.Elapsed.TotalMilliseconds;
-            double accumulatorMs = 0;
-
-            while (!linkedCts.IsCancellationRequested && ServerSetup.Instance.Running)
+            // Main world loops: keep each system focused and periodic
+            var playerLoop = PeriodicTaskRunner.RunPeriodicAsync(ct =>
             {
-                var nowMs = sw.Elapsed.TotalMilliseconds;
-                var deltaMs = nowMs - lastTimeMs;
+                if (ct.IsCancellationRequested || !ServerSetup.Instance.Running)
+                    return Task.CompletedTask;
 
-                // Clamp delta to avoid spiral-of-death
-                if (deltaMs < 0) deltaMs = 0;
-                if (deltaMs > 200) deltaMs = 200;
+                var dt = TimeSpan.FromMilliseconds(GameSpeed);
 
-                lastTimeMs = nowMs;
-                accumulatorMs += deltaMs;
-
-                // Catch-up: run one or more fixed steps if we fell behind
-                while (accumulatorMs >= fixedStepMs)
+                try
                 {
-                    accumulatorMs -= fixedStepMs;
-                    TickWorld(fixedStepMs, linkedCts.Token);
+                    // Player focused work – keep this lean for low latency
+                    UpdateClients();
+                    UpdateMaps(dt);
+                    CheckTraps(dt);
+                }
+                catch (Exception ex)
+                {
+                    SentrySdk.CaptureException(ex);
                 }
 
-                // Prevent busy waiting
-                await Task.Delay(1, linkedCts.Token).ConfigureAwait(false);
-            }
+                return Task.CompletedTask;
+            }, GameSpeed, linkedCts.Token);
+
+            var monstersLoop = PeriodicTaskRunner.RunPeriodicAsync(ct =>
+            {
+                if (ct.IsCancellationRequested || !ServerSetup.Instance.Running)
+                    return Task.CompletedTask;
+
+                try
+                {
+                    UpdateMonsters(TimeSpan.FromMilliseconds(MonstersIntervalMs));
+                }
+                catch (Exception ex)
+                {
+                    SentrySdk.CaptureException(ex);
+                }
+
+                return Task.CompletedTask;
+            }, MonstersIntervalMs, linkedCts.Token);
+
+            var mundanesLoop = PeriodicTaskRunner.RunPeriodicAsync(ct =>
+            {
+                if (ct.IsCancellationRequested || !ServerSetup.Instance.Running)
+                    return Task.CompletedTask;
+
+                try
+                {
+                    UpdateMundanes(TimeSpan.FromMilliseconds(MundanesIntervalMs));
+                }
+                catch (Exception ex)
+                {
+                    SentrySdk.CaptureException(ex);
+                }
+
+                return Task.CompletedTask;
+            }, MundanesIntervalMs, linkedCts.Token);
+
+            var groundItemsLoop = PeriodicTaskRunner.RunPeriodicAsync(ct =>
+            {
+                if (ct.IsCancellationRequested || !ServerSetup.Instance.Running)
+                    return Task.CompletedTask;
+
+                try
+                {
+                    UpdateGroundItems();
+                }
+                catch (Exception ex)
+                {
+                    SentrySdk.CaptureException(ex);
+                }
+
+                return Task.CompletedTask;
+            }, GroundItemsIntervalMs, linkedCts.Token);
+
+            var groundMoneyLoop = PeriodicTaskRunner.RunPeriodicAsync(ct =>
+            {
+                if (ct.IsCancellationRequested || !ServerSetup.Instance.Running)
+                    return Task.CompletedTask;
+
+                try
+                {
+                    UpdateGroundMoney();
+                }
+                catch (Exception ex)
+                {
+                    SentrySdk.CaptureException(ex);
+                }
+
+                return Task.CompletedTask;
+            }, GroundMoneyIntervalMs, linkedCts.Token);
+
+            // Wait on all world loops – they all honour cancellation
+            await Task.WhenAll(playerLoop, monstersLoop, mundanesLoop, groundItemsLoop, groundMoneyLoop)
+                      .ConfigureAwait(false);
         }
         catch (OperationCanceledException)
         {
@@ -178,58 +246,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
     #region Server Loop
 
-    private void TickWorld(double dtMs, CancellationToken ct)
-    {
-        if (ct.IsCancellationRequested || !ServerSetup.Instance.Running) return;
-        var dt = TimeSpan.FromMilliseconds(dtMs);
-
-        try
-        {
-            // Players – every 50 ms
-            UpdateClients();
-
-            // High-frequency systems – every 50 ms
-            UpdateMaps(dt);
-            CheckTraps(dt);
-
-            // Monsters – every 250 ms
-            _monsterAccumulatorMs += dtMs;
-            while (_monsterAccumulatorMs >= MonstersIntervalMs)
-            {
-                UpdateMonsters(TimeSpan.FromMilliseconds(MonstersIntervalMs));
-                _monsterAccumulatorMs -= MonstersIntervalMs;
-            }
-
-            // Mundanes – every 1500 ms
-            _mundaneAccumulatorMs += dtMs;
-            while (_mundaneAccumulatorMs >= MundanesIntervalMs)
-            {
-                UpdateMundanes(TimeSpan.FromMilliseconds(MundanesIntervalMs));
-                _mundaneAccumulatorMs -= MundanesIntervalMs;
-            }
-
-            // Ground items – every 60 seconds
-            _groundItemsAccumulatorMs += dtMs;
-            while (_groundItemsAccumulatorMs >= GroundItemsIntervalMs)
-            {
-                UpdateGroundItems();
-                _groundItemsAccumulatorMs -= GroundItemsIntervalMs;
-            }
-
-            // Ground money – every 60 seconds
-            _groundMoneyAccumulatorMs += dtMs;
-            while (_groundMoneyAccumulatorMs >= GroundMoneyIntervalMs)
-            {
-                UpdateGroundMoney();
-                _groundMoneyAccumulatorMs -= GroundMoneyIntervalMs;
-            }
-        }
-        catch (Exception ex)
-        {
-            SentrySdk.CaptureException(ex);
-        }
-    }
-
     private void UpdateComponentsRoutine(CancellationToken ct)
     {
         foreach (var component in _serverComponents.Values)
@@ -241,15 +257,17 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         public static async Task RunPeriodicAsync(Func<CancellationToken, Task> action, int intervalMs, CancellationToken ct)
         {
             var sw = new Stopwatch();
+
             while (!ct.IsCancellationRequested)
             {
                 sw.Restart();
-                await action(ct);
+
+                await action(ct).ConfigureAwait(false);
 
                 var elapsed = (int)sw.ElapsedMilliseconds;
                 var delay = intervalMs - elapsed;
                 if (delay > 0)
-                    await Task.Delay(delay, ct);
+                    await Task.Delay(delay, ct).ConfigureAwait(false);
             }
         }
     }

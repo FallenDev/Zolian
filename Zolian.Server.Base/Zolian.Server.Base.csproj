@@ -61,6 +61,10 @@
 		<Using Include="Chaos.DarkAges.Definitions;" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <Folder Include="GameScripts\Mundanes\Atlantis\" />
+	</ItemGroup>
+
 	<Import Project="..\Server.Configurations\Server.Configurations.projitems" Label="Shared" />
 
 </Project>
