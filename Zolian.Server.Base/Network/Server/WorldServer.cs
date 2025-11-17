@@ -527,7 +527,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     {
         if (client?.Aisling?.Map == null) return default;
         if (client.MapUpdating && client.Aisling.CurrentMapId != ServerSetup.Instance.Config.TransitionZone) return default;
-        return ExecuteHandler(client, InnerOnMapDataRequest);
+        return ExecuteHandler(client, HandlerCategory.RealTime, InnerOnMapDataRequest);
 
         static ValueTask InnerOnMapDataRequest(IWorldClient localClient)
         {
@@ -1383,7 +1383,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             client.SendCancelCasting();
 
         if (!client.Aisling.Skulled)
-            return client.Aisling.CantAttack ? default : ExecuteHandler(client, InnerOnSpacebar);
+            return client.Aisling.CantAttack ? default : ExecuteHandler(client, HandlerCategory.RealTime, InnerOnSpacebar);
 
         client.SystemMessage(ServerSetup.Instance.Config.ReapMessageDuringAction);
         return default;
@@ -1467,7 +1467,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         if (!client.Aisling.LoggedIn) return default;
         if (client.IsRefreshing) return default;
         var readyTime = DateTime.UtcNow;
-        return readyTime.Subtract(client.LastWorldListRequest).TotalSeconds < 0.50 ? default : ExecuteHandler(client, InnerOnWorldListRequest);
+        return readyTime.Subtract(client.LastWorldListRequest).TotalSeconds < 0.50 ? default : ExecuteHandler(client, HandlerCategory.Standard, InnerOnWorldListRequest);
 
         ValueTask InnerOnWorldListRequest(IWorldClient localClient)
         {
@@ -1987,7 +1987,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         if (client.Aisling.IsDead()) return default;
         if (client.Aisling.CantAttack) return default;
         var readyTime = DateTime.UtcNow;
-        return readyTime.Subtract(client.LastSelfProfileRequest).TotalSeconds < 1 ? default : ExecuteHandler(client, InnerOnProfileRequest);
+        return readyTime.Subtract(client.LastSelfProfileRequest).TotalSeconds < 1 ? default : ExecuteHandler(client, HandlerCategory.Standard, InnerOnProfileRequest);
 
         static ValueTask InnerOnProfileRequest(IWorldClient localClient)
         {
@@ -2053,7 +2053,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     public ValueTask OnToggleGroup(IWorldClient client, in Packet clientPacket)
     {
         if (client?.Aisling == null) return default;
-        return !client.Aisling.LoggedIn ? default : ExecuteHandler(client, InnerOnToggleGroup);
+        return !client.Aisling.LoggedIn ? default : ExecuteHandler(client, HandlerCategory.Standard, InnerOnToggleGroup);
 
         static ValueTask InnerOnToggleGroup(IWorldClient localClient)
         {
@@ -2143,7 +2143,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         if (!client.Aisling.LoggedIn) return default;
         if (client.IsRefreshing) return default;
         var readyTime = DateTime.UtcNow;
-        return readyTime.Subtract(client.LastClientRefresh).TotalSeconds < 0.4 ? default : ExecuteHandler(client, InnerOnRefreshRequest);
+        return readyTime.Subtract(client.LastClientRefresh).TotalSeconds < 0.4 ? default : ExecuteHandler(client, HandlerCategory.Standard, InnerOnRefreshRequest);
 
         static ValueTask InnerOnRefreshRequest(IWorldClient localClient)
         {
@@ -2687,7 +2687,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     /// <summary>
     /// 0x45 - Client Ping (Heartbeat)
     /// </summary>
-    public override ValueTask OnHeartBeatAsync(IWorldClient client, in Packet clientPacket)
+    public ValueTask OnHeartBeatAsync(IWorldClient client, in Packet clientPacket)
     {
         var args = PacketSerializer.Deserialize<HeartBeatArgs>(in clientPacket);
         return ExecuteHandler(client, args, InnerOnHeartBeat);

@@ -164,7 +164,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
 
     public ValueTask OnHomepageRequest(ILoginClient client, in Packet packet)
     {
-        return ExecuteHandler(client, InnerOnHomepageRequest);
+        return ExecuteHandler(client, HandlerCategory.Standard, InnerOnHomepageRequest);
 
         static ValueTask InnerOnHomepageRequest(ILoginClient localClient)
         {
@@ -321,7 +321,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
     /// </summary>
     public ValueTask OnNoticeRequest(ILoginClient client, in Packet packet)
     {
-        return ExecuteHandler(client, InnerOnNoticeRequest);
+        return ExecuteHandler(client, HandlerCategory.RealTime, InnerOnNoticeRequest);
 
         ValueTask InnerOnNoticeRequest(ILoginClient localClient)
         {
@@ -414,7 +414,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
     /// </summary>
     public ValueTask OnExitRequest(ILoginClient client, in Packet clientPacket)
     {
-        return ExecuteHandler(client, InnerOnExitRequest);
+        return ExecuteHandler(client, HandlerCategory.RealTime, InnerOnExitRequest);
 
         ValueTask InnerOnExitRequest(ILoginClient localClient)
         {
