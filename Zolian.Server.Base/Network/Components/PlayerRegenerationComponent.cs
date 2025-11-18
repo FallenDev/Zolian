@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-
 using Darkages.Enums;
 using Darkages.Network.Client;
 using Darkages.Network.Server;
@@ -9,79 +8,64 @@ namespace Darkages.Network.Components;
 
 public class PlayerRegenerationComponent(WorldServer server) : WorldServerComponent(server)
 {
-    private static readonly Stopwatch PlayerRegenControl = new();
     private const int ComponentSpeed = 1000;
 
     protected internal override async Task Update()
     {
-        var componentStopWatch = new Stopwatch();
-        componentStopWatch.Start();
-        var variableGameSpeed = ComponentSpeed;
+        var sw = Stopwatch.StartNew();
+        var target = ComponentSpeed;
 
         while (ServerSetup.Instance.Running)
         {
-            if (componentStopWatch.Elapsed.TotalMilliseconds < variableGameSpeed)
+            var elapsed = sw.Elapsed.TotalMilliseconds;
+            if (elapsed < target)
             {
-                await Task.Delay(1);
+                var remaining = (int)(target - elapsed);
+
+                if (remaining > 0)
+                    await Task.Delay(Math.Min(remaining, 50));
+
                 continue;
             }
 
-            _ = UpdatePlayerRegeneration();
-            var awaiter = (int)(ComponentSpeed - componentStopWatch.Elapsed.TotalMilliseconds);
+            UpdatePlayerRegeneration();
 
-            if (awaiter < 0)
+            var postElapsed = sw.Elapsed.TotalMilliseconds;
+            var overshoot = postElapsed - ComponentSpeed;
+
+            if (overshoot > 0 && overshoot < ComponentSpeed)
             {
-                variableGameSpeed = ComponentSpeed + awaiter;
-                componentStopWatch.Restart();
-                continue;
+                // Slightly compensate next tick if we ran late
+                target = ComponentSpeed - (int)overshoot;
+            }
+            else
+            {
+                target = ComponentSpeed;
             }
 
-            await Task.Delay(TimeSpan.FromMilliseconds(awaiter));
-            variableGameSpeed = ComponentSpeed;
-            componentStopWatch.Restart();
+            sw.Restart();
         }
     }
 
-    private static async Task UpdatePlayerRegeneration()
+    private void UpdatePlayerRegeneration()
     {
-        if (!ServerSetup.Instance.Running || !Server.Aislings.Any()) return;
-        const int maxConcurrency = 10;
-        var semaphore = new SemaphoreSlim(maxConcurrency);
-        var playerUpdateTasks = new List<Task>();
+        var players = Server.Aislings
+            .Where(p => p?.Client != null && p.LoggedIn)
+            .ToList();
 
-        if (!PlayerRegenControl.IsRunning)
-            PlayerRegenControl.Start();
+        if (players.Count == 0)
+            return;
 
-        if (PlayerRegenControl.Elapsed.TotalMilliseconds < 1000) return;
-
-        try
-        {
-            var players = Server.Aislings.Where(player => player?.Client != null).ToList();
-
-            foreach (var player in players)
-            {
-                await semaphore.WaitAsync();
-                var task = ProcessUpdates(player).ContinueWith(t =>
-                {
-                    semaphore.Release();
-                }, TaskScheduler.Default);
-
-                playerUpdateTasks.Add(task);
-            }
-
-            await Task.WhenAll(playerUpdateTasks);
-            PlayerRegenControl.Restart();
-        }
-        catch (Exception ex)
-        {
-            SentrySdk.CaptureException(ex);
-        }
+        foreach (var player in players)
+            ProcessUpdates(player);
     }
 
-    private static Task ProcessUpdates(Aisling player)
+    private static void ProcessUpdates(Aisling player)
     {
-        if (player?.Client == null) return Task.CompletedTask;
-        if (!player.LoggedIn) return Task.CompletedTask;
+        if (player?.Client == null) return;
+        if (!player.LoggedIn) return;
+
+        // Statuses that disable regen
         if (player.IsPoisoned || player.Skulled || player.IsDead())
         {
             player.RegenTimerDisabled = true;
@@ -91,10 +75,14 @@ public class PlayerRegenerationComponent(WorldServer server) : WorldServerCompon
             player.RegenTimerDisabled = false;
         }
 
-        if (player.RegenTimerDisabled) return Task.CompletedTask;
-        if (player.CurrentHp == player.MaximumHp &&
-            player.CurrentMp == player.MaximumMp) return Task.CompletedTask;
+        if (player.RegenTimerDisabled) return;
 
+        // Already full
+        if (player.CurrentHp == player.MaximumHp &&
+            player.CurrentMp == player.MaximumMp)
+            return;
+
+        // Clamp overflows
         if (player.CurrentHp > player.MaximumHp || player.CurrentMp > player.MaximumMp)
         {
             player.CurrentHp = player.MaximumHp;
@@ -102,17 +90,21 @@ public class PlayerRegenerationComponent(WorldServer server) : WorldServerCompon
             player.Client.SendAttributes(StatUpdateType.Vitality);
         }
 
-        if (player.Path == Class.Peasant | player.GameMaster)
+        // Special-case: peasants / GMs
+        if (player.Path == Class.Peasant || player.GameMaster)
         {
             player.Recover();
         }
 
-        if (player.CurrentMp < 1) player.CurrentMp = 1;
+        if (player.CurrentMp < 1)
+            player.CurrentMp = 1;
 
         var hpRegenSeed = HpRegenSoftCap(player.Client);
         var mpRegenSeed = MpRegenSoftCap(player.Client);
+
         var hpHardCap = Math.Abs(player.BaseHp / 3.00);
         var mpHardCap = Math.Abs(player.BaseMp / 3.00);
+
         var performedRegen = false;
 
         if (player.CurrentHp < player.MaximumHp)
@@ -129,10 +121,7 @@ public class PlayerRegenerationComponent(WorldServer server) : WorldServerCompon
 
         if (performedRegen)
             player.Client.SendAttributes(StatUpdateType.Vitality);
-
-        return Task.CompletedTask;
     }
-
 
     private static void RegenHpCalculator(WorldClient client, double seed, double cap)
     {
@@ -171,7 +160,6 @@ public class PlayerRegenerationComponent(WorldServer server) : WorldServerCompon
             SentrySdk.CaptureException(ex);
         }
     }
-
 
     private static double HpRegenSoftCap(WorldClient client)
     {

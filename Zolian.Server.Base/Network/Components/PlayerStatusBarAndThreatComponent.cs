@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-
 using Darkages.Network.Server;
 using Darkages.Sprites;
 
@@ -7,68 +6,55 @@ namespace Darkages.Network.Components;
 
 public class PlayerStatusBarAndThreatComponent(WorldServer server) : WorldServerComponent(server)
 {
-    private static readonly Stopwatch StatusControl = new();
-    private const int ComponentSpeed = 100;
+    private const int ComponentSpeed = 1000;
 
     protected internal override async Task Update()
     {
-        var componentStopWatch = new Stopwatch();
-        componentStopWatch.Start();
-        var variableGameSpeed = ComponentSpeed;
+        var sw = Stopwatch.StartNew();
+        var target = ComponentSpeed;
 
         while (ServerSetup.Instance.Running)
         {
-            if (componentStopWatch.Elapsed.TotalMilliseconds < variableGameSpeed)
+            var elapsed = sw.Elapsed.TotalMilliseconds;
+            if (elapsed < target)
             {
-                await Task.Delay(1);
+                var remaining = (int)(target - elapsed);
+
+                if (remaining > 0)
+                    await Task.Delay(Math.Min(remaining, 100));
+
                 continue;
             }
 
-            _ = UpdatePlayerStatusBarAndThreat();
-            var awaiter = (int)(ComponentSpeed - componentStopWatch.Elapsed.TotalMilliseconds);
+            UpdatePlayerStatusBarAndThreat();
 
-            if (awaiter < 0)
+            var postElapsed = sw.Elapsed.TotalMilliseconds;
+            var overshoot = postElapsed - ComponentSpeed;
+
+            if (overshoot > 0 && overshoot < ComponentSpeed)
             {
-                variableGameSpeed = ComponentSpeed + awaiter;
-                componentStopWatch.Restart();
-                continue;
+                // Slightly compensate next tick if we ran late
+                target = ComponentSpeed - (int)overshoot;
+            }
+            else
+            {
+                target = ComponentSpeed;
             }
 
-            await Task.Delay(TimeSpan.FromMilliseconds(awaiter));
-            variableGameSpeed = ComponentSpeed;
-            componentStopWatch.Restart();
+            sw.Restart();
         }
     }
 
-    private static async Task UpdatePlayerStatusBarAndThreat()
+    private void UpdatePlayerStatusBarAndThreat()
     {
-        if (!ServerSetup.Instance.Running || !Server.Aislings.Any()) return;
-        const int maxConcurrency = 10;
-        var semaphore = new SemaphoreSlim(maxConcurrency);
-        var playerUpdateTasks = new List<Task>();
-
-        if (!StatusControl.IsRunning)
-            StatusControl.Start();
-
-        if (StatusControl.Elapsed.TotalMilliseconds < 1000) return;
-
         try
         {
-            var players = Server.Aislings.Where(player => player?.Client != null).ToList();
-
-            foreach (var player in players)
+            foreach (var player in Server.Aislings)
             {
-                await semaphore.WaitAsync();
-                var task = ProcessUpdates(player).ContinueWith(t =>
-                    {
-                        semaphore.Release();
-                    }, TaskScheduler.Default);
-
-                playerUpdateTasks.Add(task);
+                if (player?.Client == null) continue;
+                if (!player.LoggedIn) continue;
+                ProcessUpdates(player);
             }
-
-            await Task.WhenAll(playerUpdateTasks);
-            StatusControl.Restart();
         }
         catch (Exception ex)
         {
@@ -76,11 +62,10 @@ public class PlayerStatusBarAndThreatComponent(WorldServer server) : WorldServer
         }
     }
 
-    private static Task ProcessUpdates(Aisling player)
+    private static void ProcessUpdates(Aisling player)
     {
         player.UpdateBuffs(player);
         player.UpdateDebuffs(player);
         player.ThreatGeneratedSubsided(player);
-        return Task.CompletedTask;
     }
 }

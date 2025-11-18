@@ -11,37 +11,44 @@ public class PingComponent(WorldServer server) : WorldServerComponent(server)
 
     protected internal override async Task Update()
     {
-        var componentStopWatch = new Stopwatch();
-        componentStopWatch.Start();
-        var variableGameSpeed = ComponentSpeed;
+        var sw = Stopwatch.StartNew();
+        var target = ComponentSpeed;
 
         while (ServerSetup.Instance.Running)
         {
-            if (componentStopWatch.Elapsed.TotalMilliseconds < variableGameSpeed)
+            var elapsed = sw.Elapsed.TotalMilliseconds;
+            if (elapsed < target)
             {
-                await Task.Delay(50);
+                var remaining = (int)(target - elapsed);
+
+                // Clamp to avoid super tiny delays
+                if (remaining > 0)
+                    await Task.Delay(Math.Min(remaining, 50));
                 continue;
             }
 
-            var players = Server.Aislings;
-            players.AsParallel()
-                .WithDegreeOfParallelism(Environment.ProcessorCount)
-                .ForAll(Ping);
+            foreach (var player in Server.Aislings)
+                Ping(player);
 
-            var awaiter = (int)(ComponentSpeed - componentStopWatch.Elapsed.TotalMilliseconds);
+            var postElapsed = sw.Elapsed.TotalMilliseconds;
+            var overshoot = postElapsed - ComponentSpeed;
 
-            if (awaiter < 0)
+            if (overshoot > 0)
             {
-                variableGameSpeed = ComponentSpeed + awaiter;
-                componentStopWatch.Restart();
-                continue;
+                // Compensate next tick by firing slightly earlier
+                target = ComponentSpeed - (int)overshoot;
+                if (target < 0)
+                    target = 0;
+            }
+            else
+            {
+                target = ComponentSpeed;
             }
 
-            await Task.Delay(TimeSpan.FromMilliseconds(awaiter));
-            variableGameSpeed = ComponentSpeed;
-            componentStopWatch.Restart();
+            sw.Restart();
         }
     }
+
 
     private static void Ping(Aisling player)
     {

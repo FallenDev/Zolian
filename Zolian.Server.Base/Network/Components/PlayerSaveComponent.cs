@@ -2,6 +2,7 @@
 
 using Darkages.Database;
 using Darkages.Network.Server;
+using Microsoft.Extensions.Logging;
 
 namespace Darkages.Network.Components;
 
@@ -11,39 +12,52 @@ public class PlayerSaveComponent(WorldServer server) : WorldServerComponent(serv
 
     protected internal override async Task Update()
     {
-        var componentStopWatch = new Stopwatch();
-        componentStopWatch.Start();
-        var variableGameSpeed = ComponentSpeed;
+        var sw = Stopwatch.StartNew();
+        var target = ComponentSpeed;
 
         while (ServerSetup.Instance.Running)
         {
-            if (componentStopWatch.Elapsed.TotalMilliseconds < variableGameSpeed)
+            var elapsed = sw.Elapsed.TotalMilliseconds;
+            if (elapsed < target)
             {
-                await Task.Delay(500);
+                var remaining = (int)(target - elapsed);
+
+                if (remaining > 0)
+                    await Task.Delay(Math.Min(remaining, 1000));
                 continue;
             }
 
-            UpdatePlayerSave();
-            var awaiter = (int)(ComponentSpeed - componentStopWatch.Elapsed.TotalMilliseconds);
+            await UpdatePlayerSaveAsync();
 
-            if (awaiter < 0)
+            var postElapsed = sw.Elapsed.TotalMilliseconds;
+            var overshoot = postElapsed - ComponentSpeed;
+
+            if (overshoot > 0 && overshoot < ComponentSpeed)
             {
-                variableGameSpeed = ComponentSpeed + awaiter;
-                componentStopWatch.Restart();
-                continue;
+                target = ComponentSpeed - (int)overshoot;
+            }
+            else
+            {
+                target = ComponentSpeed;
             }
 
-            await Task.Delay(TimeSpan.FromMilliseconds(awaiter));
-            variableGameSpeed = ComponentSpeed;
-            componentStopWatch.Restart();
+            sw.Restart();
         }
     }
 
-    private static void UpdatePlayerSave()
+    private async Task UpdatePlayerSaveAsync()
     {
-        if (!ServerSetup.Instance.Running || !Server.Aislings.Any()) return;
-
         var playersList = Server.Aislings.ToList();
-        _ = StorageManager.AislingBucket.ServerSave(playersList);
+        if (playersList.Count == 0) return;
+
+        try
+        {
+            await StorageManager.AislingBucket.ServerSave(playersList);
+        }
+        catch (Exception e)
+        {
+            ServerSetup.EventsLogger($"PlayerSaveComponent failed to save {playersList.Count} players: {e}", LogLevel.Error);
+            SentrySdk.CaptureException(e);
+        }
     }
 }
