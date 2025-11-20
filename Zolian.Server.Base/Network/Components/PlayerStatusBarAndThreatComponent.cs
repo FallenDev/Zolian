@@ -31,15 +31,9 @@ public class PlayerStatusBarAndThreatComponent(WorldServer server) : WorldServer
             var postElapsed = sw.Elapsed.TotalMilliseconds;
             var overshoot = postElapsed - ComponentSpeed;
 
-            if (overshoot > 0 && overshoot < ComponentSpeed)
-            {
-                // Slightly compensate next tick if we ran late
-                target = ComponentSpeed - (int)overshoot;
-            }
-            else
-            {
-                target = ComponentSpeed;
-            }
+            target = (overshoot > 0 && overshoot < ComponentSpeed)
+                ? ComponentSpeed - (int)overshoot
+                : ComponentSpeed;
 
             sw.Restart();
         }
@@ -47,18 +41,19 @@ public class PlayerStatusBarAndThreatComponent(WorldServer server) : WorldServer
 
     private void UpdatePlayerStatusBarAndThreat()
     {
-        try
+        foreach (var player in Server.Aislings)
         {
-            foreach (var player in Server.Aislings)
+            if (player?.Client == null) continue;
+            if (!player.LoggedIn) continue;
+
+            try
             {
-                if (player?.Client == null) continue;
-                if (!player.LoggedIn) continue;
                 ProcessUpdates(player);
             }
-        }
-        catch (Exception ex)
-        {
-            SentrySdk.CaptureException(ex);
+            catch (Exception ex)
+            {
+                SentrySdk.CaptureException(ex);
+            }
         }
     }
 

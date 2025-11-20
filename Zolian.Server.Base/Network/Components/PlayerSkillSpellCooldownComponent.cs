@@ -32,15 +32,9 @@ public class PlayerSkillSpellCooldownComponent(WorldServer server) : WorldServer
             var postElapsed = sw.Elapsed.TotalMilliseconds;
             var overshoot = postElapsed - ComponentSpeed;
 
-            if (overshoot > 0 && overshoot < ComponentSpeed)
-            {
-                // Slightly compensate next tick if we ran late
-                target = ComponentSpeed - (int)overshoot;
-            }
-            else
-            {
-                target = ComponentSpeed;
-            }
+            target = (overshoot > 0 && overshoot < ComponentSpeed)
+                ? ComponentSpeed - (int)overshoot
+                : ComponentSpeed;
 
             sw.Restart();
         }
@@ -59,30 +53,38 @@ public class PlayerSkillSpellCooldownComponent(WorldServer server) : WorldServer
             if (player?.Client == null) continue;
             if (!player.LoggedIn) continue;
 
-            var client = player.Client;
-
-            if (!client.CooldownControl.IsRunning)
-                client.CooldownControl.Start();
-
-            if (client.CooldownControl.Elapsed.TotalMilliseconds <
-                client.SkillSpellTimer.Delay.TotalMilliseconds)
+            try
             {
-                continue;
+                var client = player.Client;
+
+                if (!client.CooldownControl.IsRunning)
+                    client.CooldownControl.Start();
+
+                if (client.CooldownControl.Elapsed.TotalMilliseconds <
+                    client.SkillSpellTimer.Delay.TotalMilliseconds)
+                {
+                    continue;
+                }
+
+                var hasteFlag = player.HasteFlag;
+
+                // Skills
+                foreach (var skill in player.SkillBook.Skills.Values)
+                    ProcessSkills(player, skill, hasteFlag);
+
+                // Spells
+                foreach (var spell in player.SpellBook.Spells.Values)
+                    ProcessSpells(player, spell, hasteFlag);
+
+                // Remove haste flag after processing, buff readds it if still active
+                player.HasteFlag = false;
+                client.CooldownControl.Restart();
             }
+            catch (Exception ex)
+            {
+                SentrySdk.CaptureException(ex);
 
-            var hasteFlag = player.HasteFlag;
-
-            // Skills
-            foreach (var skill in player.SkillBook.Skills.Values)
-                ProcessSkills(player, skill, hasteFlag);
-
-            // Spells
-            foreach (var spell in player.SpellBook.Spells.Values)
-                ProcessSpells(player, spell, hasteFlag);
-
-            // Remove haste flag after processing, buff readds it if still active
-            player.HasteFlag = false;
-            client.CooldownControl.Restart();
+            }
         }
     }
 

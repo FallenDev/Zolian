@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-
 using Darkages.Database;
 using Darkages.Network.Server;
 using Darkages.Templates;
@@ -8,53 +7,59 @@ namespace Darkages.Network.Components;
 
 public class MessageClearComponent(WorldServer server) : WorldServerComponent(server)
 {
-    private const int ComponentSpeed = 60000;
+    private const int ComponentSpeed = 60_000;
 
     protected internal override async Task Update()
     {
-        var componentStopWatch = new Stopwatch();
-        componentStopWatch.Start();
-        var variableGameSpeed = ComponentSpeed;
+        var sw = Stopwatch.StartNew();
+        var target = ComponentSpeed;
 
         while (ServerSetup.Instance.Running)
         {
-            if (componentStopWatch.Elapsed.TotalMilliseconds < variableGameSpeed)
+            var elapsed = sw.Elapsed.TotalMilliseconds;
+
+            if (elapsed < target)
             {
-                await Task.Delay(500);
+                var remaining = (int)(target - elapsed);
+                if (remaining > 0)
+                    await Task.Delay(Math.Min(remaining, 500));
                 continue;
             }
 
-            Message();
-            UpdateBoards();
-            var awaiter = (int)(ComponentSpeed - componentStopWatch.Elapsed.TotalMilliseconds);
+            ClearPlayerMessages();
+            RefreshBoardCache();
 
-            if (awaiter < 0)
-            {
-                variableGameSpeed = ComponentSpeed + awaiter;
-                componentStopWatch.Restart();
-                continue;
-            }
+            var postElapsed = sw.Elapsed.TotalMilliseconds;
+            var overshoot = postElapsed - ComponentSpeed;
 
-            await Task.Delay(TimeSpan.FromMilliseconds(awaiter));
-            variableGameSpeed = ComponentSpeed;
-            componentStopWatch.Restart();
+            target = (overshoot > 0 && overshoot < ComponentSpeed)
+                ? ComponentSpeed - (int)overshoot
+                : ComponentSpeed;
+
+            sw.Restart();
         }
     }
 
-    private static void Message()
+    private static void ClearPlayerMessages()
     {
-        var readyTime = DateTime.UtcNow;
+        var now = DateTime.UtcNow;
+        var timeout = TimeSpan.FromSeconds(5);
 
-        Parallel.ForEach(Server.Aislings, (player) =>
+        foreach (var player in Server.Aislings)
         {
-            if (player?.Client == null) return;
-            if (!player.LoggedIn) return;
-            if ((readyTime - player.Client.LastMessageSent).TotalSeconds > 5)
+            if (player?.Client == null) continue;
+            if (!player.LoggedIn) continue;
+
+            var sinceLast = now - player.Client.LastMessageSent;
+            if (sinceLast > timeout)
+            {
+                // Clear the orange bar message
                 player.Client.SendServerMessage(ServerMessageType.OrangeBar1, "\u0000");
-        });
+            }
+        }
     }
 
-    private static void UpdateBoards()
+    private static void RefreshBoardCache()
     {
         try
         {

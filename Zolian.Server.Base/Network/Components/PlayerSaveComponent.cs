@@ -32,14 +32,9 @@ public class PlayerSaveComponent(WorldServer server) : WorldServerComponent(serv
             var postElapsed = sw.Elapsed.TotalMilliseconds;
             var overshoot = postElapsed - ComponentSpeed;
 
-            if (overshoot > 0 && overshoot < ComponentSpeed)
-            {
-                target = ComponentSpeed - (int)overshoot;
-            }
-            else
-            {
-                target = ComponentSpeed;
-            }
+            target = (overshoot > 0 && overshoot < ComponentSpeed)
+                ? ComponentSpeed - (int)overshoot
+                : ComponentSpeed;
 
             sw.Restart();
         }
@@ -47,16 +42,13 @@ public class PlayerSaveComponent(WorldServer server) : WorldServerComponent(serv
 
     private async Task UpdatePlayerSaveAsync()
     {
-        var playersList = Server.Aislings.ToList();
-        if (playersList.Count == 0) return;
-
         try
         {
-            await StorageManager.AislingBucket.ServerSave(playersList);
+            await StorageManager.AislingBucket.ServerSave(Server.Aislings.ToList());
         }
         catch (Exception e)
         {
-            ServerSetup.EventsLogger($"PlayerSaveComponent failed to save {playersList.Count} players: {e}", LogLevel.Error);
+            ServerSetup.EventsLogger($"PlayerSaveComponent failed to perform a server save", LogLevel.Error);
             SentrySdk.CaptureException(e);
         }
     }

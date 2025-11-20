@@ -33,15 +33,9 @@ public class PlayerRegenerationComponent(WorldServer server) : WorldServerCompon
             var postElapsed = sw.Elapsed.TotalMilliseconds;
             var overshoot = postElapsed - ComponentSpeed;
 
-            if (overshoot > 0 && overshoot < ComponentSpeed)
-            {
-                // Slightly compensate next tick if we ran late
-                target = ComponentSpeed - (int)overshoot;
-            }
-            else
-            {
-                target = ComponentSpeed;
-            }
+            target = (overshoot > 0 && overshoot < ComponentSpeed)
+                ? ComponentSpeed - (int)overshoot
+                : ComponentSpeed;
 
             sw.Restart();
         }
@@ -49,15 +43,20 @@ public class PlayerRegenerationComponent(WorldServer server) : WorldServerCompon
 
     private void UpdatePlayerRegeneration()
     {
-        var players = Server.Aislings
-            .Where(p => p?.Client != null && p.LoggedIn)
-            .ToList();
+        foreach (var player in Server.Aislings)
+        {
+            if (player?.Client == null) continue;
+            if (!player.LoggedIn) continue;
 
-        if (players.Count == 0)
-            return;
-
-        foreach (var player in players)
-            ProcessUpdates(player);
+            try
+            {
+                ProcessUpdates(player);
+            }
+            catch (Exception ex)
+            {
+                SentrySdk.CaptureException(ex);
+            }
+        }
     }
 
     private static void ProcessUpdates(Aisling player)

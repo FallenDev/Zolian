@@ -2,57 +2,54 @@
 using Darkages.Common;
 using Darkages.Network.Server;
 using Darkages.Object;
-
-using ServiceStack;
-
+using Darkages.Sprites.Entity;
 using SunCalcNet;
 
 namespace Darkages.Network.Components;
 
 public class MoonPhaseComponent(WorldServer server) : WorldServerComponent(server)
 {
-    private const int ComponentSpeed = 900000;
-    private double _dayStored = DateTime.Today.Day;
+    private const int ComponentSpeed = 900_000;
+    private double _dayStored;
 
     protected internal override async Task Update()
     {
-        var componentStopWatch = new Stopwatch();
-        componentStopWatch.Start();
-        var variableGameSpeed = ComponentSpeed;
+        var sw = Stopwatch.StartNew();
+        var target = ComponentSpeed;
 
         while (ServerSetup.Instance.Running)
         {
-            if (componentStopWatch.Elapsed.TotalMilliseconds < variableGameSpeed)
+            var elapsed = sw.Elapsed.TotalMilliseconds;
+
+            if (elapsed < target)
             {
-                await Task.Delay(5000);
+                var remaining = (int)(target - elapsed);
+                if (remaining > 0)
+                    await Task.Delay(Math.Min(remaining, 5000));
                 continue;
             }
 
             UpdateMoonPhase();
-            var awaiter = (int)(ComponentSpeed - componentStopWatch.Elapsed.TotalMilliseconds);
 
-            if (awaiter < 0)
-            {
-                variableGameSpeed = ComponentSpeed + awaiter;
-                componentStopWatch.Restart();
-                continue;
-            }
+            var postElapsed = sw.Elapsed.TotalMilliseconds;
+            var overshoot = postElapsed - ComponentSpeed;
 
-            await Task.Delay(TimeSpan.FromMilliseconds(awaiter));
-            variableGameSpeed = ComponentSpeed;
-            componentStopWatch.Restart();
+            target = (overshoot > 0 && overshoot < ComponentSpeed)
+                ? ComponentSpeed - (int)overshoot
+                : ComponentSpeed;
+
+            sw.Restart();
         }
     }
 
     private void UpdateMoonPhase()
     {
-        var moonCalc = MoonCalc.GetMoonIllumination(DateTime.UtcNow);
-        _dayStored = moonCalc.Fraction;
+        var moon = MoonCalc.GetMoonIllumination(DateTime.UtcNow).Fraction;
+        _dayStored = moon;
 
-        ServerSetup.Instance.MoonPhase = _dayStored switch
+        ServerSetup.Instance.MoonPhase = moon switch
         {
-            >= 0.00 and <= 0.039999 => "NewMoon",
-            >= 0.04 and <= 0.959999 => "None",
+            >= 0.00 and <= 0.04 => "NewMoon",
             >= 0.96 and <= 1.00 => "FullMoon",
             _ => "None"
         };
@@ -60,169 +57,144 @@ public class MoonPhaseComponent(WorldServer server) : WorldServerComponent(serve
         switch (ServerSetup.Instance.MoonPhase)
         {
             case "NewMoon":
-                SetVampireNpc();
-                SetCarn();
+                MoveNosferatu();
+                MoveCarnNormal();
                 break;
+
             case "FullMoon":
-                SetLycanNpc();
-                SetSleepingCarn();
+                MoveFenrir();
+                MoveCarnSleeping();
                 break;
-            case "None":
-                ClearNpcs();
-                SetCarn();
+
+            default:
+                ResetNightCreatures();
+                MoveCarnNormal();
                 break;
         }
     }
 
-    private static void SetVampireNpc()
+    private static void MoveNpc(Mundane npc, int map, int x, int y, byte dir)
+    {
+        npc.CurrentMapId = map;
+        npc.X = x;
+        npc.Y = y;
+        npc.Direction = dir;
+
+        ServerSetup.Instance.GlobalMundaneCache.TryUpdate(npc.Serial, npc, npc);
+        npc.UpdateAddAndRemove();
+        ObjectManager.AddObject(npc);
+    }
+
+    /// <summary>
+    /// Provides the predefined spawn locations for Nosferatu entities during the New Moon event.
+    /// </summary>
+    /// <remarks>Each tuple in the array specifies the map identifier, X and Y coordinates, and facing
+    /// direction for a Nosferatu spawn point. These locations are used to position Nosferatu entities at the start of
+    /// the event.</remarks>
+    private static readonly (int map, int x, int y, byte dir)[] NosferatuSpots =
+    {
+        (100, 9, 3, 2),
+        (286, 16, 1, 1),
+        (1505, 1, 23, 2)
+    };
+
+    private static void MoveNosferatu()
     {
         foreach (var npc in ServerSetup.Instance.GlobalMundaneCache.Values)
         {
             if (npc.Name != "Nosferatu") continue;
-            var rand = Generator.RandNumGen3();
-            switch (rand)
-            {
-                case 0:
-                    npc.CurrentMapId = 100;
-                    npc.X = 9;
-                    npc.Y = 3;
-                    npc.Direction = 2;
-                    break;
-                case 1:
-                    npc.CurrentMapId = 286;
-                    npc.X = 16;
-                    npc.Y = 1;
-                    npc.Direction = 1;
-                    break;
-                case 2:
-                    npc.CurrentMapId = 1505;
-                    npc.X = 1;
-                    npc.Y = 23;
-                    npc.Direction = 2;
-                    break;
-            }
 
-            ServerSetup.Instance.GlobalMundaneCache.TryUpdate(npc.Serial, npc, npc);
-            npc.UpdateAddAndRemove();
-            ObjectManager.AddObject(npc);
+            var loc = NosferatuSpots[Generator.RandNumGen3()];
+            MoveNpc(npc, loc.map, loc.x, loc.y, loc.dir);
         }
     }
 
-    private static void SetLycanNpc()
+    /// <summary>
+    /// Provides the predefined spawn locations for Fenrir during the Full Moon event.
+    /// </summary>
+    /// <remarks>Each tuple in the array specifies the map identifier, X and Y coordinates, and the initial
+    /// direction for Fenrir's spawn. This array is intended for use in event logic that requires knowledge of Fenrir's
+    /// possible spawn points.</remarks>
+    private static readonly (int map, int x, int y, byte dir)[] FenrirSpots =
+    {
+        (100, 9, 3, 2),
+        (6719, 4, 3, 1),
+        (3212, 29, 12, 1)
+    };
+
+    private static void MoveFenrir()
     {
         foreach (var npc in ServerSetup.Instance.GlobalMundaneCache.Values)
         {
             if (npc.Name != "Fenrir") continue;
-            var rand = Generator.RandNumGen3();
-            switch (rand)
-            {
-                case 0:
-                    npc.CurrentMapId = 100;
-                    npc.X = 9;
-                    npc.Y = 3;
-                    npc.Direction = 2;
-                    break;
-                case 1:
-                    npc.CurrentMapId = 6719;
-                    npc.X = 4;
-                    npc.Y = 3;
-                    npc.Direction = 1;
-                    break;
-                case 2:
-                    npc.CurrentMapId = 3212;
-                    npc.X = 29;
-                    npc.Y = 12;
-                    npc.Direction = 1;
-                    break;
-            }
 
-            ServerSetup.Instance.GlobalMundaneCache.TryUpdate(npc.Serial, npc, npc);
-            npc.UpdateAddAndRemove();
-            ObjectManager.AddObject(npc);
+            var loc = FenrirSpots[Generator.RandNumGen3()];
+            MoveNpc(npc, loc.map, loc.x, loc.y, loc.dir);
         }
     }
 
-    private static void SetCarn()
+    /// <summary>
+    /// Moves all NPCs named "Carn" and "Sleeping Carn" to their designated locations in the game world.
+    /// </summary>
+    /// <remarks>This method is intended to update the positions of specific NPCs based on their current
+    /// state. It should be called when synchronizing or resetting the locations of these NPCs. Only NPCs with the exact
+    /// names "Carn" or "Sleeping Carn" are affected.</remarks>
+    private static void MoveCarnNormal()
     {
         foreach (var npc in ServerSetup.Instance.GlobalMundaneCache.Values)
         {
             if (npc.Name != "Carn") continue;
-            if (npc.CurrentMapId == 5031) continue;
-            npc.CurrentMapId = 5031;
-            npc.X = 30;
-            npc.Y = 12;
-            npc.Direction = 2;
-            ServerSetup.Instance.GlobalMundaneCache.TryUpdate(npc.Serial, npc, npc);
-            npc.UpdateAddAndRemove();
-            ObjectManager.AddObject(npc);
+
+            MoveNpc(npc, 5031, 30, 12, 2);
         }
 
         foreach (var npc in ServerSetup.Instance.GlobalMundaneCache.Values)
         {
             if (npc.Name != "Sleeping Carn") continue;
-            if (npc.CurrentMapId == 14759) continue;
-            npc.CurrentMapId = 14759;
-            npc.X = 3;
-            npc.Y = 1;
-            npc.Direction = 1;
-            ServerSetup.Instance.GlobalMundaneCache.TryUpdate(npc.Serial, npc, npc);
-            npc.UpdateAddAndRemove();
-            ObjectManager.AddObject(npc);
+
+            MoveNpc(npc, 14759, 3, 1, 1);
         }
     }
 
-    private static void SetSleepingCarn()
+    /// <summary>
+    /// Moves all NPCs named "Carn" and "Sleeping Carn" to their designated locations in the game world.
+    /// </summary>
+    /// <remarks>This method is intended to update the positions of specific NPCs based on their current
+    /// state. It should be called when synchronizing or resetting the locations of these NPCs. Only NPCs with the exact
+    /// names "Carn" or "Sleeping Carn" are affected.</remarks>
+    private static void MoveCarnSleeping()
     {
         foreach (var npc in ServerSetup.Instance.GlobalMundaneCache.Values)
         {
             if (npc.Name != "Carn") continue;
-            if (npc.CurrentMapId == 14759) continue;
-            npc.CurrentMapId = 14759;
-            npc.X = 4;
-            npc.Y = 1;
-            npc.Direction = 1;
-            ServerSetup.Instance.GlobalMundaneCache.TryUpdate(npc.Serial, npc, npc);
-            npc.UpdateAddAndRemove();
-            ObjectManager.AddObject(npc);
+
+            MoveNpc(npc, 14759, 4, 1, 1);
         }
 
         foreach (var npc in ServerSetup.Instance.GlobalMundaneCache.Values)
         {
             if (npc.Name != "Sleeping Carn") continue;
-            if (npc.CurrentMapId == 5031) continue;
-            npc.CurrentMapId = 5031;
-            npc.X = 30;
-            npc.Y = 11;
-            npc.Direction = 1;
-            ServerSetup.Instance.GlobalMundaneCache.TryUpdate(npc.Serial, npc, npc);
-            npc.UpdateAddAndRemove();
-            ObjectManager.AddObject(npc);
+
+            MoveNpc(npc, 5031, 30, 11, 1);
         }
     }
 
-    private static void ClearNpcs()
+    /// <summary>
+    /// Resets the positions of the Fenrir and Nosferatu NPCs to their default locations within the game world.
+    /// </summary>
+    /// <remarks>This method restores Fenrir and Nosferatu to their initial states by moving them to
+    /// predefined coordinates. It should be called when a reset of these specific NPCs is required, such as during
+    /// server initialization or game state restoration. This method does not affect other NPCs.</remarks>
+    private static void ResetNightCreatures()
     {
-        var mundanes = ServerSetup.Instance.GlobalMundaneCache.ToConcurrentDictionary();
-        foreach (var npc in mundanes.Values)
+        foreach (var npc in ServerSetup.Instance.GlobalMundaneCache.Values)
         {
             if (npc.Name is not ("Fenrir" or "Nosferatu")) continue;
-            if (npc.Name is "Fenrir")
-            {
-                npc.X = 1;
-                npc.Y = 2;
-            }
+
+            if (npc.Name == "Fenrir")
+                MoveNpc(npc, 14759, 1, 2, 1);
             else
-            {
-                npc.X = 1;
-                npc.Y = 1;
-            }
-
-            npc.CurrentMapId = 14759;
-            npc.Direction = 1;
-
-            ServerSetup.Instance.GlobalMundaneCache.TryUpdate(npc.Serial, npc, npc);
-            npc.UpdateAddAndRemove();
-            ObjectManager.AddObject(npc);
+                MoveNpc(npc, 14759, 1, 1, 1);
         }
     }
 }

@@ -53,16 +53,10 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
     private const int GameSpeed = 50;
 
     // Subsystem intervals (ms)
-    private const int MonstersIntervalMs = 250;    // 4x per second
-    private const int MundanesIntervalMs = 1500;   // 1.5 seconds
+    private const int MonstersIntervalMs = 250;       // 4x per second
+    private const int MundanesIntervalMs = 1500;      // 1.5 seconds
     private const int GroundItemsIntervalMs = 60000;  // 60 seconds
     private const int GroundMoneyIntervalMs = 60000;  // 60 seconds
-
-    // Accumulators for fixed-step scheduling
-    private double _monsterAccumulatorMs;
-    private double _mundaneAccumulatorMs;
-    private double _groundItemsAccumulatorMs;
-    private double _groundMoneyAccumulatorMs;
 
     public IEnumerable<Aisling> Aislings => ClientRegistry
         .Where(c => c is { Aisling.LoggedIn: true }).Select(c => c.Aisling);
@@ -110,7 +104,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             ServerSetup.Instance.Running = true;
 
             // Components keep their own internal loops
-            UpdateComponentsRoutine(linkedCts.Token);
+            UpdateComponentsRoutine();
 
             // Main world loops: keep each system focused and periodic
             var playerLoop = PeriodicTaskRunner.RunPeriodicAsync(ct =>
@@ -246,10 +240,12 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
     #region Server Loop
 
-    private void UpdateComponentsRoutine(CancellationToken ct)
+    private void UpdateComponentsRoutine()
     {
         foreach (var component in _serverComponents.Values)
-            Task.Factory.StartNew(() => component.Update(), TaskCreationOptions.LongRunning);
+        {
+            _ = Task.Run(component.Update);
+        }
     }
 
     private static class PeriodicTaskRunner

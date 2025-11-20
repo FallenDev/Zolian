@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-
 using Darkages.Network.Server;
 using Darkages.Object;
 using Darkages.Sprites.Entity;
@@ -8,54 +7,57 @@ namespace Darkages.Network.Components;
 
 public class MundaneComponent(WorldServer server) : WorldServerComponent(server)
 {
-    private const int ComponentSpeed = 10000;
+    private const int ComponentSpeed = 10_000;
 
     protected internal override async Task Update()
     {
-        var componentStopWatch = new Stopwatch();
-        componentStopWatch.Start();
-        var variableGameSpeed = ComponentSpeed;
+        var sw = Stopwatch.StartNew();
+        var target = ComponentSpeed;
 
         while (ServerSetup.Instance.Running)
         {
-            if (componentStopWatch.Elapsed.TotalMilliseconds < variableGameSpeed)
+            var elapsed = sw.Elapsed.TotalMilliseconds;
+            if (elapsed < target)
             {
-                await Task.Delay(500);
+                var remaining = (int)(target - elapsed);
+                if (remaining > 0)
+                    await Task.Delay(Math.Min(remaining, 500));
                 continue;
             }
 
             SpawnMundanes();
-            var awaiter = (int)(ComponentSpeed - componentStopWatch.Elapsed.TotalMilliseconds);
 
-            if (awaiter < 0)
-            {
-                variableGameSpeed = ComponentSpeed + awaiter;
-                componentStopWatch.Restart();
-                continue;
-            }
+            var postElapsed = sw.Elapsed.TotalMilliseconds;
+            var overshoot = postElapsed - ComponentSpeed;
 
-            await Task.Delay(TimeSpan.FromMilliseconds(awaiter));
-            variableGameSpeed = ComponentSpeed;
-            componentStopWatch.Restart();
+            target = (overshoot > 0 && overshoot < ComponentSpeed)
+                ? ComponentSpeed - (int)overshoot
+                : ComponentSpeed;
+
+            sw.Restart();
         }
     }
 
-    private static void SpawnMundanes()
+    private void SpawnMundanes()
     {
-        foreach (var mundane in from mundane in ServerSetup.Instance.GlobalMundaneTemplateCache
-                                where mundane.Value != null
-                     && mundane.Value.AreaID != 0
-                                where ServerSetup.Instance.GlobalMapCache.ContainsKey(mundane.Value.AreaID)
-                                let map = ServerSetup.Instance.GlobalMapCache[mundane.Value.AreaID]
-                                where map is { Ready: true }
-                                let npc = ObjectManager.GetObject<Mundane>(map, i => i.CurrentMapId == map.ID
-                                                                         && i.Template != null
-                                                                         && i.Template.Name ==
-                                                                         mundane.Value.Name)
-                                where npc is not { CurrentHp: > 0 }
-                                select mundane)
+        foreach (var template in ServerSetup.Instance.GlobalMundaneTemplateCache.Values)
         {
-            Mundane.Create(mundane.Value);
+            if (template == null) continue;
+            if (template.AreaID == 0) continue;
+
+            // Map must exist and be ready
+            if (!ServerSetup.Instance.GlobalMapCache.TryGetValue(template.AreaID, out var map)) continue;
+            if (!map.Ready) continue;
+
+            // Check if a matching Mundane already exists and is alive
+            var existing = ObjectManager.GetObject<Mundane>(
+                map,
+                m => m.CurrentMapId == map.ID &&
+                     m.Template?.Name == template.Name &&
+                     m.CurrentHp > 0);
+
+            if (existing != null) continue;
+            Mundane.Create(template);
         }
     }
 }

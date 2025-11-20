@@ -1,58 +1,66 @@
 ﻿using System.Diagnostics;
-
 using Darkages.Network.Server;
 
 namespace Darkages.Network.Components;
 
 public class ClientCreationLimit(WorldServer server) : WorldServerComponent(server)
 {
-    private const int ComponentSpeed = 3600000;
+    private const int ComponentSpeed = 3_600_000;
 
     protected internal override async Task Update()
     {
-        var componentStopWatch = new Stopwatch();
-        componentStopWatch.Start();
-        var variableGameSpeed = ComponentSpeed;
+        var sw = Stopwatch.StartNew();
+        var target = ComponentSpeed;
 
         while (ServerSetup.Instance.Running)
         {
-            if (componentStopWatch.Elapsed.TotalMilliseconds < variableGameSpeed)
+            var elapsed = sw.Elapsed.TotalMilliseconds;
+
+            if (elapsed < target)
             {
-                await Task.Delay(60000);
+                var remaining = (int)(target - elapsed);
+                if (remaining > 0)
+                    await Task.Delay(Math.Min(remaining, 60_000));
                 continue;
             }
 
-            RemoveLimit();
-            var awaiter = (int)(ComponentSpeed - componentStopWatch.Elapsed.TotalMilliseconds);
+            CleanupCreationLimits();
 
-            if (awaiter < 0)
-            {
-                variableGameSpeed = ComponentSpeed + awaiter;
-                componentStopWatch.Restart();
-                continue;
-            }
+            var postElapsed = sw.Elapsed.TotalMilliseconds;
+            var overshoot = postElapsed - ComponentSpeed;
 
-            await Task.Delay(TimeSpan.FromMilliseconds(awaiter));
-            variableGameSpeed = ComponentSpeed;
-            componentStopWatch.Restart();
+            target = (overshoot > 0 && overshoot < ComponentSpeed)
+                ? ComponentSpeed - (int)overshoot
+                : ComponentSpeed;
+
+            sw.Restart();
         }
     }
 
-    private static void RemoveLimit()
+    private static void CleanupCreationLimits()
     {
         if (!ServerSetup.Instance.Running) return;
 
-        foreach (var (ip, creationCount) in ServerSetup.Instance.GlobalCreationCount)
+        var dict = ServerSetup.Instance.GlobalCreationCount;
+
+        foreach (var kvp in dict)
         {
-            if (creationCount > 0)
+            var ip = kvp.Key;
+            var count = kvp.Value;
+
+            if (count == 0)
             {
-                var countMod = creationCount;
-                countMod--;
-                ServerSetup.Instance.GlobalCreationCount.TryUpdate(ip, countMod, creationCount);
+                dict.TryRemove(ip, out _);
+                continue;
             }
 
-            if (creationCount == 0)
-                ServerSetup.Instance.GlobalCreationCount.TryRemove(ip, out _);
+            // Compute the decremented value safely
+            byte newCount = (byte)(count - 1);
+            dict.TryUpdate(ip, newCount, count);
+
+            // If we reached zero after decrement, remove the entry
+            if (newCount == 0)
+                dict.TryRemove(ip, out _);
         }
     }
 }

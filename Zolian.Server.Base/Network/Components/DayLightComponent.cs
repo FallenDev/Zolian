@@ -1,74 +1,84 @@
 ﻿using System.Diagnostics;
-
 using Darkages.Network.Server;
 
 namespace Darkages.Network.Components;
 
 public class DayLightComponent(WorldServer server) : WorldServerComponent(server)
 {
-    private const int ComponentSpeed = 15000;
-    private static readonly SortedDictionary<int, (byte start, byte end)> Routine = new()
+    private const int ComponentSpeed = 15_000;
+
+    private static readonly (byte start, byte end)[] Routine =
     {
-        {0, (0, 0)},
-        {1, (0, 1)},
-        {2, (1, 2)},
-        {3, (2, 3)},
-        {4, (3, 4)},
-        {5, (4, 5)},
-        {6, (5, 4)},
-        {7, (4, 3)},
-        {8, (3, 2)},
-        {9, (2, 1)},
-        {10, (1, 0)},
-        {11, (0, 0)}
+        (0, 0),
+        (0, 1),
+        (1, 2),
+        (2, 3),
+        (3, 4),
+        (4, 5),
+        (5, 4),
+        (4, 3),
+        (3, 2),
+        (2, 1),
+        (1, 0),
+        (0, 0)
     };
 
     protected internal override async Task Update()
     {
-        var componentStopWatch = new Stopwatch();
-        componentStopWatch.Start();
-        var variableGameSpeed = ComponentSpeed;
+        var sw = Stopwatch.StartNew();
+        var target = ComponentSpeed;
 
         while (ServerSetup.Instance.Running)
         {
-            if (componentStopWatch.Elapsed.TotalMilliseconds < variableGameSpeed)
+            var elapsed = sw.Elapsed.TotalMilliseconds;
+
+            if (elapsed < target)
             {
-                await Task.Delay(500);
+                var remaining = (int)(target - elapsed);
+                if (remaining > 0)
+                    await Task.Delay(Math.Min(remaining, 500));
                 continue;
             }
 
             UpdateDayLight();
-            var awaiter = (int)(ComponentSpeed - componentStopWatch.Elapsed.TotalMilliseconds);
 
-            if (awaiter < 0)
-            {
-                variableGameSpeed = ComponentSpeed + awaiter;
-                componentStopWatch.Restart();
-                continue;
-            }
+            var post = sw.Elapsed.TotalMilliseconds;
+            var overshoot = post - ComponentSpeed;
 
-            await Task.Delay(TimeSpan.FromMilliseconds(awaiter));
-            variableGameSpeed = ComponentSpeed;
-            componentStopWatch.Restart();
+            target = (overshoot > 0 && overshoot < ComponentSpeed)
+                ? ComponentSpeed - (int)overshoot
+                : ComponentSpeed;
+
+            sw.Restart();
         }
     }
 
     private static void UpdateDayLight()
     {
+        // Wrap phase 0–11
         if (ServerSetup.Instance.LightPhase >= 12)
             ServerSetup.Instance.LightPhase = 0;
 
-        var (start, end) = Routine.First(x => ServerSetup.Instance.LightPhase == x.Key).Value;
+        var (start, end) = Routine[ServerSetup.Instance.LightPhase];
 
+        // Only move to the end state if we're still at "start"
         if (ServerSetup.Instance.LightLevel == start)
             ServerSetup.Instance.LightLevel = end;
 
-        Parallel.ForEach(Server.Aislings, (player) =>
+        foreach (var player in Server.Aislings)
         {
-            if (player?.Client == null) return;
-            if (!player.LoggedIn) return;
-            player.Client.SendLightLevel((LightLevel)ServerSetup.Instance.LightLevel);
-        });
+            if (player?.Client == null) continue;
+            if (!player.LoggedIn) continue;
+
+            try
+            {
+                player.Client.SendLightLevel((LightLevel)ServerSetup.Instance.LightLevel);
+            }
+            catch (Exception ex)
+            {
+                SentrySdk.CaptureException(ex);
+            }
+        }
 
         ServerSetup.Instance.LightPhase++;
     }

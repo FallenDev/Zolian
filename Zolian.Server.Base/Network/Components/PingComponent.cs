@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics;
 
 using Darkages.Network.Server;
-using Darkages.Sprites;
 
 namespace Darkages.Network.Components;
 
@@ -27,33 +26,34 @@ public class PingComponent(WorldServer server) : WorldServerComponent(server)
                 continue;
             }
 
-            foreach (var player in Server.Aislings)
-                Ping(player);
+            Ping();
 
             var postElapsed = sw.Elapsed.TotalMilliseconds;
             var overshoot = postElapsed - ComponentSpeed;
 
-            if (overshoot > 0)
-            {
-                // Compensate next tick by firing slightly earlier
-                target = ComponentSpeed - (int)overshoot;
-                if (target < 0)
-                    target = 0;
-            }
-            else
-            {
-                target = ComponentSpeed;
-            }
+            target = (overshoot > 0 && overshoot < ComponentSpeed)
+                ? ComponentSpeed - (int)overshoot
+                : ComponentSpeed;
 
             sw.Restart();
         }
     }
 
-
-    private static void Ping(Aisling player)
+    private static void Ping()
     {
-        if (player?.Client == null) return;
-        if (!player.LoggedIn) return;
-        player.Client.SendHeartBeat(0x20, 0x14);
+        foreach (var player in Server.Aislings)
+        {
+            if (player?.Client == null) return;
+            if (!player.LoggedIn) return;
+
+            try
+            {
+                player.Client.SendHeartBeat(0x20, 0x14);
+            }
+            catch (Exception ex)
+            {
+                SentrySdk.CaptureException(ex);
+            }
+        }
     }
 }

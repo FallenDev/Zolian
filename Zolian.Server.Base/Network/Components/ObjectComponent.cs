@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-
 using Darkages.Common;
 using Darkages.Network.Server;
 using Darkages.Object;
@@ -10,196 +9,180 @@ namespace Darkages.Network.Components;
 
 public class ObjectComponent(WorldServer server) : WorldServerComponent(server)
 {
-    private const int ComponentSpeed = 50;
+    private const int ComponentSpeed = 30;
 
     protected internal override async Task Update()
     {
-        var componentStopWatch = new Stopwatch();
-        componentStopWatch.Start();
-        var variableGameSpeed = ComponentSpeed;
+        var sw = Stopwatch.StartNew();
+        var target = ComponentSpeed;
 
         while (ServerSetup.Instance.Running)
         {
-            if (componentStopWatch.Elapsed.TotalMilliseconds < variableGameSpeed)
+            var elapsed = sw.Elapsed.TotalMilliseconds;
+
+            if (elapsed < target)
             {
-                await Task.Delay(1);
+                var remaining = (int)(target - elapsed);
+                if (remaining > 0)
+                    await Task.Delay(Math.Min(remaining, 1));
                 continue;
             }
 
-            _ = UpdateObjects();
-            var awaiter = (int)(ComponentSpeed - componentStopWatch.Elapsed.TotalMilliseconds);
+            UpdateObjects();
 
-            if (awaiter < 0)
-            {
-                variableGameSpeed = ComponentSpeed + awaiter;
-                componentStopWatch.Restart();
-                continue;
-            }
+            var post = sw.Elapsed.TotalMilliseconds;
+            var overshoot = post - ComponentSpeed;
 
-            await Task.Delay(TimeSpan.FromMilliseconds(awaiter));
-            variableGameSpeed = ComponentSpeed;
-            componentStopWatch.Restart();
+            target = (overshoot > 0 && overshoot < ComponentSpeed)
+                ? ComponentSpeed - (int)overshoot
+                : ComponentSpeed;
+
+            sw.Restart();
         }
     }
 
-    private static async Task UpdateObjects()
+    private static void UpdateObjects()
     {
-        var connectedUsers = Server.Aislings;
-        var readyLoggedIn = connectedUsers.Where(i => i.Map is { Ready: true } && i.LoggedIn).ToArray();
-        if (readyLoggedIn.Length == 0) return;
-
-        try
+        foreach (var user in Server.Aislings)
         {
-            foreach (var user in readyLoggedIn)
+            if (user?.Client == null) continue;
+            if (!user.LoggedIn) continue;
+            if (user.Map is not { Ready: true }) continue;
+
+            try
             {
-                user.ObjectsUpdating = true;
+                // Remove objects that left view
+                HandleObjectsOutOfView(user);
 
-                while (user.LoggedIn && user.ObjectsUpdating)
-                {
-                    if (user.Client == null) return;
-                    HandleObjectsOutOfView(user);
-                    UpdateClientObjects(user);
-                    await Task.Delay(50);
-                    user.ObjectsUpdating = false;
-                }
+                // Add objects that entered view
+                UpdateClientObjects(user);
             }
-        }
-        catch
-        {
-            // ignored
+            catch
+            {
+                // ignored
+            }
         }
     }
 
     private static void UpdateClientObjects(Aisling user)
     {
-        // Initialize payload
         var payload = new List<Sprite>();
 
-        // Retrieve and categorize
-        var objects = ObjectManager.GetObjects(user.Map, s => s.WithinRangeOf(user, 13), ObjectManager.Get.All).ToList();
+        // Get nearby sprites
+        var objects = ObjectManager
+            .GetObjects(user.Map, s => s.WithinRangeOf(user, 13), ObjectManager.Get.All)
+            .ToList();
 
         foreach (var obj in objects)
         {
+            if (obj == null) continue;
+
             switch (obj)
             {
-                case null:
-                    continue;
-                case Item item when !user.SpritesInView.ContainsKey(item.ItemVisibilityId):
-                    {
+                case Item item:
+                    if (!user.SpritesInView.ContainsKey(item.ItemVisibilityId))
+                        payload.Add(item);
+                    break;
+
+                case Aisling or Monster or Mundane or Money:
+                    if (!user.SpritesInView.ContainsKey(obj.Serial))
                         payload.Add(obj);
-                        break;
-                    }
-                case Aisling:
-                case Monster:
-                case Mundane:
-                case Money:
-                    {
-                        if (!user.SpritesInView.ContainsKey(obj.Serial))
-                            payload.Add(obj);
-                        break;
-                    }
+                    break;
             }
         }
 
-        // Handle OnApproach visible objects
+        if (payload.Count == 0) return;
         var toUpdate = AddObjects(payload, user);
 
-        // If within range, send visible entities
-        if (payload.Count <= 0) return;
-        user.Client.SendVisibleEntities(toUpdate);
+        if (toUpdate.Count > 0)
+            user.Client.SendVisibleEntities(toUpdate);
     }
 
     private static void HandleObjectsOutOfView(Aisling user)
     {
         foreach (var (serial, sprite) in user.SpritesInView)
         {
+            if (sprite == null)
+            {
+                user.SpritesInView.TryRemove(serial, out _);
+                continue;
+            }
+
             switch (sprite)
             {
-                case null:
-                    user.SpritesInView.TryRemove(serial, out _);
-                    continue;
                 case Item item:
-                {
-                    if (user.SpritesInView.ContainsKey(item.ItemVisibilityId) && (item.ItemPane != Item.ItemPanes.Ground || !sprite.WithinRangeOf(user, 13)))
+                    if (item.ItemPane != Item.ItemPanes.Ground ||
+                        !sprite.WithinRangeOf(user, 13))
+                    {
+                        RemoveObject(user, sprite);
+                    }
+                    break;
+
+                case Aisling or Monster or Mundane or Money:
+                    if (!sprite.WithinRangeOf(user, 13))
                         RemoveObject(user, sprite);
                     break;
-                }
-                case Aisling:
-                case Monster:
-                case Mundane:
-                case Money:
-                {
-                    if (!sprite.WithinRangeOf(user, 13) && user.SpritesInView.ContainsKey(sprite.Serial))
-                        RemoveObject(user, sprite);
-                    break;
-                }
             }
         }
     }
 
-    private static void RemoveObject(Aisling self, Sprite objectToRemove)
+    private static void RemoveObject(Aisling self, Sprite obj)
     {
-        // Validate
-        if (self == null || objectToRemove == null) return;
-        if (objectToRemove is not Identifiable identifiable || objectToRemove.Serial == self.Serial) return;
+        if (self == null || obj == null) return;
+        if (obj is not Identifiable identifiable) return;
+        if (obj.Serial == self.Serial) return;
 
-        if (objectToRemove is Monster monster)
+        if (obj is Monster monster)
         {
             var script = monster.Scripts?.Values.FirstOrDefault();
             script?.OnLeave(self.Client);
         }
 
-        if (objectToRemove is Item item)
+        if (obj is Item item)
             self.SpritesInView.TryRemove(item.ItemVisibilityId, out _);
         else
-            self.SpritesInView.TryRemove(objectToRemove.Serial, out _);
+            self.SpritesInView.TryRemove(obj.Serial, out _);
+
         identifiable.HideFrom(self);
     }
 
     private static List<Sprite> AddObjects(List<Sprite> payload, Aisling self)
     {
         var toUpdate = new List<Sprite>();
+        if (self == null) return toUpdate;
 
-        // Validate
-        if (self == null || payload == null) return default;
-        
-        foreach (var obj in payload.Where(obj => obj != null))
+        foreach (var obj in payload)
         {
-            // Handle sprite types
+            if (obj == null) continue;
+
             switch (obj)
             {
                 case Monster monster:
-                    {
-                        var script = monster.Scripts?.Values.FirstOrDefault();
-                        script?.OnApproach(self.Client);
-                        break;
-                    }
+                    monster.Scripts?.Values.FirstOrDefault()?.OnApproach(self.Client);
+                    break;
+
                 case Mundane npc:
-                    {
-                        var script = npc.Scripts?.Values.FirstOrDefault();
-                        script?.OnApproach(self.Client);
-                        break;
-                    }
+                    npc.Scripts?.Values.FirstOrDefault()?.OnApproach(self.Client);
+                    break;
+
                 case Aisling other:
-                    {
-                        // Self Check
-                        if (self.Serial == other.Serial) continue;
+                    if (self.Serial == other.Serial) continue;
 
-                        // Invisible Checks
-                        if (self.CanSeeSprite(other))
-                            other.ShowTo(self);
+                    if (self.CanSeeSprite(other))
+                        other.ShowTo(self);
 
-                        if (other.CanSeeSprite(self))
-                            self.ShowTo(other);
-                        continue;
-                    }
+                    if (other.CanSeeSprite(self))
+                        self.ShowTo(other);
+
+                    continue;
             }
 
             toUpdate.Add(obj);
+
             if (obj is Item item)
-                self.SpritesInView.AddOrUpdate(item.ItemVisibilityId, obj, (_, _) => obj);
+                self.SpritesInView[item.ItemVisibilityId] = obj;
             else
-                self.SpritesInView.AddOrUpdate(obj.Serial, obj, (_, _) => obj);
+                self.SpritesInView[obj.Serial] = obj;
         }
 
         return toUpdate;
