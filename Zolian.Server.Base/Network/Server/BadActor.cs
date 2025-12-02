@@ -18,7 +18,13 @@ public class ReportInfo
 public static class BadActor
 {
     private static readonly IMemoryCache IpCache = new MemoryCache(new MemoryCacheOptions());
-    private static readonly TimeSpan CacheDuration = TimeSpan.FromMinutes(10);
+
+    // Good actors: cache “clean” for 30 days
+    private static readonly TimeSpan CacheDurationGoodActor = TimeSpan.FromDays(30);
+    // Bad actors: re-check every 5 days so reputation/ownership can change
+    private static readonly TimeSpan CacheDurationBadActor = TimeSpan.FromDays(5);
+    // AbuseIPDB API is down or unreachable
+    private static readonly TimeSpan CacheDurationFailure = TimeSpan.FromMinutes(10);
 
     private static readonly ConcurrentQueue<ReportInfo> RetryQueue = [];
     private static bool _isProcessingQueue;
@@ -39,8 +45,13 @@ public static class BadActor
 
     public static async Task<bool> ClientOnBlackListAsync(string remoteIp)
     {
+        // Malformed / empty IPs are always blocked
         if (string.IsNullOrWhiteSpace(remoteIp) || !IPAddress.TryParse(remoteIp, out _)) return true;
+
+        // Localhost and internal IPs are never blocked
         if (remoteIp is "127.0.0.1" or InternalIp) return false;
+
+        // Is the IP cached? Return the cached result
         if (IpCache.TryGetValue(remoteIp, out IpCacheEntry entry)) return entry.IsBlocked;
 
         try
@@ -75,13 +86,14 @@ public static class BadActor
                 var isDisallowed = IsDisallowedUsageType(usageType);
                 var isVpnBot = IsVpnBotUsageType(usageType) && abuseScore >= 3;
 
-                // Block disallowed, no need to report
+                // 1) Hard-disallowed: IPv6, non-public, disallowed usage, or blacklisted ISP
                 if (ipVersion == 6 || isPublic == false || isDisallowed || IsBlackListed(isp))
                 {
-                    IpCache.Set(remoteIp, new IpCacheEntry { IsBlocked = true }, CacheDuration);
+                    IpCache.Set(remoteIp, new IpCacheEntry { IsBlocked = true }, CacheDurationBadActor);
                     return true;
                 }
 
+                // 2) VPN / data-center with bad abuse score
                 if (isVpnBot)
                 {
                     shouldBlock = true;
@@ -90,6 +102,7 @@ public static class BadActor
                         shouldBlock = false;
                 }
 
+                // 3) General abuse / TOR handling
                 if (isBlocked)
                 {
                     shouldBlock = true;
@@ -107,7 +120,10 @@ public static class BadActor
                     }
                 }
 
-                IpCache.Set(remoteIp, new IpCacheEntry { IsBlocked = shouldBlock }, CacheDuration);
+                // 4) Cache result with different TTLs for good vs bad actors
+                var ttl = shouldBlock ? CacheDurationBadActor : CacheDurationGoodActor;
+
+                IpCache.Set(remoteIp, new IpCacheEntry { IsBlocked = shouldBlock }, ttl);
                 return shouldBlock;
             }
 
@@ -119,7 +135,8 @@ public static class BadActor
             SentrySdk.CaptureException(ex);
         }
 
-        IpCache.Set(remoteIp, new IpCacheEntry { IsBlocked = false }, TimeSpan.FromMinutes(1));
+        // Fallback: API failure / unexpected flow -> treat as not blocked, but cache briefly
+        IpCache.Set(remoteIp, new IpCacheEntry { IsBlocked = false }, CacheDurationFailure);
         return false;
     }
 

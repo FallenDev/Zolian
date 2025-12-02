@@ -27,8 +27,8 @@
 		<PackageReference Include="Sentry" Version="5.16.2" />
 		<PackageReference Include="Sentry.Extensions.Logging" Version="5.16.2" />
 		<PackageReference Include="Sentry.Profiling" Version="5.16.2" />
-		<PackageReference Include="ServiceStack" Version="8.10.0" />
-		<PackageReference Include="ServiceStack.Text" Version="8.10.0" />
+		<PackageReference Include="ServiceStack" Version="10.0.0" />
+		<PackageReference Include="ServiceStack.Text" Version="10.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>
