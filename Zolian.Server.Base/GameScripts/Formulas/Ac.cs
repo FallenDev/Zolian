@@ -12,52 +12,78 @@ public class Ac : FormulaScript
 
     public override long Calculate(Sprite obj, long value)
     {
+        if (value <= 0)
+            return 1;
+
+        // Armor is clamped to [-200, 500] in Ac Property
+        // SealedAc only reduces that range
         var armor = obj.SealedAc;
-        var dmgMitigation = armor / 100f;
 
-        if (obj.SealedAc < 0)
+        // Sanitize armor value
+        if (armor < -200)
+            armor = -200;
+
+        // -----------------------------------------------------
+        // NEGATIVE AC → takes MORE damage, bounded (no Dmg use)
+        // -----------------------------------------------------
+        if (armor < 0)
         {
-            var dmgIncreasedByMitigation = Math.Abs(dmgMitigation) * value;
-            value += (int)dmgIncreasedByMitigation;
+            // Every point below 0 AC is +1% damage taken.
+            // -100 AC => +100% (2x total)
+            // -200 AC => +200% (3x total)
+            var penalty = Math.Min(System.Math.Abs(armor) / 100.0, 2.0); // 0..2
+            var multiplier = 1.0 + penalty;                              // 1.0..3.0
 
-            if (value <= 0)
-                value = 1;
-
-            if (obj.Dmg <= 0) return value;
-
-            var dmgModifier = obj.Dmg * 0.25;
-            dmgModifier /= 100;
-            var dmgBoost = dmgModifier * value;
-            value += (int)dmgBoost;
-
-            if (value <= 0)
-                value = 1;
-
-            return value;
+            var increased = (long)(value * multiplier);
+            return increased <= 0 ? 1 : increased;
         }
+
+        // No armor = no mitigation
+        if (armor == 0)
+            return value;
+
+        // -----------------------------------------------------
+        // POSITIVE AC → diminishing returns
+        // Uses role-dependent caps for monsters
+        // Uses 90% cap for players
+        // -----------------------------------------------------
+        double mitigationCurve;
+        double maxCap;
 
         if (obj is Monster monster)
         {
-            dmgMitigation = monster.Template.MonsterArmorType switch
+            // DR-style, role-based:
+            (mitigationCurve, maxCap) = monster.Template.MonsterArmorType switch
             {
-                MonsterArmorType.Caster when dmgMitigation >= 0.50f => 0.50f,
-                MonsterArmorType.Common when dmgMitigation >= 0.75f => 0.75f,
-                MonsterArmorType.Tank when dmgMitigation >= 0.98f => 0.98f,
-                _ => dmgMitigation
+                // Tanks: strong vs physical (70% cap, fast curve)
+                MonsterArmorType.Tank => (120.0, 0.70),
+
+                // Common: balanced (55% cap, medium curve)
+                MonsterArmorType.Common => (140.0, 0.55),
+
+                // Casters: weak vs physical (40% cap, slow curve)
+                MonsterArmorType.Caster => (160.0, 0.40),
+                _ => (140.0, 0.55)
             };
         }
         else
         {
-            if (dmgMitigation >= 0.98f)
-                dmgMitigation = 0.98f;
+            // -----------------------------------------
+            // PLAYER AC MODEL
+            // -----------------------------------------
+            mitigationCurve = 75.0;
+            maxCap = 0.90;  // 90% max physical mitigation
         }
 
-        var dmgReducedByMitigation = dmgMitigation * value;
-        value -= (int)dmgReducedByMitigation;
+        var mitigation = armor / (armor + mitigationCurve);
+        if (mitigation < 0.0)
+            mitigation = 0.0;
+        if (mitigation > maxCap)
+            mitigation = maxCap;
 
-        if (value <= 0)
-            value = 1;
+        var reduced = (long)(value * mitigation);
+        var result = value - reduced;
 
-        return value;
+        return result <= 0 ? 1 : result;
     }
 }

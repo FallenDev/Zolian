@@ -119,8 +119,8 @@ public abstract class Sprite : INotifyPropertyChanged
     public double Fortitude => Math.Min(Math.Round(_fortitude + BonusFortitude, 2), 85);
     private double _reflex => (Hit * 0.1).DoubleClamp(0, 70);
     public double Reflex => Math.Min(Math.Round(_reflex, 2), 70);
-    private double _will => (Mr * 0.14).DoubleClamp(0, 80);
-    public double Will => Math.Min(Math.Round(_will, 2), 80);
+    private double _will => (Mr * 0.14).DoubleClamp(0, 90);
+    public double Will => Math.Min(Math.Round(_will, 2), 90);
     public int Hit => _Hit + BonusHit;
     private int Mr => _Mr + BonusMr;
     public int Str => (_Str + BonusStr).IntClamp(0, ServerSetup.Instance.Config.StatCap);

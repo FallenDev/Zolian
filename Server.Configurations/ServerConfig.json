@@ -117,7 +117,7 @@
     "GlobalSpawnTimer": 3000.0,
     // Base damage modifier for monsters
     // Default: 1 (100%) - 1.2 (120%) Difficulty
-    "BaseDamageMod": 1.2,
+    "BaseDamageMod": 1.0,
 
     // Players
     // Max level for players

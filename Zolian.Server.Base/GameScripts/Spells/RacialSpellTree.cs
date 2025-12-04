@@ -293,8 +293,7 @@ public class Elemental_Bolt(Spell spell) : SpellScript(spell)
     {
         if (sprite is not Aisling aisling) return;
         if (target is not Damageable damageable) return;
-        var dmg = (long)aisling.GetBaseDamage(aisling, target, MonsterEnums.Elemental);
-        dmg = GlobalSpellMethods.AislingSpellDamageCalc(sprite, dmg, Spell, 95);
+        var dmg = GlobalSpellMethods.AislingSpellDamageCalc(sprite, Spell, 95);
         var randomEle = Generator.RandomEnumValue<ElementManager.Element>();
 
         if (target.CurrentHp > 0)

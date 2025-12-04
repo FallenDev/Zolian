@@ -12,52 +12,57 @@ public class WillSavingThrow : FormulaScript
 
     public override long Calculate(Sprite obj, long value)
     {
-        var armor = obj.Will;
-        var dmgMitigation = armor / 100f;
+        if (value <= 0)
+            return 1;
 
-        if (obj.Will < 0)
-        {
-            var dmgIncreasedByMitigation = Math.Abs(dmgMitigation) * value;
-            value += (int)dmgIncreasedByMitigation;
+        // Will is clamped to [0, 90] in Sprite
+        var will = obj.Will;
 
-            if (value <= 0)
-                value = 1;
-
-            if (obj.Dmg <= 0) return value;
-
-            var dmgModifier = obj.Dmg * 0.25;
-            dmgModifier /= 100;
-            var dmgBoost = dmgModifier * value;
-            value += (int)dmgBoost;
-
-            if (value <= 0)
-                value = 1;
-
+        // Zero Will = no mitigation
+        if (will <= 0)
             return value;
-        }
+
+        // -----------------------------------------------------
+        // POSITIVE WILL -> diminishing returns
+        // Uses role-dependent caps for monsters
+        // -----------------------------------------------------
+        double mitigationCurve;
+        double maxCap;
 
         if (obj is Monster monster)
         {
-            dmgMitigation = monster.Template.MonsterArmorType switch
+            // DR-style, role-based:
+            (mitigationCurve, maxCap) = monster.Template.MonsterArmorType switch
             {
-                MonsterArmorType.Caster when dmgMitigation >= 0.98f => 0.98f,
-                MonsterArmorType.Common when dmgMitigation >= 0.75f => 0.75f,
-                MonsterArmorType.Tank when dmgMitigation >= 0.50f => 0.50f,
-                _ => dmgMitigation
+                // Casters: strong vs magic (90% cap, leans on Will more)
+                MonsterArmorType.Caster => (40.0, 0.90),
+
+                // Commons: balanced (75% cap, medium curve)
+                MonsterArmorType.Common => (60.0, 0.75),
+
+                // Tanks: weak vs magic (50% cap, leans less on Will)
+                MonsterArmorType.Tank => (75.0, 0.50),
+                _ => (60.0, 0.75)
             };
         }
         else
         {
-            if (dmgMitigation >= 0.85f)
-                dmgMitigation = 0.85f;
+            // -----------------------------------------
+            // PLAYER Will MODEL
+            // -----------------------------------------
+            mitigationCurve = 60.0;
+            maxCap = 0.85; // 85% max magical mitigation
         }
-        
-        var dmgReducedByMitigation = dmgMitigation * value;
-        value -= (int)dmgReducedByMitigation;
 
-        if (value <= 0)
-            value = 1;
+        var mitigation = will / (will + mitigationCurve);
+        if (mitigation < 0.0)
+            mitigation = 0.0;
+        if (mitigation > maxCap)
+            mitigation = maxCap;
 
-        return value;
+        var reduced = (long)(value * mitigation);
+        var result = value - reduced;
+
+        return result <= 0 ? 1 : result;
     }
 }

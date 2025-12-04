@@ -82,13 +82,13 @@ public class GlobalSpellMethods
         return dmg;
     }
 
-    public static long AislingSpellDamageCalc(Sprite sprite, long baseDmg, Spell spell, double exp)
+    public static long AislingSpellDamageCalc(Sprite sprite, Spell spell, double exp)
     {
         const int dmg = 0;
         if (sprite is not Aisling damageDealingAisling) return dmg;
         var spellLevelOffset = spell.Level + 1;
         var client = damageDealingAisling.Client;
-        var bonus = baseDmg + 2.0 * spellLevelOffset;
+        var bonus = ServerSetup.Instance.Config.BaseDamageMod + 2.0 * spellLevelOffset;
         var amp = client.Aisling.Int / 2.0 * exp;
         var final = (int)(amp + bonus);
         var crit = CritStrike();
@@ -101,10 +101,10 @@ public class GlobalSpellMethods
         return final;
     }
 
-    public static long MonsterElementalDamageProc(Sprite sprite, long baseDmg, Spell spell, double exp)
+    public static long MonsterElementalDamageProc(Sprite sprite, Spell spell, double exp)
     {
         if (sprite is not Monster damageMonster) return 0;
-        var imp = baseDmg + 2.0;
+        var imp = ServerSetup.Instance.Config.BaseDamageMod + 2.0;
         var level = damageMonster.Level;
 
         var amp = damageMonster.Int / 2.0 * exp;
@@ -125,7 +125,7 @@ public class GlobalSpellMethods
         if (sprite is Aisling aisling)
         {
             var levelSeed = (long)((aisling.ExpLevel + aisling.AbpLevel) * 0.10 * spell.Level);
-            var dmg = AislingSpellDamageCalc(sprite, levelSeed, spell, exp);
+            var dmg = AislingSpellDamageCalc(sprite, spell, exp);
 
             if (target.CurrentHp > 0)
             {
@@ -139,8 +139,7 @@ public class GlobalSpellMethods
         }
         else
         {
-            var dmg = (long)damageable.GetBaseDamage(sprite, sprite.Target, MonsterEnums.Elemental);
-            dmg = MonsterElementalDamageProc(sprite, dmg, spell, exp);
+            var dmg = MonsterElementalDamageProc(sprite, spell, exp);
             damageable.ApplyElementalSpellDamage(sprite, dmg, spell.Template.ElementalProperty, spell);
 
             if (target is Aisling targetAisling)
@@ -260,7 +259,7 @@ public class GlobalSpellMethods
         if (sprite is not Aisling aisling) return;
         if (target is not Damageable damageable) return;
         var levelSeed = (long)((aisling.ExpLevel + aisling.AbpLevel) * 0.10 * spell.Level);
-        var dmg = AislingSpellDamageCalc(sprite, levelSeed, spell, exp);
+        var dmg = AislingSpellDamageCalc(sprite, spell, exp);
 
         if (target.CurrentHp > 0)
         {

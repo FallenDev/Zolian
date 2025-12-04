@@ -81,12 +81,19 @@ public class PlayerRegenerationComponent(WorldServer server) : WorldServerCompon
             player.CurrentMp == player.MaximumMp)
             return;
 
+        var performedRegen = false;
+
         // Clamp overflows
-        if (player.CurrentHp > player.MaximumHp || player.CurrentMp > player.MaximumMp)
+        if (player.CurrentHp > player.MaximumHp)
         {
             player.CurrentHp = player.MaximumHp;
+            performedRegen = true;
+        }
+
+        if (player.CurrentMp > player.MaximumMp)
+        {
             player.CurrentMp = player.MaximumMp;
-            player.Client.SendAttributes(StatUpdateType.Vitality);
+            performedRegen = true;
         }
 
         // Special-case: peasants / GMs
@@ -104,7 +111,6 @@ public class PlayerRegenerationComponent(WorldServer server) : WorldServerCompon
         var hpHardCap = Math.Abs(player.BaseHp / 3.00);
         var mpHardCap = Math.Abs(player.BaseMp / 3.00);
 
-        var performedRegen = false;
 
         if (player.CurrentHp < player.MaximumHp)
         {
