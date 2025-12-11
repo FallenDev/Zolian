@@ -178,6 +178,8 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
 
                 return;
             }
+
+            ServerSetup.ConnectionLogger($"Good Actor! {ip}");
         }
 
         if (!ClientRegistry.TryAdd(client))

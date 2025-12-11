@@ -483,30 +483,6 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
         var ipAddress = ip.Address;
         var client = _clientProvider.CreateClient(clientSocket);
         client.OnDisconnected += OnDisconnect;
-        var safe = false;
-
-        foreach (var _ in ServerSetup.Instance.GlobalKnownGoodActorsCache.Values.Where(savedIp => savedIp == ipAddress.ToString()))
-            safe = true;
-
-        if (!safe)
-        {
-            var isBadActor = Task.Run(() => BadActor.ClientOnBlackListAsync(ipAddress.ToString())).Result;
-
-            if (isBadActor)
-            {
-                try
-                {
-                    client.Disconnect();
-                    ServerSetup.ConnectionLogger($"Disconnected Bad Actor from {ip}");
-                }
-                catch
-                {
-                    // ignored
-                }
-
-                return;
-            }
-        }
 
         if (!ClientRegistry.TryAdd(client))
         {
