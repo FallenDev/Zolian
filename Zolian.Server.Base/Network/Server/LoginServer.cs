@@ -264,7 +264,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
                     {
                         var ipLocal = IPAddress.Parse(ServerSetup.Instance.InternalAddress);
 
-                        if (GameMastersIPs.Any(ip => localClient.RemoteIp.Equals(IPAddress.Parse(ip))) 
+                        if (GameMastersIPs.Any(ip => localClient.RemoteIp.Equals(IPAddress.Parse(ip)))
                             || IPAddress.IsLoopback(localClient.RemoteIp) || localClient.RemoteIp.Equals(ipLocal))
                         {
                             _ = Login(result, redirect, localClient);
@@ -275,16 +275,16 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
                         return;
                     }
                 default:
-                {
-                    if (result.Hacked)
                     {
-                        localClient.SendLoginMessage(LoginMessageType.CharacterDoesntExist, "Bruteforce detected, we've locked the account to protect it; If this is your account, please contact the GM.");
-                        return;
-                    }
+                        if (result.Hacked)
+                        {
+                            localClient.SendLoginMessage(LoginMessageType.CharacterDoesntExist, "Bruteforce detected, we've locked the account to protect it; If this is your account, please contact the GM.");
+                            return;
+                        }
 
-                    _ = Login(result, redirect, localClient);
-                    break;
-                }
+                        _ = Login(result, redirect, localClient);
+                        break;
+                    }
             }
         }
     }
@@ -484,21 +484,34 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
         var client = _clientProvider.CreateClient(clientSocket);
         client.OnDisconnected += OnDisconnect;
 
-        if (!ClientRegistry.TryAdd(client))
+        // Check for banned IPs
+        var banned = BadActor.BannedIpCheck(ipAddress.ToString());
+        if (banned)
         {
-            ServerSetup.ConnectionLogger("Two clients ended up with the same id - newest client disconnected");
             try
             {
+                ServerSetup.ConnectionLogger($"Banned connection attempt on Login Server from {ip}");
                 client.Disconnect();
             }
-            catch
-            {
-                // ignored
-            }
+            catch { }
 
             return;
         }
 
+        // Register client and check for ID collisions
+        if (!ClientRegistry.TryAdd(client))
+        {
+            try
+            {
+                ServerSetup.ConnectionLogger("ID Collision - Login Server");
+                client.Disconnect();
+            }
+            catch { }
+
+            return;
+        }
+
+        // Verify connection passed through appropriate port access
         var lobbyCheck = ServerSetup.Instance.GlobalLobbyConnection.TryGetValue(ipAddress, out _);
 
         if (!lobbyCheck)
@@ -506,19 +519,17 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
             try
             {
                 client.Disconnect();
+                ServerSetup.ConnectionLogger("---------Login-Server---------");
+                var comment = $"{ipAddress} has been blocked for violating security protocols through improper port access.";
+                ServerSetup.ConnectionLogger(comment, LogLevel.Warning);
+                Task.Run(() => BadActor.ReportMaliciousEndpoint(ipAddress.ToString(), comment));
             }
-            catch
-            {
-                // ignored
-            }
+            catch { }
 
-            ServerSetup.ConnectionLogger("---------Login-Server---------");
-            var comment = $"{ipAddress} has been blocked for violating security protocols through improper port access.";
-            ServerSetup.ConnectionLogger(comment, LogLevel.Warning);
-            Task.Run(() => BadActor.ReportMaliciousEndpoint(ipAddress.ToString(), comment));
             return;
         }
 
+        // Add to passed checks cache for Login Server
         ServerSetup.Instance.GlobalLoginConnection.TryAdd(ipAddress, ipAddress);
         client.BeginReceive();
         // 0x7E - Handshake

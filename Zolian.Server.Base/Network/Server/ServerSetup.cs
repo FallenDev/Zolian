@@ -87,7 +87,6 @@ public class ServerSetup : IServerContext
     public ConcurrentDictionary<long, ConcurrentDictionary<string, KillRecord>> GlobalKillRecordCache { get; set; } = [];
     public ConcurrentDictionary<IPAddress, IPAddress> GlobalLobbyConnection { get; set; } = [];
     public ConcurrentDictionary<IPAddress, IPAddress> GlobalLoginConnection { get; set; } = [];
-    public ConcurrentDictionary<IPAddress, IPAddress> GlobalWorldConnection { get; set; } = [];
     public ConcurrentDictionary<IPAddress, byte> GlobalCreationCount { get; set; } = [];
     public ConcurrentDictionary<IPAddress, byte> GlobalPasswordAttempt { get; set; } = [];
 

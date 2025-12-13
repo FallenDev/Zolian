@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using RestSharp;
 using Darkages.Models;
+using ServiceStack.Text;
 
 namespace Darkages.Network.Server;
 
@@ -17,7 +18,7 @@ public class ReportInfo
 
 public static class BadActor
 {
-    private static readonly IMemoryCache IpCache = new MemoryCache(new MemoryCacheOptions());
+    public static readonly IMemoryCache IpCache = new MemoryCache(new MemoryCacheOptions());
 
     // Good actors: cache “clean” for 30 days
     private static readonly TimeSpan CacheDurationGoodActor = TimeSpan.FromDays(30);
@@ -379,6 +380,22 @@ public static class BadActor
         "Driftnet Ltd" or "DigitalOcean, LLC" => true,
         _ => false
     };
+
+    private static readonly HashSet<string> _bannedIPs = [];
+
+    public static bool BannedIpCheck(string ip)
+    {
+        if (ip.IsNullOrEmpty()) return true;
+
+        // Check against known bad actors cache
+        var knownBadActor = BadActor.IpCache.TryGetValue(ip, out _);
+        if (knownBadActor) return true;
+
+        // Add banned player IPs to the _bannedIPs HashSet
+        _bannedIPs.Add("0.0.0.0");
+
+        return _bannedIPs.Contains(ip);
+    }
 
     private static bool IsKeyCodeValid(string? keyCode) => !string.IsNullOrWhiteSpace(keyCode);
 }

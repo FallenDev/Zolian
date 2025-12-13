@@ -134,6 +134,30 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
         ClientHandlers[(byte)ClientOpCode.ServerTableRequest] = OnServerTableRequest;
     }
 
+    protected override bool ShouldAcceptConnection(Socket clientSocket, out string? rejectReason)
+    {
+        rejectReason = null;
+
+        string ipAddress;
+        try
+        {
+            ipAddress = (clientSocket.RemoteEndPoint as IPEndPoint)?.Address.ToString() ?? "unknown";
+        }
+        catch
+        {
+            rejectReason = "Rejecting connection: unable to read RemoteEndPoint.";
+            return false;
+        }
+
+        if (!IsConnectionAllowed(ipAddress))
+        {
+            rejectReason = $"Too many connection attempts - throttled {ipAddress}";
+            return false;
+        }
+
+        return true;
+    }
+
     protected override void OnConnected(Socket clientSocket)
     {
         ServerSetup.ConnectionLogger($"Lobby connection from {clientSocket.RemoteEndPoint as IPEndPoint}");
@@ -149,54 +173,56 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
         client.OnDisconnected += OnDisconnect;
         var safe = false;
 
-        var banned = BannedIpCheck(ipAddress.ToString());
+        // Check for banned IPs
+        var banned = BadActor.BannedIpCheck(ipAddress.ToString());
         if (banned)
         {
-            client.Disconnect();
-            ServerSetup.ConnectionLogger($"Banned connection attempt from {ip}");
+            try
+            {
+                ServerSetup.ConnectionLogger($"Banned connection attempt on Lobby Server from {ip}");
+                client.Disconnect();
+            }
+            catch { }
+
             return;
         }
 
+        // Check against known good actors cache
         foreach (var _ in ServerSetup.Instance.GlobalKnownGoodActorsCache.Values.Where(savedIp => savedIp == ipAddress.ToString()))
             safe = true;
 
         if (!safe)
         {
+            // Check against bad actor service
             var isBadActor = Task.Run(() => BadActor.ClientOnBlackListAsync(ipAddress.ToString())).Result;
 
             if (isBadActor)
             {
                 try
                 {
-                    client.Disconnect();
                     ServerSetup.ConnectionLogger($"Disconnected Bad Actor from {ip}");
+                    client.Disconnect();
                 }
-                catch
-                {
-                    // ignored
-                }
+                catch { }
 
                 return;
             }
-
-            ServerSetup.ConnectionLogger($"Good Actor! {ip}");
         }
 
+        // Register client and check for ID collisions
         if (!ClientRegistry.TryAdd(client))
         {
-            ServerSetup.ConnectionLogger("Two clients ended up with the same id - newest client disconnected");
             try
             {
+                ServerSetup.ConnectionLogger("ID Collision - Lobby Server");
                 client.Disconnect();
             }
-            catch
-            {
-                // ignored
-            }
+            catch { }
 
             return;
         }
 
+        // Add to passed checks cache for Lobby Server
         ServerSetup.Instance.GlobalLobbyConnection.TryAdd(ipAddress, ipAddress);
         client.BeginReceive();
         // 0x7E - Handshake
@@ -207,18 +233,6 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
     {
         var client = (ILobbyClient)sender!;
         ClientRegistry.TryRemove(client.Id, out _);
-    }
-
-    private readonly HashSet<string> _bannedIPs = [];
-
-    private bool BannedIpCheck(string ip)
-    {
-        if (ip.IsNullOrEmpty()) return true;
-
-        // Add banned player IPs to the _bannedIPs HashSet
-        _bannedIPs.Add("0.0.0.0");
-
-        return _bannedIPs.Contains(ip);
     }
 
     #endregion

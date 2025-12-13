@@ -3138,22 +3138,34 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         var client = _clientProvider.CreateClient(clientSocket);
         client.OnDisconnected += OnDisconnect;
 
-        if (!ClientRegistry.TryAdd(client))
+        // Check for banned IPs
+        var banned = BadActor.BannedIpCheck(ipAddress.ToString());
+        if (banned)
         {
-            ServerSetup.ConnectionLogger("Two clients ended up with the same id - newest client disconnected");
-
             try
             {
+                ServerSetup.ConnectionLogger($"Banned connection attempt on World Server from {ip}");
                 client.Disconnect();
             }
-            catch
-            {
-                // ignored
-            }
+            catch { }
 
             return;
         }
 
+        // Register client and check for ID collisions
+        if (!ClientRegistry.TryAdd(client))
+        {
+            try
+            {
+                ServerSetup.ConnectionLogger("ID Collision - World Server");
+                client.Disconnect();
+            }
+            catch { }
+
+            return;
+        }
+
+        // Verify connection passed through appropriate port access
         var lobbyCheck = ServerSetup.Instance.GlobalLobbyConnection.TryGetValue(ipAddress, out _);
         var loginCheck = ServerSetup.Instance.GlobalLoginConnection.TryGetValue(ipAddress, out _);
 
@@ -3162,20 +3174,16 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             try
             {
                 client.Disconnect();
+                ServerSetup.ConnectionLogger("---------World-Server---------");
+                var comment = $"{ipAddress} has been blocked for violating security protocols through improper port access.";
+                ServerSetup.ConnectionLogger(comment, LogLevel.Warning);
+                Task.Run(() => BadActor.ReportMaliciousEndpoint(ipAddress.ToString(), comment));
             }
-            catch
-            {
-                // ignored
-            }
+            catch { }
 
-            ServerSetup.ConnectionLogger("---------World-Server---------");
-            var comment = $"{ipAddress} has been blocked for violating security protocols through improper port access.";
-            ServerSetup.ConnectionLogger(comment, LogLevel.Warning);
-            Task.Run(() => BadActor.ReportMaliciousEndpoint(ipAddress.ToString(), comment));
             return;
         }
 
-        ServerSetup.Instance.GlobalWorldConnection.TryAdd(ipAddress, ipAddress);
         client.BeginReceive();
     }
 
