@@ -6,6 +6,7 @@ using Newtonsoft.Json;
 using RestSharp;
 using Darkages.Models;
 using ServiceStack.Text;
+using ServiceStack;
 
 namespace Darkages.Network.Server;
 
@@ -388,8 +389,7 @@ public static class BadActor
         if (ip.IsNullOrEmpty()) return true;
 
         // Check against known bad actors cache
-        var knownBadActor = BadActor.IpCache.TryGetValue(ip, out _);
-        if (knownBadActor) return true;
+        if (IpCache.TryGetValue(ip, out IpCacheEntry entry)) return entry.IsBlocked;
 
         // Add banned player IPs to the _bannedIPs HashSet
         _bannedIPs.Add("0.0.0.0");
