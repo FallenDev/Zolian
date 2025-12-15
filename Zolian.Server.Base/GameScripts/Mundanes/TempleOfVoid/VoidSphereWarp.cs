@@ -32,7 +32,7 @@ public class VoidSphereWarp(WorldServer server, Mundane mundane) : MundaneScript
     {
         if (client.Aisling.Map.ID != 1500)
         {
-            client.Disconnect();
+            client.CloseTransport();
             return;
         }
 

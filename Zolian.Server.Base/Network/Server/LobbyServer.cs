@@ -26,7 +26,7 @@ namespace Darkages.Network.Server;
 ///     -> OnServerTableRequest (Sends server table)
 /// </summary>
 [UsedImplicitly]
-public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyClient>
+public sealed class LobbyServer : TcpListenerBase<ILobbyClient>, ILobbyServer<ILobbyClient>
 {
     private readonly IClientFactory<LobbyClient> _clientProvider;
     private readonly MServerTable _serverTable;
@@ -60,7 +60,7 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
             if (localArgs.Version != ServerSetup.Instance.Config.ClientVersion)
             {
                 localClient.SendLoginMessage(LoginMessageType.Confirm, "You're not using an authorized client. Please visit https://www.TheBuckNetwork.com/Zolian for the latest client.");
-                localClient.Disconnect();
+                localClient.CloseTransport();
                 return default;
             }
 
@@ -96,7 +96,7 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
                     break;
                 default:
                     localClient.SendLoginMessage(LoginMessageType.Confirm, "You're not authorized.");
-                    localClient.Disconnect();
+                    localClient.CloseTransport();
                     break;
             }
 
@@ -180,7 +180,7 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
             try
             {
                 ServerSetup.ConnectionLogger($"Banned connection attempt on Lobby Server from {ip}");
-                client.Disconnect();
+                client.CloseTransport();
             }
             catch { }
 
@@ -201,7 +201,7 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
                 try
                 {
                     ServerSetup.ConnectionLogger($"Disconnected Bad Actor from {ip}");
-                    client.Disconnect();
+                    client.CloseTransport();
                 }
                 catch { }
 
@@ -215,7 +215,7 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
             try
             {
                 ServerSetup.ConnectionLogger("ID Collision - Lobby Server");
-                client.Disconnect();
+                client.CloseTransport();
             }
             catch { }
 
@@ -224,7 +224,7 @@ public sealed class LobbyServer : ServerBase<ILobbyClient>, ILobbyServer<ILobbyC
 
         // Add to passed checks cache for Lobby Server
         ServerSetup.Instance.GlobalLobbyConnection.TryAdd(ipAddress, ipAddress);
-        client.BeginReceive();
+        client.StartReceiveLoop();
         // 0x7E - Handshake
         client.SendAcceptConnection("CONNECTED SERVER");
     }

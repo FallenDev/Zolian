@@ -22,7 +22,7 @@ public class LoginClient([NotNull] ILoginServer<ILoginClient> server, [NotNull] 
         [NotNull] ILogger<LoginClient> logger)
     : LoginClientBase(socket, crypto, packetSerializer, logger), ILoginClient
 {
-    protected override ValueTask HandlePacketAsync(Span<byte> span)
+    protected override ValueTask OnPacketAsync(Span<byte> span)
     {
         var opCode = span[3];
         var packet = new Packet(ref span, Crypto.IsClientEncrypted(opCode));

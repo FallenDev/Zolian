@@ -616,7 +616,7 @@ public class WorldClient : WorldClientBase, IWorldClient
             ServerSetup.EventsLogger(ex.StackTrace, LogLevel.Error);
             SentrySdk.CaptureException(ex);
 
-            Disconnect();
+            CloseTransport();
             return null;
         }
         finally
@@ -797,7 +797,7 @@ public class WorldClient : WorldClientBase, IWorldClient
 
                         if (routineCheck <= 4) continue;
                         ServerSetup.EventsLogger($"{Aisling.Username} has somehow exceeded their inventory, and have hanging items.");
-                        Disconnect();
+                        CloseTransport();
                         break;
                     }
                 }
@@ -1325,7 +1325,7 @@ public class WorldClient : WorldClientBase, IWorldClient
 
     #region Handlers
 
-    protected override ValueTask HandlePacketAsync(Span<byte> span)
+    protected override ValueTask OnPacketAsync(Span<byte> span)
     {
         var opCode = span[3];
         var packet = new Packet(ref span, Crypto.IsClientEncrypted(opCode));

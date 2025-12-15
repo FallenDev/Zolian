@@ -7,7 +7,7 @@ using System.Net.Sockets;
 namespace Darkages.Network.Server
 {
     public class ClientFactory<T>(IServiceProvider service) : IClientFactory<T>
-        where T : SocketClientBase
+        where T : SocketTransportBase
     {
         public T CreateClient(Socket socket)
         {

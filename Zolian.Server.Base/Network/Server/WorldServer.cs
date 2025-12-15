@@ -39,7 +39,7 @@ using ServerOptions = Chaos.Networking.Options.ServerOptions;
 namespace Darkages.Network.Server;
 
 [UsedImplicitly]
-public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldClient>
+public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IWorldClient>
 {
     private readonly IClientFactory<WorldClient> _clientProvider;
     public ServerPacketLogger ServerPacketLogger { get; } = new();
@@ -85,8 +85,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         IndexHandlers();
         SClassDictionary.SkillMapper();
         RegisterServerComponents();
-        Console.ForegroundColor = ConsoleColor.Yellow;
-        Console.WriteLine("Server is now Online\n");
         MetafileManager = new MetafileManager();
     }
 
@@ -231,9 +229,6 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             [typeof(MoonPhaseComponent)] = new MoonPhaseComponent(this),
             [typeof(ClientCreationLimit)] = new ClientCreationLimit(this)
         };
-
-        Console.WriteLine();
-        ServerSetup.ConnectionLogger($"Server Components Loaded: {_serverComponents.Count}");
     }
 
     #endregion
@@ -303,7 +298,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
             try
             {
-                player.Client.Disconnect();
+                player.Client.CloseTransport();
             }
             catch
             {
@@ -1023,7 +1018,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                     audience = localClient.Aisling.AislingsNearby();
                     break;
                 default:
-                    localClient.Disconnect();
+                    localClient.CloseTransport();
                     return default;
             }
 
@@ -1200,7 +1195,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             if (!RedirectManager.TryGetRemove(localArgs.Id, out var redirect))
             {
                 SentrySdk.CaptureMessage($"{client.RemoteIp} tried to redirect to the world with invalid details.");
-                localClient.Disconnect();
+                localClient.CloseTransport();
                 return default;
             }
 
@@ -1208,7 +1203,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             if (localArgs.Name != redirect.Name)
             {
                 SentrySdk.CaptureMessage($"{client.RemoteIp} tried to impersonate a redirect with redirect {redirect.Id}.");
-                localClient.Disconnect();
+                localClient.CloseTransport();
                 return default;
             }
 
@@ -1217,10 +1212,10 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
 
             //double logon, disconnect both clients
             if (existingAisling == null && redirect.Type != ServerType.Lobby) return LoadAislingAsync(localClient, redirect);
-            localClient.Disconnect();
+            localClient.CloseTransport();
             if (redirect.Type == ServerType.Lobby) return default;
             ServerSetup.ConnectionLogger($"Duplicate login, player {redirect.Name}, disconnecting both clients.");
-            existingAisling?.Client.Disconnect();
+            existingAisling?.Client.CloseTransport();
             return default;
         }
     }
@@ -1236,7 +1231,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             if (aisling == null)
             {
                 SentrySdk.CaptureMessage($"Unable to retrieve player data: {client.RemoteIp}");
-                client.Disconnect();
+                client.CloseTransport();
                 return;
             }
             client.Aisling = aisling;
@@ -1251,7 +1246,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 client.Aisling._Con <= 0 || client.Aisling._Dex <= 0)
             {
                 SentrySdk.CaptureMessage($"Player {client.Aisling.Username} has corrupt stats.");
-                client.Disconnect();
+                client.CloseTransport();
                 return;
             }
 
@@ -1272,7 +1267,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 {
                     ServerSetup.ConnectionLogger($"Failed to login GM from {client.RemoteIp}.");
                     SentrySdk.CaptureMessage($"Failed to login GM from {client.RemoteIp}.");
-                    client.Disconnect();
+                    client.CloseTransport();
                     return;
                 }
             }
@@ -1284,7 +1279,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
                 if (load == null)
                 {
                     ServerSetup.ConnectionLogger($"Failed to load player to client - exiting");
-                    client.Disconnect();
+                    client.CloseTransport();
                     return;
                 }
 
@@ -1306,14 +1301,14 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             {
                 ServerSetup.ConnectionLogger($"Failed to add player {redirect.Name} to world server.");
                 SentrySdk.CaptureException(e);
-                client.Disconnect();
+                client.CloseTransport();
             }
         }
         catch (Exception e)
         {
             ServerSetup.ConnectionLogger($"Client with ip {client.RemoteIp} failed to load player {redirect.Name}.");
             SentrySdk.CaptureException(e);
-            client.Disconnect();
+            client.CloseTransport();
         }
         finally
         {
@@ -3145,7 +3140,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             try
             {
                 ServerSetup.ConnectionLogger($"Banned connection attempt on World Server from {ip}");
-                client.Disconnect();
+                client.CloseTransport();
             }
             catch { }
 
@@ -3158,7 +3153,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             try
             {
                 ServerSetup.ConnectionLogger("ID Collision - World Server");
-                client.Disconnect();
+                client.CloseTransport();
             }
             catch { }
 
@@ -3173,7 +3168,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
         {
             try
             {
-                client.Disconnect();
+                client.CloseTransport();
                 ServerSetup.ConnectionLogger("---------World-Server---------");
                 var comment = $"{ipAddress} has been blocked for violating security protocols through improper port access.";
                 ServerSetup.ConnectionLogger(comment, LogLevel.Warning);
@@ -3184,7 +3179,7 @@ public sealed class WorldServer : ServerBase<IWorldClient>, IWorldServer<IWorldC
             return;
         }
 
-        client.BeginReceive();
+        client.StartReceiveLoop();
     }
 
     private async void OnDisconnect(object sender, EventArgs e)

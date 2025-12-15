@@ -30,7 +30,7 @@ using Darkages.Network.Client.Abstractions;
 namespace Darkages.Network.Server;
 
 [UsedImplicitly]
-public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer<ILoginClient>
+public sealed partial class LoginServer : TcpListenerBase<ILoginClient>, ILoginServer<ILoginClient>
 {
     private readonly IClientFactory<LoginClient> _clientProvider;
     private readonly Notification _notification;
@@ -86,7 +86,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
             {
                 ServerSetup.ConnectionLogger($"Attempt to redirect with invalid redirect details, {localClient.RemoteIp}");
                 SentrySdk.CaptureMessage($"Attempt to redirect with invalid redirect details, {localClient.RemoteIp}");
-                localClient.Disconnect();
+                localClient.CloseTransport();
             }
 
             return default;
@@ -491,7 +491,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
             try
             {
                 ServerSetup.ConnectionLogger($"Banned connection attempt on Login Server from {ip}");
-                client.Disconnect();
+                client.CloseTransport();
             }
             catch { }
 
@@ -504,7 +504,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
             try
             {
                 ServerSetup.ConnectionLogger("ID Collision - Login Server");
-                client.Disconnect();
+                client.CloseTransport();
             }
             catch { }
 
@@ -518,7 +518,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
         {
             try
             {
-                client.Disconnect();
+                client.CloseTransport();
                 ServerSetup.ConnectionLogger("---------Login-Server---------");
                 var comment = $"{ipAddress} has been blocked for violating security protocols through improper port access.";
                 ServerSetup.ConnectionLogger(comment, LogLevel.Warning);
@@ -531,7 +531,7 @@ public sealed partial class LoginServer : ServerBase<ILoginClient>, ILoginServer
 
         // Add to passed checks cache for Login Server
         ServerSetup.Instance.GlobalLoginConnection.TryAdd(ipAddress, ipAddress);
-        client.BeginReceive();
+        client.StartReceiveLoop();
         // 0x7E - Handshake
         client.SendAcceptConnection("CONNECTED SERVER");
     }

@@ -266,6 +266,7 @@ public class ServerSetup : IServerContext
         {
             Console.ForegroundColor = ConsoleColor.Blue;
             Console.WriteLine("Player Save-State Connected");
+            Console.WriteLine();
         }
         else
         {

@@ -171,7 +171,7 @@ public static class Commander
             Task.Delay(60000).ContinueWith(ct =>
             {
                 if (!client.Aisling.GameMasterChaosCancel)
-                    connected.Client.Disconnect();
+                    connected.Client.CloseTransport();
 
                 connected.Client.SendServerMessage(ServerMessageType.GroupChat, "{=qDeath{=g: {=bChaos has been cancelled.");
             });

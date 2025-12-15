@@ -20,7 +20,7 @@ public class LobbyClient([NotNull] ILobbyServer<ILobbyClient> server, [NotNull] 
         [NotNull] ILogger<LobbyClient> logger)
     : LobbyClientBase(socket, crypto, packetSerializer, logger), ILobbyClient
 {
-    protected override ValueTask HandlePacketAsync(Span<byte> span)
+    protected override ValueTask OnPacketAsync(Span<byte> span)
     {
         var opCode = span[3];
         var packet = new Packet(ref span, Crypto.IsClientEncrypted(opCode));

@@ -37,7 +37,7 @@ public partial class App
 {
     private CancellationTokenSource ServerCtx { get; set; }
 
-    protected override void OnStartup(StartupEventArgs e)
+    protected override async void OnStartup(StartupEventArgs e)
     {
         DispatcherUnhandledException += App_DispatcherUnhandledException;
         AppDomain.CurrentDomain.UnhandledException += GlobalUnhandledException;
@@ -100,49 +100,28 @@ public partial class App
             serviceCollection.AddSingleton<IClientRegistry<ILobbyClient>, ClientRegistry<ILobbyClient>>();
             serviceCollection.AddSingleton<LobbyServer>();
             serviceCollection.AddSingleton<ILobbyServer<ILobbyClient>>(sp => sp.GetRequiredService<LobbyServer>());
-            serviceCollection.AddSingleton<IHostedService>(sp => sp.GetRequiredService<LobbyServer>());
 
             // Login
             serviceCollection.AddSingleton<IClientFactory<LoginClient>, ClientFactory<LoginClient>>();
             serviceCollection.AddSingleton<IClientRegistry<ILoginClient>, ClientRegistry<ILoginClient>>();
             serviceCollection.AddSingleton<LoginServer>();
             serviceCollection.AddSingleton<ILoginServer<ILoginClient>>(sp => sp.GetRequiredService<LoginServer>());
-            serviceCollection.AddSingleton<IHostedService>(sp => sp.GetRequiredService<LoginServer>());
 
             // World
             serviceCollection.AddSingleton<IClientFactory<WorldClient>, ClientFactory<WorldClient>>();
             serviceCollection.AddSingleton<IClientRegistry<IWorldClient>, ClientRegistry<IWorldClient>>();
             serviceCollection.AddSingleton<WorldServer>();
             serviceCollection.AddSingleton<IWorldServer<IWorldClient>>(sp => sp.GetRequiredService<WorldServer>());
-            serviceCollection.AddSingleton<IHostedService>(sp => sp.GetRequiredService<WorldServer>());
+
+            // Hosted Services
+            serviceCollection.AddSingleton<IHostedService, ServerOrchestrator>();
 
             var serviceProvider = serviceCollection.BuildServiceProvider();
             serviceProvider.GetService<IServer>();
             var hostedServices = serviceProvider.GetServices<IHostedService>().ToArray();
 
-            // Start the hosted services in a dedicated long-running task
-            _ = Task.Run(async () =>
-            {
-                try
-                {
-                    // Start all hosted services
-                    await Task.WhenAll(hostedServices.Select(svc => svc.StartAsync(ServerCtx.Token)));
-
-                    // Then wait until the token is cancelled
-                    try
-                    {
-                        await Task.Delay(Timeout.Infinite, ServerCtx.Token);
-                    }
-                    catch (OperationCanceledException)
-                    {
-                        // Expected when the token is canceled
-                    }
-                }
-                catch (Exception exception)
-                {
-                    SentrySdk.CaptureException(exception);
-                }
-            }, ServerCtx.Token);
+            foreach (var svc in hostedServices)
+                await svc.StartAsync(ServerCtx.Token);
         }
         catch (Exception exception)
         {
