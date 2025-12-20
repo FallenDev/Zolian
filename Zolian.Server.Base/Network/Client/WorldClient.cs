@@ -1339,14 +1339,17 @@ public class WorldClient : WorldClientBase, IWorldClient
         return _server.HandlePacketAsync(this, in packet);
     }
 
+    /// <summary>
+    /// For Diagnostic Logging of Packets Sent from Server to Client -- Off when not needed
+    /// </summary>
     private void ServerPacketDisplayBuilder()
     {
-        var stackTrace = new StackTrace();
-        var currentMethod = stackTrace.GetFrame(1)?.GetMethod()?.Name ?? "Unknown";
-        var callingMethod = stackTrace.GetFrame(2)?.GetMethod()?.Name ?? "Unknown";
-        var callingMethodTwo = stackTrace.GetFrame(3)?.GetMethod()?.Name ?? "Unknown";
-        var callingMethodThree = stackTrace.GetFrame(4)?.GetMethod()?.Name ?? "Unknown";
-        ServerSetup.Instance.Game.ServerPacketLogger.LogPacket(RemoteIp, $"{Aisling?.Username ?? RemoteIp.ToString()} with: {currentMethod}, from: {callingMethod}, from: {callingMethodTwo}, from: {callingMethodThree}");
+        //var stackTrace = new StackTrace();
+        //var currentMethod = stackTrace.GetFrame(1)?.GetMethod()?.Name ?? "Unknown";
+        //var callingMethod = stackTrace.GetFrame(2)?.GetMethod()?.Name ?? "Unknown";
+        //var callingMethodTwo = stackTrace.GetFrame(3)?.GetMethod()?.Name ?? "Unknown";
+        //var callingMethodThree = stackTrace.GetFrame(4)?.GetMethod()?.Name ?? "Unknown";
+        //ServerSetup.Instance.Game.ServerPacketLogger.LogPacket(RemoteIp, $"{Aisling?.Username ?? RemoteIp.ToString()} with: {currentMethod}, from: {callingMethod}, from: {callingMethodTwo}, from: {callingMethodThree}");
     }
 
     /// <summary>
