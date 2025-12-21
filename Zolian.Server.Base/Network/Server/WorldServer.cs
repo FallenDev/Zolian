@@ -3052,15 +3052,11 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
 
         // ToDo: Packet logging
         //ServerSetup.ConnectionLogger($"Server: {packet.OpCode}");
+        //ClientPacketLogger.LogPacket(client.RemoteIp, $"{client.Aisling?.Username ?? client.RemoteIp.ToString()} with Client OpCode: {opCode} ({Enum.GetName(typeof(ClientOpCode), opCode)})");
 
         try
         {
-            if (handler is not null)
-            {
-                ClientPacketLogger.LogPacket(client.RemoteIp, $"{client.Aisling?.Username ?? client.RemoteIp.ToString()} with Client OpCode: {opCode} ({Enum.GetName(typeof(ClientOpCode), opCode)})");
-                return handler(client, in packet);
-            }
-
+            if (handler is not null) return handler(client, in packet);
             ServerSetup.PacketLogger("//////////////// Handled World Server Unknown Packet ////////////////", LogLevel.Error);
             ServerSetup.PacketLogger($"{opCode} from {client.RemoteIp}", LogLevel.Error);
         }
