@@ -5,12 +5,14 @@ using System.Net;
 using System.Net.Sockets;
 using System.Numerics;
 using System.Text;
+
 using Chaos.Cryptography;
 using Chaos.Networking.Abstractions;
 using Chaos.Networking.Abstractions.Definitions;
 using Chaos.Networking.Entities.Client;
 using Chaos.Packets;
 using Chaos.Packets.Abstractions;
+
 using Darkages.CommandSystem;
 using Darkages.Common;
 using Darkages.Database;
@@ -28,9 +30,13 @@ using Darkages.Sprites;
 using Darkages.Sprites.Entity;
 using Darkages.Templates;
 using Darkages.Types;
+
 using JetBrains.Annotations;
+
 using Microsoft.Extensions.Logging;
+
 using ServiceStack;
+
 using IWorldClient = Darkages.Network.Client.Abstractions.IWorldClient;
 using MapFlags = Darkages.Enums.MapFlags;
 using Redirect = Chaos.Networking.Entities.Redirect;
@@ -2685,8 +2691,35 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
 
         static ValueTask InnerOnHeartBeat(IWorldClient localClient, HeartBeatArgs localArgs)
         {
-            if (localArgs.First != 20 || localArgs.Second != 32) return default;
-            localClient.Latency.Stop();
+            if (localArgs.First != 0x20 || localArgs.Second != 0x14) return default;
+            var client = localClient.Aisling.Client;
+            if (Interlocked.Exchange(ref client.HeartBeatInFlight, 0) == 0) return default;
+
+            var start = Volatile.Read(ref client.HeartBeatStartTimestamp);
+            if (start <= 0) return default;
+
+            var now = Stopwatch.GetTimestamp();
+            var rttMs = (int)Math.Round((now - start) * 1000.0 / Stopwatch.Frequency);
+            if (rttMs < 0) rttMs = 0;
+
+            client.LastRttMs = rttMs;
+
+            // Rolling mean calculation
+            client.HeartBeatSamplesMs[client.HeartBeatIdx] = rttMs;
+            client.HeartBeatIdx = (client.HeartBeatIdx + 1) % client.HeartBeatSamplesMs.Length;
+            if (client.HeartBeatCount < client.HeartBeatSamplesMs.Length) client.HeartBeatCount++;
+
+            int sum = 0;
+            for (int i = 0; i < client.HeartBeatCount; i++)
+                sum += client.HeartBeatSamplesMs[i];
+
+            client.RollingRtt15sMs = (int)Math.Round(sum / (double)client.HeartBeatCount);
+
+            // EMA Smoothing
+            const double alpha = 0.25;
+            client.SmoothedRttMs = client.SmoothedRttMs == 0
+                ? rttMs
+                : (int)Math.Round(client.SmoothedRttMs + alpha * (rttMs - client.SmoothedRttMs));
 
             return default;
         }

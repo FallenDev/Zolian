@@ -30,7 +30,6 @@ public interface IWorldClient : IConnectedClient
     DateTime LastMessageSent { get; set; }
     DateTime LastMovement { get; set; }
     DateTime LastEquip { get; set; }
-    Stopwatch Latency { get; set; }
     DateTime LastWhisperMessageSent { get; set; }
     uint EntryCheck { get; set; }
     void LoadSkillBook();

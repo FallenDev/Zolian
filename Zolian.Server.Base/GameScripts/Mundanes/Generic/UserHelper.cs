@@ -1,11 +1,12 @@
-﻿using Darkages.Common;
+﻿using System.Globalization;
+using System.Text;
+
+using Darkages.Common;
 using Darkages.Enums;
 using Darkages.Network.Client;
 using Darkages.Network.Server;
 using Darkages.ScriptingBase;
 using Darkages.Sprites.Entity;
-using System.Globalization;
-using System.Text.RegularExpressions;
 
 namespace Darkages.GameScripts.Mundanes.Generic;
 
@@ -22,79 +23,117 @@ public class UserHelper(WorldServer server, Mundane mundane) : MundaneScript(ser
     {
         base.TopMenu(client);
 
-        var level = client.Aisling.ExpLevel;
-        var ability = client.Aisling.AbpLevel;
-        var bStr = client.Aisling._Str.ToString("D3");
-        var baseStr = Regex.Replace(bStr, @"\b0+", m => "".PadLeft(m.Value.Length, ' '));
-        var bInt = client.Aisling._Int.ToString("D3");
-        var baseInt = Regex.Replace(bInt, @"\b0+", m => "".PadLeft(m.Value.Length, ' '));
-        var bWis = client.Aisling._Wis.ToString("D3");
-        var baseWis = Regex.Replace(bWis, @"\b0+", m => "".PadLeft(m.Value.Length, ' '));
-        var bCon = client.Aisling._Con.ToString("D3");
-        var baseCon = Regex.Replace(bCon, @"\b0+", m => "".PadLeft(m.Value.Length, ' '));
-        var bDex = client.Aisling._Dex.ToString("D3");
-        var baseDex = Regex.Replace(bDex, @"\b0+", m => "".PadLeft(m.Value.Length, ' '));
-        var gStr = client.Aisling.BonusStr.ToString("D3");
-        var gearStr = Regex.Replace(gStr, @"\b0+", m => "".PadLeft(m.Value.Length, ' '));
-        var gInt = client.Aisling.BonusInt.ToString("D3");
-        var gearInt = Regex.Replace(gInt, @"\b0+", m => "".PadLeft(m.Value.Length, ' '));
-        var gWis = client.Aisling.BonusWis.ToString("D3");
-        var gearWis = Regex.Replace(gWis, @"\b0+", m => "".PadLeft(m.Value.Length, ' '));
-        var gCon = client.Aisling.BonusCon.ToString("D3");
-        var gearCon = Regex.Replace(gCon, @"\b0+", m => "".PadLeft(m.Value.Length, ' '));
-        var gDex = client.Aisling.BonusDex.ToString("D3");
-        var gearDex = Regex.Replace(gDex, @"\b0+", m => "".PadLeft(m.Value.Length, ' '));
-        var pStr = client.Aisling.Str.ToString("D3");
-        var playerStr = Regex.Replace(pStr, @"\b0+", m => "".PadLeft(m.Value.Length, ' '));
-        var pInt = client.Aisling.Int.ToString("D3");
-        var playerInt = Regex.Replace(pInt, @"\b0+", m => "".PadLeft(m.Value.Length, ' '));
-        var pWis = client.Aisling.Wis.ToString("D3");
-        var playerWis = Regex.Replace(pWis, @"\b0+", m => "".PadLeft(m.Value.Length, ' '));
-        var pCon = client.Aisling.Con.ToString("D3");
-        var playerCon = Regex.Replace(pCon, @"\b0+", m => "".PadLeft(m.Value.Length, ' '));
-        var pDex = client.Aisling.Dex.ToString("D3");
-        var playerDex = Regex.Replace(pDex, @"\b0+", m => "".PadLeft(m.Value.Length, ' '));
-        var playerDmg = client.Aisling.Dmg.ToString();
-        var playerAc = client.Aisling.SealedAc.ToString();
-        var playerFort = client.Aisling.Fortitude.ToString(CultureInfo.CurrentCulture);
-        var playerReflex = client.Aisling.Reflex.ToString(CultureInfo.CurrentCulture);
-        var playerWill = client.Aisling.Will.ToString(CultureInfo.CurrentCulture);
-        var playerRegen = client.Aisling.Regen.ToString();
-        var playerBleeding = client.Aisling.Bleeding.ToString();
-        var playerRending = client.Aisling.Rending.ToString();
-        var playerAegis = client.Aisling.Aegis.ToString();
-        var playerReaping = client.Aisling.Reaping.ToString();
-        var playerVamp = client.Aisling.Vampirism.ToString();
-        var playerGhost = client.Aisling.Ghosting.ToString();
-        var playerHaste = client.Aisling.Haste.ToString();
-        var playerSpikes = client.Aisling.Spikes.ToString();
-        var playerGust = client.Aisling.Gust.ToString();
-        var playerQuake = client.Aisling.Quake.ToString();
-        var playerRain = client.Aisling.Rain.ToString();
-        var playerFlame = client.Aisling.Flame.ToString();
-        var playerDusk = client.Aisling.Dusk.ToString();
-        var playerDawn = client.Aisling.Dawn.ToString();
-        var playerOffElement = ElementManager.ElementValue(client.Aisling.SecondaryOffensiveElement);
-        var playerDefElement = ElementManager.ElementValue(client.Aisling.SecondaryDefensiveElement);
-        var amplified = (client.Aisling.Amplified * 100).ToString(CultureInfo.CurrentCulture);
-        var latency = client.Latency.Elapsed;
-        var latencyMs = $"{client.Latency.Elapsed.Milliseconds} ms";
-        var latencyCode = ColorCodeLatency(latency);
-        var mapNum = client.Aisling.Map.ID;
-        var playerBoxed = client.Aisling.ExpTotal;
+        var a = client.Aisling;
+        var level = a.ExpLevel;
+        var ability = a.AbpLevel;
+        var baseStr = D3(a._Str);
+        var baseInt = D3(a._Int);
+        var baseWis = D3(a._Wis);
+        var baseCon = D3(a._Con);
+        var baseDex = D3(a._Dex);
+        var gearStr = D3(a.BonusStr);
+        var gearInt = D3(a.BonusInt);
+        var gearWis = D3(a.BonusWis);
+        var gearCon = D3(a.BonusCon);
+        var gearDex = D3(a.BonusDex);
+        var playerStr = D3(a.Str);
+        var playerInt = D3(a.Int);
+        var playerWis = D3(a.Wis);
+        var playerCon = D3(a.Con);
+        var playerDex = D3(a.Dex);
+
+        var playerDmg = a.Dmg;
+        var playerAc = a.SealedAc;
+        var playerRegen = a.Regen;
+
+        var fort = a.Fortitude.ToString("0.#", CultureInfo.InvariantCulture);
+        var reflex = a.Reflex.ToString("0.#", CultureInfo.InvariantCulture);
+        var will = a.Will.ToString("0.#", CultureInfo.InvariantCulture);
+        var playerOffPriElement = ElementManager.ElementValue(a.OffenseElement);
+        var playerDefPriElement = ElementManager.ElementValue(a.DefenseElement);
+        var playerOffSecElement = ElementManager.ElementValue(a.SecondaryOffensiveElement);
+        var playerDefSecElement = ElementManager.ElementValue(a.SecondaryDefensiveElement);
+        var amplifiedPct = (a.Amplified * 100).ToString("0.#", CultureInfo.InvariantCulture);
+
+        var rtt = client.LastRttMs;
+        var avg = client.SmoothedRttMs;
+        var rttCode = ColorCodeLatency(rtt);
+        var avgCode = ColorCodeLatency(avg);
+
+        // Non-color cue for spikes (colorblind helper)
+        static string Cue(int ms) => ms >= 250 ? "!!" : ms >= 150 ? "!" : "";
+
+        var mapNum = a.Map.ID;
         if (mapNum is >= 800 and <= 810) mapNum = 0;
 
-        client.SendServerMessage(ServerMessageType.ScrollWindow, $"{{=gMap#: {{=a{mapNum} {{=gInsight: {{=b{level} {{=gRank: {{=b{ability} {{=gLatency: {{={latencyCode}{latencyMs}\n" +
-                                                                 $"{{=gBase Stats| {{=cS:{{=a{baseStr}{{=c, I:{{=a{baseInt}{{=c, W:{{=a{baseWis}{{=c, C:{{=a{baseCon}{{=c, D:{{=a{baseDex}\n" +
-                                                                 $"{{=gGear Stats| {{=cS:{{=a{gearStr}{{=c, I:{{=a{gearInt}{{=c, W:{{=a{gearWis}{{=c, C:{{=a{gearCon}{{=c, D:{{=a{gearDex}\n" +
-                                                                 $"{{=gFull Stats| {{=cS:{{=a{playerStr}{{=c, I:{{=a{playerInt}{{=c, W:{{=a{playerWis}{{=c, C:{{=a{playerCon}{{=c, D:{{=a{playerDex}\n" +
-                                                                 $"   {{=gOffense| {{=cDMG{{=c:{{=a{playerDmg}{{=c, {{=sAmp{{=c:{{=a{amplified}%{{=c, {{=sSecondary{{=c:{{=a{playerOffElement}\n" +
-                                                                 $"   {{=gDefense| {{=sAC{{=c:{{=a{playerAc}{{=c, {{=gRegen{{=c:{{=a{playerRegen}{{=c, {{=sSecondary{{=c:{{=a{playerDefElement}\n" +
-                                                                 $"{{=cExp Boxed: {{=a{playerBoxed}\n\n" +
-                                                                 $"{{=eSaving Throws{{=c: {{=sFort{{=c:{{=a{playerFort}%{{=c, {{=sReflex{{=c:{{=a{playerReflex}%{{=c, {{=sWill{{=c:{{=a{playerWill}%\n" +
-                                                                 $"{{=bBleeding{{=c: {{=a{playerBleeding}{{=c, {{=rRending{{=c: {{=a{playerRending}{{=c, {{=sAegis{{=c: {{=a{playerAegis}{{=c, {{=nReaping{{=c: {{=a{playerReaping}\n" +
-                                                                 $"{{=bVamp{{=c: {{=a{playerVamp}{{=c, {{=uGhost{{=c: {{=a{playerGhost}{{=c, {{=cHaste{{=c: {{=a{playerHaste}{{=c, {{=wSpikes{{=c: {{=a{playerSpikes}, {{=uGust{{=c: {{=a{playerGust}{{=c\n" +
-                                                                 $"{{=uQuake{{=c: {{=a{playerQuake}{{=c, {{=uRain{{=c: {{=a{playerRain}, {{=uFlame{{=c: {{=a{playerFlame}{{=c, {{=uDusk{{=c: {{=a{playerDusk}{{=c, {{=uDawn{{=c: {{=a{playerDawn}");
+        var sb = new StringBuilder(900);
+
+        // Player Info Card
+        sb.Append("{=q").Append(a.Username)
+          .Append("    {=gLvl: {=b").Append(level)
+          .Append(" {=gJob: {=b").Append(ability)
+          .Append(" {=gIns: {=b").Append(level + ability)
+          .Append('\n');
+
+        // Map, Ping, EMA Latency
+        sb.Append("{=gMap#: {=e").Append(mapNum)
+          .Append(" {=gGrid: {=e").Append(a.Position.X).Append("{=c,").Append("{=e").Append(a.Position.Y)
+          .Append("   {=gPing: {=").Append(rttCode).Append(rtt).Append("{=ams").Append(Cue(rtt))
+          .Append(" {=gAvg: {=").Append(avgCode).Append(avg).Append("{=ams").Append(Cue(avg))
+          .Append('\n');
+
+        // Stats Blocks
+        sb.Append("{=gBase| {=cS:{=a").Append(baseStr).Append("{=c, I:{=a").Append(baseInt)
+          .Append("{=c, W:{=a").Append(baseWis).Append("{=c, C:{=a").Append(baseCon)
+          .Append("{=c, D:{=a").Append(baseDex).Append('\n');
+
+        sb.Append("{=gGear| {=cS:{=a").Append(gearStr).Append("{=c, I:{=a").Append(gearInt)
+          .Append("{=c, W:{=a").Append(gearWis).Append("{=c, C:{=a").Append(gearCon)
+          .Append("{=c, D:{=a").Append(gearDex).Append('\n');
+
+        sb.Append("{=gMax | {=cS:{=a").Append(playerStr).Append("{=c, I:{=a").Append(playerInt)
+          .Append("{=c, W:{=a").Append(playerWis).Append("{=c, C:{=a").Append(playerCon)
+          .Append("{=c, D:{=a").Append(playerDex).Append('\n');
+
+        // Offense / Defense
+        sb.Append("{=gOff | {=sDMG{=c:{=a").Append(playerDmg).Append("{=c, {=sAmp{=c:{=a").Append(amplifiedPct)
+          .Append("{=c%, {=sPri{=c:{=a").Append(playerOffPriElement).Append("{=c, {=sSec{=c:{=a").Append(playerOffSecElement)
+          .Append('\n');
+
+        sb.Append("{=gDef |  {=sAC{=c:{=a").Append(playerAc).Append("{=c, {=sRegen{=c:{=a").Append(playerRegen)
+          .Append("{=c%, {=sPri{=c:{=a").Append(playerDefPriElement).Append("{=c, {=sSec{=c:{=a").Append(playerDefSecElement)
+          .Append('\n');
+
+        // Saving Throws
+        sb.Append("{=eSAVE{=g| {=sFort{=c:{=a").Append(fort).Append("{=c%, ")
+          .Append("{=sRef{=c:{=a").Append(reflex).Append("{=c%, ")
+          .Append("{=sWill{=c:{=a").Append(will).Append("{=c%")
+          .Append("\n\n");
+
+        // Exp
+        sb.Append("{=cExp Boxed: {=a").Append(a.ExpTotal).Append("    {=q--Buffs Below").Append('\n');
+
+        // Buff Grid
+        sb.Append("{=bBleed{=c: {=").Append(BuffColor(a.Bleeding)).Append(a.Bleeding)
+          .Append("{=c, {=rRend{=c: {=").Append(BuffColor(a.Rending)).Append(a.Rending)
+          .Append("{=c, {=sAegis{=c: {=").Append(BuffColor(a.Aegis)).Append(a.Aegis)
+          .Append("{=c, {=nReap{=c: {=").Append(BuffColor(a.Reaping)).Append(a.Reaping)
+          .Append('\n');
+
+        sb.Append("{=bVamp{=c: {=").Append(BuffColor(a.Vampirism)).Append(a.Vampirism)
+          .Append("{=c, {=uGhost{=c: {=").Append(BuffColor(a.Ghosting)).Append(a.Ghosting)
+          .Append("{=c, {=cHaste{=c: {=").Append(BuffColor(a.Haste)).Append(a.Haste)
+          .Append("{=c, {=wSpikes{=c: {=").Append(BuffColor(a.Spikes)).Append(a.Spikes)
+          .Append("{=c, {=uGust{=c: {=").Append(BuffColor(a.Gust)).Append(a.Gust)
+          .Append('\n');
+
+        sb.Append("{=uQuake{=c: {=").Append(BuffColor(a.Quake)).Append(a.Quake)
+          .Append("{=c, {=uRain{=c: {=").Append(BuffColor(a.Rain)).Append(a.Rain)
+          .Append("{=c, {=uFlame{=c: {=").Append(BuffColor(a.Flame)).Append(a.Flame)
+          .Append("{=c, {=uDusk{=c: {=").Append(BuffColor(a.Dusk)).Append(a.Dusk)
+          .Append("{=c, {=uDawn{=c: {=").Append(BuffColor(a.Dawn)).Append(a.Dawn);
+
+        client.SendServerMessage(ServerMessageType.ScrollWindow, sb.ToString());
     }
 
     public override void OnResponse(WorldClient client, ushort responseID, string args)
@@ -105,10 +144,26 @@ public class UserHelper(WorldServer server, Mundane mundane) : MundaneScript(ser
         }
     }
 
-    private static string ColorCodeLatency(TimeSpan time)
+    private static string ColorCodeLatency(int time)
     {
-        if (time < TimeSpan.FromMilliseconds(100)) return "q";
-        if (time < TimeSpan.FromMilliseconds(200)) return "c";
-        return time >= TimeSpan.FromMilliseconds(250) ? "b" : "n";
+        if (time < 100) return "q";
+        if (time < 200) return "c";
+        return time >= 250 ? "n" : "b";
+    }
+
+    private static string BuffColor(int value) => value > 0 ? "q" : "a";
+
+    private static string D3(int value)
+    {
+        if (value < 0) value = 0;
+        if (value > 1000) value = 1000;
+
+        return value switch
+        {
+            < 10 => $"   {value}",
+            < 100 => $"  {value}",
+            < 1000 => $" {value}",
+            _ => value.ToString(CultureInfo.InvariantCulture)
+        };
     }
 }

@@ -62,6 +62,16 @@ public class WorldClient : WorldClientBase, IWorldClient
     public Spell LastSpell = new();
     public bool ExitConfirmed;
 
+    // Ping/Pong RTT
+    public int HeartBeatInFlight;
+    public long HeartBeatStartTimestamp;
+    public int HeartBeatIdx;
+    public int HeartBeatCount;
+    public readonly int[] HeartBeatSamplesMs = new int[3];
+    public int LastRttMs { get; set; }
+    public int RollingRtt15sMs { get; set; }
+    public int SmoothedRttMs { get; set; }
+
     private readonly Dictionary<string, Stopwatch> _clientStopwatches = new()
     {
         { "Affliction", new Stopwatch() },
@@ -132,7 +142,6 @@ public class WorldClient : WorldClientBase, IWorldClient
     public DateTime LastMessageSent { get; set; }
     public DateTime LastMovement { get; set; }
     public DateTime LastEquip { get; set; }
-    public Stopwatch Latency { get; set; } = new();
     public DateTime LastSave { get; set; }
     public DateTime LastWhisperMessageSent { get; set; }
     public PendingBuy PendingBuySessions { get; set; }
@@ -2753,13 +2762,15 @@ public class WorldClient : WorldClientBase, IWorldClient
 
     public override void SendHeartBeat(byte first, byte second)
     {
+        if (Interlocked.CompareExchange(ref HeartBeatInFlight, 1, 0) != 0) return;
+        Volatile.Write(ref HeartBeatStartTimestamp, Stopwatch.GetTimestamp());
+
         var args = new HeartBeatResponseArgs
         {
             First = first,
             Second = second
         };
 
-        Latency.Restart();
         Send(args);
     }
 

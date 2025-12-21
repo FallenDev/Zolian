@@ -6,7 +6,9 @@ namespace Darkages.Network.Components;
 
 public class PingComponent(WorldServer server) : WorldServerComponent(server)
 {
-    private const int ComponentSpeed = 7000;
+    private const int ComponentSpeed = 5000;
+    private const byte HeartbeatFirst = 0x14;
+    private const byte HeartbeatSecond = 0x20;
 
     protected internal override async Task Update()
     {
@@ -22,7 +24,7 @@ public class PingComponent(WorldServer server) : WorldServerComponent(server)
 
                 // Clamp to avoid super tiny delays
                 if (remaining > 0)
-                    await Task.Delay(Math.Min(remaining, 50));
+                    await Task.Delay(Math.Min(remaining, 10));
                 continue;
             }
 
@@ -43,17 +45,11 @@ public class PingComponent(WorldServer server) : WorldServerComponent(server)
     {
         foreach (var player in Server.Aislings)
         {
-            if (player?.Client == null) return;
-            if (!player.LoggedIn) return;
-
             try
             {
-                player.Client.SendHeartBeat(0x20, 0x14);
+                player?.Client?.SendHeartBeat(HeartbeatFirst, HeartbeatSecond);
             }
-            catch (Exception ex)
-            {
-                SentrySdk.CaptureException(ex);
-            }
+            catch { }
         }
     }
 }
