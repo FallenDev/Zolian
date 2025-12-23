@@ -3215,12 +3215,13 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
     {
         var client = (IWorldClient)sender!;
         var aisling = client.Aisling;
-
         if (aisling == null)
         {
             ClientRegistry.TryRemove(client.Id, out _);
             return;
         }
+
+        var serial = client.Aisling.Serial;
 
         if (aisling.Client.ExitConfirmed)
         {
@@ -3249,6 +3250,7 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
             // Cleanup
             aisling.Remove(true);
             ClientRegistry.TryRemove(client.Id, out _);
+            StorageManager.AislingBucket.TryRemovePlayerLock(serial);
             ServerSetup.ConnectionLogger($"{aisling.Username} either logged out or was removed from the server.");
         }
         catch
