@@ -144,7 +144,7 @@ public class Chromitus : MundaneScript
             if (temp.MonsterRace == MonsterRace.LowerBeing)
                 temp.MonsterRace = MonsterRace.Rodent;
 
-            if (temp.MonsterRace.MonsterRaceIsSet(MonsterRace.HigherBeing))
+            if (temp.MonsterRace.MonsterRaceIsSet(MonsterRace.Aberration))
                 temp.IgnoreCollision = true;
 
             monsterTemplates.Add(temp);

@@ -1,9 +1,18 @@
 ﻿using System.Collections.Concurrent;
+using System.Collections.Specialized;
+using System.Data;
+using System.Diagnostics;
+using System.Globalization;
+using System.Net.Sockets;
+using System.Numerics;
+using System.Security.Cryptography;
+
 using Chaos.Cryptography.Abstractions;
 using Chaos.Extensions.Networking;
 using Chaos.Geometry;
 using Chaos.Geometry.Abstractions.Definitions;
 using Chaos.Networking.Abstractions;
+using Chaos.Networking.Abstractions.Definitions;
 using Chaos.Networking.Entities.Server;
 using Chaos.Packets;
 using Chaos.Packets.Abstractions;
@@ -16,28 +25,24 @@ using Darkages.Enums;
 using Darkages.Events;
 using Darkages.GameScripts.Affects;
 using Darkages.GameScripts.Formulas;
+using Darkages.Managers;
 using Darkages.Meta;
 using Darkages.Models;
 using Darkages.Network.Server;
 using Darkages.Object;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;
+using Darkages.Sprites.Entity;
 using Darkages.Templates;
 using Darkages.Types;
 
 using JetBrains.Annotations;
+
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
 
 using ServiceStack;
-using System.Collections.Specialized;
-using System.Data;
-using System.Diagnostics;
-using System.Globalization;
-using System.Net.Sockets;
-using System.Numerics;
-using Chaos.Networking.Abstractions.Definitions;
-using Darkages.Managers;
+
 using BodyColor = Chaos.DarkAges.Definitions.BodyColor;
 using BodySprite = Chaos.DarkAges.Definitions.BodySprite;
 using EquipmentSlot = Chaos.DarkAges.Definitions.EquipmentSlot;
@@ -47,7 +52,6 @@ using LanternSize = Chaos.DarkAges.Definitions.LanternSize;
 using MapFlags = Darkages.Enums.MapFlags;
 using Nation = Chaos.DarkAges.Definitions.Nation;
 using RestPosition = Chaos.DarkAges.Definitions.RestPosition;
-using Darkages.Sprites.Entity;
 
 namespace Darkages.Network.Client;
 
@@ -4069,7 +4073,7 @@ public class WorldClient : WorldClientBase, IWorldClient
     {
         var item = new Legend.LegendItem
         {
-            Key = $"Sp{EphemeralRandomIdGenerator<uint>.Shared.NextId}ark{EphemeralRandomIdGenerator<uint>.Shared.NextId}",
+            Key = $"Sp{RandomNumberGenerator.GetInt32(int.MaxValue)}ark{RandomNumberGenerator.GetInt32(int.MaxValue)}",
             IsPublic = true,
             Time = DateTime.UtcNow,
             Color = LegendColor.Red,

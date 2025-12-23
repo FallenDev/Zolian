@@ -42,6 +42,14 @@ public static class ItemQualityVariance
                 item.MaxDurability = (uint)(temp / 0.3);
                 item.Durability = item.MaxDurability;
                 break;
+            case Item.Quality.Primordial:
+                item.MaxDurability = (uint)(temp / 0.2);
+                item.Durability = item.MaxDurability;
+                break;
+            case Item.Quality.Transcendent:
+                item.MaxDurability = (uint)(temp / 0.1);
+                item.Durability = item.MaxDurability;
+                break;
         }
     }
 
@@ -77,6 +85,12 @@ public static class ItemQualityVariance
             case Item.Quality.Mythic:
                 item.MaxDurability = (uint)(temp / 0.3);
                 break;
+            case Item.Quality.Primordial:
+                item.MaxDurability = (uint)(temp / 0.2);
+                break;
+            case Item.Quality.Transcendent:
+                item.MaxDurability = (uint)(temp / 0.1);
+                break;
         }
     }
 
@@ -105,8 +119,8 @@ public static class ItemQualityVariance
         return qualityGen switch
         {
             >= 0 and <= .20 => Item.Quality.Rare,
-            > .77 and <= .89 => Item.Quality.Epic,
-            > .89 and <= .99 => Item.Quality.Legendary,
+            > .20 and <= .80 => Item.Quality.Epic,
+            > .80 and <= .99 => Item.Quality.Legendary,
             > .99 and <= .997 => Item.Quality.Forsaken,
             > .997 and <= .999 => Item.Quality.Mythic,
             > 1 => Item.Quality.Primordial,
