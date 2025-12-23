@@ -1772,7 +1772,7 @@ public class WorldClient : WorldClientBase, IWorldClient
     /// <summary>
     /// 0x4C - Reconnect
     /// </summary>
-    public void SendConfirmExit()
+    public async void SendConfirmExit()
     {
         // Close Popups
         this.CloseDialog();
@@ -1787,8 +1787,7 @@ public class WorldClient : WorldClientBase, IWorldClient
         Aisling.LoggedIn = false;
 
         // Save
-        var saved = Save();
-        ExitConfirmed = saved.Result;
+        ExitConfirmed = await Save().ConfigureAwait(false);
 
         // Cleanup
         Aisling.Remove(true);
@@ -3648,8 +3647,7 @@ public class WorldClient : WorldClientBase, IWorldClient
     {
         if (Aisling == null) return false;
         LastSave = DateTime.UtcNow;
-        var saved = await AislingStorage.Save(Aisling);
-        return saved;
+        return await StorageManager.AislingBucket.Save(Aisling).ConfigureAwait(false);
     }
 
     public WorldClient UpdateDisplay(bool excludeSelf = false)

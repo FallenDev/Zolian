@@ -15,6 +15,7 @@ using Darkages.Network.Server;
 using Darkages.Object;
 using ServiceStack;
 using Darkages.Common;
+using Microsoft.Data.SqlClient;
 
 namespace Darkages.Sprites.Entity;
 
@@ -762,22 +763,25 @@ public sealed class Item : Identifiable
     /// <summary>
     /// Delete from database only happens on death, item dropped, stored, or sold
     /// Checks if item still exists on SQL List, if so remove
-    /// Utilizes a semaphore lock to prevent multiple saves and deletes at once
     /// </summary>
-    public async Task DeleteFromAislingDb()
+    public Task DeleteFromAislingDb(uint ownerSerial) => DeleteFromAislingDbCore(ownerSerial);
+
+    private async Task DeleteFromAislingDbCore(uint ownerSerial)
     {
         var itemId = ItemId;
-        using (await StorageManager.AislingBucket.SaveLock.LockAsync())
+
+        using (await StorageManager.AislingBucket.GetPlayerLock(ownerSerial).LockAsync().ConfigureAwait(false))
         {
             try
             {
-                var sConn = ServerSetup.Instance.ServerSaveConnection;
+                await using var conn = new SqlConnection(AislingStorage.ConnectionString);
+                await conn.OpenAsync().ConfigureAwait(false);
                 const string cmd = "DELETE FROM ZolianPlayers.dbo.PlayersItems WHERE ItemId = @ItemId";
-                sConn.Execute(cmd, new { itemId });
+                await conn.ExecuteAsync(cmd, new { ItemId = itemId }).ConfigureAwait(false);
             }
             catch (Exception e)
             {
-                ServerSetup.EventsLogger($"Failed to delete {ItemId}:{Name} from Player: {Serial}", LogLevel.Error);
+                ServerSetup.EventsLogger($"Failed to delete {itemId}:{Name} from Player: {ownerSerial}", LogLevel.Error);
                 SentrySdk.CaptureException(e);
             }
         }

@@ -55,7 +55,7 @@ public class Rift : AreaScript
         {
             var guardianKillReward = _playersOnMap.RandomIEnum().Value;
             guardianKillReward ??= _playersOnMap.RandomIEnum().Value;
-            ChestGenerator(guardianKillReward.Client);
+            //ChestGenerator(guardianKillReward.Client);
 
             foreach (var player in _playersOnMap.Values)
             {

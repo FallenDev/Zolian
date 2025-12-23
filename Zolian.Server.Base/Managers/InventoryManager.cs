@@ -118,7 +118,7 @@ public class InventoryManager : ObjectManager
         }
         finally
         {
-            _ = item.DeleteFromAislingDb();
+            _ = item.DeleteFromAislingDb(client.Aisling.Serial);
         }
     }
 

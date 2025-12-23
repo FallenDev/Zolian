@@ -1,15 +1,18 @@
-﻿using Dapper;
-
-using Darkages.Enums;
-using Darkages.Sprites;
-using Microsoft.Data.SqlClient;
+﻿using System.Collections.Concurrent;
 using System.Data;
 using System.Numerics;
-using Darkages.Models;
-using Darkages.Templates;
-using Microsoft.Extensions.Logging;
-using Darkages.Network.Server;
+
+using Dapper;
+
 using Darkages.Common;
+using Darkages.Enums;
+using Darkages.Models;
+using Darkages.Network.Server;
+using Darkages.Sprites;
+using Darkages.Templates;
+
+using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Logging;
 
 namespace Darkages.Database;
 
@@ -18,9 +21,11 @@ public record AislingStorage : Sql, IEqualityOperators<AislingStorage, AislingSt
     public const string ConnectionString = "Data Source=.;Initial Catalog=ZolianPlayers;Integrated Security=True;Encrypt=False;MultipleActiveResultSets=True;";
     public const string PersonalMailString = "Data Source=.;Initial Catalog=ZolianBoardsMail;Integrated Security=True;Encrypt=False;MultipleActiveResultSets=True;";
     private const string EncryptedConnectionString = "Data Source=.;Initial Catalog=ZolianPlayers;Integrated Security=True;Column Encryption Setting=enabled;TrustServerCertificate=True;MultipleActiveResultSets=True;";
-    public AsyncLock SaveLock { get; } = new();
     private AsyncLock LoadLock { get; } = new();
     private AsyncLock CreateLock { get; } = new();
+    private readonly ConcurrentDictionary<uint, AsyncLock> _playerLocks = new();
+    public AsyncLock GetPlayerLock(uint serial) => _playerLocks.GetOrAdd(serial, static _ => new AsyncLock());
+    public void TryRemovePlayerLock(uint serial) => _playerLocks.TryRemove(serial, out _);
 
     #region LoginServer Operations
 
@@ -309,175 +314,116 @@ public record AislingStorage : Sql, IEqualityOperators<AislingStorage, AislingSt
     /// Saves a player's state on disconnect or error
     /// Utilizes an active connection that self-heals if closed
     /// </summary>
-    public static async Task<bool> Save(Aisling obj)
+    public async Task<bool> Save(Aisling obj, CancellationToken ct = default)
     {
         if (obj == null) return false;
         if (obj.Loading) return false;
-        var connection = ServerSetup.Instance.ServerSaveConnection;
 
-        try
+        using (await GetPlayerLock(obj.Serial).LockAsync().ConfigureAwait(false))
         {
-            _ = PlayerSaveRoutine(obj, connection);
-        }
-        catch (Exception e)
-        {
-            SentrySdk.CaptureException(e);
-        }
-        finally
-        {
-            if (connection.State != ConnectionState.Open)
+            try
             {
-                Console.ForegroundColor = ConsoleColor.Blue;
-                Console.WriteLine("Reconnecting Player Save-State");
-                ServerSetup.Instance.ServerSaveConnection = new SqlConnection(ConnectionString);
-                ServerSetup.Instance.ServerSaveConnection.Open();
+                await PlayerSaveRoutine(obj, ct).ConfigureAwait(false);
+                return true;
+            }
+            catch (Exception e)
+            {
+                SentrySdk.CaptureException(e);
+                return false;
             }
         }
-
-        return true;
     }
 
     /// <summary>
     /// Saves all players states
     /// Utilizes an active connection that self-heals if closed
     /// </summary>
-    public async Task<bool> ServerSave(List<Aisling> playerList)
+    public async Task ServerSave(List<Aisling> players, CancellationToken ct = default)
     {
-        if (playerList.Count == 0) return false;
+        if (players.Count == 0) return;
+        const int maxConcurrency = 10;
+        using var throttler = new SemaphoreSlim(maxConcurrency, maxConcurrency);
 
-        using (await SaveLock.LockAsync())
+        var tasks = new List<Task>(players.Count);
+
+        foreach (var p in players)
         {
-            var connection = ServerSetup.Instance.ServerSaveConnection;
+            await throttler.WaitAsync(ct).ConfigureAwait(false);
 
-            try
+            tasks.Add(Task.Run(async () =>
             {
-                const int maxConcurrency = 10;
-                var semaphore = new SemaphoreSlim(maxConcurrency);
-                var tasks = new List<Task>();
-
-                foreach (var player in playerList.Where(p => p is { Loading: false }))
+                try
                 {
-                    await semaphore.WaitAsync();
-
-                    var task = PlayerSaveRoutine(player, connection).ContinueWith(_ => semaphore.Release());
-                    tasks.Add(task);
+                    await Save(p, ct).ConfigureAwait(false);
                 }
-
-                await Task.WhenAll(tasks);
-            }
-            catch (Exception e)
-            {
-                SentrySdk.CaptureException(e);
-            }
-            finally
-            {
-                if (connection.State != ConnectionState.Open)
+                finally
                 {
-                    Console.ForegroundColor = ConsoleColor.Blue;
-                    Console.WriteLine("Reconnecting Player Save-State");
-                    ServerSetup.Instance.ServerSaveConnection = new SqlConnection(ConnectionString);
-                    ServerSetup.Instance.ServerSaveConnection.Open();
+                    throttler.Release();
                 }
-            }
+            }, ct));
+        }
 
-            return true;
+        await Task.WhenAll(tasks).ConfigureAwait(false);
+    }
+
+    private async Task PlayerSaveRoutine(Aisling player, CancellationToken ct)
+    {
+        await using var conn = new SqlConnection(ConnectionString);
+        await conn.OpenAsync(ct).ConfigureAwait(false);
+        await using var tx = (SqlTransaction)await conn.BeginTransactionAsync(IsolationLevel.ReadCommitted, ct).ConfigureAwait(false);
+
+        try
+        {
+            player.Client.LastSave = DateTime.UtcNow;
+            var dt = PlayerDataTable();
+            var qDt = QuestDataTable();
+            var cDt = ComboScrollDataTable();
+            var iDt = ItemsDataTable();
+            var skillDt = SkillDataTable();
+            var spellDt = SpellDataTable();
+            var buffDt = BuffsDataTable();
+            var debuffDt = DeBuffsDataTable();
+            dt = PlayerStatSave(player, dt);
+            qDt = PlayerQuestSave(player, qDt);
+            cDt = PlayerComboSave(player, cDt);
+            iDt = PlayerItemSave(player, iDt);
+            skillDt = PlayerSkillSave(player, skillDt);
+            spellDt = PlayerSpellSave(player, spellDt);
+            buffDt = PlayerBuffSave(player, buffDt);
+            debuffDt = PlayerDebuffSave(player, debuffDt);
+
+            await ExecTvpAsync(conn, tx, "PlayerSave", "@Players", "dbo.PlayerType", dt, ct).ConfigureAwait(false);
+            await ExecTvpAsync(conn, tx, "PlayerQuestSave", "@Quests", "dbo.QuestType", qDt, ct).ConfigureAwait(false);
+            await ExecTvpAsync(conn, tx, "PlayerComboSave", "@Combos", "dbo.ComboType", cDt, ct).ConfigureAwait(false);
+            await ExecTvpAsync(conn, tx, "ItemUpsert", "@Items", "dbo.ItemType", iDt, ct).ConfigureAwait(false);
+            await ExecTvpAsync(conn, tx, "PlayerSaveSkills", "@Skills", "dbo.SkillType", skillDt, ct).ConfigureAwait(false);
+            await ExecTvpAsync(conn, tx, "PlayerSaveSpells", "@Spells", "dbo.SpellType", spellDt, ct).ConfigureAwait(false);
+            await ExecTvpAsync(conn, tx, "BuffSave", "@Buffs", "dbo.BuffType", buffDt, ct).ConfigureAwait(false);
+            await ExecTvpAsync(conn, tx, "DeBuffSave", "@Debuffs", "dbo.DebuffType", debuffDt, ct).ConfigureAwait(false);
+
+            await tx.CommitAsync(ct).ConfigureAwait(false);
+        }
+        catch (Exception e)
+        {
+            await tx.RollbackAsync(ct).ConfigureAwait(false);
+            ServerSetup.EventsLogger($"PlayerSave performed rollback!", LogLevel.Error);
+            SentrySdk.CaptureException(e);
         }
     }
 
-    private static Task PlayerSaveRoutine(Aisling player, SqlConnection connection)
+    private static async Task ExecTvpAsync(SqlConnection conn, SqlTransaction tx, string procName,
+        string paramName, string typeName, DataTable tvp, CancellationToken ct)
     {
-        if (player.Client == null) return Task.CompletedTask;
-        player.Client.LastSave = DateTime.UtcNow;
-        var dt = PlayerDataTable();
-        var qDt = QuestDataTable();
-        var cDt = ComboScrollDataTable();
-        var iDt = ItemsDataTable();
-        var skillDt = SkillDataTable();
-        var spellDt = SpellDataTable();
-        var buffDt = BuffsDataTable();
-        var debuffDt = DeBuffsDataTable();
-        dt = PlayerStatSave(player, dt);
-        qDt = PlayerQuestSave(player, qDt);
-        cDt = PlayerComboSave(player, cDt);
-        iDt = PlayerItemSave(player, iDt);
-        skillDt = PlayerSkillSave(player, skillDt);
-        spellDt = PlayerSpellSave(player, spellDt);
-        buffDt = PlayerBuffSave(player, buffDt);
-        debuffDt = PlayerDebuffSave(player, debuffDt);
-
-        using (var cmd = new SqlCommand("PlayerSave", connection))
+        await using var cmd = new SqlCommand(procName, conn, tx)
         {
-            cmd.CommandType = CommandType.StoredProcedure;
-            var param = cmd.Parameters.AddWithValue("@Players", dt);
-            param.SqlDbType = SqlDbType.Structured;
-            param.TypeName = "dbo.PlayerType";
-            cmd.ExecuteNonQuery();
-        }
+            CommandType = CommandType.StoredProcedure
+        };
 
-        using (var cmd2 = new SqlCommand("PlayerQuestSave", connection))
-        {
-            cmd2.CommandType = CommandType.StoredProcedure;
-            var param2 = cmd2.Parameters.AddWithValue("@Quests", qDt);
-            param2.SqlDbType = SqlDbType.Structured;
-            param2.TypeName = "dbo.QuestType";
-            cmd2.ExecuteNonQuery();
-        }
+        var p = cmd.Parameters.AddWithValue(paramName, tvp);
+        p.SqlDbType = SqlDbType.Structured;
+        p.TypeName = typeName;
 
-        using (var cmd3 = new SqlCommand("PlayerComboSave", connection))
-        {
-            cmd3.CommandType = CommandType.StoredProcedure;
-            var param3 = cmd3.Parameters.AddWithValue("@Combos", cDt);
-            param3.SqlDbType = SqlDbType.Structured;
-            param3.TypeName = "dbo.ComboType";
-            cmd3.ExecuteNonQuery();
-        }
-
-        using (var cmd4 = new SqlCommand("ItemUpsert", connection))
-        {
-            cmd4.CommandType = CommandType.StoredProcedure;
-            var param4 = cmd4.Parameters.AddWithValue("@Items", iDt);
-            param4.SqlDbType = SqlDbType.Structured;
-            param4.TypeName = "dbo.ItemType";
-            cmd4.ExecuteNonQuery();
-        }
-
-        using (var cmd5 = new SqlCommand("PlayerSaveSkills", connection))
-        {
-            cmd5.CommandType = CommandType.StoredProcedure;
-            var param5 = cmd5.Parameters.AddWithValue("@Skills", skillDt);
-            param5.SqlDbType = SqlDbType.Structured;
-            param5.TypeName = "dbo.SkillType";
-            cmd5.ExecuteNonQuery();
-        }
-
-        using (var cmd6 = new SqlCommand("PlayerSaveSpells", connection))
-        {
-            cmd6.CommandType = CommandType.StoredProcedure;
-            var param6 = cmd6.Parameters.AddWithValue("@Spells", spellDt);
-            param6.SqlDbType = SqlDbType.Structured;
-            param6.TypeName = "dbo.SpellType";
-            cmd6.ExecuteNonQuery();
-        }
-
-        using (var cmd7 = new SqlCommand("BuffSave", connection))
-        {
-            cmd7.CommandType = CommandType.StoredProcedure;
-            var param7 = cmd7.Parameters.AddWithValue("@Buffs", buffDt);
-            param7.SqlDbType = SqlDbType.Structured;
-            param7.TypeName = "dbo.BuffType";
-            cmd7.ExecuteNonQuery();
-        }
-
-        using (var cmd8 = new SqlCommand("DeBuffSave", connection))
-        {
-            cmd8.CommandType = CommandType.StoredProcedure;
-            var param8 = cmd8.Parameters.AddWithValue("@Debuffs", debuffDt);
-            param8.SqlDbType = SqlDbType.Structured;
-            param8.TypeName = "dbo.DebuffType";
-            cmd8.ExecuteNonQuery();
-        }
-
-        return Task.CompletedTask;
+        await cmd.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
     }
 
     private static DataTable PlayerStatSave(Aisling obj, DataTable dt)

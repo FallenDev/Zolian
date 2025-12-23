@@ -6,6 +6,7 @@ using Darkages.Enums;
 using Darkages.Network.Client;
 using Darkages.Network.Server;
 using Microsoft.Data.SqlClient;
+using Darkages.Database;
 
 namespace Darkages.Managers;
 
@@ -33,10 +34,10 @@ public class BankManager
     /// Removes the item from bank (Only used when item is pawned in bulk) -
     /// Deletes the record from the database
     /// </summary>
-    public static void RemoveFromBank(WorldClient client, List<Item> itemsToDelete)
+    public static async Task RemoveFromBankAsync(WorldClient client, List<Item> itemsToDelete, CancellationToken ct = default)
     {
         if (client == null) return;
-        if (itemsToDelete.Count == 0) return;
+        if (itemsToDelete == null || itemsToDelete.Count == 0) return;
         var iDt = ItemsDataTable();
 
         try
@@ -71,15 +72,20 @@ public class BankManager
                     item.Enchantable,
                     item.Tarnished,
                     gearEnhanced,
-                    itemMaterial
+                    itemMaterial,
+                    item.GiftWrapped
                 );
             }
 
-            DeleteFromAislingDb(iDt);
+            using (await StorageManager.AislingBucket.GetPlayerLock(client.Aisling.Serial).LockAsync().ConfigureAwait(false))
+            {
+                await DeleteFromAislingDbAsync(iDt, ct).ConfigureAwait(false);
+            }
         }
-        catch
+        catch (Exception ex)
         {
             ServerSetup.EventsLogger($"Issue pawning items from {client.RemoteIp} - {client.Aisling.Serial}");
+            SentrySdk.CaptureException(ex);
         }
     }
 
@@ -109,14 +115,19 @@ public class BankManager
         return dt;
     }
 
-    private static void DeleteFromAislingDb(DataTable iDt)
+    private static async Task DeleteFromAislingDbAsync(DataTable iDt, CancellationToken ct)
     {
-        var connection = ServerSetup.Instance.ServerSaveConnection;
-        using var cmd4 = new SqlCommand("ItemMassDelete", connection);
-        cmd4.CommandType = CommandType.StoredProcedure;
-        var param4 = cmd4.Parameters.AddWithValue("@Items", iDt);
-        param4.SqlDbType = SqlDbType.Structured;
-        param4.TypeName = "dbo.ItemType";
-        cmd4.ExecuteNonQuery();
+        await using var conn = new SqlConnection(AislingStorage.ConnectionString);
+        await conn.OpenAsync(ct).ConfigureAwait(false);
+
+        await using var cmd = new SqlCommand("ItemMassDelete", conn)
+        {
+            CommandType = CommandType.StoredProcedure
+        };
+
+        var p = cmd.Parameters.AddWithValue("@Items", iDt);
+        p.SqlDbType = SqlDbType.Structured;
+        p.TypeName = "dbo.ItemType";
+        await cmd.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
     }
 }

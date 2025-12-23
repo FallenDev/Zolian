@@ -7,7 +7,6 @@ using Darkages.Sprites;
 using Darkages.Templates;
 using Darkages.Types;
 
-using System.Diagnostics;
 using Chaos.Networking.Entities.Server;
 
 namespace Darkages.Network.Client.Abstractions;

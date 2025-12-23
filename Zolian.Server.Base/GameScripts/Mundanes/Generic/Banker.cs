@@ -81,7 +81,7 @@ public class Banker(WorldServer server, Mundane mundane) : MundaneScript(server,
         }
     }
 
-    public override void OnResponse(WorldClient client, ushort responseId, string args)
+    public override async void OnResponse(WorldClient client, ushort responseId, string args)
     {
         if (client.Aisling.ActionUsed != "Remote Bank")
             if (!AuthenticateUser(client)) return;
@@ -302,7 +302,7 @@ public class Banker(WorldServer server, Mundane mundane) : MundaneScript(server,
                         itemsToDelete.Add(item);
                     }
 
-                    BankManager.RemoveFromBank(client, itemsToDelete);
+                    await BankManager.RemoveFromBankAsync(client, itemsToDelete);
                     client.Aisling.BankedGold += offer;
                     client.SendOptionsDialog(Mundane, $"They're going to send over your {offer} gold and we'll store it here in the bank.");
                 }
