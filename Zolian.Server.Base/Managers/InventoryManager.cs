@@ -1,4 +1,8 @@
-﻿using Darkages.Common;
+﻿using System.Collections.Concurrent;
+using System.Data;
+
+using Darkages.Common;
+using Darkages.Database;
 using Darkages.Enums;
 using Darkages.Network.Client;
 using Darkages.Network.Server;
@@ -7,7 +11,7 @@ using Darkages.ScriptingBase;
 using Darkages.Sprites.Entity;
 using Darkages.Templates;
 
-using System.Collections.Concurrent;
+using Microsoft.Data.SqlClient;
 
 namespace Darkages.Managers;
 
@@ -45,7 +49,8 @@ public class InventoryManager : ObjectManager
         foreach (var slot in Items)
         {
             if (slot.Value == null)
-                return idx;
+                if (IsValidSlot(idx))
+                    return idx;
 
             idx++;
         }
@@ -247,9 +252,19 @@ public class InventoryManager : ObjectManager
                 }
 
                 if (!Items.TryUpdate(item1.InventorySlot, null, item1)) return (true, 0);
+
                 item1.ItemPane = Item.ItemPanes.Bank;
+
                 if (client.Aisling.BankManager.Items.TryAdd(item1.ItemId, item1))
                     client.SendRemoveItemFromPane(item1.InventorySlot);
+
+                _ = Task.Run(async () =>
+                {
+                    await PersistMoveInventoryItemToBankAsync(
+                        client.Aisling.Serial,
+                        item1.ItemId
+                    ).ConfigureAwait(false);
+                });
 
                 client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cDeposited: {{=g{item1.DisplayName}");
                 UpdatePlayersWeight(client);
@@ -331,5 +346,26 @@ public class InventoryManager : ObjectManager
         }
 
         return (true, 0);
+    }
+
+    private static async Task PersistMoveInventoryItemToBankAsync(uint serial, long itemId)
+    {
+        // Per-player atomicity (match banker behavior)
+        using (await StorageManager.AislingBucket.GetPlayerLock(serial).LockAsync().ConfigureAwait(false))
+        {
+            await using var conn = new SqlConnection(AislingStorage.ConnectionString);
+            await conn.OpenAsync().ConfigureAwait(false);
+
+            const string sql =
+                "UPDATE dbo.PlayersItems " +
+                "SET ItemPane = 'Bank', Slot = 0, InventorySlot = 0 " +
+                "WHERE Serial = @Serial AND ItemId = @ItemId;";
+
+            await using var cmd = new SqlCommand(sql, conn);
+            cmd.Parameters.Add("@Serial", SqlDbType.BigInt).Value = (long)serial;
+            cmd.Parameters.Add("@ItemId", SqlDbType.BigInt).Value = itemId;
+
+            await cmd.ExecuteNonQueryAsync().ConfigureAwait(false);
+        }
     }
 }

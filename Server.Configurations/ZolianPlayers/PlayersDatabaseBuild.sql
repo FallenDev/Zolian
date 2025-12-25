@@ -19,75 +19,76 @@ GO
 USE [ZolianPlayers]
 GO
 
-DROP PROCEDURE [dbo].[SpellToPlayer]
-DROP PROCEDURE [dbo].[SkillToPlayer]
-DROP PROCEDURE [dbo].[SelectSpells]
-DROP PROCEDURE [dbo].[SelectSkills]
-DROP PROCEDURE [dbo].[SelectQuests]
-DROP PROCEDURE [dbo].[SelectCombos]
-DROP PROCEDURE [dbo].[SelectPlayer]
-DROP PROCEDURE [dbo].[SelectLegends]
-DROP PROCEDURE [dbo].[SelectIgnoredPlayers]
-DROP PROCEDURE [dbo].[SelectBanked]
-DROP PROCEDURE [dbo].[SelectEquipped]
-DROP PROCEDURE [dbo].[SelectInventory]
-DROP PROCEDURE [dbo].[SelectDiscoveredMaps]
-DROP PROCEDURE [dbo].[SelectDeBuffsCheck]
-DROP PROCEDURE [dbo].[SelectDeBuffs]
-DROP PROCEDURE [dbo].[SelectBuffsCheck]
-DROP PROCEDURE [dbo].[SelectBuffs]
-DROP PROCEDURE [dbo].[PlayerSecurity]
-DROP PROCEDURE [dbo].[PlayerSaveSpells]
-DROP PROCEDURE [dbo].[PlayerSaveSkills]
-DROP PROCEDURE [dbo].[PlayerSave]
-DROP PROCEDURE [dbo].[PlayerQuestSave]
-DROP PROCEDURE [dbo].[PlayerComboSave]
-DROP PROCEDURE [dbo].[PlayerCreation]
-DROP PROCEDURE [dbo].[AccountLockoutCount]
-DROP PROCEDURE [dbo].[PasswordSave]
-DROP PROCEDURE [dbo].[InsertQuests]
-DROP PROCEDURE [dbo].[InsertDeBuff]
-DROP PROCEDURE [dbo].[InsertBuff]
-DROP PROCEDURE [dbo].[IgnoredSave]
-DROP PROCEDURE [dbo].[FoundMap]
-DROP PROCEDURE [dbo].[DeBuffSave]
-DROP PROCEDURE [dbo].[CheckIfPlayerSerialExists]
-DROP PROCEDURE [dbo].[CheckIfPlayerHashExists]
-DROP PROCEDURE [dbo].[CheckIfPlayerExists]
-DROP PROCEDURE [dbo].[LoadItemsToCache]
-DROP PROCEDURE [dbo].[BuffSave]
-DROP PROCEDURE [dbo].[AddLegendMark]
-DROP PROCEDURE [dbo].[ItemUpsert]
-DROP PROCEDURE [dbo].[ItemMassDelete]
-DROP PROCEDURE [dbo].[CheckIfMailBoxNumberExists]
-DROP PROCEDURE [dbo].[ObtainMailBoxNumber]
+DROP PROCEDURE IF EXISTS [dbo].[SpellToPlayer]
+DROP PROCEDURE IF EXISTS [dbo].[SkillToPlayer]
+DROP PROCEDURE IF EXISTS [dbo].[SelectSpells]
+DROP PROCEDURE IF EXISTS [dbo].[SelectSkills]
+DROP PROCEDURE IF EXISTS [dbo].[SelectQuests]
+DROP PROCEDURE IF EXISTS [dbo].[SelectCombos]
+DROP PROCEDURE IF EXISTS [dbo].[SelectPlayer]
+DROP PROCEDURE IF EXISTS [dbo].[SelectLegends]
+DROP PROCEDURE IF EXISTS [dbo].[SelectIgnoredPlayers]
+DROP PROCEDURE IF EXISTS [dbo].[SelectBanked]
+DROP PROCEDURE IF EXISTS [dbo].[SelectEquipped]
+DROP PROCEDURE IF EXISTS [dbo].[SelectInventory]
+DROP PROCEDURE IF EXISTS [dbo].[SelectDiscoveredMaps]
+DROP PROCEDURE IF EXISTS [dbo].[SelectDeBuffsCheck]
+DROP PROCEDURE IF EXISTS [dbo].[SelectDeBuffs]
+DROP PROCEDURE IF EXISTS [dbo].[SelectBuffsCheck]
+DROP PROCEDURE IF EXISTS [dbo].[SelectBuffs]
+DROP PROCEDURE IF EXISTS [dbo].[PlayerSecurity]
+DROP PROCEDURE IF EXISTS [dbo].[PlayerSaveSpells]
+DROP PROCEDURE IF EXISTS [dbo].[PlayerSaveSkills]
+DROP PROCEDURE IF EXISTS [dbo].[PlayerSave]
+DROP PROCEDURE IF EXISTS [dbo].[PlayerQuestSave]
+DROP PROCEDURE IF EXISTS [dbo].[PlayerComboSave]
+DROP PROCEDURE IF EXISTS [dbo].[PlayerCreation]
+DROP PROCEDURE IF EXISTS [dbo].[AccountLockoutCount]
+DROP PROCEDURE IF EXISTS [dbo].[PasswordSave]
+DROP PROCEDURE IF EXISTS [dbo].[InsertQuests]
+DROP PROCEDURE IF EXISTS [dbo].[InsertDeBuff]
+DROP PROCEDURE IF EXISTS [dbo].[InsertBuff]
+DROP PROCEDURE IF EXISTS [dbo].[IgnoredSave]
+DROP PROCEDURE IF EXISTS [dbo].[FoundMap]
+DROP PROCEDURE IF EXISTS [dbo].[DeBuffSave]
+DROP PROCEDURE IF EXISTS [dbo].[CheckIfPlayerSerialExists]
+DROP PROCEDURE IF EXISTS [dbo].[CheckIfPlayerHashExists]
+DROP PROCEDURE IF EXISTS [dbo].[CheckIfPlayerExists]
+DROP PROCEDURE IF EXISTS [dbo].[LoadItemsToCache]
+DROP PROCEDURE IF EXISTS [dbo].[BuffSave]
+DROP PROCEDURE IF EXISTS [dbo].[AddLegendMark]
+DROP PROCEDURE IF EXISTS [dbo].[ItemUpsert]
+DROP PROCEDURE IF EXISTS [dbo].[ItemMassDelete]
+DROP PROCEDURE IF EXISTS [dbo].[CheckIfMailBoxNumberExists]
+DROP PROCEDURE IF EXISTS [dbo].[ObtainMailBoxNumber]
+DROP PROCEDURE IF EXISTS [dbo].[dbo.BankDepositStack]
+DROP PROCEDURE IF EXISTS [dbo].[BankDepositStack]
 GO
 
-DROP TYPE dbo.PlayerType
-DROP TYPE dbo.ComboType
-DROP TYPE dbo.QuestType
-DROP TYPE dbo.ItemType
-DROP TYPE dbo.SkillType
-DROP TYPE dbo.SpellType
-DROP TYPE dbo.BuffType
-DROP TYPE dbo.DebuffType
+DROP TYPE IF EXISTS dbo.PlayerType
+DROP TYPE IF EXISTS dbo.ComboType
+DROP TYPE IF EXISTS dbo.QuestType
+DROP TYPE IF EXISTS dbo.ItemType
+DROP TYPE IF EXISTS dbo.SkillType
+DROP TYPE IF EXISTS dbo.SpellType
+DROP TYPE IF EXISTS dbo.BuffType
+DROP TYPE IF EXISTS dbo.DebuffType
 GO
 
-DROP TABLE PlayersItems;
-DROP TABLE PlayersLegend;
-DROP TABLE PlayersSkillBook;
-DROP TABLE PlayersSpellBook;
-DROP TABLE PlayersDebuffs;
-DROP TABLE PlayersBuffs;
-DROP TABLE PlayersDiscoveredMaps;
-DROP TABLE PlayersCombos;
-DROP TABLE PlayersQuests;
-DROP TABLE PlayersIgnoreList;
-DROP TABLE Players;
+DROP TABLE IF EXISTS PlayersItems;
+DROP TABLE IF EXISTS PlayersLegend;
+DROP TABLE IF EXISTS PlayersSkillBook;
+DROP TABLE IF EXISTS PlayersSpellBook;
+DROP TABLE IF EXISTS PlayersDebuffs;
+DROP TABLE IF EXISTS PlayersBuffs;
+DROP TABLE IF EXISTS PlayersDiscoveredMaps;
+DROP TABLE IF EXISTS PlayersCombos;
+DROP TABLE IF EXISTS PlayersQuests;
+DROP TABLE IF EXISTS PlayersIgnoreList;
+DROP TABLE IF EXISTS Players;
 
 SET ANSI_NULLS ON
 GO
-
 SET QUOTED_IDENTIFIER ON
 GO
 
@@ -1685,4 +1686,333 @@ BEGIN
 	([Serial], [Level], [Slot], [SpellName], [Casts], [CurrentCooldown])
     VALUES	(@Serial, @Level, @Slot, @SpellName, @Casts, @CurrentCooldown);
 END
+GO
+
+-- BankDepositStack Logic
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE dbo.BankDepositStack
+    @Serial         BIGINT,
+    @SourceItemId   BIGINT,
+    @Quantity       INT,
+    @MaxStack       INT,
+    @NewBankItemId  BIGINT = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+    IF @MaxStack IS NULL OR @MaxStack <= 0
+    BEGIN
+        RAISERROR('MaxStack must be > 0.', 16, 1);
+        RETURN;
+    END
+
+    IF @Quantity IS NULL OR @Quantity <= 0
+    BEGIN
+        RAISERROR('Quantity must be > 0.', 16, 1);
+        RETURN;
+    END
+
+    BEGIN TRAN;
+
+    -------------------------------------------------------------------------
+    -- 1) Load + lock the source inventory row
+    -------------------------------------------------------------------------
+    DECLARE @Name VARCHAR(45);
+    DECLARE @SourceStacks INT;
+
+    SELECT
+        @Name = Name,
+        @SourceStacks = Stacks
+    FROM dbo.PlayersItems WITH (UPDLOCK, ROWLOCK)
+    WHERE ItemId = @SourceItemId
+      AND Serial = @Serial
+      AND ItemPane = 'Inventory';
+
+    IF @Name IS NULL
+    BEGIN
+        ROLLBACK;
+        RAISERROR('Source item not found in inventory.', 16, 1);
+        RETURN;
+    END
+
+    -- Defensive: stacked items should never exceed MaxStack
+    IF @SourceStacks > @MaxStack
+    BEGIN
+        ROLLBACK;
+        RAISERROR('Source stacks exceed MaxStack (data integrity issue).', 16, 1);
+        RETURN;
+    END
+
+    IF @Quantity > @SourceStacks
+    BEGIN
+        ROLLBACK;
+        RAISERROR('Quantity exceeds available stacks.', 16, 1);
+        RETURN;
+    END
+
+    -------------------------------------------------------------------------
+    -- 2) Find a bank target stack with room (same name)
+    --    Pick the smallest stack with room so you fill neatly.
+    -------------------------------------------------------------------------
+    DECLARE @TargetItemId BIGINT = NULL;
+    DECLARE @TargetStacks INT = NULL;
+
+    SELECT TOP (1)
+        @TargetItemId = ItemId,
+        @TargetStacks = Stacks
+    FROM dbo.PlayersItems WITH (UPDLOCK, HOLDLOCK, ROWLOCK)
+    WHERE Serial = @Serial
+      AND ItemPane = 'Bank'
+      AND Name = @Name
+      AND Stacks < @MaxStack
+    ORDER BY Stacks ASC, ItemId ASC;
+
+    -------------------------------------------------------------------------
+    -- 3) Merge as much as possible into the bank target (if any)
+    -------------------------------------------------------------------------
+    DECLARE @RemainingToBank INT = @Quantity;
+
+    IF @TargetItemId IS NOT NULL
+    BEGIN
+        DECLARE @Room INT = @MaxStack - @TargetStacks;
+        DECLARE @MoveToTarget INT = CASE WHEN @RemainingToBank <= @Room THEN @RemainingToBank ELSE @Room END;
+
+        UPDATE dbo.PlayersItems
+        SET Stacks = Stacks + @MoveToTarget
+        WHERE ItemId = @TargetItemId;
+
+        SET @RemainingToBank = @RemainingToBank - @MoveToTarget;
+    END
+
+    -------------------------------------------------------------------------
+    -- 4) Now handle what remains to bank (either 0 or >0)
+    -------------------------------------------------------------------------
+
+    -- If everything was merged into an existing bank stack
+    IF @RemainingToBank = 0
+    BEGIN
+        IF @Quantity = @SourceStacks
+        BEGIN
+            DELETE dbo.PlayersItems
+            WHERE ItemId = @SourceItemId;
+        END
+        ELSE
+        BEGIN
+            UPDATE dbo.PlayersItems
+            SET Stacks = Stacks - @Quantity
+            WHERE ItemId = @SourceItemId;
+        END
+
+        COMMIT;
+        RETURN;
+    END
+
+    -- Remaining must still be <= MaxStack (since SourceStacks <= MaxStack)
+    IF @RemainingToBank > @MaxStack
+    BEGIN
+        ROLLBACK;
+        RAISERROR('Remaining stacks exceed MaxStack (unexpected).', 16, 1);
+        RETURN;
+    END
+
+    -- There is leftover that could not fit into the existing bank stack
+    IF @Quantity = @SourceStacks
+    BEGIN
+        UPDATE dbo.PlayersItems
+        SET ItemPane = 'Bank',
+            Slot = 0,
+            InventorySlot = 0,
+            Stacks = @RemainingToBank
+        WHERE ItemId = @SourceItemId;
+
+        COMMIT;
+        RETURN;
+    END
+
+    -------------------------------------------------------------------------
+    -- Partial deposit with leftover:
+    -- Split: source becomes (N-Quantity) in Inventory.
+    -- Bank piece becomes new row (NewBankItemId) with leftover stacks.
+    -------------------------------------------------------------------------
+    IF @NewBankItemId IS NULL
+    BEGIN
+        ROLLBACK;
+        RAISERROR('NewBankItemId is required for partial deposits.', 16, 1);
+        RETURN;
+    END
+
+    UPDATE dbo.PlayersItems
+    SET Stacks = Stacks - @Quantity
+    WHERE ItemId = @SourceItemId;
+
+    INSERT INTO dbo.PlayersItems
+    (
+        ItemId, Name, Serial, ItemPane, Slot, InventorySlot, Color, Cursed, Durability, Identified,
+        ItemVariance, WeapVariance, ItemQuality, OriginalQuality, Stacks, Enchantable, Tarnished,
+        GearEnhancement, ItemMaterial, GiftWrapped
+    )
+    SELECT
+        @NewBankItemId,
+        Name,
+        Serial,
+        'Bank',
+        0,
+        0,
+        Color,
+        Cursed,
+        Durability,
+        Identified,
+        ItemVariance,
+        WeapVariance,
+        ItemQuality,
+        OriginalQuality,
+        @RemainingToBank,
+        Enchantable,
+        Tarnished,
+        GearEnhancement,
+        ItemMaterial,
+        GiftWrapped
+    FROM dbo.PlayersItems
+    WHERE ItemId = @SourceItemId;
+
+    COMMIT;
+END
+GO
+
+-- BankWithdrawStack Logic
+SET ANSI_NULLS ON;
+GO
+SET QUOTED_IDENTIFIER ON;
+GO
+CREATE PROCEDURE dbo.BankWithdrawStack
+    @Serial             BIGINT,
+    @SourceBankItemId   BIGINT,
+    @Quantity           INT,
+    @Name               VARCHAR(45),
+    @MaxStack           INT,
+    @NewInventoryItemId BIGINT,
+    @NewInventorySlot   INT = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+    IF @Quantity IS NULL OR @Quantity <= 0
+        THROW 50000, 'Quantity must be > 0.', 1;
+
+    IF @MaxStack IS NULL OR @MaxStack <= 0
+        THROW 50000, 'MaxStack must be > 0.', 1;
+
+    -- Do not allow pulling more than one stack at a time.
+    IF @Quantity > @MaxStack
+        THROW 50000, 'Quantity exceeds MaxStack.', 1;
+
+    BEGIN TRY
+        BEGIN TRAN;
+
+        ------------------------------------------------------------------
+        -- 1) Lock + validate bank source row
+        ------------------------------------------------------------------
+        DECLARE @BankStacks INT;
+
+        SELECT @BankStacks = Stacks
+        FROM dbo.PlayersItems WITH (UPDLOCK, HOLDLOCK)
+        WHERE Serial = @Serial
+          AND ItemId = @SourceBankItemId
+          AND ItemPane = 'Bank'
+          AND Name = @Name;
+
+        IF @BankStacks IS NULL
+            THROW 50000, 'Source bank item not found.', 1;
+
+        IF @BankStacks < @Quantity
+            THROW 50000, 'Insufficient bank stacks.', 1;
+
+        ------------------------------------------------------------------
+        -- 2) Try to merge into an existing inventory stack where it fits
+        ------------------------------------------------------------------
+        DECLARE @TargetInvItemId BIGINT;
+
+        SELECT TOP (1)
+            @TargetInvItemId = ItemId
+        FROM dbo.PlayersItems WITH (UPDLOCK, HOLDLOCK)
+        WHERE Serial = @Serial
+          AND ItemPane = 'Inventory'
+          AND Name = @Name
+          AND Stacks < @MaxStack
+          AND (Stacks + @Quantity) <= @MaxStack
+        ORDER BY Stacks DESC, ItemId ASC;
+
+        IF @TargetInvItemId IS NOT NULL
+        BEGIN
+            UPDATE dbo.PlayersItems
+            SET Stacks = Stacks + @Quantity
+            WHERE Serial = @Serial
+              AND ItemId = @TargetInvItemId
+              AND ItemPane = 'Inventory';
+        END
+        ELSE
+        BEGIN
+            ------------------------------------------------------------------
+            -- 3) No merge target exists: require an empty slot to create a row
+            ------------------------------------------------------------------
+            IF @NewInventorySlot IS NULL
+                THROW 50000, 'Inventory full: no empty slot provided to create a new stack row.', 1;
+
+            -- Slot must be empty (inventory only). We do not allow overwriting.
+            IF EXISTS (
+                SELECT 1
+                FROM dbo.PlayersItems WITH (UPDLOCK, HOLDLOCK)
+                WHERE Serial = @Serial
+                  AND ItemPane = 'Inventory'
+                  AND InventorySlot = @NewInventorySlot
+            )
+                THROW 50000, 'Inventory slot is not empty.', 1;
+
+            -- Insert a new inventory row cloned from the bank row.
+            INSERT INTO dbo.PlayersItems
+            (
+                ItemId, Name, Serial, ItemPane, Slot, InventorySlot, Color, Cursed, Durability, Identified,
+                ItemVariance, WeapVariance, ItemQuality, OriginalQuality, Stacks, Enchantable, Tarnished,
+                GearEnhancement, ItemMaterial, GiftWrapped
+            )
+            SELECT
+                @NewInventoryItemId, Name, Serial, 'Inventory', 0, @NewInventorySlot, Color, Cursed, Durability, Identified,
+                ItemVariance, WeapVariance, ItemQuality, OriginalQuality, @Quantity, Enchantable, Tarnished,
+                GearEnhancement, ItemMaterial, GiftWrapped
+            FROM dbo.PlayersItems WITH (UPDLOCK, HOLDLOCK)
+            WHERE Serial = @Serial
+              AND ItemId = @SourceBankItemId
+              AND ItemPane = 'Bank'
+              AND Name = @Name;
+        END
+
+        ------------------------------------------------------------------
+        -- 4) Decrement/delete bank row
+        ------------------------------------------------------------------
+        UPDATE dbo.PlayersItems
+        SET Stacks = Stacks - @Quantity
+        WHERE Serial = @Serial
+          AND ItemId = @SourceBankItemId
+          AND ItemPane = 'Bank'
+          AND Name = @Name;
+
+        DELETE dbo.PlayersItems
+        WHERE Serial = @Serial
+          AND ItemId = @SourceBankItemId
+          AND ItemPane = 'Bank'
+          AND Name = @Name
+          AND Stacks <= 0;
+
+        COMMIT TRAN;
+    END TRY
+    BEGIN CATCH
+        IF @@TRANCOUNT > 0 ROLLBACK TRAN;
+        THROW;
+    END CATCH
+END;
 GO

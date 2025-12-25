@@ -230,6 +230,7 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
             [typeof(PingComponent)] = new PingComponent(this),
             [typeof(PlayerRegenerationComponent)] = new PlayerRegenerationComponent(this),
             [typeof(PlayerSaveComponent)] = new PlayerSaveComponent(this),
+            [typeof(PlayerSaveDirtyComponent)] = new PlayerSaveDirtyComponent(this),
             [typeof(PlayerStatusBarAndThreatComponent)] = new PlayerStatusBarAndThreatComponent(this),
             [typeof(PlayerSkillSpellCooldownComponent)] = new PlayerSkillSpellCooldownComponent(this),
             [typeof(MoonPhaseComponent)] = new MoonPhaseComponent(this),

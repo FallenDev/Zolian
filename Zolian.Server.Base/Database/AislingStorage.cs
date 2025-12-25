@@ -402,6 +402,9 @@ public record AislingStorage : Sql, IEqualityOperators<AislingStorage, AislingSt
             await ExecTvpAsync(conn, tx, "DeBuffSave", "@Debuffs", "dbo.DebuffType", debuffDt, ct).ConfigureAwait(false);
 
             await tx.CommitAsync(ct).ConfigureAwait(false);
+
+            // Player has a synced database state
+            player.PlayerSaveDirty = false;
         }
         catch (Exception e)
         {

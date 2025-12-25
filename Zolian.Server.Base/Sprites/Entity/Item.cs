@@ -131,7 +131,7 @@ public sealed class Item : Identifiable
     public bool Cursed { get; set; }
     public uint Durability { get; set; }
     public uint MaxDurability { get; set; }
-    public bool Identified { get; init; }
+    public bool Identified { get; set; }
     public Variance ItemVariance { get; set; }
     public WeaponVariance WeapVariance { get; set; }
     public Quality ItemQuality { get; set; }
@@ -146,7 +146,7 @@ public sealed class Item : Identifiable
     public ConcurrentDictionary<string, WeaponScript> WeaponScripts { get; set; }
     public int Dropping { get; set; }
     public bool[] Warnings { get; set; }
-    public ushort Image { get; init; }
+    public ushort Image { get; set; }
 
     public ushort DisplayImage
     {
@@ -688,6 +688,7 @@ public sealed class Item : Identifiable
             return false;
         }
 
+        aisling.PlayerSaveDirty = true;
         ItemPane = ItemPanes.Inventory;
 
         // Stack

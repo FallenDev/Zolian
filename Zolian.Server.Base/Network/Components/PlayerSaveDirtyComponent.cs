@@ -1,14 +1,12 @@
 ﻿using System.Diagnostics;
 
-using Darkages.Database;
 using Darkages.Network.Server;
-using Microsoft.Extensions.Logging;
 
 namespace Darkages.Network.Components;
 
-public class PlayerSaveComponent(WorldServer server) : WorldServerComponent(server)
+public class PlayerSaveDirtyComponent(WorldServer server) : WorldServerComponent(server)
 {
-    private const int ComponentSpeed = 45000;
+    private const int ComponentSpeed = 5000;
 
     protected internal override async Task Update()
     {
@@ -21,13 +19,12 @@ public class PlayerSaveComponent(WorldServer server) : WorldServerComponent(serv
             if (elapsed < target)
             {
                 var remaining = (int)(target - elapsed);
-
                 if (remaining > 0)
                     await Task.Delay(Math.Min(remaining, 1000));
                 continue;
             }
 
-            await UpdatePlayerSaveAsync();
+            await UpdateDirtyPlayersAsync();
 
             var postElapsed = sw.Elapsed.TotalMilliseconds;
             var overshoot = postElapsed - ComponentSpeed;
@@ -40,16 +37,22 @@ public class PlayerSaveComponent(WorldServer server) : WorldServerComponent(serv
         }
     }
 
-    private async Task UpdatePlayerSaveAsync()
+    private async Task UpdateDirtyPlayersAsync()
     {
         try
         {
-            await StorageManager.AislingBucket.ServerSave([.. Server.Aislings]);
+            var dirtyPlayers = Server.Aislings.Where(a => a.PlayerSaveDirty).ToArray();
+            if (dirtyPlayers.Length == 0) return;
+
+            foreach (var aisling in dirtyPlayers)
+            {
+                // Ensure cached player is still loggged in
+                if (aisling?.Client?.Aisling == null) continue;
+
+                // Player save, dirty flag is reset after successful save within AislingStorage.PlayerSaveRoutine()
+                _ = await aisling.Client.Save();
+            }
         }
-        catch (Exception e)
-        {
-            ServerSetup.EventsLogger($"PlayerSaveComponent failed to perform a server save", LogLevel.Error);
-            SentrySdk.CaptureException(e);
-        }
+        catch { }
     }
 }

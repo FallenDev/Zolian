@@ -1,8 +1,13 @@
-﻿using Darkages.Enums;
+﻿using System.Collections.Concurrent;
+
+using Chaos.Networking.Entities;
+
+using Darkages.Enums;
 using Darkages.Network.Client;
+using Darkages.Network.Server;
 using Darkages.Sprites.Entity;
 using Darkages.Types;
-using System.Collections.Concurrent;
+
 using EquipmentSlot = Darkages.Models.EquipmentSlot;
 
 namespace Darkages.Managers;
@@ -127,8 +132,23 @@ public class EquipmentManager
         if (itemObj == null) return;
         var givenBack = itemObj.GiveTo(Client.Aisling, false);
         if (givenBack) return;
-        Client.Aisling.BankManager.Items.TryAdd(itemObj.ItemId, itemObj);
-        Client.SendServerMessage(ServerMessageType.ActiveMessage, "Inventory full, item deposited to bank");
+
+        AddItemToBankOnIssue(itemObj);
+    }
+
+    private bool AddItemToBankOnIssue(Item item)
+    {
+        if (item == null)
+        {
+            ServerSetup.ConnectionLogger($"{Client.Aisling.Username} lost an item during equip -> bank swap.");
+            return false;
+        }
+
+        item.ItemPane = Item.ItemPanes.Bank;
+        Client.Aisling.BankManager.Items.TryAdd(item.ItemId, item);
+        Client.SendAttributes(StatUpdateType.WeightGold);
+        Client.SendServerMessage(ServerMessageType.ActiveMessage, "Item deposited to bank");
+        return true;
     }
 
     private void RemoveFromInventoryToEquip(Item item, bool handleWeight = false)
@@ -157,9 +177,7 @@ public class EquipmentManager
         if (Client.Aisling.CurrentWeight < 0)
             Client.Aisling.CurrentWeight = 0;
 
-        Client.Aisling.BankManager.Items.TryAdd(itemObj.ItemId, itemObj);
-        Client.SendAttributes(StatUpdateType.WeightGold);
-        return true;
+        return AddItemToBankOnIssue(itemObj);
     }
 
     private void ManageDurabilitySignals(Item item)

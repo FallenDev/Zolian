@@ -36,6 +36,7 @@ public record IgnoredRecord : IEqualityOperators<IgnoredRecord, IgnoredRecord, b
 public sealed class Aisling : Player, IAisling
 {
     public WorldClient Client { get; set; }
+    public bool PlayerSaveDirty { get; set; } = false;
     public bool ObjectsUpdating { get; set; }
     public readonly ConcurrentDictionary<uint, Sprite> SpritesInView = [];
     public bool GameMasterChaosCancel { get; set; }
