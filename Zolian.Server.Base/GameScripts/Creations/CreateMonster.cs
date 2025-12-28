@@ -413,7 +413,7 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
 
     private static void MonsterExperience(Monster obj)
     {
-        var levelExperienceRange = new SortedDictionary<int, (int start, int end)>
+        var levelExperienceRange = new SortedDictionary<long, (long start, long end)>
         {
             { 3, (200, 600) },
             { 7, (600, 1500) },
@@ -452,8 +452,8 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
             { 200, (3500000, 3899999) }
         };
 
-        const int startLevel = 200;
-        const int endLevel = 1000;
+        const long startLevel = 200;
+        const long endLevel = 1000;
         // ToDo: Increment this in the future if higher levels need more experience
         var stepSize = 5;
 
@@ -466,10 +466,17 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
         }
 
         var (start, end) = levelExperienceRange.First(x => obj.Template.Level <= x.Key).Value;
-        var minXp = (int)(start * 0.9);
-        var maxXp = (int)(end * 1.1);
+        var minXp = (long)(start * 0.9);
+        var maxXp = (long)(end * 1.1);
 
-        obj.Experience = (uint)Generator.GenerateDeterminedNumberRange(minXp, maxXp);
+        obj.Experience = Generator.GenerateDeterminedLargeNumberRange(minXp, maxXp);
+    }
+
+    private static (long, long) IncrementByFivePercent((long, long) prevValues)
+    {
+        var newValue1 = (long)(prevValues.Item1 * 1.05);
+        var newValue2 = (long)(prevValues.Item2 * 1.05);
+        return (newValue1, newValue2);
     }
 
     private static (int, int) IncrementByFivePercent((int, int) prevValues)

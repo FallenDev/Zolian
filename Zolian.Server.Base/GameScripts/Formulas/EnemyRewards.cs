@@ -263,7 +263,7 @@ public class EnemyRewards : RewardScript
 
     private void GenerateExperience(Aisling player, bool canCrit = false)
     {
-        var exp = (int)_monster.Experience;
+        var exp = _monster.Experience;
 
         if (canCrit)
         {
@@ -347,14 +347,14 @@ public class EnemyRewards : RewardScript
         {
             // Monster is higher level than player
             <= -80 => 1,
-            <= -50 => (int)(exp * 0.25),
-            <= -30 => (int)(exp * 0.5),
-            <= -15 => (int)(exp * 0.75),
+            <= -50 => (long)(exp * 0.25),
+            <= -30 => (long)(exp * 0.5),
+            <= -15 => (long)(exp * 0.75),
             // Monster is lower level than player
             >= 80 => 1,
-            >= 50 => (int)(exp * 0.15),
-            >= 30 => (int)(exp * 0.33),
-            >= 15 => (int)(exp * 0.66),
+            >= 50 => (long)(exp * 0.15),
+            >= 30 => (long)(exp * 0.33),
+            >= 15 => (long)(exp * 0.66),
             _ => exp
         };
 

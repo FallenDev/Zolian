@@ -54,7 +54,7 @@ public sealed class Monster : Damageable
     public bool AbilityEnabled { get; set; }
     public bool CastEnabled { get; set; }
     public bool ObjectUpdateEnabled { get; set; }
-    public uint Experience { get; set; }
+    public long Experience { get; set; }
     public uint Ability { get; set; }
     public string Size { get; set; }
     public ushort Image { get; set; }

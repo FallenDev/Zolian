@@ -6,6 +6,7 @@ namespace Darkages.Common;
 public static class Generator
 {
     public static int GenerateDeterminedNumberRange(int min, int max) => Random.Shared.Next(min, max + 1);
+    public static long GenerateDeterminedLargeNumberRange(long min, long max) => Random.Shared.NextInt64(min, max + 1);
 
     public static int GenerateMapLocation(int rowCol) => RandomNumberGenerator.GetInt32(rowCol + 1);
 
