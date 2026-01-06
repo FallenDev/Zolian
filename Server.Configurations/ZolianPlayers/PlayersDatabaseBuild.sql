@@ -32,10 +32,10 @@ DROP PROCEDURE IF EXISTS [dbo].[SelectBanked]
 DROP PROCEDURE IF EXISTS [dbo].[SelectEquipped]
 DROP PROCEDURE IF EXISTS [dbo].[SelectInventory]
 DROP PROCEDURE IF EXISTS [dbo].[SelectDiscoveredMaps]
-DROP PROCEDURE IF EXISTS [dbo].[SelectDeBuffsCheck]
 DROP PROCEDURE IF EXISTS [dbo].[SelectDeBuffs]
-DROP PROCEDURE IF EXISTS [dbo].[SelectBuffsCheck]
 DROP PROCEDURE IF EXISTS [dbo].[SelectBuffs]
+DROP PROCEDURE IF EXISTS [dbo].[PlayerDeBuffSync]
+DROP PROCEDURE IF EXISTS [dbo].[PlayerBuffSync]
 DROP PROCEDURE IF EXISTS [dbo].[PlayerSecurity]
 DROP PROCEDURE IF EXISTS [dbo].[PlayerSaveSpells]
 DROP PROCEDURE IF EXISTS [dbo].[PlayerSaveSkills]
@@ -46,16 +46,12 @@ DROP PROCEDURE IF EXISTS [dbo].[PlayerCreation]
 DROP PROCEDURE IF EXISTS [dbo].[AccountLockoutCount]
 DROP PROCEDURE IF EXISTS [dbo].[PasswordSave]
 DROP PROCEDURE IF EXISTS [dbo].[InsertQuests]
-DROP PROCEDURE IF EXISTS [dbo].[InsertDeBuff]
-DROP PROCEDURE IF EXISTS [dbo].[InsertBuff]
 DROP PROCEDURE IF EXISTS [dbo].[IgnoredSave]
 DROP PROCEDURE IF EXISTS [dbo].[FoundMap]
-DROP PROCEDURE IF EXISTS [dbo].[DeBuffSave]
 DROP PROCEDURE IF EXISTS [dbo].[CheckIfPlayerSerialExists]
 DROP PROCEDURE IF EXISTS [dbo].[CheckIfPlayerHashExists]
 DROP PROCEDURE IF EXISTS [dbo].[CheckIfPlayerExists]
 DROP PROCEDURE IF EXISTS [dbo].[LoadItemsToCache]
-DROP PROCEDURE IF EXISTS [dbo].[BuffSave]
 DROP PROCEDURE IF EXISTS [dbo].[AddLegendMark]
 DROP PROCEDURE IF EXISTS [dbo].[ItemUpsert]
 DROP PROCEDURE IF EXISTS [dbo].[ItemMassDelete]
@@ -198,7 +194,6 @@ CREATE TABLE PlayersDiscoveredMaps
 
 CREATE TABLE PlayersBuffs
 (
-	[BuffId] INT NOT NULL PRIMARY KEY, 
 	[Serial] BIGINT FOREIGN KEY REFERENCES Players(Serial),
 	[Name] VARCHAR(30) NULL,
 	[TimeLeft] INT NOT NULL DEFAULT 0
@@ -206,7 +201,6 @@ CREATE TABLE PlayersBuffs
 
 CREATE TABLE PlayersDebuffs
 (
-	[DebuffId] INT NOT NULL PRIMARY KEY,
 	[Serial] BIGINT FOREIGN KEY REFERENCES Players(Serial),
 	[Name] VARCHAR(30) NULL,
 	[TimeLeft] INT NOT NULL DEFAULT 0
@@ -747,26 +741,6 @@ BEGIN
 END
 GO
 
--- BuffSave
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE PROCEDURE [dbo].[BuffSave]
-    @Buffs dbo.BuffType READONLY
-AS
-BEGIN
-    SET NOCOUNT ON;
-
-    UPDATE target
-    SET    target.[Name] = source.[Name],
-           target.[TimeLeft] = source.[TimeLeft]
-    FROM [ZolianPlayers].[dbo].[PlayersBuffs] AS target
-    INNER JOIN @Buffs AS source
-    ON target.Serial = source.Serial AND target.Name = source.Name;
-END
-GO
-
 -- LoadItemsToCache
 SET ANSI_NULLS ON
 GO
@@ -820,26 +794,6 @@ BEGIN
 END
 GO
 
--- DeBuffSave
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE PROCEDURE [dbo].[DeBuffSave]
-    @Debuffs dbo.DebuffType READONLY
-AS
-BEGIN
-    SET NOCOUNT ON;
-
-    UPDATE target
-    SET    target.[Name] = source.[Name],
-           target.[TimeLeft] = source.[TimeLeft]
-    FROM [ZolianPlayers].[dbo].[PlayersDebuffs] AS target
-    INNER JOIN @Debuffs AS source
-    ON target.Serial = source.Serial AND target.Name = source.Name;
-END
-GO
-
 -- FoundMap
 SET ANSI_NULLS ON
 GO
@@ -867,36 +821,6 @@ BEGIN
     SET NOCOUNT ON;
     INSERT  INTO [ZolianPlayers].[dbo].[PlayersIgnoreList] ([Serial], [PlayerIgnored])
     VALUES (@Serial, @PlayerIgnored);
-END
-GO
-
--- InsertBuff
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE PROCEDURE [dbo].[InsertBuff]
-@BuffId INT, @Serial BIGINT, @Name VARCHAR(30), @TimeLeft INT
-AS
-BEGIN
-    SET NOCOUNT ON;
-    INSERT  INTO [ZolianPlayers].[dbo].[PlayersBuffs] ([BuffId], [Serial], [Name], [TimeLeft])
-    VALUES	(@BuffId, @Serial, @Name, @TimeLeft);
-END
-GO
-
--- InsertDeBuff
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE PROCEDURE [dbo].[InsertDeBuff]
-@DebuffId INT, @Serial BIGINT, @Name VARCHAR(30), @TimeLeft INT
-AS
-BEGIN
-    SET NOCOUNT ON;
-    INSERT  INTO [ZolianPlayers].[dbo].[PlayersDeBuffs] ([DebuffId], [Serial], [Name], [TimeLeft])
-    VALUES	(@DebuffId, @Serial, @Name, @TimeLeft);
 END
 GO
 
@@ -1343,6 +1267,86 @@ BEGIN
 END
 GO
 
+-- PlayerBuffSync
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE OR ALTER PROCEDURE dbo.PlayerBuffSync
+(
+    @Serial BIGINT,
+    @Buffs  dbo.BuffType READONLY
+)
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+    ;WITH SourceRows AS
+    (
+        SELECT
+            @Serial AS Serial,
+            b.[Name],
+            b.TimeLeft
+        FROM @Buffs b
+        WHERE b.Serial = @Serial
+    )
+    MERGE dbo.PlayersBuffs WITH (HOLDLOCK) AS t
+    USING SourceRows AS s
+        ON  t.Serial = s.Serial
+        AND t.[Name] = s.[Name]
+    WHEN MATCHED THEN
+        UPDATE SET
+            t.TimeLeft = s.TimeLeft
+    WHEN NOT MATCHED BY TARGET THEN
+        INSERT (Serial, [Name], TimeLeft)
+        VALUES (s.Serial, s.[Name], s.TimeLeft)
+    WHEN NOT MATCHED BY SOURCE
+         AND t.Serial = @Serial
+    THEN DELETE;
+END;
+GO
+
+-- PlayerDeBuffSync
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE OR ALTER PROCEDURE dbo.PlayerDeBuffSync
+(
+    @Serial BIGINT,
+    @Debuffs  dbo.DebuffType READONLY
+)
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+    ;WITH SourceRows AS
+    (
+        SELECT
+            @Serial AS Serial,
+            b.[Name],
+            b.TimeLeft
+        FROM @Debuffs b
+        WHERE b.Serial = @Serial
+    )
+    MERGE dbo.PlayersDebuffs WITH (HOLDLOCK) AS t
+    USING SourceRows AS s
+        ON  t.Serial = s.Serial
+        AND t.[Name] = s.[Name]
+    WHEN MATCHED THEN
+        UPDATE SET
+            t.TimeLeft = s.TimeLeft
+    WHEN NOT MATCHED BY TARGET THEN
+        INSERT (Serial, [Name], TimeLeft)
+        VALUES (s.Serial, s.[Name], s.TimeLeft)
+    WHEN NOT MATCHED BY SOURCE
+         AND t.Serial = @Serial
+    THEN DELETE;
+END;
+GO
+
 -- SelectBuffs
 SET ANSI_NULLS ON
 GO
@@ -1356,19 +1360,6 @@ BEGIN
 END
 GO
 
--- SelectBuffsCheck
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE PROCEDURE [dbo].[SelectBuffsCheck] @Serial BIGINT, @Name VARCHAR(30)
-AS
-BEGIN
-	SET NOCOUNT ON;
-	SELECT * FROM ZolianPlayers.dbo.PlayersBuffs WHERE Serial = @Serial AND Name = @Name
-END
-GO
-
 -- SelectDeBuffs
 SET ANSI_NULLS ON
 GO
@@ -1379,19 +1370,6 @@ AS
 BEGIN
 	SET NOCOUNT ON;
 	SELECT * FROM ZolianPlayers.dbo.PlayersDebuffs WHERE Serial = @Serial
-END
-GO
-
--- SelectDeBuffsCheck
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE PROCEDURE [dbo].[SelectDeBuffsCheck] @Serial BIGINT, @Name VARCHAR(30)
-AS
-BEGIN
-	SET NOCOUNT ON;
-	SELECT * FROM ZolianPlayers.dbo.PlayersDebuffs WHERE Serial = @Serial AND Name = @Name
 END
 GO
 

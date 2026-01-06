@@ -398,8 +398,8 @@ public record AislingStorage : Sql, IEqualityOperators<AislingStorage, AislingSt
             await ExecTvpAsync(conn, tx, "ItemUpsert", "@Items", "dbo.ItemType", iDt, ct).ConfigureAwait(false);
             await ExecTvpAsync(conn, tx, "PlayerSaveSkills", "@Skills", "dbo.SkillType", skillDt, ct).ConfigureAwait(false);
             await ExecTvpAsync(conn, tx, "PlayerSaveSpells", "@Spells", "dbo.SpellType", spellDt, ct).ConfigureAwait(false);
-            await ExecTvpAsync(conn, tx, "BuffSave", "@Buffs", "dbo.BuffType", buffDt, ct).ConfigureAwait(false);
-            await ExecTvpAsync(conn, tx, "DeBuffSave", "@Debuffs", "dbo.DebuffType", debuffDt, ct).ConfigureAwait(false);
+            await ExecTvpAsync(conn, tx, "PlayerBuffSync", "@Buffs", "dbo.BuffType", buffDt, ct, new SqlParameter("@Serial", SqlDbType.BigInt) { Value = (long)player.Serial }).ConfigureAwait(false);
+            await ExecTvpAsync(conn, tx, "PlayerDeBuffSync", "@Debuffs", "dbo.DebuffType", debuffDt, ct, new SqlParameter("@Serial", SqlDbType.BigInt) { Value = (long)player.Serial }).ConfigureAwait(false);
 
             await tx.CommitAsync(ct).ConfigureAwait(false);
 
@@ -414,15 +414,26 @@ public record AislingStorage : Sql, IEqualityOperators<AislingStorage, AislingSt
         }
     }
 
-    private static async Task ExecTvpAsync(SqlConnection conn, SqlTransaction tx, string procName,
-        string paramName, string typeName, DataTable tvp, CancellationToken ct)
+    private static async Task ExecTvpAsync(SqlConnection conn, SqlTransaction tx, string procName, string tvpParamName,
+        string typeName, DataTable tvp, CancellationToken ct, params SqlParameter[] extraParams)
     {
         await using var cmd = new SqlCommand(procName, conn, tx)
         {
             CommandType = CommandType.StoredProcedure
         };
 
-        var p = cmd.Parameters.AddWithValue(paramName, tvp);
+        // Add scalar/extra parameters first
+        if (extraParams is { Length: > 0 })
+        {
+            foreach (var ep in extraParams)
+            {
+                if (ep is null) continue;
+                cmd.Parameters.Add(ep);
+            }
+        }
+
+        // Add TVP parameter
+        var p = cmd.Parameters.AddWithValue(tvpParamName, tvp);
         p.SqlDbType = SqlDbType.Structured;
         p.TypeName = typeName;
 

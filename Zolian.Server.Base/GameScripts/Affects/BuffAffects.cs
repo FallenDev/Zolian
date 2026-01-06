@@ -1,4 +1,6 @@
-﻿using Darkages.Common;
+﻿using System.Net;
+
+using Darkages.Common;
 using Darkages.Enums;
 using Darkages.Models;
 using Darkages.Sprites;
@@ -35,8 +37,7 @@ public class BuffLycanisim : Buff
             BuffSpell.TimeLeft = BuffSpell.Length;
         }
 
-        InsertBuff(aisling, affliction);
-
+        aisling.PlayerSaveDirty = true;
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=bYou begin to howl uncontrollably");
         aisling.SendAnimationNearby(345, aisling.Position);
         aisling.BonusDex += DexModifier;
@@ -57,7 +58,7 @@ public class BuffLycanisim : Buff
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "The desire to kill has passed.");
         aisling.Client.SendAttributes(StatUpdateType.Full);
-        DeleteBuff(aisling, affliction);
+        aisling.PlayerSaveDirty = true;
     }
 
     public override void OnItemChange(Aisling affected, Buff affliction)
@@ -93,8 +94,7 @@ public class BuffVampirisim : Buff
             BuffSpell.TimeLeft = BuffSpell.Length;
         }
 
-        InsertBuff(aisling, affliction);
-
+        aisling.PlayerSaveDirty = true;
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=bYour thirst is unquenchable!");
         aisling.SendAnimationNearby(345, aisling.Position);
         aisling.BonusDex += DexModifier;
@@ -115,7 +115,7 @@ public class BuffVampirisim : Buff
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "The thirst for others has passed.");
         aisling.Client.SendAttributes(StatUpdateType.Full);
-        DeleteBuff(aisling, affliction);
+        aisling.PlayerSaveDirty = true;
     }
 
     public override void OnItemChange(Aisling affected, Buff affliction)
@@ -152,7 +152,7 @@ public class buff_DiaAite : Buff
 
         if (affected is not Aisling aisling) return;
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cYou feel Ceannlaidir's hand on your shoulder");
-        InsertBuff(aisling, buff);
+        aisling.PlayerSaveDirty = true;
     }
 
     public override void OnEnded(Sprite affected, Buff buff)
@@ -162,7 +162,7 @@ public class buff_DiaAite : Buff
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Your resolve returns to normal");
-        DeleteBuff(aisling, buff);
+        aisling.PlayerSaveDirty = true;
     }
 }
 
@@ -188,7 +188,7 @@ public class buff_aite : Buff
 
         if (affected is not Aisling aisling) return;
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You feel a sense of security");
-        InsertBuff(aisling, buff);
+        aisling.PlayerSaveDirty = true;
     }
 
     public override void OnEnded(Sprite affected, Buff buff)
@@ -198,7 +198,7 @@ public class buff_aite : Buff
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Your resolve returns to normal");
-        DeleteBuff(aisling, buff);
+        aisling.PlayerSaveDirty = true;
     }
 }
 
@@ -226,7 +226,7 @@ public class buff_SpectralShield : Buff
 
         if (affected is not Aisling aisling) return;
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Spectral Shield has strengthened your resolve.");
-        InsertBuff(aisling, buff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 
@@ -238,7 +238,7 @@ public class buff_SpectralShield : Buff
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Your resolve returns to normal.");
-        DeleteBuff(aisling, buff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 
@@ -272,7 +272,7 @@ public class buff_DefenseUp : Buff
 
         if (affected is not Aisling aisling) return;
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You're now aware of your surroundings.");
-        InsertBuff(aisling, buff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 
@@ -284,7 +284,7 @@ public class buff_DefenseUp : Buff
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You've grown complacent.");
-        DeleteBuff(aisling, buff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 
@@ -322,7 +322,7 @@ public class buff_Dia_Haste : Buff
         aisling.HasteFlag = true;
         aisling.Client.SkillSpellTimer.Delay = TimeSpan.FromMilliseconds(750);
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Everything starts to slow down around you");
-        InsertBuff(aisling, buff);
+        aisling.PlayerSaveDirty = true;
     }
 
     public override void OnDurationUpdate(Sprite affected, Buff buff)
@@ -346,7 +346,7 @@ public class buff_Dia_Haste : Buff
         aisling.Client.SkillSpellTimer.Delay = TimeSpan.FromMilliseconds(1000);
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Time goes back to normal");
         aisling.Client.SendEffect(byte.MinValue, Icon);
-        DeleteBuff(aisling, buff);
+        aisling.PlayerSaveDirty = true;
     }
 }
 
@@ -375,7 +375,7 @@ public class buff_Hastenga : Buff
         aisling.HasteFlag = true;
         aisling.Client.SkillSpellTimer.Delay = TimeSpan.FromMilliseconds(500);
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Everything starts to slow down around you");
-        InsertBuff(aisling, buff);
+        aisling.PlayerSaveDirty = true;
     }
 
     public override void OnDurationUpdate(Sprite affected, Buff buff)
@@ -399,7 +399,7 @@ public class buff_Hastenga : Buff
         aisling.Client.SkillSpellTimer.Delay = TimeSpan.FromMilliseconds(1000);
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Time goes back to normal");
         aisling.Client.SendEffect(byte.MinValue, Icon);
-        DeleteBuff(aisling, buff);
+        aisling.PlayerSaveDirty = true;
     }
 }
 
@@ -427,7 +427,7 @@ public class buff_Hasten : Buff
         aisling.HasteFlag = true;
         aisling.Client.SkillSpellTimer.Delay = TimeSpan.FromMilliseconds(500);
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Everything starts to slow down around you");
-        InsertBuff(aisling, buff);
+        aisling.PlayerSaveDirty = true;
     }
 
     public override void OnDurationUpdate(Sprite affected, Buff buff)
@@ -451,7 +451,7 @@ public class buff_Hasten : Buff
         aisling.Client.SkillSpellTimer.Delay = TimeSpan.FromMilliseconds(1000);
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Time goes back to normal");
         aisling.Client.SendEffect(byte.MinValue, Icon);
-        DeleteBuff(aisling, buff);
+        aisling.PlayerSaveDirty = true;
     }
 }
 
@@ -479,7 +479,7 @@ public class buff_Haste : Buff
         aisling.HasteFlag = true;
         aisling.Client.SkillSpellTimer.Delay = TimeSpan.FromMilliseconds(750);
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Everything starts to slow down around you");
-        InsertBuff(aisling, buff);
+        aisling.PlayerSaveDirty = true;
     }
 
     public override void OnDurationUpdate(Sprite affected, Buff buff)
@@ -503,7 +503,7 @@ public class buff_Haste : Buff
         aisling.Client.SkillSpellTimer.Delay = TimeSpan.FromMilliseconds(1000);
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Time goes back to normal");
         aisling.Client.SendEffect(byte.MinValue, Icon);
-        DeleteBuff(aisling, buff);
+        aisling.PlayerSaveDirty = true;
     }
 }
 
@@ -530,7 +530,7 @@ public class buff_clawfist : Buff
 
         if (affected is not Aisling aisling) return;
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Your hands are empowered!");
-        InsertBuff(aisling, buff);
+        aisling.PlayerSaveDirty = true;
     }
 
     public override void OnEnded(Sprite affected, Buff buff)
@@ -541,7 +541,7 @@ public class buff_clawfist : Buff
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Your hands turn back to normal.");
-        DeleteBuff(aisling, buff);
+        aisling.PlayerSaveDirty = true;
     }
 }
 
@@ -564,7 +564,7 @@ public class BuffHardenedHands : Buff
 
         if (affected is not Aisling aisling) return;
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Your hands are hardened!");
-        InsertBuff(aisling, buff);
+        aisling.PlayerSaveDirty = true;
     }
 
     public override void OnEnded(Sprite affected, Buff buff)
@@ -574,7 +574,7 @@ public class BuffHardenedHands : Buff
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Your hands return to normal.");
-        DeleteBuff(aisling, buff);
+        aisling.PlayerSaveDirty = true;
     }
 }
 
@@ -594,7 +594,7 @@ public class buff_drunkenFist : Buff
 
         if (affected is not Aisling aisling) return;
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cYour body begins to sway, (+25% dmg +25% def)");
-        InsertBuff(aisling, buff);
+        aisling.PlayerSaveDirty = true;
     }
 
     public override void OnDurationUpdate(Sprite affected, Buff buff)
@@ -612,7 +612,7 @@ public class buff_drunkenFist : Buff
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cYou are no longer drunk!");
         aisling.SendAnimationNearby(1, null, aisling.Serial);
-        DeleteBuff(aisling, buff);
+        aisling.PlayerSaveDirty = true;
     }
 }
 
@@ -632,7 +632,7 @@ public class buff_ninthGate : Buff
 
         if (affected is not Aisling aisling) return;
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=bYour blood begins to boil, your bones crack!");
-        InsertBuff(aisling, buff);
+        aisling.PlayerSaveDirty = true;
     }
 
     public override void OnDurationUpdate(Sprite affected, Buff buff)
@@ -656,7 +656,7 @@ public class buff_ninthGate : Buff
 
         aisling.Client.SendAttributes(StatUpdateType.Vitality);
         aisling.SendAnimationNearby(75, null, aisling.Serial);
-        DeleteBuff(aisling, buff);
+        aisling.PlayerSaveDirty = true;
     }
 }
 
@@ -682,7 +682,7 @@ public class buff_berserk : Buff
         aisling.Client.SendAttributes(StatUpdateType.Full);
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=bEverything turns red!");
         aisling.SendAnimationNearby(324, null, aisling.Serial);
-        InsertBuff(aisling, buff);
+        aisling.PlayerSaveDirty = true;
     }
 
     public override void OnDurationUpdate(Sprite affected, Buff buff)
@@ -702,7 +702,7 @@ public class buff_berserk : Buff
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=bYou begin to realize your actions");
         aisling.SendAnimationNearby(55, null, aisling.Serial);
-        DeleteBuff(aisling, buff);
+        aisling.PlayerSaveDirty = true;
     }
 
     public override void OnItemChange(Aisling affected, Buff buff)
@@ -740,7 +740,7 @@ public class buff_RasenShoheki : Buff
 
         if (affected is not Aisling aisling) return;
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Swirling Wind surrounds you, protecting you!");
-        InsertBuff(aisling, buff);
+        aisling.PlayerSaveDirty = true;
     }
 
     public override void OnDurationUpdate(Sprite affected, Buff buff)
@@ -770,7 +770,7 @@ public class buff_RasenShoheki : Buff
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "The protection fades");
-        DeleteBuff(aisling, buff);
+        aisling.PlayerSaveDirty = true;
     }
 }
 
@@ -803,7 +803,7 @@ public class buff_wingsOfProtect : Buff
 
         if (affected is not Aisling aisling) return;
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Wings of a guardian fall upon you");
-        InsertBuff(aisling, buff);
+        aisling.PlayerSaveDirty = true;
     }
 
     public override void OnDurationUpdate(Sprite affected, Buff buff)
@@ -822,7 +822,7 @@ public class buff_wingsOfProtect : Buff
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "The protection fades");
-        DeleteBuff(aisling, buff);
+        aisling.PlayerSaveDirty = true;
     }
 }
 
@@ -854,7 +854,7 @@ public class buff_ArdDion : Buff
 
         if (affected is not Aisling aisling) return;
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You've become almost impervious.");
-        InsertBuff(aisling, buff);
+        aisling.PlayerSaveDirty = true;
     }
 
     public override void OnDurationUpdate(Sprite affected, Buff buff)
@@ -873,7 +873,7 @@ public class buff_ArdDion : Buff
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You're no longer impervious.");
-        DeleteBuff(aisling, buff);
+        aisling.PlayerSaveDirty = true;
     }
 }
 
@@ -905,7 +905,7 @@ public class buff_MorDion : Buff
 
         if (affected is not Aisling aisling) return;
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You've become almost impervious.");
-        InsertBuff(aisling, buff);
+        aisling.PlayerSaveDirty = true;
     }
 
     public override void OnDurationUpdate(Sprite affected, Buff buff)
@@ -924,7 +924,7 @@ public class buff_MorDion : Buff
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You're no longer impervious.");
-        DeleteBuff(aisling, buff);
+        aisling.PlayerSaveDirty = true;
     }
 }
 
@@ -956,7 +956,7 @@ public class buff_dion : Buff
 
         if (affected is not Aisling aisling) return;
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You've become almost impervious.");
-        InsertBuff(aisling, buff);
+        aisling.PlayerSaveDirty = true;
     }
 
     public override void OnDurationUpdate(Sprite affected, Buff buff)
@@ -975,7 +975,7 @@ public class buff_dion : Buff
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You're no longer impervious.");
-        DeleteBuff(aisling, buff);
+        aisling.PlayerSaveDirty = true;
     }
 }
 
@@ -1007,7 +1007,7 @@ public class buff_IronSkin : Buff
 
         if (affected is not Aisling aisling) return;
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Your skin turns to iron!");
-        InsertBuff(aisling, buff);
+        aisling.PlayerSaveDirty = true;
     }
 
     public override void OnDurationUpdate(Sprite affected, Buff buff)
@@ -1026,7 +1026,7 @@ public class buff_IronSkin : Buff
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Your skin turns back to normal.");
-        DeleteBuff(aisling, buff);
+        aisling.PlayerSaveDirty = true;
     }
 }
 
@@ -1058,7 +1058,7 @@ public class buff_StoneSkin : Buff
 
         if (affected is not Aisling aisling) return;
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Your skin turns to stone!");
-        InsertBuff(aisling, buff);
+        aisling.PlayerSaveDirty = true;
     }
 
 
@@ -1078,7 +1078,7 @@ public class buff_StoneSkin : Buff
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Your skin turns back to normal.");
-        DeleteBuff(aisling, buff);
+        aisling.PlayerSaveDirty = true;
     }
 }
 
@@ -1107,7 +1107,7 @@ public class buff_hide : Buff
 
         if (affected is not Aisling aisling) return;
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Blended into the shadows");
-        InsertBuff(aisling, buff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.UpdateDisplay();
     }
 
@@ -1128,7 +1128,7 @@ public class buff_hide : Buff
 
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Emerged from the shadows");
-        DeleteBuff(aisling, buff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.UpdateDisplay();
     }
 }
@@ -1157,7 +1157,7 @@ public class buff_advHide : Buff
 
         if (affected is not Aisling aisling) return;
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Blended into a mist of fog");
-        InsertBuff(aisling, buff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.UpdateDisplay();
     }
 
@@ -1178,7 +1178,7 @@ public class buff_advHide : Buff
 
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Emerged from the mist");
-        DeleteBuff(aisling, buff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.UpdateDisplay();
     }
 }
@@ -1208,7 +1208,7 @@ public class buff_ShadowFade : Buff
 
         if (affected is not Aisling aisling) return;
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Faded into the dark");
-        InsertBuff(aisling, buff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.UpdateDisplay();
     }
 
@@ -1231,7 +1231,7 @@ public class buff_ShadowFade : Buff
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Emerged from the shadows");
         client.UpdateDisplay();
-        DeleteBuff(aisling, buff);
+        aisling.PlayerSaveDirty = true;
     }
 }
 
@@ -1259,7 +1259,7 @@ public class buff_DexUp : Buff
         if (affected is not Aisling aisling) return;
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Adrenaline starts pumping!");
         aisling.Client.SendAttributes(StatUpdateType.Primary);
-        InsertBuff(aisling, buff);
+        aisling.PlayerSaveDirty = true;
     }
 
     public override void OnEnded(Sprite affected, Buff buff)
@@ -1270,7 +1270,7 @@ public class buff_DexUp : Buff
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You begin to come down from your high");
-        DeleteBuff(aisling, buff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.SendAttributes(StatUpdateType.Primary);
     }
 
@@ -1300,7 +1300,7 @@ public class buff_GryphonsGrace : Buff
 
         if (affected is not Aisling aisling) return;
         aisling.Client.SendAttributes(StatUpdateType.Primary);
-        InsertBuff(aisling, buff);
+        aisling.PlayerSaveDirty = true;
     }
 
     public override void OnEnded(Sprite affected, Buff buff)
@@ -1311,7 +1311,7 @@ public class buff_GryphonsGrace : Buff
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Starting to feel heavier again");
-        DeleteBuff(aisling, buff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.SendAttributes(StatUpdateType.Primary);
     }
 
@@ -1341,7 +1341,7 @@ public class buff_OrcishStrength : Buff
 
         if (affected is not Aisling aisling) return;
         aisling.Client.SendAttributes(StatUpdateType.Primary);
-        InsertBuff(aisling, buff);
+        aisling.PlayerSaveDirty = true;
     }
 
     public override void OnEnded(Sprite affected, Buff buff)
@@ -1352,7 +1352,7 @@ public class buff_OrcishStrength : Buff
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Muscles return to normal");
-        DeleteBuff(aisling, buff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.SendAttributes(StatUpdateType.Primary);
     }
 
@@ -1383,7 +1383,7 @@ public class buff_FeywildNectar : Buff
 
         if (affected is not Aisling aisling) return;
         aisling.Client.SendAttributes(StatUpdateType.Primary);
-        InsertBuff(aisling, buff);
+        aisling.PlayerSaveDirty = true;
     }
 
     public override void OnEnded(Sprite affected, Buff buff)
@@ -1395,7 +1395,7 @@ public class buff_FeywildNectar : Buff
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Feys disappear");
-        DeleteBuff(aisling, buff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.SendAttributes(StatUpdateType.Primary);
     }
 
@@ -1430,7 +1430,7 @@ public class buff_randWeaponElement : Buff
         if (affected is not Aisling aisling) return;
         aisling.TempOffensiveHold = aisling.SecondaryOffensiveElement;
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"Secondary Offensive element has changed {aisling.SecondaryOffensiveElement}");
-        InsertBuff(aisling, buff);
+        aisling.PlayerSaveDirty = true;
     }
 
     public override void OnDurationUpdate(Sprite affected, Buff buff)
@@ -1468,7 +1468,7 @@ public class buff_randWeaponElement : Buff
 
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Element enhancement has worn off");
-        DeleteBuff(aisling, buff);
+        aisling.PlayerSaveDirty = true;
     }
 }
 
@@ -1490,7 +1490,7 @@ public class buff_ElementalBane : Buff
 
         if (affected is not Aisling aisling) return;
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Resistance to damage increased by 33%");
-        InsertBuff(aisling, buff);
+        aisling.PlayerSaveDirty = true;
     }
 
     public override void OnEnded(Sprite affected, Buff buff)
@@ -1501,7 +1501,7 @@ public class buff_ElementalBane : Buff
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You are no longer protected.");
-        DeleteBuff(aisling, buff);
+        aisling.PlayerSaveDirty = true;
     }
 
     public override void OnItemChange(Aisling affected, Buff buff)
@@ -1539,7 +1539,7 @@ public class buff_skill_reflect : Buff
 
         if (affected is not Aisling aisling) return;
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Physical attacks are now being repelled");
-        InsertBuff(aisling, buff);
+        aisling.PlayerSaveDirty = true;
     }
 
     public override void OnDurationUpdate(Sprite affected, Buff buff)
@@ -1558,7 +1558,7 @@ public class buff_skill_reflect : Buff
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Physical attacks can get through again");
-        DeleteBuff(aisling, buff);
+        aisling.PlayerSaveDirty = true;
     }
 }
 
@@ -1587,7 +1587,7 @@ public class buff_spell_reflect : Buff
 
         if (affected is not Aisling aisling) return;
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Magical attacks are now being reflected back");
-        InsertBuff(aisling, buff);
+        aisling.PlayerSaveDirty = true;
     }
 
     public override void OnDurationUpdate(Sprite affected, Buff buff)
@@ -1606,7 +1606,7 @@ public class buff_spell_reflect : Buff
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Spells are no longer being reflected");
-        DeleteBuff(aisling, buff);
+        aisling.PlayerSaveDirty = true;
     }
 }
 
@@ -1635,7 +1635,7 @@ public class buff_PerfectDefense : Buff
 
         if (affected is not Aisling aisling) return;
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Magical attacks are now being deflected");
-        InsertBuff(aisling, buff);
+        aisling.PlayerSaveDirty = true;
     }
 
     public override void OnDurationUpdate(Sprite affected, Buff buff)
@@ -1654,7 +1654,7 @@ public class buff_PerfectDefense : Buff
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Spells are no longer being deflected");
-        DeleteBuff(aisling, buff);
+        aisling.PlayerSaveDirty = true;
     }
 }
 
@@ -1681,7 +1681,7 @@ public class aura_BriarThorn : Buff
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cAura: Briarthorn");
         aisling.SendAnimationNearby(87, null, affected.Serial);
         aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(30, false));
-        InsertBuff(aisling, buff);
+        aisling.PlayerSaveDirty = true;
     }
 
     public override void OnEnded(Sprite affected, Buff buff)
@@ -1693,7 +1693,7 @@ public class aura_BriarThorn : Buff
         item.ReapplyItemModifiers(aisling.Client);
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"Briarthorn ended");
         aisling.Client.SendEffect(byte.MinValue, Icon);
-        DeleteBuff(aisling, buff);
+        aisling.PlayerSaveDirty = true;
     }
 
     public override void OnItemChange(Aisling affected, Buff buff)
@@ -1720,7 +1720,7 @@ public class aura_LawsOfAosda : Buff
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cAura: Laws of Aosda");
         aisling.SendAnimationNearby(236, null, affected.Serial);
         aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(30, false));
-        InsertBuff(aisling, buff);
+        aisling.PlayerSaveDirty = true;
     }
 
     public override void OnDurationUpdate(Sprite affected, Buff buff)
@@ -1774,7 +1774,7 @@ public class aura_LawsOfAosda : Buff
         if (affected is not Aisling aisling) return;
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"Laws of Aosda ended");
         aisling.Client.SendEffect(byte.MinValue, Icon);
-        DeleteBuff(aisling, buff);
+        aisling.PlayerSaveDirty = true;
     }
 }
 
@@ -1794,7 +1794,7 @@ public class aura_SecuredPosition : Buff
 
         if (affected is not Aisling aisling) return;
         aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(30, false));
-        InsertBuff(aisling, buff);
+        aisling.PlayerSaveDirty = true;
     }
 
     public override void OnDurationUpdate(Sprite affected, Buff buff)
@@ -1813,7 +1813,7 @@ public class aura_SecuredPosition : Buff
         item.ReapplyItemModifiers(aisling.Client);
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"Position compromised");
         aisling.Client.SendEffect(byte.MinValue, Icon);
-        DeleteBuff(aisling, buff);
+        aisling.PlayerSaveDirty = true;
     }
 }
 
@@ -1837,7 +1837,7 @@ public class BuffArdFasNadur : Buff
         }
 
         if (affected is not Aisling player) return;
-        InsertBuff(player, buff);
+        player.PlayerSaveDirty = true;
     }
 
     public override void OnDurationUpdate(Sprite affected, Buff buff)
@@ -1854,7 +1854,7 @@ public class BuffArdFasNadur : Buff
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You're no longer amplified.");
-        DeleteBuff(aisling, buff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.SendAttributes(StatUpdateType.Full);
     }
 }
@@ -1875,7 +1875,7 @@ public class BuffMorFasNadur : Buff
         }
 
         if (affected is not Aisling player) return;
-        InsertBuff(player, buff);
+        player.PlayerSaveDirty = true;
     }
 
     public override void OnDurationUpdate(Sprite affected, Buff buff)
@@ -1892,7 +1892,7 @@ public class BuffMorFasNadur : Buff
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You're no longer amplified.");
-        DeleteBuff(aisling, buff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.SendAttributes(StatUpdateType.Full);
     }
 }
@@ -1913,7 +1913,7 @@ public class BuffFasNadur : Buff
         }
 
         if (affected is not Aisling player) return;
-        InsertBuff(player, buff);
+        player.PlayerSaveDirty = true;
     }
 
     public override void OnDurationUpdate(Sprite affected, Buff buff)
@@ -1930,7 +1930,7 @@ public class BuffFasNadur : Buff
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You're no longer amplified.");
-        DeleteBuff(aisling, buff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.SendAttributes(StatUpdateType.Full);
     }
 }
@@ -1962,7 +1962,7 @@ public class BuffFasSpiorad : Buff
         aisling.CurrentMp = aisling.MaximumMp;
         aisling.Client.SendAttributes(StatUpdateType.Vitality);
 
-        InsertBuff(aisling, buff);
+        aisling.PlayerSaveDirty = true;
         aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(26, false));
     }
 
@@ -1973,7 +1973,7 @@ public class BuffFasSpiorad : Buff
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "The impact to your body dissipates.");
-        DeleteBuff(aisling, buff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.SendAttributes(StatUpdateType.Full);
     }
 }
@@ -1997,7 +1997,7 @@ public class BuffDoubleExperience : Buff
 
         if (affected is not Aisling aisling) return;
         aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Experience has been doubled for two hours.");
-        InsertBuff(aisling, buff);
+        aisling.PlayerSaveDirty = true;
     }
 
     public override void OnEnded(Sprite affected, Buff buff)
@@ -2006,7 +2006,7 @@ public class BuffDoubleExperience : Buff
 
         if (affected is not Aisling aisling) return;
         aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You're no longer gaining double experience.");
-        DeleteBuff(aisling, buff);
+        aisling.PlayerSaveDirty = true;
     }
 }
 
@@ -2026,7 +2026,7 @@ public class BuffTripleExperience : Buff
 
         if (affected is not Aisling aisling) return;
         aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Experience has been tripled for two hours.");
-        InsertBuff(aisling, buff);
+        aisling.PlayerSaveDirty = true;
     }
 
     public override void OnEnded(Sprite affected, Buff buff)
@@ -2035,7 +2035,7 @@ public class BuffTripleExperience : Buff
 
         if (affected is not Aisling aisling) return;
         aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You're no longer gaining tripled experience.");
-        DeleteBuff(aisling, buff);
+        aisling.PlayerSaveDirty = true;
     }
 }
 

@@ -31,7 +31,7 @@ public class DebuffWrathConsequences : Debuff
         }
 
         if (affected is not Aisling aisling) return;
-        InsertDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 
@@ -54,7 +54,7 @@ public class DebuffWrathConsequences : Debuff
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Magical resistances return");
-        DeleteDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 
@@ -81,7 +81,7 @@ public class DebuffEclipseSeal : Debuff
         }
 
         if (affected is not Aisling aisling) return;
-        InsertDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 
@@ -93,7 +93,7 @@ public class DebuffEclipseSeal : Debuff
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "The eclipse has ended");
-        DeleteDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 
@@ -120,7 +120,7 @@ public class DebuffSunSeal : Debuff
         }
 
         if (affected is not Aisling aisling) return;
-        InsertDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 
@@ -132,7 +132,7 @@ public class DebuffSunSeal : Debuff
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "The curse lifted.");
-        DeleteDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 
@@ -159,7 +159,7 @@ public class DebuffPentaSeal : Debuff
         }
 
         if (affected is not Aisling aisling) return;
-        InsertDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 
@@ -171,7 +171,7 @@ public class DebuffPentaSeal : Debuff
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "The curse lifted.");
-        DeleteDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 
@@ -198,7 +198,7 @@ public class DebuffMoonSeal : Debuff
         }
 
         if (affected is not Aisling aisling) return;
-        InsertDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 
@@ -210,7 +210,7 @@ public class DebuffMoonSeal : Debuff
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "The curse lifted.");
-        DeleteDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 
@@ -237,7 +237,7 @@ public class DebuffDarkSeal : Debuff
         }
 
         if (affected is not Aisling aisling) return;
-        InsertDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 
@@ -249,7 +249,7 @@ public class DebuffDarkSeal : Debuff
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "The curse lifted.");
-        DeleteDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 
@@ -276,7 +276,7 @@ public class DebuffUasCradh : Debuff
         }
 
         if (affected is not Aisling aisling) return;
-        InsertDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 
@@ -288,7 +288,7 @@ public class DebuffUasCradh : Debuff
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "The curse lifted.");
-        DeleteDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 
@@ -315,7 +315,7 @@ public class DebuffCriochArdCradh : Debuff
         }
 
         if (affected is not Aisling aisling) return;
-        InsertDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 
@@ -327,7 +327,7 @@ public class DebuffCriochArdCradh : Debuff
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "The curse lifted.");
-        DeleteDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 
@@ -354,7 +354,7 @@ public class DebuffCriochMorCradh : Debuff
         }
 
         if (affected is not Aisling aisling) return;
-        InsertDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 
@@ -366,7 +366,7 @@ public class DebuffCriochMorCradh : Debuff
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "The curse lifted.");
-        DeleteDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 }
@@ -388,7 +388,7 @@ public class DebuffCriochCradh : Debuff
         }
 
         if (affected is not Aisling aisling) return;
-        InsertDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 
@@ -400,7 +400,7 @@ public class DebuffCriochCradh : Debuff
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "The curse lifted.");
-        DeleteDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 
@@ -427,7 +427,7 @@ public class DebuffCriochBeagCradh : Debuff
         }
 
         if (affected is not Aisling aisling) return;
-        InsertDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 
@@ -439,7 +439,7 @@ public class DebuffCriochBeagCradh : Debuff
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "The curse lifted.");
-        DeleteDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 
@@ -466,7 +466,7 @@ public class DebuffArdcradh : Debuff
         }
 
         if (affected is not Aisling aisling) return;
-        InsertDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 
@@ -478,7 +478,7 @@ public class DebuffArdcradh : Debuff
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "The curse lifted.");
-        DeleteDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 
@@ -505,7 +505,7 @@ public class DebuffMorcradh : Debuff
         }
 
         if (affected is not Aisling aisling) return;
-        InsertDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 
@@ -517,7 +517,7 @@ public class DebuffMorcradh : Debuff
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "The curse lifted.");
-        DeleteDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 
@@ -546,7 +546,7 @@ public class DebuffDecay : Debuff
         if (affected is not Aisling aisling) return;
         aisling.RegenTimerDisabled = true;
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Your body begins to decay");
-        InsertDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 
@@ -567,7 +567,7 @@ public class DebuffDecay : Debuff
         aisling.RegenTimerDisabled = false;
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Body begins to heal");
-        DeleteDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 
@@ -594,7 +594,7 @@ public class DebuffCradh : Debuff
         }
 
         if (affected is not Aisling aisling) return;
-        InsertDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 
@@ -606,7 +606,7 @@ public class DebuffCradh : Debuff
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "The curse lifted.");
-        DeleteDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 
@@ -633,7 +633,7 @@ public class DebuffBeagcradh : Debuff
         }
 
         if (affected is not Aisling aisling) return;
-        InsertDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 
@@ -645,7 +645,7 @@ public class DebuffBeagcradh : Debuff
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "The curse lifted.");
-        DeleteDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 
@@ -678,7 +678,7 @@ public class DebuffRending : Debuff
         }
 
         if (affected is not Aisling aisling) return;
-        InsertDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 
@@ -701,7 +701,7 @@ public class DebuffRending : Debuff
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Integrity restored");
-        DeleteDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 
@@ -735,7 +735,7 @@ public class DebuffCorrosiveTouch : Debuff
 
         if (affected is not Aisling aisling) return;
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Your armor began corroding");
-        InsertDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 
@@ -755,7 +755,7 @@ public class DebuffCorrosiveTouch : Debuff
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Your armor stopped corroding");
-        DeleteDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 
@@ -788,7 +788,7 @@ public class DebuffShieldBash : Debuff
         }
 
         if (affected is not Aisling aisling) return;
-        InsertDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 
@@ -811,7 +811,7 @@ public class DebuffShieldBash : Debuff
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Integrity restored");
-        DeleteDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 
@@ -844,7 +844,7 @@ public class DebuffTitansCleave : Debuff
         }
 
         if (affected is not Aisling aisling) return;
-        InsertDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 
@@ -867,7 +867,7 @@ public class DebuffTitansCleave : Debuff
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Things begin to clear up");
-        DeleteDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 
@@ -900,7 +900,7 @@ public class DebuffRetribution : Debuff
         }
 
         if (affected is not Aisling aisling) return;
-        InsertDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 
@@ -923,7 +923,7 @@ public class DebuffRetribution : Debuff
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "The target on your back has dissipated");
-        DeleteDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 
@@ -956,7 +956,7 @@ public class DebuffStabnTwist : Debuff
         }
 
         if (affected is not Aisling aisling) return;
-        InsertDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 
@@ -979,7 +979,7 @@ public class DebuffStabnTwist : Debuff
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "The feeling of vulnerability has passed");
-        DeleteDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 
@@ -1013,7 +1013,7 @@ public class DebuffHurricane : Debuff
 
         if (affected is not Aisling aisling) return;
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "The storm rages!!");
-        InsertDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 
@@ -1033,7 +1033,7 @@ public class DebuffHurricane : Debuff
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "The storm has passed");
-        DeleteDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 
@@ -1067,7 +1067,7 @@ public class DebuffBeagsuain : Debuff
         }
 
         if (affected is not Aisling aisling) return;
-        InsertDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
     }
 
     public override void OnDurationUpdate(Sprite affected, Debuff debuff)
@@ -1087,7 +1087,7 @@ public class DebuffBeagsuain : Debuff
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You can feel your limbs again");
-        DeleteDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
     }
 }
 
@@ -1112,7 +1112,7 @@ public class DebuffDarkChain : Debuff
         }
 
         if (affected is not Aisling aisling) return;
-        InsertDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
     }
 
     public override void OnDurationUpdate(Sprite affected, Debuff debuff)
@@ -1132,7 +1132,7 @@ public class DebuffDarkChain : Debuff
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You can feel your limbs again");
-        DeleteDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
     }
 }
 
@@ -1157,7 +1157,7 @@ public class DebuffSilence : Debuff
         }
 
         if (affected is not Aisling aisling) return;
-        InsertDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
     }
 
     public override void OnDurationUpdate(Sprite affected, Debuff debuff)
@@ -1176,7 +1176,7 @@ public class DebuffSilence : Debuff
         affected.Debuffs.TryRemove(debuff.Name, out _);
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
-        DeleteDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
     }
 }
 
@@ -1201,7 +1201,7 @@ public class DebuffHalt : Debuff
         }
 
         if (affected is not Aisling aisling) return;
-        InsertDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
     }
 
     public override void OnDurationUpdate(Sprite affected, Debuff debuff)
@@ -1221,7 +1221,7 @@ public class DebuffHalt : Debuff
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Things begin to move");
-        DeleteDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
     }
 }
 
@@ -1246,7 +1246,7 @@ public class DebuffBeagsuaingar : Debuff
         }
 
         if (affected is not Aisling aisling) return;
-        InsertDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
     }
 
     public override void OnDurationUpdate(Sprite affected, Debuff debuff)
@@ -1266,7 +1266,7 @@ public class DebuffBeagsuaingar : Debuff
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You can feel your limbs again");
-        DeleteDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
     }
 }
 
@@ -1291,7 +1291,7 @@ public class DebuffCharmed : Debuff
         }
 
         if (affected is not Aisling aisling) return;
-        InsertDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
     }
 
     public override void OnDurationUpdate(Sprite affected, Debuff debuff)
@@ -1311,7 +1311,7 @@ public class DebuffCharmed : Debuff
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "What was I thinking?!");
-        DeleteDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
     }
 }
 
@@ -1336,7 +1336,7 @@ public class DebuffFrozen : Debuff
         }
 
         if (affected is not Aisling aisling) return;
-        InsertDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
     }
 
     public override void OnDurationUpdate(Sprite affected, Debuff debuff)
@@ -1359,7 +1359,7 @@ public class DebuffFrozen : Debuff
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You can move again");
-        DeleteDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
     }
 }
 
@@ -1384,7 +1384,7 @@ public class DebuffAdvFrozen : Debuff
         }
 
         if (affected is not Aisling aisling) return;
-        InsertDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
     }
 
     public override void OnDurationUpdate(Sprite affected, Debuff debuff)
@@ -1407,7 +1407,7 @@ public class DebuffAdvFrozen : Debuff
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You can move again");
-        DeleteDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
     }
 }
 
@@ -1433,7 +1433,7 @@ public class DebuffSleep : Debuff
         }
 
         if (affected is not Aisling aisling) return;
-        InsertDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
     }
 
     public override void OnDurationUpdate(Sprite affected, Debuff debuff)
@@ -1457,7 +1457,7 @@ public class DebuffSleep : Debuff
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Was that a dream?");
-        DeleteDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.SendAttributes(StatUpdateType.Full);
     }
 }
@@ -1501,7 +1501,7 @@ public class DebuffReaping : Debuff
         aisling.SendAnimationNearby(24, null, aisling.Serial);
         aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(6, false));
         aisling.CurrentHp = 0;
-        InsertDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.SendAttributes(StatUpdateType.Full);
         aisling.Client.UpdateDisplay();
         aisling.Client.SendDisplayAisling(aisling);
@@ -1559,7 +1559,7 @@ public class DebuffReaping : Debuff
         {
             if (mapCheck.Debuffs.TryRemove(debuff.Name, out var saved))
             {
-                saved.DeleteDebuff(mapCheck, saved);
+                mapCheck.PlayerSaveDirty = true;
                 mapCheck.Client.SendEffect(byte.MinValue, saved.Icon);
             }
             mapCheck.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You were knocked out of the rift.");
@@ -1578,16 +1578,15 @@ public class DebuffReaping : Debuff
                 foreach (var (_, value) in aisling.Debuffs)
                 {
                     if (!aisling.Debuffs.TryRemove(value.Name, out var debuffs)) continue;
-                    debuffs.DeleteDebuff(aisling, value);
                     aisling.Client.SendEffect(byte.MinValue, value.Icon);
                 }
                 foreach (var (_, value) in aisling.Buffs)
                 {
                     if (!aisling.Buffs.TryRemove(value.Name, out var buffs)) continue;
-                    buffs.DeleteBuff(aisling, value);
                     aisling.Client.SendEffect(byte.MinValue, value.Icon);
                 }
 
+                aisling.PlayerSaveDirty = true;
                 aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Your soul has been ripped from your mortal coil.");
                 aisling.SendTargetedClientMethod(PlayerScope.AislingsOnSameMap, client => client.SendSound(5, false));
                 
@@ -1601,7 +1600,7 @@ public class DebuffReaping : Debuff
             case Aisling savedAffected when debuff.Cancelled:
                 if (savedAffected.Debuffs.TryRemove(debuff.Name, out var saved))
                 {
-                    saved.DeleteDebuff(savedAffected, saved);
+                    savedAffected.PlayerSaveDirty = true;
                     savedAffected.Client.SendEffect(byte.MinValue, saved.Icon);
                 }
 
@@ -1652,7 +1651,7 @@ public class DebuffAmaterasu : Debuff
 
         if (affected is not Aisling aisling) return;
         aisling.RegenTimerDisabled = true;
-        InsertDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 
@@ -1677,7 +1676,7 @@ public class DebuffAmaterasu : Debuff
         aisling.RegenTimerDisabled = false;
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "The burning has stopped");
-        DeleteDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.SendAttributes(StatUpdateType.Vitality);
     }
 
@@ -1741,7 +1740,7 @@ public class DebuffBleeding : Debuff
         }
 
         if (affected is not Aisling aisling) return;
-        InsertDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 
@@ -1764,7 +1763,7 @@ public class DebuffBleeding : Debuff
         if (affected is not Aisling aisling) return;
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Bleeding slowed");
-        DeleteDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.SendAttributes(StatUpdateType.Vitality);
     }
 
@@ -1818,7 +1817,7 @@ public class DebuffDeadlyPoison : Debuff
 
         if (affected is not Aisling aisling) return;
         aisling.RegenTimerDisabled = true;
-        InsertDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 
@@ -1842,7 +1841,7 @@ public class DebuffDeadlyPoison : Debuff
         aisling.RegenTimerDisabled = false;
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You're starting to feel better");
-        DeleteDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.SendAttributes(StatUpdateType.Vitality);
     }
 
@@ -1896,7 +1895,7 @@ public class DebuffUasPoison : Debuff
 
         if (affected is not Aisling aisling) return;
         aisling.RegenTimerDisabled = true;
-        InsertDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 
@@ -1920,7 +1919,7 @@ public class DebuffUasPoison : Debuff
         aisling.RegenTimerDisabled = false;
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You're starting to feel better");
-        DeleteDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.SendAttributes(StatUpdateType.Vitality);
     }
 
@@ -1974,7 +1973,7 @@ public class DebuffArdPoison : Debuff
 
         if (affected is not Aisling aisling) return;
         aisling.RegenTimerDisabled = true;
-        InsertDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 
@@ -1998,7 +1997,7 @@ public class DebuffArdPoison : Debuff
         aisling.RegenTimerDisabled = false;
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You're starting to feel better");
-        DeleteDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.SendAttributes(StatUpdateType.Vitality);
     }
 
@@ -2052,7 +2051,7 @@ public class DebuffMorPoison : Debuff
 
         if (affected is not Aisling aisling) return;
         aisling.RegenTimerDisabled = true;
-        InsertDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 
@@ -2076,7 +2075,7 @@ public class DebuffMorPoison : Debuff
         aisling.RegenTimerDisabled = false;
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You're starting to feel better");
-        DeleteDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.SendAttributes(StatUpdateType.Full);
     }
 
@@ -2130,7 +2129,7 @@ public class DebuffPoison : Debuff
 
         if (affected is not Aisling aisling) return;
         aisling.RegenTimerDisabled = true;
-        InsertDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 
@@ -2154,7 +2153,7 @@ public class DebuffPoison : Debuff
         aisling.RegenTimerDisabled = false;
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You're starting to feel better");
-        DeleteDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.SendAttributes(StatUpdateType.Full);
     }
 
@@ -2208,7 +2207,7 @@ public class DebuffBeagPoison : Debuff
 
         if (affected is not Aisling aisling) return;
         aisling.RegenTimerDisabled = true;
-        InsertDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 
@@ -2232,7 +2231,7 @@ public class DebuffBeagPoison : Debuff
         aisling.RegenTimerDisabled = false;
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You're starting to feel better");
-        DeleteDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.SendAttributes(StatUpdateType.Full);
     }
 
@@ -2276,7 +2275,7 @@ public class DebuffBlind : Debuff
 
         if (affected is not Aisling aisling) return;
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Blinded!");
-        InsertDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 
@@ -2298,7 +2297,7 @@ public class DebuffBlind : Debuff
         aisling.SendAnimationNearby(379, null, affected.Serial);
         aisling.Client.SendEffect(byte.MinValue, Icon);
         aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You can see again.");
-        DeleteDebuff(aisling, debuff);
+        aisling.PlayerSaveDirty = true;
         aisling.Client.SendAttributes(StatUpdateType.Secondary);
     }
 }
