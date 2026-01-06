@@ -3,12 +3,24 @@ After using script to generate ZolianPlayers Tables & Stored Procedures
 Ensure you encrypt the column under dbo.Players "Password"
 
 Note: You must create a database called "ZolianPlayers" prior to 
-executing this script. If a database already exists, ignore this
+executing this script.
 
-While creating characters if the encryption is new or is overwriting
-an existing encryption. You may delete your keys within your database
-and recreate them. If you encounter errors or issues you may need
-to execute this command on the stored procedures
+Encrypting:
+1. Create Master key
+2. Create Certificate
+3. Create Symmetric Key
+4. Encrypt the Password column
+5. Close Symmetric Key
+
+This script will not create encryption.
+
+WARNING: This script will drop and recreate all tables, procedures, and types.
+Ensure you have backups and understand the impact.
+
+If you need to delete this database in the future, you must first drop any existing encryption.
+Afterwards any stored procedure that calls the encrypted column must be refreshed.
+
+Use the below query and change "StroedProcedureName" to the name of the procedure.
 
 USE [ZolianPlayers]
 GO
@@ -57,8 +69,8 @@ DROP PROCEDURE IF EXISTS [dbo].[ItemUpsert]
 DROP PROCEDURE IF EXISTS [dbo].[ItemMassDelete]
 DROP PROCEDURE IF EXISTS [dbo].[CheckIfMailBoxNumberExists]
 DROP PROCEDURE IF EXISTS [dbo].[ObtainMailBoxNumber]
-DROP PROCEDURE IF EXISTS [dbo].[dbo.BankDepositStack]
 DROP PROCEDURE IF EXISTS [dbo].[BankDepositStack]
+DROP PROCEDURE IF EXISTS [dbo].[BankWithdrawStack]
 GO
 
 DROP TYPE IF EXISTS dbo.PlayerType
@@ -82,24 +94,31 @@ DROP TABLE IF EXISTS PlayersCombos;
 DROP TABLE IF EXISTS PlayersQuests;
 DROP TABLE IF EXISTS PlayersIgnoreList;
 DROP TABLE IF EXISTS Players;
+GO
 
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
 
+/*
+    -----------------------------
+            Tables
+    -----------------------------
+*/
+
 CREATE TABLE Players
 (
     [Serial] BIGINT NOT NULL PRIMARY KEY,
-	[Created] DATETIME DEFAULT CURRENT_TIMESTAMP,
+	[Created] DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	[Username] VARCHAR(12) NOT NULL,
 	[Password] VARCHAR(8) NOT NULL,
 	[PasswordAttempts] TINYINT NOT NULL DEFAULT 0,
 	[Hacked] BIT NOT NULL DEFAULT 0,
 	[LoggedIn] BIT NOT NULL DEFAULT 0,
-	[LastLogged] DATETIME DEFAULT CURRENT_TIMESTAMP,
-	[LastIP] VARCHAR(15) DEFAULT '127.0.0.1',
-	[LastAttemptIP] VARCHAR(15) DEFAULT '127.0.0.1',
+	[LastLogged] DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	[LastIP] VARCHAR(15) NOT NULL DEFAULT '127.0.0.1',
+	[LastAttemptIP] VARCHAR(15) NOT NULL DEFAULT '127.0.0.1',
 	[X] TINYINT NOT NULL DEFAULT 0,
 	[Y] TINYINT NOT NULL DEFAULT 0,
 	[CurrentMapId] INT NOT NULL DEFAULT 3029,
@@ -223,7 +242,7 @@ CREATE TABLE PlayersSkillBook
 	[Slot] INT NULL,
 	[SkillName] VARCHAR(30) NULL,
 	[CurrentCooldown] INT NULL,
-    [Uses] INT NOT NULL DEFAULT 0,
+    [Uses] INT NOT NULL DEFAULT 0
 )
 
 CREATE TABLE PlayersLegend
@@ -279,7 +298,7 @@ CREATE TABLE PlayersCombos
     [Combo12] VARCHAR(30) NULL,
     [Combo13] VARCHAR(30) NULL,
     [Combo14] VARCHAR(30) NULL,
-    [Combo15] VARCHAR(30) NULL,
+    [Combo15] VARCHAR(30) NULL
 )
 
 CREATE TABLE PlayersQuests
@@ -377,8 +396,15 @@ CREATE TABLE PlayersQuests
 CREATE TABLE PlayersIgnoreList
 (
 	[Serial] BIGINT FOREIGN KEY REFERENCES Players(Serial),
-	[PlayerIgnored] VARCHAR(12) NOT NULL,
+	[PlayerIgnored] VARCHAR(12) NOT NULL
 )
+GO
+
+/*
+    -----------------------------
+            Types
+    -----------------------------
+*/
 
 CREATE TYPE dbo.PlayerType AS TABLE
 (
@@ -642,6 +668,13 @@ CREATE TYPE dbo.DebuffType AS TABLE
     Name VARCHAR (30),
     TimeLeft INT
 );
+GO
+
+/*
+    -----------------------------
+         Stored Procedures
+    -----------------------------
+*/
 
 -- Obtain MailboxNumber
 SET ANSI_NULLS ON
@@ -652,8 +685,11 @@ CREATE PROCEDURE [dbo].[ObtainMailBoxNumber] @Serial BIGINT
 AS
 BEGIN
 	SET NOCOUNT ON;
-	SELECT MailBoxNumber FROM ZolianPlayers.dbo.PlayersQuests WHERE Serial = @Serial
+	SELECT MailBoxNumber 
+    FROM ZolianPlayers.dbo.PlayersQuests 
+    WHERE Serial = @Serial
 END
+GO
 
 -- Check MailboxNumber
 SET ANSI_NULLS ON
@@ -664,8 +700,11 @@ CREATE PROCEDURE [dbo].[CheckIfMailBoxNumberExists] @MailBoxNumber INT
 AS
 BEGIN
 	SET NOCOUNT ON;
-	SELECT Serial FROM ZolianPlayers.dbo.PlayersQuests WHERE MailBoxNumber = @MailBoxNumber
+	SELECT Serial 
+    FROM ZolianPlayers.dbo.PlayersQuests 
+    WHERE MailBoxNumber = @MailBoxNumber
 END
+GO
 
 -- Item Mass Delete
 SET ANSI_NULLS ON
@@ -678,9 +717,11 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
-    DELETE FROM [ZolianPlayers].[dbo].[PlayersItems]
-    WHERE ItemId IN (SELECT ItemId FROM @Items);
+    DELETE t
+    FROM dbo.PlayersItems AS t
+    JOIN @Items s ON s.ItemId = t.ItemId;
 END
+GO
 
 -- Item Upsert
 SET ANSI_NULLS ON
@@ -693,7 +734,7 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
-    MERGE INTO [ZolianPlayers].[dbo].[PlayersItems] AS target
+    MERGE INTO [dbo].[PlayersItems] WITH (HOLDLOCK) AS target
     USING @Items AS source 
 	ON target.ItemId = source.ItemId
 
@@ -723,6 +764,7 @@ BEGIN
     INSERT (ItemId, Name, Serial, ItemPane, Slot, InventorySlot, Color, Cursed, Durability, Identified, ItemVariance, WeapVariance, ItemQuality, OriginalQuality, Stacks, Enchantable, Tarnished, GearEnhancement, ItemMaterial, GiftWrapped)
     VALUES (source.ItemId, source.Name, source.Serial, source.ItemPane, source.Slot, source.InventorySlot, source.Color, source.Cursed, source.Durability, source.Identified, source.ItemVariance, source.WeapVariance, source.ItemQuality, source.OriginalQuality, source.Stacks, source.Enchantable, source.Tarnished, source.GearEnhancement, source.ItemMaterial, source.GiftWrapped);
 END
+GO
 
 -- AddLegendMark
 SET ANSI_NULLS ON
@@ -735,7 +777,7 @@ CREATE PROCEDURE [dbo].[AddLegendMark]
 AS
 BEGIN
     SET NOCOUNT ON;
-    INSERT  INTO [ZolianPlayers].[dbo].[PlayersLegend]
+    INSERT  INTO [dbo].[PlayersLegend]
 	([LegendId], [Serial], [Key], [IsPublic], [Time], [Color], [Icon], [Text])
     VALUES	(@LegendId, @Serial, @Key, @IsPublic, @Time, @Color, @Icon, @Text);
 END
@@ -760,11 +802,13 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE PROCEDURE [dbo].[CheckIfPlayerExists] @Name NVARCHAR(12)
+CREATE PROCEDURE [dbo].[CheckIfPlayerExists] @Name VARCHAR(12)
 AS
 BEGIN
 	SET NOCOUNT ON;
-	SELECT Username FROM ZolianPlayers.dbo.Players WHERE Username = @Name
+	SELECT Username 
+    FROM ZolianPlayers.dbo.Players 
+    WHERE Username = @Name
 END
 GO
 
@@ -773,11 +817,13 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE PROCEDURE [dbo].[CheckIfPlayerHashExists] @Name NVARCHAR(12), @Serial BIGINT
+CREATE PROCEDURE [dbo].[CheckIfPlayerHashExists] @Name VARCHAR(12), @Serial BIGINT
 AS
 BEGIN
 	SET NOCOUNT ON;
-	SELECT Username FROM ZolianPlayers.dbo.Players WHERE Username = @Name AND Serial = @Serial
+	SELECT Username 
+    FROM ZolianPlayers.dbo.Players 
+    WHERE Username = @Name AND Serial = @Serial
 END
 GO
 
@@ -790,7 +836,9 @@ CREATE PROCEDURE [dbo].[CheckIfPlayerSerialExists] @Serial BIGINT
 AS
 BEGIN
 	SET NOCOUNT ON;
-	SELECT Username FROM ZolianPlayers.dbo.Players WHERE Serial = @Serial
+	SELECT Username 
+    FROM ZolianPlayers.dbo.Players 
+    WHERE Serial = @Serial
 END
 GO
 
@@ -804,7 +852,7 @@ CREATE PROCEDURE [dbo].[FoundMap]
 AS
 BEGIN
     SET NOCOUNT ON;
-    INSERT  INTO [ZolianPlayers].[dbo].[PlayersDiscoveredMaps] ([Serial], [MapId])
+    INSERT  INTO [dbo].[PlayersDiscoveredMaps] ([Serial], [MapId])
     VALUES (@Serial, @MapId);
 END
 GO
@@ -819,7 +867,7 @@ CREATE PROCEDURE [dbo].[IgnoredSave]
 AS
 BEGIN
     SET NOCOUNT ON;
-    INSERT  INTO [ZolianPlayers].[dbo].[PlayersIgnoreList] ([Serial], [PlayerIgnored])
+    INSERT  INTO [dbo].[PlayersIgnoreList] ([Serial], [PlayerIgnored])
     VALUES (@Serial, @PlayerIgnored);
 END
 GO
@@ -850,7 +898,7 @@ AS
 BEGIN
     SET NOCOUNT ON;
     
-    INSERT INTO [ZolianPlayers].[dbo].[PlayersQuests] (
+    INSERT INTO [dbo].[PlayersQuests] (
         [Serial], [MailBoxNumber], [TutorialCompleted], [BetaReset], [StoneSmithing], [StoneSmithingTier], [MilethReputation],
 		[ArtursGift], [CamilleGreetingComplete], [ConnPotions], [CryptTerror], [CryptTerrorSlayed], [CryptTerrorContinued], [CryptTerrorContSlayed],
 		[NightTerror], [NightTerrorSlayed], [DreamWalking], [DreamWalkingSlayed], [Dar], [DarItem], [ReleasedTodesbaum], [DrunkenHabit],
@@ -897,7 +945,7 @@ CREATE PROCEDURE [dbo].[PasswordSave]
 AS
 BEGIN
     SET NOCOUNT ON;
-    UPDATE [ZolianPlayers].[dbo].[Players]
+    UPDATE [dbo].[Players]
     SET    [Password]         = @Pass,
            [PasswordAttempts] = @Attempts,
            [Hacked]           = @Hacked,
@@ -917,7 +965,7 @@ CREATE PROCEDURE [dbo].[AccountLockoutCount]
 AS
 BEGIN
     SET NOCOUNT ON;
-    UPDATE [ZolianPlayers].[dbo].[Players]
+    UPDATE [dbo].[Players]
     SET    [PasswordAttempts] = @Attempts,
            [Hacked]           = @Hacked,
            [LastAttemptIP]    = @LastAttemptIP
@@ -936,7 +984,7 @@ CREATE PROCEDURE [dbo].[PlayerCreation]
 AS
 BEGIN
     SET NOCOUNT ON;
-    INSERT  INTO [ZolianPlayers].[dbo].[Players] ([Serial], [Created], [Username], [Password], [PasswordAttempts], [Hacked], [LoggedIn], [LastLogged],
+    INSERT  INTO [dbo].[Players] ([Serial], [Created], [Username], [Password], [PasswordAttempts], [Hacked], [LoggedIn], [LastLogged],
     [X], [Y], [CurrentMapId], [Direction], [CurrentHp], [BaseHp], [CurrentMp], [BaseMp], [_ac], [_Regen], [_Dmg], [_Hit], [_Mr], [_Str], [_Int], [_Wis],
     [_Con], [_Dex], [_Luck], [AbpLevel], [AbpNext], [AbpTotal], [ExpLevel], [ExpNext], [ExpTotal], [Stage], [JobClass], [Path], [PastClass], [Race],
     [Afflictions], [Gender], [HairColor], [HairStyle], [NameColor], [Nation], [Clan], [ClanRank], [ClanTitle], [MonsterForm],
@@ -965,7 +1013,7 @@ AS
 BEGIN
     SET NOCOUNT ON;
     
-    MERGE INTO [ZolianPlayers].[dbo].[PlayersCombos] AS target
+    MERGE INTO [dbo].[PlayersCombos] AS target
     USING @Combos AS source
     ON target.Serial = source.Serial
 
@@ -1004,7 +1052,7 @@ AS
 BEGIN
     SET NOCOUNT ON;
     
-    MERGE INTO [ZolianPlayers].[dbo].[PlayersQuests] AS target
+    MERGE INTO [dbo].[PlayersQuests] AS target
     USING @Quests AS source
     ON target.Serial = source.Serial
 
@@ -1111,7 +1159,7 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
-    MERGE INTO [ZolianPlayers].[dbo].[Players] AS target
+    MERGE INTO [dbo].[Players] AS target
     USING @Players AS source 
     ON target.Serial = source.Serial
 
@@ -1225,7 +1273,7 @@ BEGIN
            target.[SkillName] = source.[Skill],
            target.[Uses] = source.[Uses],
            target.[CurrentCooldown] = source.[Cooldown]
-    FROM [ZolianPlayers].[dbo].[PlayersSkillBook] AS target
+    FROM [dbo].[PlayersSkillBook] AS target
     INNER JOIN @Skills AS source
     ON target.Serial = source.Serial AND target.SkillName = source.Skill;
 END
@@ -1248,7 +1296,7 @@ BEGIN
            target.[SpellName] = source.[Spell],
            target.[Casts] = source.[Casts],
            target.[CurrentCooldown] = source.[Cooldown]
-    FROM [ZolianPlayers].[dbo].[PlayersSpellBook] AS target
+    FROM [dbo].[PlayersSpellBook] AS target
     INNER JOIN @Spells AS source
     ON target.Serial = source.Serial AND target.SpellName = source.Spell;
 END
@@ -1259,11 +1307,13 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE PROCEDURE [dbo].[PlayerSecurity] @Name NVARCHAR(12)
+CREATE PROCEDURE [dbo].[PlayerSecurity] @Name VARCHAR(12)
 AS
 BEGIN
 	SET NOCOUNT ON;
-	SELECT Serial, Username, [Password], PasswordAttempts, Hacked, CurrentMapId FROM ZolianPlayers.dbo.Players WHERE Username = @Name
+	SELECT Serial, Username, [Password], PasswordAttempts, Hacked, CurrentMapId 
+    FROM ZolianPlayers.dbo.Players 
+    WHERE Username = @Name
 END
 GO
 
@@ -1356,7 +1406,9 @@ CREATE PROCEDURE [dbo].[SelectBuffs] @Serial BIGINT
 AS
 BEGIN
 	SET NOCOUNT ON;
-	SELECT * FROM ZolianPlayers.dbo.PlayersBuffs WHERE Serial = @Serial
+	SELECT * 
+    FROM ZolianPlayers.dbo.PlayersBuffs 
+    WHERE Serial = @Serial
 END
 GO
 
@@ -1369,7 +1421,9 @@ CREATE PROCEDURE [dbo].[SelectDeBuffs] @Serial BIGINT
 AS
 BEGIN
 	SET NOCOUNT ON;
-	SELECT * FROM ZolianPlayers.dbo.PlayersDebuffs WHERE Serial = @Serial
+	SELECT * 
+    FROM ZolianPlayers.dbo.PlayersDebuffs 
+    WHERE Serial = @Serial
 END
 GO
 
@@ -1382,7 +1436,9 @@ CREATE PROCEDURE [dbo].[SelectDiscoveredMaps] @Serial BIGINT
 AS
 BEGIN
 	SET NOCOUNT ON;
-	SELECT * FROM ZolianPlayers.dbo.PlayersDiscoveredMaps WHERE Serial = @Serial
+	SELECT * 
+    FROM ZolianPlayers.dbo.PlayersDiscoveredMaps 
+    WHERE Serial = @Serial
 END
 GO
 
@@ -1395,7 +1451,9 @@ CREATE PROCEDURE [dbo].[SelectInventory] @Serial BIGINT
 AS
 BEGIN
 	SET NOCOUNT ON;
-	SELECT * FROM ZolianPlayers.dbo.PlayersItems WHERE Serial = @Serial AND ItemPane = 'Inventory'
+	SELECT * 
+    FROM ZolianPlayers.dbo.PlayersItems 
+    WHERE Serial = @Serial AND ItemPane = 'Inventory'
 END
 GO
 
@@ -1408,7 +1466,9 @@ CREATE PROCEDURE [dbo].[SelectEquipped] @Serial BIGINT
 AS
 BEGIN
 	SET NOCOUNT ON;
-	SELECT * FROM ZolianPlayers.dbo.PlayersItems WHERE Serial = @Serial AND ItemPane = 'Equip'
+	SELECT * 
+    FROM ZolianPlayers.dbo.PlayersItems 
+    WHERE Serial = @Serial AND ItemPane = 'Equip'
 END
 GO
 
@@ -1421,7 +1481,9 @@ CREATE PROCEDURE [dbo].[SelectBanked] @Serial BIGINT
 AS
 BEGIN
 	SET NOCOUNT ON;
-	SELECT * FROM ZolianPlayers.dbo.PlayersItems WHERE Serial = @Serial AND ItemPane = 'Bank'
+	SELECT * 
+    FROM ZolianPlayers.dbo.PlayersItems 
+    WHERE Serial = @Serial AND ItemPane = 'Bank'
 END
 GO
 
@@ -1434,7 +1496,9 @@ CREATE PROCEDURE [dbo].[SelectIgnoredPlayers] @Serial BIGINT
 AS
 BEGIN
 	SET NOCOUNT ON;
-	SELECT * FROM ZolianPlayers.dbo.PlayersIgnoreList WHERE Serial = @Serial
+	SELECT * 
+    FROM ZolianPlayers.dbo.PlayersIgnoreList 
+    WHERE Serial = @Serial
 END
 GO
 
@@ -1447,7 +1511,9 @@ CREATE PROCEDURE [dbo].[SelectLegends] @Serial BIGINT
 AS
 BEGIN
 	SET NOCOUNT ON;
-	SELECT * FROM ZolianPlayers.dbo.PlayersLegend WHERE Serial = @Serial
+	SELECT * 
+    FROM ZolianPlayers.dbo.PlayersLegend 
+    WHERE Serial = @Serial
 END
 GO
 
@@ -1457,7 +1523,7 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 CREATE PROCEDURE [dbo].[SelectPlayer]
-@Name NVARCHAR (12)
+@Name VARCHAR (12)
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -1552,7 +1618,7 @@ BEGIN
            [BootColor],
            [OverCoatColor],
            [Pants]
-    FROM   [ZolianPlayers].[dbo].[Players]
+    FROM   [dbo].[Players]
     WHERE  Username = @Name;
 END
 GO
@@ -1570,7 +1636,7 @@ BEGIN
 
     SELECT Combo1, Combo2, Combo3, Combo4, Combo5, Combo6, Combo7, Combo8, Combo9,
            Combo10, Combo11, Combo12, Combo13, Combo14, Combo15
-    FROM   [ZolianPlayers].[dbo].[PlayersCombos]
+    FROM   [dbo].[PlayersCombos]
     WHERE  Serial = @Serial;
 END
 GO
@@ -1601,7 +1667,7 @@ BEGIN
 		   ArmorApothecaryAccepted, ArmorCodexDeciphered, ArmorCraftingCodexLearned, ArmorCraftingAdvancedCodexLearned,
            CthonicKillTarget, CthonicFindTarget, CthonicKillCompletions, CthonicCleansingOne, CthonicCleansingTwo,
 		   CthonicDepthsCleansing, CthonicRuinsAccess, CthonicRemainsExplorationLevel, EndedOmegasRein, CraftedMoonArmor
-    FROM   [ZolianPlayers].[dbo].[PlayersQuests]
+    FROM   [dbo].[PlayersQuests]
     WHERE  Serial = @Serial;
 END
 GO
@@ -1615,7 +1681,9 @@ CREATE PROCEDURE [dbo].[SelectSkills] @Serial BIGINT
 AS
 BEGIN
 	SET NOCOUNT ON;
-	SELECT * FROM ZolianPlayers.dbo.PlayersSkillBook WHERE Serial = @Serial
+	SELECT * 
+    FROM ZolianPlayers.dbo.PlayersSkillBook 
+    WHERE Serial = @Serial
 END
 GO
 
@@ -1628,7 +1696,9 @@ CREATE PROCEDURE [dbo].[SelectSpells] @Serial BIGINT
 AS
 BEGIN
 	SET NOCOUNT ON;
-	SELECT * FROM ZolianPlayers.dbo.PlayersSpellBook WHERE Serial = @Serial
+	SELECT * 
+    FROM ZolianPlayers.dbo.PlayersSpellBook 
+    WHERE Serial = @Serial
 END
 GO
 
@@ -1643,7 +1713,7 @@ CREATE PROCEDURE [dbo].[SkillToPlayer]
 AS
 BEGIN
     SET NOCOUNT ON;
-    INSERT  INTO [ZolianPlayers].[dbo].[PlayersSkillBook]
+    INSERT  INTO [dbo].[PlayersSkillBook]
 	([Serial], [Level], [Slot], [SkillName], [Uses], [CurrentCooldown])
     VALUES	(@Serial, @Level, @Slot, @SkillName, @Uses, @CurrentCooldown);
 END
@@ -1660,7 +1730,7 @@ CREATE PROCEDURE [dbo].[SpellToPlayer]
 AS
 BEGIN
     SET NOCOUNT ON;
-    INSERT  INTO [ZolianPlayers].[dbo].[PlayersSpellBook]
+    INSERT  INTO [dbo].[PlayersSpellBook]
 	([Serial], [Level], [Slot], [SpellName], [Casts], [CurrentCooldown])
     VALUES	(@Serial, @Level, @Slot, @SpellName, @Casts, @CurrentCooldown);
 END
