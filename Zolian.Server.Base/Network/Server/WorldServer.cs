@@ -2142,7 +2142,7 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
         if (!client.Aisling.LoggedIn) return default;
         if (client.IsRefreshing) return default;
         var readyTime = DateTime.UtcNow;
-        return readyTime.Subtract(client.LastClientRefresh).TotalSeconds < 0.4 ? default : ExecuteHandler(client, HandlerCategory.Standard, InnerOnRefreshRequest);
+        return readyTime.Subtract(client.LastClientRefresh).TotalSeconds < 0.4 ? default : ExecuteHandler(client, HandlerCategory.RealTime, InnerOnRefreshRequest);
 
         static ValueTask InnerOnRefreshRequest(IWorldClient localClient)
         {
