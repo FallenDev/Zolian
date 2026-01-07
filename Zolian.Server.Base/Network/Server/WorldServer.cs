@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Frozen;
 using System.Diagnostics;
+using System.Diagnostics.Metrics;
 using System.Net;
 using System.Net.Sockets;
 using System.Numerics;
@@ -2293,6 +2294,9 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
 
                             var prevEnabled = post.PostId > 0;
                             localClient.SendPost(post, true, prevEnabled);
+                            post.ReadPost = true;
+                            AislingStorage.UpdatePost(post, localClient.Aisling.QuestManager.MailBoxNumber);
+                            localClient.SendAttributes(StatUpdateType.Secondary);
                             break;
                         }
 

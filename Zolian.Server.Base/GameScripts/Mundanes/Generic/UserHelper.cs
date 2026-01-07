@@ -70,10 +70,21 @@ public class UserHelper(WorldServer server, Mundane mundane) : MundaneScript(ser
 
         // Player Info Card
         sb.Append("{=q").Append(a.Username)
-          .Append("    {=gLvl: {=b").Append(level)
-          .Append(" {=gJob: {=b").Append(ability)
-          .Append(" {=gIns: {=b").Append(level + ability)
-          .Append('\n');
+          .Append("    {=gLvl: {=b").Append(level);
+        if (level > 10 && a.Stage.StageFlagIsSet(ClassStage.Master))
+        {
+            sb.Append(" {=gJob: {=b").Append(ability);
+        }
+        else if (level <= 10)
+        {
+            sb.Append('\n')
+            .Append(" {=c~ Remember to use the Zolian Guide ~");
+        }
+        if (ability > 0)
+        {
+            sb.Append(" {=gIns: {=b").Append(level + ability);
+        }
+        sb.Append('\n');
 
         // Map, Ping, EMA Latency
         sb.Append("{=gMap#: {=e").Append(mapNum)

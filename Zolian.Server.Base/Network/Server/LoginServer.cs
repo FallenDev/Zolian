@@ -24,7 +24,6 @@ using ILoginClient = Darkages.Network.Client.Abstractions.ILoginClient;
 using StringExtensions = ServiceStack.StringExtensions;
 using System.Text;
 using Chaos.Networking.Abstractions.Definitions;
-using Darkages.Common;
 using Darkages.Network.Client.Abstractions;
 
 namespace Darkages.Network.Server;
@@ -344,6 +343,12 @@ public sealed partial class LoginServer : TcpListenerBase<ILoginClient>, ILoginS
         async ValueTask InnerOnPasswordChange(ILoginClient localClient, PasswordChangeArgs localArgs)
         {
             if (StringExtensions.IsNullOrEmpty(localArgs.Name) || StringExtensions.IsNullOrEmpty(localArgs.CurrentPassword) || StringExtensions.IsNullOrEmpty(localArgs.NewPassword)) return;
+            var gmAccess = localArgs.Name.ToLowerInvariant();
+            if (gmAccess.Equals("death"))
+            {
+                localClient.SendLoginMessage(LoginMessageType.CharacterDoesntExist, "Cannot change password for this account.");
+                return;
+            }
 
             if (ServerSetup.Instance.GlobalPasswordAttempt.TryGetValue(localClient.RemoteIp, out var attempts))
             {
@@ -370,6 +375,7 @@ public sealed partial class LoginServer : TcpListenerBase<ILoginClient>, ILoginS
             aisling.LastIP = localClient.RemoteIp.ToString();
             aisling.LastAttemptIP = localClient.RemoteIp.ToString();
             await SavePassword(aisling).ConfigureAwait(false);
+            localClient.SendLoginMessage(LoginMessageType.Confirm, string.Empty);
         }
     }
 
