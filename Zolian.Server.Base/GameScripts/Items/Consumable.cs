@@ -1439,7 +1439,7 @@ public class Consumable(Item item) : ItemScript(item)
             #endregion
             #region Rift Chests
 
-            case "Rift Chest lv. 500":
+            case "Rift Boss Chest":
                 {
                     if (aisling.HasItem("Moonstone Lockpick"))
                     {
@@ -1460,207 +1460,15 @@ public class Consumable(Item item) : ItemScript(item)
 
                             stockingItem = rand switch
                             {
-                                > 0 and <= 0.20 => stockingItem.Create(aisling, "Cosmic Sabre", quality, variance,
+                                > 0 and <= 0.20 => stockingItem.Create(aisling, "MewMew Claws", quality, variance,
                                     wVariance),
-                                > 0.20 and <= 0.40 => stockingItem.Create(aisling, "Slick Shades", quality, variance,
+                                > 0.20 and <= 0.40 => stockingItem.Create(aisling, "", quality, variance,
                                     wVariance),
-                                > 0.40 and <= 0.60 => stockingItem.Create(aisling, "Cathonic Shield", quality, variance,
+                                > 0.40 and <= 0.60 => stockingItem.Create(aisling, "", quality, variance,
                                     wVariance),
-                                > 0.60 and <= 0.80 => stockingItem.Create(aisling, "Kalkuri", quality, variance,
+                                > 0.60 and <= 0.80 => stockingItem.Create(aisling, "", quality, variance,
                                     wVariance),
-                                > 0.80 => stockingItem.Create(aisling, "Queen's Bow", quality, variance,
-                                    wVariance),
-                                _ => stockingItem
-                            };
-
-                            stockingItem.GiveTo(client.Aisling);
-                            client.Aisling.Inventory.RemoveFromInventory(client, Item);
-                            return;
-                        }
-
-                        var lockpick = aisling.HasItemReturnItem("Moonstone Lockpick");
-                        aisling.Inventory.RemoveRange(client, lockpick, 1);
-                        client.SendServerMessage(ServerMessageType.ActiveMessage, "{=bLockpick snapped!");
-                        return;
-                    }
-
-                    client.SendServerMessage(ServerMessageType.ActiveMessage, "{=bIt's Locked!");
-                    return;
-                }
-            case "Rift Chest lv. 600":
-                {
-                    if (aisling.HasItem("Moonstone Lockpick"))
-                    {
-                        var chance = Generator.RandomPercentPrecise();
-
-                        if (chance <= .80)
-                        {
-                            client.SendServerMessage(ServerMessageType.ActiveMessage, "{=qClick! Nice, it opened!");
-                            aisling.SendAnimationNearby(391, aisling.Position);
-                            client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(132, false));
-                            client.Aisling.GiveGold((uint)Random.Shared.Next(25_000_000, 42_000_000));
-
-                            var rand = Generator.RandomPercentPrecise();
-                            var stockingItem = new Item();
-                            var quality = ItemQualityVariance.DetermineHighQuality();
-                            var variance = ItemQualityVariance.DetermineVariance();
-                            var wVariance = ItemQualityVariance.DetermineWeaponVariance();
-
-                            stockingItem = rand switch
-                            {
-                                > 0 and <= 0.20 => stockingItem.Create(aisling, "Cosmic Sabre", quality, variance,
-                                    wVariance),
-                                > 0.20 and <= 0.40 => stockingItem.Create(aisling, "Slick Shades", quality, variance,
-                                    wVariance),
-                                > 0.40 and <= 0.60 => stockingItem.Create(aisling, "Cathonic Shield", quality, variance,
-                                    wVariance),
-                                > 0.60 and <= 0.80 => stockingItem.Create(aisling, "Kalkuri", quality, variance,
-                                    wVariance),
-                                > 0.80 => stockingItem.Create(aisling, "Queen's Bow", quality, variance,
-                                    wVariance),
-                                _ => stockingItem
-                            };
-
-                            stockingItem.GiveTo(client.Aisling);
-                            client.Aisling.Inventory.RemoveFromInventory(client, Item);
-                            return;
-                        }
-
-                        var lockpick = aisling.HasItemReturnItem("Moonstone Lockpick");
-                        aisling.Inventory.RemoveRange(client, lockpick, 1);
-                        client.SendServerMessage(ServerMessageType.ActiveMessage, "{=bLockpick snapped!");
-                        return;
-                    }
-
-                    client.SendServerMessage(ServerMessageType.ActiveMessage, "{=bIt's Locked!");
-                    return;
-                }
-            case "Rift Chest lv. 700":
-                {
-                    if (aisling.HasItem("Moonstone Lockpick"))
-                    {
-                        var chance = Generator.RandomPercentPrecise();
-
-                        if (chance <= .80)
-                        {
-                            client.SendServerMessage(ServerMessageType.ActiveMessage, "{=qClick! Nice, it opened!");
-                            aisling.SendAnimationNearby(391, aisling.Position);
-                            client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(132, false));
-                            client.Aisling.GiveGold((uint)Random.Shared.Next(25_000_000, 42_000_000));
-
-                            var rand = Generator.RandomPercentPrecise();
-                            var stockingItem = new Item();
-                            var quality = ItemQualityVariance.DetermineHighQuality();
-                            var variance = ItemQualityVariance.DetermineVariance();
-                            var wVariance = ItemQualityVariance.DetermineWeaponVariance();
-
-                            stockingItem = rand switch
-                            {
-                                > 0 and <= 0.20 => stockingItem.Create(aisling, "Cosmic Sabre", quality, variance,
-                                    wVariance),
-                                > 0.20 and <= 0.40 => stockingItem.Create(aisling, "Slick Shades", quality, variance,
-                                    wVariance),
-                                > 0.40 and <= 0.60 => stockingItem.Create(aisling, "Cathonic Shield", quality, variance,
-                                    wVariance),
-                                > 0.60 and <= 0.80 => stockingItem.Create(aisling, "Kalkuri", quality, variance,
-                                    wVariance),
-                                > 0.80 => stockingItem.Create(aisling, "Queen's Bow", quality, variance,
-                                    wVariance),
-                                _ => stockingItem
-                            };
-
-                            stockingItem.GiveTo(client.Aisling);
-                            client.Aisling.Inventory.RemoveFromInventory(client, Item);
-                            return;
-                        }
-
-                        var lockpick = aisling.HasItemReturnItem("Moonstone Lockpick");
-                        aisling.Inventory.RemoveRange(client, lockpick, 1);
-                        client.SendServerMessage(ServerMessageType.ActiveMessage, "{=bLockpick snapped!");
-                        return;
-                    }
-
-                    client.SendServerMessage(ServerMessageType.ActiveMessage, "{=bIt's Locked!");
-                    return;
-                }
-            case "Rift Chest lv. 800":
-                {
-                    if (aisling.HasItem("Moonstone Lockpick"))
-                    {
-                        var chance = Generator.RandomPercentPrecise();
-
-                        if (chance <= .80)
-                        {
-                            client.SendServerMessage(ServerMessageType.ActiveMessage, "{=qClick! Nice, it opened!");
-                            aisling.SendAnimationNearby(391, aisling.Position);
-                            client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(132, false));
-                            client.Aisling.GiveGold((uint)Random.Shared.Next(25_000_000, 42_000_000));
-
-                            var rand = Generator.RandomPercentPrecise();
-                            var stockingItem = new Item();
-                            var quality = ItemQualityVariance.DetermineHighQuality();
-                            var variance = ItemQualityVariance.DetermineVariance();
-                            var wVariance = ItemQualityVariance.DetermineWeaponVariance();
-
-                            stockingItem = rand switch
-                            {
-                                > 0 and <= 0.20 => stockingItem.Create(aisling, "Cosmic Sabre", quality, variance,
-                                    wVariance),
-                                > 0.20 and <= 0.40 => stockingItem.Create(aisling, "Slick Shades", quality, variance,
-                                    wVariance),
-                                > 0.40 and <= 0.60 => stockingItem.Create(aisling, "Cathonic Shield", quality, variance,
-                                    wVariance),
-                                > 0.60 and <= 0.80 => stockingItem.Create(aisling, "Kalkuri", quality, variance,
-                                    wVariance),
-                                > 0.80 => stockingItem.Create(aisling, "Queen's Bow", quality, variance,
-                                    wVariance),
-                                _ => stockingItem
-                            };
-
-                            stockingItem.GiveTo(client.Aisling);
-                            client.Aisling.Inventory.RemoveFromInventory(client, Item);
-                            return;
-                        }
-
-                        var lockpick = aisling.HasItemReturnItem("Moonstone Lockpick");
-                        aisling.Inventory.RemoveRange(client, lockpick, 1);
-                        client.SendServerMessage(ServerMessageType.ActiveMessage, "{=bLockpick snapped!");
-                        return;
-                    }
-
-                    client.SendServerMessage(ServerMessageType.ActiveMessage, "{=bIt's Locked!");
-                    return;
-                }
-            case "Rift Chest lv. 900":
-                {
-                    if (aisling.HasItem("Moonstone Lockpick"))
-                    {
-                        var chance = Generator.RandomPercentPrecise();
-
-                        if (chance <= .80)
-                        {
-                            client.SendServerMessage(ServerMessageType.ActiveMessage, "{=qClick! Nice, it opened!");
-                            aisling.SendAnimationNearby(391, aisling.Position);
-                            client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(132, false));
-                            client.Aisling.GiveGold((uint)Random.Shared.Next(25_000_000, 42_000_000));
-
-                            var rand = Generator.RandomPercentPrecise();
-                            var stockingItem = new Item();
-                            var quality = ItemQualityVariance.DetermineHighQuality();
-                            var variance = ItemQualityVariance.DetermineVariance();
-                            var wVariance = ItemQualityVariance.DetermineWeaponVariance();
-
-                            stockingItem = rand switch
-                            {
-                                > 0 and <= 0.20 => stockingItem.Create(aisling, "Cosmic Sabre", quality, variance,
-                                    wVariance),
-                                > 0.20 and <= 0.40 => stockingItem.Create(aisling, "Slick Shades", quality, variance,
-                                    wVariance),
-                                > 0.40 and <= 0.60 => stockingItem.Create(aisling, "Cathonic Shield", quality, variance,
-                                    wVariance),
-                                > 0.60 and <= 0.80 => stockingItem.Create(aisling, "Kalkuri", quality, variance,
-                                    wVariance),
-                                > 0.80 => stockingItem.Create(aisling, "Queen's Bow", quality, variance,
+                                > 0.80 => stockingItem.Create(aisling, "", quality, variance,
                                     wVariance),
                                 _ => stockingItem
                             };

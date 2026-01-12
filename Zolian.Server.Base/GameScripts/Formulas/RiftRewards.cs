@@ -336,7 +336,7 @@ public class RiftRewards : RewardScript
 
             var partyDiff = party.ExpLevel + player.AbpLevel - _monster.Template.Level;
             var partyExp = LevelRestrictionsOnExpAp(ap, partyDiff);
-            
+
             party.Client.EnqueueAbilityEvent(party, (int)partyExp, true);
         }
     }
@@ -414,6 +414,27 @@ public class RiftRewards : RewardScript
         if (wrist != null)
             dropList.AddRange(wrist);
 
-        return dropList;
+        // Restriction on items above level 750 to not drop in Rifts
+        var filteredDropList = new List<string>(dropList.Count);
+
+        foreach (var item in dropList)
+        {
+            // If the item template does not exist, exclude it
+            if (!ServerSetup.Instance.GlobalItemTemplateCache.TryGetValue(
+                    item, out Templates.ItemTemplate template))
+            {
+                continue;
+            }
+
+            // Exclude items whose combined level requirement is 750 or higher
+            if (template.LevelRequired + template.JobLevelRequired >= 750)
+            {
+                continue;
+            }
+
+            filteredDropList.Add(item);
+        }
+
+        return filteredDropList;
     }
 }

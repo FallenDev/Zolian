@@ -83,7 +83,8 @@ public class WorldClient : WorldClientBase, IWorldClient
         { "DayDreaming", new Stopwatch() },
         { "MailMan", new Stopwatch() },
         { "ItemAnimation", new Stopwatch() },
-        { "Invisible", new Stopwatch() }
+        { "Invisible", new Stopwatch() },
+        { "DeathRattle", new Stopwatch() }
     };
 
     public Aisling Aisling { get; set; }
@@ -192,6 +193,7 @@ public class WorldClient : WorldClientBase, IWorldClient
         CheckForMail(elapsed);
         DisplayQualityPillar(elapsed);
         ApplyAffliction(elapsed);
+        HandleDeathRattleRefresh(elapsed);
         HandleBadTrades();
         HandleSecOffenseEle();
         return Task.CompletedTask;
@@ -486,6 +488,14 @@ public class WorldClient : WorldClientBase, IWorldClient
         Aisling.Afflictions |= Afflictions.Normal;
     }
 
+    private void HandleDeathRattleRefresh(Dictionary<string, TimeSpan> elapsed)
+    {
+        if (!Aisling.DeathRattle)
+            _clientStopwatches["DeathRattle"].Restart();
+        if (elapsed["DeathRattle"].TotalMilliseconds < 300000) return;
+        Aisling.DeathRattle = false;
+    }
+
     private void HandleBadTrades()
     {
         if (Aisling.Exchange?.Trader == null) return;
@@ -500,14 +510,22 @@ public class WorldClient : WorldClientBase, IWorldClient
             Aisling.SecondaryOffensiveElement = ElementManager.Element.None;
     }
 
-    public void DeathStatusCheck(Sprite damageDealer)
+    public void PlayerDeathStatusCheck(Sprite damageDealer)
     {
         var proceed = false;
 
         if (Aisling.CurrentHp <= 0)
         {
             Aisling.CurrentHp = 1;
-            proceed = true;
+            if (Aisling.DeathRattle)
+            {
+                proceed = true;
+            }
+            else
+            {
+                ApplyDeathRattle(Aisling);
+                return;
+            }
         }
 
         if (!proceed) return;
@@ -541,6 +559,16 @@ public class WorldClient : WorldClientBase, IWorldClient
 
         var debuff = new DebuffReaping();
         EnqueueDebuffAppliedEvent(Aisling, debuff);
+    }
+
+    private void ApplyDeathRattle(Aisling player)
+    {
+        player.DeathRattle = true;
+        player.Client.SendServerMessage(ServerMessageType.ActiveMessage, "You feel a cold chill run down your spine...");
+        player.SendAnimationNearby(401, player.Position);
+        var save = (int)(player.MaximumHp * 0.05);
+        player.CurrentHp = save;
+        player.Client.SendAttributes(StatUpdateType.Vitality);
     }
 
     private static void ReviveOnPlayerKillMap(Aisling aisling)
@@ -4138,7 +4166,7 @@ public class WorldClient : WorldClientBase, IWorldClient
         if (user != null)
         {
             user.CurrentHp = 0;
-            user.Client.DeathStatusCheck(new Item());
+            user.Client.PlayerDeathStatusCheck(new Item());
         }
     }
 
@@ -4404,6 +4432,24 @@ public class WorldClient : WorldClientBase, IWorldClient
                     $"{ServerSetup.Instance.Config.AbilityUpMessage}, Job Level: {player.AbpLevel} " +
                     $"(+{ranksGained} rank{(ranksGained == 1 ? "" : "s")})");
                 player.SendAnimationNearby(385, null, player.Serial, 75);
+
+                if (player.AbpLevel == 500)
+                {
+                    player.Client.SendServerMessage(ServerMessageType.ActiveMessage,
+                        "You have reached the maximum level. Congratulations!");
+
+                    var legend = new Legend.LegendItem
+                    {
+                        Key = $"{player.Username}{player.Serial}Maxed",
+                        IsPublic = true,
+                        Time = DateTime.UtcNow,
+                        Color = LegendColor.RedPurpleG5,
+                        Icon = (byte)LegendIcon.Victory,
+                        Text = "Acendant of Chaos"
+                    };
+
+                    player.LegendBook.AddLegend(legend, player.Client);
+                }
             }
 
             player.CurrentHp = player.MaximumHp;

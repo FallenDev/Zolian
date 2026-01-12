@@ -200,7 +200,7 @@ public class Damageable : Movable
         {
             damagedPlayer.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendHealthBar(this, sound));
             if (CurrentHp <= 0)
-                damagedPlayer.Client.DeathStatusCheck(damageDealingSprite);
+                damagedPlayer.Client.PlayerDeathStatusCheck(damageDealingSprite);
         }
         else
             SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendHealthBar(this, sound));
@@ -1331,7 +1331,7 @@ public class Damageable : Movable
         {
             aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendHealthBar(this, sound));
             if (CurrentHp <= 0)
-                aisling.Client.DeathStatusCheck(damageDealingSprite);
+                aisling.Client.PlayerDeathStatusCheck(damageDealingSprite);
         }
         else
             SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendHealthBar(this, sound));

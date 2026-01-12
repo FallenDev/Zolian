@@ -74,12 +74,14 @@ public abstract class RewardScript
         [(551, 600)] = ["Flame-Etched Dragon's Cingulum", "Wind-Etched Dragon's Cingulum", "Earth-Etched Dragon's Cingulum", "Sea-Etched Dragon's Cingulum", "Void-Etched Dragon's Cingulum", "Holy-Etched Dragon's Cingulum"],
         [(601, 650)] = ["Void-Etched Dragon's Cingulum", "Holy-Etched Dragon's Cingulum"],
         [(651, 700)] = ["Skull Dragon's Void Clasp", "Skull Dragon's Holy Clasp"],
-        [(701, 750)] = null,
-        [(751, 800)] = null,
-        [(801, 850)] = null,
-        [(851, 900)] = null,
-        [(901, 950)] = null,
-        [(951, 1000)] = null
+        [(701, 750)] = ["Holy Mantled Belt", "Void Mantled Belt", "Fire Mantled Belt", "Wind Mantled Belt", "Water Mantled Belt", "Earth Mantled Belt"],
+        [(751, 800)] = ["Holy Sigilbound Belt", "Void Sigilbound Belt", "Fire Sigilbound Belt", "Wind Sigilbound Belt", "Water Sigilbound Belt", "Earth Sigilbound Belt"],
+        [(801, 850)] = ["Holy Lithe Girdle", "Void Lithe Girdle", "Fire Lithe Girdle", "Wind Lithe Girdle", "Water Lithe Girdle", "Earth Lithe Girdle"],
+        [(851, 900)] = ["Holy Runewoven Belt", "Void Runewoven Belt"],
+        [(901, 950)] = ["Fire Ascendant Belt", "Wind Ascendant Belt", "Water Ascendant Belt", "Earth Ascendant Belt"],
+        [(951, 980)] = ["Holy Ascendant Belt", "Void Ascendant Belt"],
+        [(981, 994)] = ["Holy Sovereign Dragon Girdle", "Void Sovereign Dragon Girdle"],
+        [(995, 1000)] = ["Holy Abyssal Girdle", "Void Abyssal Girdle"]
     };
 
     protected static readonly Dictionary<(int, int), List<string>> BootDrops = new()
@@ -109,13 +111,15 @@ public abstract class RewardScript
         [(501, 550)] = ["Atlantis Sandals", "Depth Voyagers"],
         [(551, 600)] = ["Obsidian Tipped Voyagers"],
         [(601, 650)] = ["Laced Obsidian Boots"],
-        [(651, 700)] = null,
-        [(701, 750)] = null,
+        [(651, 700)] = ["Shadow Wrappings"],
+        [(701, 750)] = ["Mantled Treads"],
         [(751, 800)] = null,
-        [(801, 850)] = null,
-        [(851, 900)] = null,
-        [(901, 950)] = null,
-        [(951, 1000)] = null
+        [(801, 850)] = ["Sigilbound Sabatons", "Lithe Sandals", "Iced Lithe Sandals"],
+        [(851, 900)] = ["Runewoven Sandals", "Pitch Runewoven Sandals"],
+        [(901, 950)] = ["Graymaw Battle Boots"],
+        [(951, 980)] = ["Ascendant Treads"],
+        [(981, 994)] = ["Traveler's Treads", "Pegasus's Boots"],
+        [(995, 1000)] = ["Sovereign Dragon Boots", "Abyssal Treads"]
     };
 
     protected static readonly Dictionary<(int, int), List<string>> EarringDrops = new()
