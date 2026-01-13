@@ -658,13 +658,11 @@ public static class NpcShopExtensions
         return ItemDetail.OriginalQuality switch
         {
             Item.Quality.Damaged => 1000,
-            Item.Quality.Common => 20000,
-            Item.Quality.Uncommon => 50000,
-            Item.Quality.Rare => 500000,
-            Item.Quality.Epic => 1000000,
-            Item.Quality.Legendary => 25000000,
-            Item.Quality.Forsaken => 100000000,
-            Item.Quality.Mythic => 1000000000,
+            Item.Quality.Common => 20_000,
+            Item.Quality.Uncommon => 50_000,
+            Item.Quality.Rare => 15_000_000,
+            Item.Quality.Epic => 50_000_000,
+            Item.Quality.Legendary => 700_000_000,
             _ => 0
         };
     }
