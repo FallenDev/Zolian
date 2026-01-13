@@ -122,7 +122,7 @@ public class Todience(WorldServer server, Mundane mundane) : MundaneScript(serve
         }
 
         // Drop-path supports polishing only for these states
-        if (item.ItemQuality is Item.Quality.Uncommon or Item.Quality.Common or Item.Quality.Damaged)
+        if (item.ItemQuality is Item.Quality.Uncommon or Item.Quality.Common or Item.Quality.Damaged or Item.Quality.Rare)
         {
             HandleItemSelection(client, item.InventorySlot.ToString());
             return;
