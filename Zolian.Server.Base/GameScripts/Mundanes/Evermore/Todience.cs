@@ -6,10 +6,10 @@ using Darkages.ScriptingBase;
 using Darkages.Sprites.Entity;
 using Darkages.Types;
 
-namespace Darkages.GameScripts.Mundanes.Mileth;
+namespace Darkages.GameScripts.Mundanes.Evermore;
 
-[Script("Callum")]
-public class Callum(WorldServer server, Mundane mundane) : MundaneScript(server, mundane)
+[Script("Todience")]
+public class Todience(WorldServer server, Mundane mundane) : MundaneScript(server, mundane)
 {
     private Item? _itemDetail;
     private uint _cost;
@@ -74,11 +74,11 @@ public class Callum(WorldServer server, Mundane mundane) : MundaneScript(server,
     {
         var options = new[]
         {
-            new Dialog.OptionsDataItem(R_Top_Detail, "Detail"),
+            new Dialog.OptionsDataItem(R_Top_Detail, "Detail Services"),
             new Dialog.OptionsDataItem(R_Top_Nothing, "Nothing"),
         };
 
-        client.SendOptionsDialog(Mundane, "*cleans glass* Need something?", options);
+        client.SendOptionsDialog(Mundane, "Sweet Sally walks the heathered road at dusk's last fading glow,\nHer song's a thread of ancient days the northern winds still know.", options);
     }
 
     private void ShowDetailIntro(WorldClient client)
@@ -91,7 +91,7 @@ public class Callum(WorldServer server, Mundane mundane) : MundaneScript(server,
 
         client.SendOptionsDialog(
             Mundane,
-            "You've heard of my service then? I'm able to increase the quality of an item for a fee.",
+            "The guild pays me extra to keep you Aislings around. I'm able to increase the quality of an item for a fee.",
             options
         );
     }
@@ -106,7 +106,7 @@ public class Callum(WorldServer server, Mundane mundane) : MundaneScript(server,
         client.Aisling.GoldPoints -= cost;
         client.SendAttributes(StatUpdateType.WeightGold);
         SayPublic(client, $"{client.Aisling.Username}, good as new!");
-        client.SendOptionsDialog(Mundane, $"I put a lot of work into your {item.DisplayName}{{=a, hope you like it.");
+        client.SendOptionsDialog(Mundane, $"*hands you your {item.DisplayName}{{=a*... And hearts grow light where'er she sings, like embers long ago.");
     }
 
     public override void OnItemDropped(WorldClient client, Item item)
@@ -136,7 +136,7 @@ public class Callum(WorldServer server, Mundane mundane) : MundaneScript(server,
     private void ShowEligibleItemsList(WorldClient client)
     {
         // Keep your existing eligibility list source
-        var eligible = NpcShopExtensions.GetCharacterDetailingByteListForMidGradePolish(client);
+        var eligible = NpcShopExtensions.GetCharacterDetailingByteListForMidHighGradePolish(client);
 
         if (eligible.Count == 0)
         {
@@ -146,7 +146,7 @@ public class Callum(WorldServer server, Mundane mundane) : MundaneScript(server,
 
         client.SendItemSellDialog(
             Mundane,
-            "I can polish and upgrade Damaged, Common, or Uncommon items. Pick an item you'd like polished.",
+            "I can polish and upgrade Damaged, Common, Uncommon, or Rare items. Pick an item you'd like polished.",
             eligible
         );
     }
@@ -237,9 +237,8 @@ public class Callum(WorldServer server, Mundane mundane) : MundaneScript(server,
             return false;
         }
 
-        // This NPC is explicitly a polish ladder up to Rare
-        if (item.ItemQuality is Item.Quality.Rare
-            or Item.Quality.Epic
+        // This NPC is explicitly a polish ladder up to Epic
+        if (item.ItemQuality is Item.Quality.Epic
             or Item.Quality.Legendary
             or Item.Quality.Forsaken
             or Item.Quality.Mythic
@@ -250,7 +249,7 @@ public class Callum(WorldServer server, Mundane mundane) : MundaneScript(server,
             return false;
         }
 
-        if (item.ItemQuality is not (Item.Quality.Damaged or Item.Quality.Common or Item.Quality.Uncommon))
+        if (item.ItemQuality is not (Item.Quality.Damaged or Item.Quality.Common or Item.Quality.Uncommon or Item.Quality.Rare))
         {
             client.SendOptionsDialog(Mundane, "Yea, I won't touch that.");
             return false;
@@ -271,12 +270,13 @@ public class Callum(WorldServer server, Mundane mundane) : MundaneScript(server,
             Item.Quality.Damaged => Item.Quality.Common,
             Item.Quality.Common => Item.Quality.Uncommon,
             Item.Quality.Uncommon => Item.Quality.Rare,
+            Item.Quality.Rare => Item.Quality.Epic,
             _ => default
         };
 
         if (after == default)
         {
-            failureReason = "I can only polish Damaged, Common, or Uncommon items.";
+            failureReason = "I can only polish Damaged, Common, Uncommon, or Rare items.";
             return false;
         }
 

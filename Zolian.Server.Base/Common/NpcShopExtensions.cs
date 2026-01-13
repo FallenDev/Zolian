@@ -602,20 +602,20 @@ public static class NpcShopExtensions
 
     #region Repair
 
-    public static List<byte> GetCharacterDetailingByteListForLowGradePolish(WorldClient client)
-    {
-        var inventory = new List<Item>(client.Aisling.Inventory.Items.Values.Where(i =>
-            i != null && i.Template.CanStack == false && i.Template.Enchantable));
-
-        return inventory.Where(i => i.ItemQuality is Item.Quality.Damaged or Item.Quality.Common).Select(i => i.InventorySlot).ToList();
-    }
-
     public static List<byte> GetCharacterDetailingByteListForMidGradePolish(WorldClient client)
     {
         var inventory = new List<Item>(client.Aisling.Inventory.Items.Values.Where(i =>
             i != null && i.Template.CanStack == false && i.Template.Enchantable));
 
         return inventory.Where(i => i.ItemQuality is Item.Quality.Damaged or Item.Quality.Common or Item.Quality.Uncommon).Select(i => i.InventorySlot).ToList();
+    }
+
+    public static List<byte> GetCharacterDetailingByteListForMidHighGradePolish(WorldClient client)
+    {
+        var inventory = new List<Item>(client.Aisling.Inventory.Items.Values.Where(i =>
+            i != null && i.Template.CanStack == false && i.Template.Enchantable));
+
+        return inventory.Where(i => i.ItemQuality is Item.Quality.Damaged or Item.Quality.Common or Item.Quality.Uncommon or Item.Quality.Rare).Select(i => i.InventorySlot).ToList();
     }
 
     public static List<byte> GetCharacterDetailingByteListForHighGradePolish(WorldClient client)
@@ -660,7 +660,7 @@ public static class NpcShopExtensions
             Item.Quality.Damaged => 1000,
             Item.Quality.Common => 20000,
             Item.Quality.Uncommon => 50000,
-            Item.Quality.Rare => 100000,
+            Item.Quality.Rare => 500000,
             Item.Quality.Epic => 1000000,
             Item.Quality.Legendary => 25000000,
             Item.Quality.Forsaken => 100000000,
