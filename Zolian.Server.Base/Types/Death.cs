@@ -1,6 +1,5 @@
 ﻿using Darkages.Enums;
 using Darkages.Network.Server;
-using Darkages.Sprites;
 using Darkages.Sprites.Entity;
 using Microsoft.Extensions.Logging;
 using MapFlags = Darkages.Enums.MapFlags;

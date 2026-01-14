@@ -1,9 +1,12 @@
-﻿using Darkages.Network.Client;
-using Darkages.ScriptingBase;
-using Darkages.Types;
-using System.Numerics;
+﻿using System.Numerics;
+
 using Darkages.Common;
+using Darkages.Enums;
+using Darkages.Network.Client;
+using Darkages.ScriptingBase;
+using Darkages.Sprites;
 using Darkages.Sprites.Entity;
+using Darkages.Types;
 
 namespace Darkages.GameScripts.Areas.Piet;
 
@@ -88,13 +91,15 @@ public class EvermoreHallsA : AreaScript
 
     private static void OnPoleTrap(WorldClient client)
     {
-        client.SendAnimation(140, client.Aisling.Position);
-        client.Aisling.ApplyTrapDamage(client.Aisling, 150000, 59);
+        client.Aisling.ApplyTrapDamage(client.Aisling, 500000);
+        client.Aisling.SendAnimationNearby(140, client.Aisling.Position);
+        client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(59, false));
     }
 
     private static void OnSpikeTrap(WorldClient client)
     {
-        client.SendAnimation(112, client.Aisling.Position);
-        client.Aisling.ApplyTrapDamage(client.Aisling, 250000, 68);
+        client.Aisling.ApplyTrapDamage(client.Aisling, 750000);
+        client.Aisling.SendAnimationNearby(112, client.Aisling.Position);
+        client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(68, false));
     }
 }

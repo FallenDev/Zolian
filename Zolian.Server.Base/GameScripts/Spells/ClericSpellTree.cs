@@ -395,7 +395,6 @@ public class Heal_Minor(Spell spell) : SpellScript(spell)
                 if (target.CurrentHp > target.MaximumHp)
                     target.CurrentHp = target.MaximumHp;
 
-                aisling.Client.SendHealthBar(target, Spell.Template.Sound);
                 if (target is Aisling targetAisling)
                     targetAisling.Client.SendAttributes(StatUpdateType.FullVitality);
             }
@@ -504,7 +503,6 @@ public class Heal_Major(Spell spell) : SpellScript(spell)
                 if (target.CurrentHp > target.MaximumHp)
                     target.CurrentHp = target.MaximumHp;
 
-                aisling.Client.SendHealthBar(target, Spell.Template.Sound);
                 if (target is Aisling targetAisling)
                     targetAisling.Client.SendAttributes(StatUpdateType.FullVitality);
             }
@@ -613,7 +611,6 @@ public class Heal_Critical(Spell spell) : SpellScript(spell)
                 if (target.CurrentHp > target.MaximumHp)
                     target.CurrentHp = target.MaximumHp;
 
-                aisling.Client.SendHealthBar(target, Spell.Template.Sound);
                 if (target is Aisling targetAisling)
                     targetAisling.Client.SendAttributes(StatUpdateType.FullVitality);
             }
@@ -733,7 +730,6 @@ public class Dire_Aid(Spell spell) : SpellScript(spell)
                 if (target.CurrentHp > target.MaximumHp)
                     target.CurrentHp = target.MaximumHp;
 
-                aisling.Client.SendHealthBar(target, Spell.Template.Sound);
                 if (target is Aisling targetAisling)
                     targetAisling.Client.SendAttributes(StatUpdateType.FullVitality);
             }
@@ -850,7 +846,7 @@ public class Healing_Winds(Spell spell) : SpellScript(spell)
                 if (partyMember.CurrentHp > partyMember.MaximumHp)
                     partyMember.CurrentHp = partyMember.MaximumHp;
 
-                partyMember.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendHealthBar(partyMember, 8));
+                partyMember.Client.SendSound(8, false);
                 partyMember.SendAnimationNearby(267, null, partyMember.Serial);
                 partyMember.Client.SendAttributes(StatUpdateType.Vitality);
             }
@@ -862,7 +858,7 @@ public class Healing_Winds(Spell spell) : SpellScript(spell)
             if (aisling.CurrentHp > aisling.MaximumHp)
                 aisling.CurrentHp = aisling.MaximumHp;
 
-            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendHealthBar(aisling, 8));
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(8, false));
             aisling.Client.SendAttributes(StatUpdateType.Vitality);
         }
     }

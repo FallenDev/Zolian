@@ -1,5 +1,6 @@
 ﻿using Darkages.Enums;
 using Darkages.Sprites;
+using Darkages.Sprites.Entity;
 
 using System.Numerics;
 using System.Text;

@@ -6,7 +6,7 @@ using Darkages.Common;
 using Darkages.Database;
 using Darkages.Enums;
 using Darkages.Network.Client;
-using Darkages.Sprites;
+using Darkages.Sprites.Entity;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
 using System.Data;

@@ -1,5 +1,6 @@
 ﻿using Darkages.GameScripts.Affects;
 using Darkages.Sprites;
+using Darkages.Sprites.Entity;
 
 namespace Darkages.Types;
 

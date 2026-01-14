@@ -215,11 +215,7 @@ public class Movable : Identifiable
             AddPlayersToSelection(selectedPlayers, WithinRangeOf);
             SendToSelectedPlayers(selectedPlayers, c => c.SendAnimation(targetEffect, position, targetSerial, speed, casterEffect, casterSerial));
         }
-        catch
-        {
-            ServerSetup.EventsLogger($"Issue with SendAnimationNearby called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}");
-            SentrySdk.CaptureMessage($"Issue with SendAnimationNearby called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
-        }
+        catch { }
 
         return this;
     }
@@ -324,7 +320,7 @@ public class Movable : Identifiable
             foreach (var (serial, player) in players)
             {
                 if (player?.Client == null) continue;
-                if ((method.Method.Name.Contains("SendArmorBodyAnimationNearby") || method.Method.Name.Contains("SendAnimationNearby")) 
+                if ((method.Method.Name.Contains("SendArmorBodyAnimationNearby") || method.Method.Name.Contains("SendAnimationNearby"))
                     && !player.GameSettings.Animations) continue;
                 method(player.Client);
             }

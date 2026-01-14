@@ -63,7 +63,7 @@ public class TempleOfVoid(WorldServer server, Mundane mundane) : MundaneScript(s
                             break;
                     }
 
-                    client.SendAnimation(262, null, client.Aisling.Serial);
+                    client.Aisling.SendAnimationNearby(262, null, client.Aisling.Serial);
                     break;
                 }
             case 2:

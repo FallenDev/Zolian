@@ -9,7 +9,6 @@ using Darkages.Network.Client;
 using Darkages.Network.Server;
 using Darkages.Object;
 using Darkages.Sprites.Abstractions;
-using Darkages.Sprites.Entity;
 using Darkages.Templates;
 using Darkages.Types;
 
@@ -19,7 +18,7 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Numerics;
 
-namespace Darkages.Sprites;
+namespace Darkages.Sprites.Entity;
 
 public record KillRecord : IEqualityOperators<KillRecord, KillRecord, bool>
 {

@@ -1,7 +1,21 @@
-﻿namespace Darkages.Enums;
+﻿using Darkages.Sprites;
+using Darkages.Sprites.Entity;
+
+namespace Darkages.Enums;
 
 public static class SpriteMaker
 {
+    public static byte SpriteKind(Sprite e)
+    {
+        return e switch
+        {
+            Aisling => 0x00,
+            Mundane => 0x01,
+            Monster => 0x02,
+            _ => 0x00
+        };
+    }
+
     public static string GenderValue(Gender e)
     {
         return e switch

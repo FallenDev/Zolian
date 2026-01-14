@@ -4,6 +4,7 @@ using Chaos.Networking.Abstractions;
 using Darkages.Meta;
 using Darkages.Models;
 using Darkages.Sprites;
+using Darkages.Sprites.Entity;
 using Darkages.Templates;
 using Darkages.Types;
 

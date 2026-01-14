@@ -1381,19 +1381,6 @@ public class WorldClient : WorldClientBase, IWorldClient
     }
 
     /// <summary>
-    /// For Diagnostic Logging of Packets Sent from Server to Client -- Off when not needed
-    /// </summary>
-    private void ServerPacketDisplayBuilder()
-    {
-        //var stackTrace = new StackTrace();
-        //var currentMethod = stackTrace.GetFrame(1)?.GetMethod()?.Name ?? "Unknown";
-        //var callingMethod = stackTrace.GetFrame(2)?.GetMethod()?.Name ?? "Unknown";
-        //var callingMethodTwo = stackTrace.GetFrame(3)?.GetMethod()?.Name ?? "Unknown";
-        //var callingMethodThree = stackTrace.GetFrame(4)?.GetMethod()?.Name ?? "Unknown";
-        //ServerSetup.Instance.Game.ServerPacketLogger.LogPacket(RemoteIp, $"{Aisling?.Username ?? RemoteIp.ToString()} with: {currentMethod}, from: {callingMethod}, from: {callingMethodTwo}, from: {callingMethodThree}");
-    }
-
-    /// <summary>
     /// 0x02 - Send Login Message
     /// </summary>
     public void SendLoginMessage(LoginMessageType loginMessageType, string message = null)
@@ -1428,7 +1415,6 @@ public class WorldClient : WorldClientBase, IWorldClient
             }
         };
 
-        ServerPacketDisplayBuilder();
         Send(args);
     }
 
@@ -1448,7 +1434,6 @@ public class WorldClient : WorldClientBase, IWorldClient
             }
         };
 
-        ServerPacketDisplayBuilder();
         Send(args);
     }
 
@@ -1471,7 +1456,6 @@ public class WorldClient : WorldClientBase, IWorldClient
             }
         };
 
-        ServerPacketDisplayBuilder();
         Send(args);
     }
 
@@ -1489,21 +1473,6 @@ public class WorldClient : WorldClientBase, IWorldClient
             else
                 point = new Point(position.X, position.Y);
 
-            var spritesInViewAndMe = new ConcurrentDictionary<uint, Sprite>();
-            foreach (var (key, value) in Aisling.SpritesInView)
-            {
-                spritesInViewAndMe.TryAdd(key, value);
-            }
-
-            spritesInViewAndMe.TryAdd(Aisling.Serial, Aisling);
-
-            // If no positions and no sprite, exit
-            if (position is null && targetSerial == 0 && casterSerial == 0) return;
-            // If target serial is declared, but target isn't in view, exit
-            if (targetSerial != 0 && !spritesInViewAndMe.TryGetValue(targetSerial, out _)) return;
-            // If caster serial is declared, but caster isn't in view, exit
-            if (casterSerial != 0 && Aisling.Serial != casterSerial && !spritesInViewAndMe.TryGetValue(casterSerial, out _)) return;
-
             var args = new AnimationArgs
             {
                 AnimationSpeed = speed,
@@ -1514,18 +1483,23 @@ public class WorldClient : WorldClientBase, IWorldClient
                 TargetPoint = point
             };
 
-            var stackTrace = new StackTrace();
-            var callingMethodOne = stackTrace.GetFrame(2)?.GetMethod()?.Name ?? "Unknown";
-            var callingMethodTwo = stackTrace.GetFrame(3)?.GetMethod()?.Name ?? "Unknown";
-            var callingMethodThree = stackTrace.GetFrame(4)?.GetMethod()?.Name ?? "Unknown";
-            var callingMethodFour = stackTrace.GetFrame(5)?.GetMethod()?.Name ?? "Unknown";
-            ServerSetup.Instance.Game.ServerPacketLogger.LogPacket(RemoteIp, $"{Aisling?.Username ?? RemoteIp.ToString()} Animation from: {callingMethodOne}, from: {callingMethodTwo}, from: {callingMethodThree}, from: {callingMethodFour}");
             Send(args);
         }
         catch
         {
-            ServerSetup.EventsLogger($"Issue in SendAnimation called from {new StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}");
-            SentrySdk.CaptureMessage($"Issue with SendAnimation called from {new StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
+            try
+            {
+                var stackTrace = new StackTrace();
+                var callingMethodOne = stackTrace.GetFrame(2)?.GetMethod()?.Name ?? "Unknown";
+                var callingMethodTwo = stackTrace.GetFrame(3)?.GetMethod()?.Name ?? "Unknown";
+                var callingMethodThree = stackTrace.GetFrame(4)?.GetMethod()?.Name ?? "Unknown";
+                var callingMethodFour = stackTrace.GetFrame(5)?.GetMethod()?.Name ?? "Unknown";
+                var trace = $"{Aisling?.Username ?? RemoteIp.ToString()} Animation from: {callingMethodOne}, from: {callingMethodTwo}, from: {callingMethodThree}, from: {callingMethodFour}";
+                ServerSetup.Instance.Game.ServerPacketLogger.LogPacket(RemoteIp, trace);
+                SentrySdk.CaptureMessage($"Issue with SendAnimation called from {trace}", SentryLevel.Error);
+                ServerSetup.EventsLogger($"Issue in SendAnimation called from {trace}");
+            }
+            catch { }
         }
     }
 
@@ -1591,7 +1565,6 @@ public class WorldClient : WorldClientBase, IWorldClient
             Wis = (byte)Math.Clamp(Aisling.Wis, byte.MinValue, byte.MaxValue)
         };
 
-        ServerPacketDisplayBuilder();
         Send(args);
     }
 
@@ -1627,7 +1600,6 @@ public class WorldClient : WorldClientBase, IWorldClient
                 StartPostId = short.MaxValue
             };
 
-            ServerPacketDisplayBuilder();
             Send(args);
             return true;
         }
@@ -1671,7 +1643,6 @@ public class WorldClient : WorldClientBase, IWorldClient
                 StartPostId = short.MaxValue
             };
 
-            ServerPacketDisplayBuilder();
             Send(args);
             return true;
         }
@@ -1709,7 +1680,6 @@ public class WorldClient : WorldClientBase, IWorldClient
             if (isMail)
                 UpdateMailAsRead(args);
 
-            ServerPacketDisplayBuilder();
             Send(args);
             return true;
         }
@@ -1740,7 +1710,6 @@ public class WorldClient : WorldClientBase, IWorldClient
             Success = success
         };
 
-        ServerPacketDisplayBuilder();
         Send(args);
     }
 
@@ -1759,7 +1728,6 @@ public class WorldClient : WorldClientBase, IWorldClient
             AnimationSpeed = speed
         };
 
-        ServerPacketDisplayBuilder();
         Send(args);
     }
 
@@ -1793,7 +1761,6 @@ public class WorldClient : WorldClientBase, IWorldClient
             OldPoint = new Point(oldPoint.X, oldPoint.Y)
         };
 
-        ServerPacketDisplayBuilder();
         Send(args);
     }
 
@@ -1862,7 +1829,6 @@ public class WorldClient : WorldClientBase, IWorldClient
             Direction = direction
         };
 
-        ServerPacketDisplayBuilder();
         Send(args);
     }
 
@@ -1878,7 +1844,6 @@ public class WorldClient : WorldClientBase, IWorldClient
             Direction = direction
         };
 
-        ServerPacketDisplayBuilder();
         Send(args);
     }
 
@@ -1957,7 +1922,6 @@ public class WorldClient : WorldClientBase, IWorldClient
                 args.NameTagStyle = NameTagStyle.NeutralHover;
         }
 
-        ServerPacketDisplayBuilder();
         Send(args);
     }
 
@@ -1969,7 +1933,7 @@ public class WorldClient : WorldClientBase, IWorldClient
         };
 
         if (doorArgs.Doors.Count == 0) return;
-        ServerPacketDisplayBuilder();
+
         Send(doorArgs);
     }
 
@@ -2013,7 +1977,6 @@ public class WorldClient : WorldClientBase, IWorldClient
             }
         };
 
-        ServerPacketDisplayBuilder();
         Send(args);
     }
 
@@ -2029,7 +1992,6 @@ public class WorldClient : WorldClientBase, IWorldClient
             OtherUserName = fromAisling.Username
         };
 
-        ServerPacketDisplayBuilder();
         Send(args);
     }
 
@@ -2051,7 +2013,6 @@ public class WorldClient : WorldClientBase, IWorldClient
         if (item.Stacks > 1)
             args.ItemName = $"{item.DisplayName} [{item.Stacks}]";
 
-        ServerPacketDisplayBuilder();
         Send(args);
     }
 
@@ -2067,7 +2028,6 @@ public class WorldClient : WorldClientBase, IWorldClient
             GoldAmount = (int)amount
         };
 
-        ServerPacketDisplayBuilder();
         Send(args);
     }
 
@@ -2082,7 +2042,6 @@ public class WorldClient : WorldClientBase, IWorldClient
             FromSlot = slot
         };
 
-        ServerPacketDisplayBuilder();
         Send(args);
     }
 
@@ -2098,7 +2057,6 @@ public class WorldClient : WorldClientBase, IWorldClient
             Message = "Exchange completed."
         };
 
-        ServerPacketDisplayBuilder();
         Send(args);
     }
 
@@ -2114,7 +2072,6 @@ public class WorldClient : WorldClientBase, IWorldClient
             Message = "Exchange cancelled."
         };
 
-        ServerPacketDisplayBuilder();
         Send(args);
     }
 
@@ -2129,7 +2086,6 @@ public class WorldClient : WorldClientBase, IWorldClient
             Data = clientPacket.Buffer.ToArray()
         };
 
-        ServerPacketDisplayBuilder();
         Send(args);
     }
 
@@ -2147,25 +2103,26 @@ public class WorldClient : WorldClientBase, IWorldClient
         if (serverGroupSwitch == ServerGroupSwitch.ShowGroupBox)
             args.GroupBoxInfo = groupBoxInfo;
 
-        ServerPacketDisplayBuilder();
         Send(args);
     }
 
     /// <summary>
     /// 0x13 - Health Bar
     /// </summary>
-    public void SendHealthBar(Sprite creature, byte? sound = null)
+    public void SendHealthBar(Sprite creature, byte? sound = 0xFF)
     {
         var currentHealth = creature.CurrentHp.LongClamp(1);
-
+        var pct = (byte)((double)100 * currentHealth / creature.MaximumHp);
+        var kind = SpriteMaker.SpriteKind(creature);
         var args = new HealthBarArgs
         {
             SourceId = creature.Serial,
-            HealthPercent = (byte)((double)100 * currentHealth / creature.MaximumHp),
-            Sound = sound
+            Kind = kind,
+            HealthPercent = pct,
+            Sound = sound,
+            Tail = creature is Aisling ? null : 0x00
         };
 
-        ServerPacketDisplayBuilder();
         Send(args);
     }
 
@@ -2201,7 +2158,6 @@ public class WorldClient : WorldClientBase, IWorldClient
             Y = Aisling.Y
         };
 
-        ServerPacketDisplayBuilder();
         Send(args);
     }
 
@@ -2221,7 +2177,6 @@ public class WorldClient : WorldClientBase, IWorldClient
                 MapData = mapTemplate.GetRowData(y).ToArray()
             };
 
-            ServerPacketDisplayBuilder();
             Send(args);
         }
     }
@@ -2241,7 +2196,6 @@ public class WorldClient : WorldClientBase, IWorldClient
             Width = Aisling.Map.Width
         };
 
-        ServerPacketDisplayBuilder();
         Send(args);
     }
 
@@ -2330,7 +2284,6 @@ public class WorldClient : WorldClientBase, IWorldClient
                 }
         }
 
-        ServerPacketDisplayBuilder();
         Send(args);
     }
 
@@ -2345,7 +2298,6 @@ public class WorldClient : WorldClientBase, IWorldClient
             Message = message ?? string.Empty
         };
 
-        ServerPacketDisplayBuilder();
         Send(args);
     }
 
@@ -2741,7 +2693,6 @@ public class WorldClient : WorldClientBase, IWorldClient
             Title = $"Lvl: {aisling.ExpLevel}  Rnk: {aisling.AbpLevel}"
         };
 
-        ServerPacketDisplayBuilder();
         Send(args);
     }
 
@@ -2820,7 +2771,6 @@ public class WorldClient : WorldClientBase, IWorldClient
             Message = message
         };
 
-        ServerPacketDisplayBuilder();
         Send(args);
     }
 
@@ -2835,7 +2785,6 @@ public class WorldClient : WorldClientBase, IWorldClient
             Slot = slot
         };
 
-        ServerPacketDisplayBuilder();
         Send(args);
     }
 
@@ -2850,7 +2799,6 @@ public class WorldClient : WorldClientBase, IWorldClient
             SourceId = id
         };
 
-        ServerPacketDisplayBuilder();
         Send(args);
     }
 
@@ -2865,7 +2813,6 @@ public class WorldClient : WorldClientBase, IWorldClient
             Slot = slot
         };
 
-        ServerPacketDisplayBuilder();
         Send(args);
     }
 
@@ -2880,7 +2827,6 @@ public class WorldClient : WorldClientBase, IWorldClient
             Slot = slot
         };
 
-        ServerPacketDisplayBuilder();
         Send(args);
     }
 
@@ -3279,7 +3225,6 @@ public class WorldClient : WorldClientBase, IWorldClient
             Title = $"Lvl: {Aisling.ExpLevel}  Rnk: {Aisling.AbpLevel}"
         };
 
-        ServerPacketDisplayBuilder();
         Send(args);
     }
 
@@ -3294,7 +3239,6 @@ public class WorldClient : WorldClientBase, IWorldClient
             Message = message
         };
 
-        ServerPacketDisplayBuilder();
         Send(args);
     }
 
@@ -3311,7 +3255,6 @@ public class WorldClient : WorldClientBase, IWorldClient
             IsMusic = isMusic
         };
 
-        ServerPacketDisplayBuilder();
         Send(args);
     }
 
@@ -3326,7 +3269,6 @@ public class WorldClient : WorldClientBase, IWorldClient
             EquipmentSlot = equipmentSlot
         };
 
-        ServerPacketDisplayBuilder();
         Send(args);
     }
 
@@ -3342,7 +3284,6 @@ public class WorldClient : WorldClientBase, IWorldClient
             Id = Aisling.Serial
         };
 
-        ServerPacketDisplayBuilder();
         Send(args);
     }
 
@@ -3433,7 +3374,6 @@ public class WorldClient : WorldClientBase, IWorldClient
                         break;
                 }
 
-            ServerPacketDisplayBuilder();
             Send(args);
         }
     }
@@ -3504,7 +3444,6 @@ public class WorldClient : WorldClientBase, IWorldClient
             worldList.Add(arg);
         }
 
-        ServerPacketDisplayBuilder();
         Send(args);
     }
 
@@ -3561,7 +3500,6 @@ public class WorldClient : WorldClientBase, IWorldClient
             Nodes = warpsList
         };
 
-        ServerPacketDisplayBuilder();
         Send(args);
     }
 
@@ -4026,18 +3964,6 @@ public class WorldClient : WorldClientBase, IWorldClient
             spell.Level >= 100
                 ? string.Format(CultureInfo.CurrentUICulture, "{0} has been mastered.", spell.Template.Name)
                 : string.Format(CultureInfo.CurrentUICulture, "{0} improved, Lv:{1}", spell.Template.Name, spell.Level));
-    }
-
-    public WorldClient ApproachGroup(Aisling targetAisling, IReadOnlyList<string> allowedMaps)
-    {
-        if (targetAisling.GroupParty?.PartyMembers == null) return this;
-        foreach (var member in targetAisling.GroupParty.PartyMembers.Values.Where(member => member.Serial != Aisling.Serial).Where(member => allowedMaps.ListContains(member.Map.Name)))
-        {
-            member.Client.SendAnimation(67);
-            member.Client.TransitionToMap(targetAisling.Map, targetAisling.Position);
-        }
-
-        return this;
     }
 
     public bool GiveItem(string itemName)

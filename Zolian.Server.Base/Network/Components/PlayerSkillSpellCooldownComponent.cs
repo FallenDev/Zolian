@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 using Darkages.Network.Server;
-using Darkages.Sprites;
+using Darkages.Sprites.Entity;
 using Darkages.Types;
 
 namespace Darkages.Network.Components;

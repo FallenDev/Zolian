@@ -29,7 +29,8 @@ public class Needle_Trap(Spell spell) : SpellScript(spell)
         var damageImp = 250 * seed;
         var dam = (int)(250 + damageImp);
         if (target is not Damageable damageable) return;
-        damageable.ApplyTrapDamage(sprite, dam, Spell.Template.Sound);
+        damageable.ApplyTrapDamage(sprite, dam);
+        damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(Spell.Template.Sound, false));
 
         if (target.CurrentHp > 1)
             damageable.SendAnimationNearby(Spell.Template.TargetAnimation, null, target.Serial);
@@ -74,7 +75,8 @@ public class Stiletto_Trap(Spell spell) : SpellScript(spell)
         var damageImp = 750 * seed;
         var dam = (int)(750 + damageImp);
         if (target is not Damageable damageable) return;
-        damageable.ApplyTrapDamage(sprite, dam, Spell.Template.Sound);
+        damageable.ApplyTrapDamage(sprite, dam);
+        damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(Spell.Template.Sound, false));
 
         if (target.CurrentHp > 1)
             damageable.SendAnimationNearby(Spell.Template.TargetAnimation, null, target.Serial);
@@ -119,7 +121,8 @@ public class Coiled_Trap(Spell spell) : SpellScript(spell)
         var damageImp = 6000 * seed;
         var dam = (int)(6000 + damageImp);
         if (target is not Damageable damageable) return;
-        damageable.ApplyTrapDamage(sprite, dam, Spell.Template.Sound);
+        damageable.ApplyTrapDamage(sprite, dam);
+        damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(Spell.Template.Sound, false));
 
         if (target.CurrentHp > 1)
             damageable.SendAnimationNearby(Spell.Template.TargetAnimation, null, target.Serial);
@@ -164,7 +167,8 @@ public class Spring_Trap(Spell spell) : SpellScript(spell)
         var damageImp = 12000 * seed;
         var dam = (int)(12000 + damageImp);
         if (target is not Damageable damageable) return;
-        damageable.ApplyTrapDamage(sprite, dam, Spell.Template.Sound);
+        damageable.ApplyTrapDamage(sprite, dam);
+        damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(Spell.Template.Sound, false));
 
         if (target.CurrentHp > 1)
             damageable.SendAnimationNearby(Spell.Template.TargetAnimation, null, target.Serial);
@@ -209,7 +213,8 @@ public class Maiden_Trap(Spell spell) : SpellScript(spell)
         var damageImp = 20000 * seed;
         var dam = (int)(20000 + damageImp);
         if (target is not Damageable damageable) return;
-        damageable.ApplyTrapDamage(sprite, dam, Spell.Template.Sound);
+        damageable.ApplyTrapDamage(sprite, dam);
+        damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(Spell.Template.Sound, false));
 
         if (target.CurrentHp > 1)
             damageable.SendAnimationNearby(Spell.Template.TargetAnimation, null, target.Serial);

@@ -1,4 +1,4 @@
-﻿using Darkages.Sprites;
+﻿using Darkages.Sprites.Entity;
 
 namespace Darkages.Events;
 

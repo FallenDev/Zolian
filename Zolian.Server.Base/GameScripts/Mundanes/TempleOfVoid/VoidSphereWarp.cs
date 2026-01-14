@@ -59,7 +59,7 @@ public class VoidSphereWarp(WorldServer server, Mundane mundane) : MundaneScript
         }
 
         client.CloseDialog();
-        client.SendAnimation(240, null, client.Aisling.Serial);
+        client.Aisling.SendAnimationNearby(240, null, client.Aisling.Serial);
         client.SendServerMessage(ServerMessageType.ActiveMessage, "The void pulls you in.. and spits you out");
     }
 }

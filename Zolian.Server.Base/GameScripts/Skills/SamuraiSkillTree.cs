@@ -266,7 +266,7 @@ public class MugaiRyu(Skill skill) : SkillScript(skill)
                 if (damageDealer.CurrentMp > damageDealer.MaximumMp)
                     damageDealer.CurrentMp = damageDealer.MaximumMp;
 
-                damageDealer.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendHealthBar(i, 7));
+                damageDealer.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(7, false));
                 GlobalSkillMethods.OnSuccessWithoutAction(i, damageDealer, Skill, 0, _crit);
             }
 

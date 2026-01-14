@@ -50,9 +50,10 @@ public class Caltrops(Spell spell) : SpellScript(spell)
     {
         var seed = Spell.Level / 100d;
         var damageImp = 15000 * seed;
-        var dam = (int)(15000 + damageImp);
+        var dmg = (int)(15000 + damageImp);
         if (target is not Damageable damageable) return;
-        damageable.ApplyTrapDamage(sprite, dam, Spell.Template.Sound);
+        damageable.ApplyTrapDamage(sprite, dmg);
+        damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(Spell.Template.Sound, false));
 
         if (target.CurrentHp > 1)
             damageable.SendAnimationNearby(Spell.Template.TargetAnimation, null, target.Serial);

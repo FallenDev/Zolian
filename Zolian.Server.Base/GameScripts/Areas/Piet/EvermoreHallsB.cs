@@ -1,13 +1,14 @@
-﻿using Darkages.Network.Client;
-using Darkages.ScriptingBase;
-using Darkages.Sprites;
-using Darkages.Types;
-
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Numerics;
+
 using Darkages.Common;
+using Darkages.Enums;
+using Darkages.Network.Client;
+using Darkages.ScriptingBase;
+using Darkages.Sprites;
 using Darkages.Sprites.Entity;
+using Darkages.Types;
 
 namespace Darkages.GameScripts.Areas.Piet;
 
@@ -145,14 +146,17 @@ public class EvermoreHallsB : AreaScript
 
     private static void OnPoleTrap(WorldClient client)
     {
-        client.SendAnimation(140, client.Aisling.Position);
-        client.Aisling.ApplyTrapDamage(client.Aisling, 500000, 59);
+        client.Aisling.ApplyTrapDamage(client.Aisling, 500000);
+        client.Aisling.SendAnimationNearby(140, client.Aisling.Position);
+        client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(59, false));
+
     }
 
     private static void OnSpikeTrap(WorldClient client)
     {
-        client.SendAnimation(112, client.Aisling.Position);
-        client.Aisling.ApplyTrapDamage(client.Aisling, 750000, 68);
+        client.Aisling.ApplyTrapDamage(client.Aisling, 750000);
+        client.Aisling.SendAnimationNearby(112, client.Aisling.Position);
+        client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(68, false));
     }
 
     private void RollingSpikeTraps(List<Vector2> trapList)
@@ -160,13 +164,14 @@ public class EvermoreHallsB : AreaScript
         foreach (var trapPosition in trapList)
         {
             if (_playersOnMap.IsEmpty) return;
-            _playersOnMap.Values.FirstOrDefault()?.SendAnimationNearby(112, new Position(trapPosition));
 
             foreach (var player in _playersOnMap.Values)
             {
                 if (player == null) continue;
+                player.Client?.SendAnimation(112, new Position(trapPosition));
                 if (player.Pos != trapPosition) continue;
-                player.ApplyTrapDamage(player, 750000, 68);
+                player.ApplyTrapDamage(player, 750000);
+                player.Client?.SendSound(68, false);
             }
         }
     }

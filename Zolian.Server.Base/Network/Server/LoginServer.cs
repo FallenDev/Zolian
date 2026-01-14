@@ -9,7 +9,7 @@ using Darkages.Common;
 using Darkages.Database;
 using Darkages.Meta;
 using Darkages.Network.Client;
-using Darkages.Sprites;
+using Darkages.Sprites.Entity;
 using Darkages.Types;
 using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;

@@ -1058,7 +1058,6 @@ public class HealingPalms(Skill skill) : SkillScript(skill)
                 if (i.CurrentHp > i.MaximumHp)
                     i.CurrentHp = i.MaximumHp;
 
-                damageDealer.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendHealthBar(i, Skill.Template.Sound));
                 damageDealer.SendAnimationNearby(Skill.Template.TargetAnimation, null, i.Serial);
 
                 if (i is Aisling targetPlayer)

@@ -159,12 +159,12 @@ public class Damageable : Movable
         }
     }
 
-    public void ApplyTrapDamage(Sprite damageDealingSprite, long dmg, byte sound)
+    public void ApplyTrapDamage(Sprite damageDealingSprite, long dmg)
     {
         if (RasenShoheki || Immunity)
         {
-            SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendHealthBar(this, sound));
-            RasenShohekiShield += dmg; // Accumulate damage for Rasen Shoheki shield
+            if (RasenShoheki)
+                RasenShohekiShield += dmg;
             return;
         }
 
@@ -198,12 +198,9 @@ public class Damageable : Movable
 
         if (this is Aisling damagedPlayer)
         {
-            damagedPlayer.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendHealthBar(this, sound));
             if (CurrentHp <= 0)
                 damagedPlayer.Client.PlayerDeathStatusCheck(damageDealingSprite);
         }
-        else
-            SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendHealthBar(this, sound));
 
         if (dmg > 50)
             ApplyEquipmentDurability(dmg);
@@ -316,8 +313,8 @@ public class Damageable : Movable
 
         if (RasenShoheki || (Immunity && !forced))
         {
-            SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendHealthBar(this, sound));
-            RasenShohekiShield += dmg; // Accumulate damage for Rasen Shoheki shield
+            if (RasenShoheki)
+                RasenShohekiShield += dmg;
             return false;
         }
 
@@ -401,8 +398,8 @@ public class Damageable : Movable
 
         if (RasenShoheki || (Immunity && !forced))
         {
-            SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendHealthBar(this, sound));
-            RasenShohekiShield += dmg; // Accumulate damage for Rasen Shoheki shield
+            if (RasenShoheki)
+                RasenShohekiShield += dmg;
             return false;
         }
 
@@ -476,14 +473,12 @@ public class Damageable : Movable
             // Player Saving Throws
             if (hit <= Reflex && this is Aisling)
             {
-                SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendHealthBar(this));
                 return 0;
             }
 
             // Monster Saving Throws
             if (hit <= Reflex && this is Monster)
             {
-                SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendHealthBar(this));
                 return (long)(dmg * 0.25);
             }
 
@@ -530,14 +525,12 @@ public class Damageable : Movable
             // Player Magic Saving Throws
             if (wis <= Will && this is Aisling)
             {
-                SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendHealthBar(this));
                 return (long)(dmg * 0.50);
             }
 
             // Monster Magic Saving Throws
             if (wis <= Will && this is Monster)
             {
-                SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendHealthBar(this));
                 return (long)(dmg * 0.25);
             }
 
@@ -1318,6 +1311,9 @@ public class Damageable : Movable
 
     private long CompleteDamageApplication(Sprite damageDealingSprite, long dmg, byte sound, double amplifier)
     {
+        // Send sound to nearby players
+        SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(sound, false));
+
         if (dmg <= 0) dmg = 1;
 
         if (CurrentHp > MaximumHp)
@@ -1327,14 +1323,12 @@ public class Damageable : Movable
         var finalDmg = LevelDamageMitigation(damageDealingSprite, dmgApplied);
         CurrentHp -= finalDmg;
 
+        // Player DeathRattle or CastDeath check
         if (this is Aisling aisling)
         {
-            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendHealthBar(this, sound));
             if (CurrentHp <= 0)
                 aisling.Client.PlayerDeathStatusCheck(damageDealingSprite);
         }
-        else
-            SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendHealthBar(this, sound));
 
         return finalDmg;
     }
@@ -1347,27 +1341,46 @@ public class Damageable : Movable
 
     private void OnDamaged(Sprite source, long dmg)
     {
-        (this as Aisling)?.Client.SendAttributes(StatUpdateType.Vitality);
-        if (source is not Aisling aisling) return;
+        // Send healthbar and vitality update to sprites
+        if (this is Aisling aisling)
+        {
+            aisling.Client.SendAttributes(StatUpdateType.Vitality);
+            aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendHealthBar(aisling));
 
+            if (CurrentHp <= 0)
+                aisling.Client.PlayerDeathStatusCheck(source);
+        }
+        else
+        {
+            if (CurrentHp >= 1)
+                SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendHealthBar(this));
+        }
+
+        // If the source of the damage is not from a player, return
+        if (source is not Aisling playerDamageDealer) return;
+
+        // Update damage counter and threat meter
         var time = DateTime.UtcNow;
         var estTime = time.TimeOfDay;
-        aisling.DamageCounter += dmg;
-        if (aisling.ThreatMeter + dmg >= long.MaxValue)
-            aisling.ThreatMeter = (long)(long.MaxValue * .95);
-        aisling.ThreatMeter += dmg;
-        if (aisling.GameSettings.DmgNumbers)
-            ShowDmg(aisling, estTime);
+        playerDamageDealer.DamageCounter += dmg;
+        if (playerDamageDealer.ThreatMeter + dmg >= long.MaxValue)
+            playerDamageDealer.ThreatMeter = (long)(long.MaxValue * .95);
+        playerDamageDealer.ThreatMeter += dmg;
 
+        // Show damage numbers if enabled
+        if (playerDamageDealer.GameSettings.DmgNumbers)
+            ShowDmg(playerDamageDealer, estTime);
+
+        // Trigger any scripts on damage taken
         if (this is not Monster monster) return;
         if (monster.Template?.ScriptName == null) return;
-        monster.Scripts?.FirstOrDefault().Value.OnDamaged(aisling.Client, dmg, source);
+        monster.Scripts?.FirstOrDefault().Value.OnDamaged(playerDamageDealer.Client, dmg, source);
     }
 
     private static void ShowDmg(Aisling aisling, TimeSpan elapsedTime)
     {
         if (!aisling.AttackDmgTrack.Update(elapsedTime)) return;
-        aisling.AttackDmgTrack.Delay = elapsedTime + TimeSpan.FromSeconds(1);
+        aisling.AttackDmgTrack.Delay = TimeSpan.FromSeconds(1);
 
         var dmgShow = aisling.DamageCounter.ToString();
         aisling.Client.SendPublicMessage(aisling.Serial, PublicMessageType.Chant, $"{dmgShow}");
