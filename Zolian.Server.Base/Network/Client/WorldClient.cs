@@ -28,6 +28,7 @@ using Darkages.GameScripts.Formulas;
 using Darkages.Managers;
 using Darkages.Meta;
 using Darkages.Models;
+using Darkages.Network.Client.Coalescer;
 using Darkages.Network.Server;
 using Darkages.Object;
 using Darkages.ScriptingBase;
@@ -59,6 +60,9 @@ namespace Darkages.Network.Client;
 public class WorldClient : WorldClientBase, IWorldClient
 {
     private readonly IWorldServer<WorldClient> _server;
+    private readonly SoundCoalescer _soundCoalescer;
+    private readonly HealthBarCoalescer _healthBarCoalescer;
+
     public readonly WorldServerTimer SkillSpellTimer = new(TimeSpan.FromMilliseconds(1000));
     public readonly Stopwatch CooldownControl = new();
     public readonly Stopwatch SpellControl = new();
@@ -166,6 +170,8 @@ public class WorldClient : WorldClientBase, IWorldClient
         [NotNull] ILogger<WorldClient> logger) : base(socket, crypto, packetSerializer, logger)
     {
         _server = server;
+        _soundCoalescer = new SoundCoalescer(SendSoundImmediate, 150, 32);
+        _healthBarCoalescer = new HealthBarCoalescer(SendHealthBarCoalesced, 150, 32);
 
         // Event-Driven Tasks
         Task.Factory.StartNew(ProcessExperienceEvents, TaskCreationOptions.LongRunning);
@@ -342,7 +348,8 @@ public class WorldClient : WorldClientBase, IWorldClient
 
     private void EquipLantern(Dictionary<string, TimeSpan> elapsed)
     {
-        if (elapsed["Lantern"].TotalMilliseconds < 2000) return;
+        if (elapsed["Lantern"].TotalMilliseconds < 1500) return;
+
         _clientStopwatches["Lantern"].Restart();
         if (Aisling.Map == null) return;
         if (Aisling.Map.Flags.MapFlagIsSet(MapFlags.Darkness))
@@ -2107,6 +2114,11 @@ public class WorldClient : WorldClientBase, IWorldClient
     }
 
     /// <summary>
+    /// 0x13 - Health Bar - Coalesced Send
+    /// </summary>
+    private void SendHealthBarCoalesced(HealthBarArgs args) => Send(args);
+
+    /// <summary>
     /// 0x13 - Health Bar
     /// </summary>
     public void SendHealthBar(Sprite creature, byte? sound = 0xFF)
@@ -2123,7 +2135,7 @@ public class WorldClient : WorldClientBase, IWorldClient
             Tail = creature is Aisling ? null : 0x00
         };
 
-        Send(args);
+        _healthBarCoalescer.Enqueue(args);
     }
 
     /// <summary>
@@ -3243,11 +3255,11 @@ public class WorldClient : WorldClientBase, IWorldClient
     }
 
     /// <summary>
-    /// 0x19 - Send Sound
+    /// 0x19 - Send Sound - Bypasses Coalescer (And is used by Coalesced Send)
     /// </summary>
     /// <param name="sound">Sound Number</param>
     /// <param name="isMusic">Whether the sound is a song</param>
-    public void SendSound(byte sound, bool isMusic)
+    public void SendSoundImmediate(byte sound, bool isMusic)
     {
         var args = new SoundArgs
         {
@@ -3257,6 +3269,13 @@ public class WorldClient : WorldClientBase, IWorldClient
 
         Send(args);
     }
+
+    /// <summary>
+    /// 0x19 - Send Sound
+    /// </summary>
+    /// <param name="sound">Sound Number</param>
+    /// <param name="isMusic">Whether the sound is a song</param>
+    public void SendSound(byte sound, bool isMusic) => _soundCoalescer.Enqueue(sound, isMusic);
 
     /// <summary>
     /// 0x38 - Remove Equipment

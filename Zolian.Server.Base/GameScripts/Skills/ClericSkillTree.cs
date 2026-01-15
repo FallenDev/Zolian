@@ -34,7 +34,7 @@ public class Blink(Skill skill) : SkillScript(skill)
             if (sprite is not Damageable damageDealer) return;
             SendPortAnimation(damageDealer, _oldPosition);
             damageDealer.SendAnimationNearby(76, null, damageDealer.Serial);
-            damageDealer.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(Skill.Template.Sound, false));
+            damageDealer.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSoundImmediate(Skill.Template.Sound, false));
         }
         catch
         {

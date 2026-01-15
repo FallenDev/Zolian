@@ -364,7 +364,7 @@ public class GlobalSpellMethods
                     targetPlayer.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{aisling.Username} afflicts you with {spell.Template.Name}");
 
                 aisling.SendAnimationNearby(spell.Template.TargetAnimation, null, target.Serial);
-                aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(spell.Template.Sound, false));
+                aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSoundImmediate(spell.Template.Sound, false));
             }
             else
             {
@@ -385,7 +385,7 @@ public class GlobalSpellMethods
 
             damageable.SendAnimationNearby(spell.Template.TargetAnimation, null, target.Serial);
             damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendBodyAnimation(sprite.Serial, BodyAnimation.Assail, 30));
-            damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(spell.Template.Sound, false));
+            damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSoundImmediate(spell.Template.Sound, false));
         }
     }
 
@@ -403,7 +403,7 @@ public class GlobalSpellMethods
                     targetPlayer.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{aisling.Username} poisons you with {spell.Template.Name}.");
 
                 aisling.SendAnimationNearby(spell.Template.Animation, null, target.Serial);
-                aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(spell.Template.Sound, false));
+                aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSoundImmediate(spell.Template.Sound, false));
             }
             else
             {
@@ -424,7 +424,7 @@ public class GlobalSpellMethods
 
             damageable.SendAnimationNearby(spell.Template.TargetAnimation, null, target.Serial);
             damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendBodyAnimation(sprite.Serial, BodyAnimation.Assail, 30));
-            damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(spell.Template.Sound, false));
+            damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSoundImmediate(spell.Template.Sound, false));
         }
     }
 
@@ -438,7 +438,7 @@ public class GlobalSpellMethods
         if (target.CurrentHp > 0)
         {
             damageable.SendAnimationNearby(spell.Template.TargetAnimation, null, target.Serial);
-            damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(spell.Template.Sound, false));
+            damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSoundImmediate(spell.Template.Sound, false));
         }
         else
         {
@@ -586,7 +586,7 @@ public class GlobalSpellMethods
             if (target.CurrentHp > 0)
             {
                 aisling.SendAnimationNearby(spell.Template.TargetAnimation, null, target.Serial);
-                aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(spell.Template.Sound, false));
+                aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSoundImmediate(spell.Template.Sound, false));
             }
             else
             {
@@ -612,7 +612,7 @@ public class GlobalSpellMethods
 
             damageable.SendAnimationNearby(spell.Template.TargetAnimation, null, target.Serial);
             damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendBodyAnimation(sprite.Serial, BodyAnimation.Assail, 30));
-            damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(spell.Template.Sound, false));
+            damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSoundImmediate(spell.Template.Sound, false));
         }
     }
 
