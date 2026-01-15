@@ -1,42 +1,41 @@
 ﻿using System.Collections.Concurrent;
 
+using Chaos.Networking.Entities.Server;
+
 namespace Darkages.Network.Client.Coalescer;
 
-public sealed class SoundCoalescer : IDisposable
+public sealed class BodyAnimationCoalescer : IDisposable
 {
-    private readonly Action<byte, bool> _sendImmediate;
+    private readonly Action<BodyAnimationArgs> _sendImmediate;
     private readonly int _windowMs;
-    private readonly int _maxUniquePerWindow;
+    private readonly int _maxPerWindow;
 
-    // Key = sound byte (SFX only); Value = sound
-    private readonly ConcurrentDictionary<int, byte> _pending = new();
+    // Latest-wins per SourceId
+    private readonly ConcurrentDictionary<uint, BodyAnimationArgs> _pending = new();
 
-    private int _flushScheduled;
+    private int _flushScheduled; // 0/1
     private CancellationTokenSource? _cts;
 
-    public SoundCoalescer(Action<byte, bool> sendImmediate, int windowMs = 50, int maxUniquePerWindow = 32)
+    public BodyAnimationCoalescer(Action<BodyAnimationArgs>? sendImmediate, int windowMs = 50, int maxPerWindow = 32)
     {
         // Default no-op
-        sendImmediate ??= (byte _, bool __) => { };
+        sendImmediate ??= static _ => { };
 
         _sendImmediate = sendImmediate;
-        _windowMs = windowMs <= 0 ? 50 : windowMs;
-        _maxUniquePerWindow = maxUniquePerWindow is <= 0 or > 256 ? 32 : maxUniquePerWindow;
+        _windowMs = windowMs <= 0 ? 30 : windowMs;
+        _maxPerWindow = maxPerWindow <= 0 ? 64 : maxPerWindow;
     }
 
-    public void Enqueue(byte sound, bool isMusic)
+    public void Enqueue(BodyAnimationArgs args)
     {
-        // Music is not coalesced
-        if (isMusic)
-        {
-            _sendImmediate(sound, true);
+        // Dedupe: if the newest is identical to what we already have pending for this SourceId, kick out
+        if (_pending.TryGetValue(args.SourceId, out var existing) && AreEquivalent(existing, args))
             return;
-        }
 
-        // Dedupe within the window
-        _pending.TryAdd(sound, sound);
+        // Latest wins for this SourceId
+        _pending[args.SourceId] = args;
 
-        // Schedule one flush task per window.
+        // Schedule one flush task per window
         if (Interlocked.Exchange(ref _flushScheduled, 1) == 0)
         {
             _cts ??= new CancellationTokenSource();
@@ -44,33 +43,28 @@ public sealed class SoundCoalescer : IDisposable
         }
     }
 
+    private static bool AreEquivalent(BodyAnimationArgs a, BodyAnimationArgs b)
+        => a.BodyAnimation == b.BodyAnimation
+           && a.AnimationSpeed == b.AnimationSpeed
+           && a.Sound == b.Sound;
+
     private async Task FlushAfterDelayAsync(CancellationToken ct)
     {
         try
         {
             await Task.Delay(_windowMs, ct).ConfigureAwait(false);
 
+            // Send at most _maxPerWindow unique SourceIds this tick
             var sent = 0;
-            Span<byte> sentMap = stackalloc byte[256];
 
             foreach (var kv in _pending)
             {
-                // Max unique per window reached
-                if (sent >= _maxUniquePerWindow)
+                if (sent >= _maxPerWindow)
                     break;
 
-                // kv.Key is int but should be [0..255] byte
-                var key = kv.Key;
-                if ((uint)key > 255u)
-                    continue;
-
-                if (sentMap[key] != 0)
-                    continue;
-
-                if (_pending.TryRemove(key, out var sfx))
+                if (_pending.TryRemove(kv.Key, out var args))
                 {
-                    sentMap[key] = 1;
-                    _sendImmediate(sfx, false);
+                    _sendImmediate(args);
                     sent++;
                 }
             }

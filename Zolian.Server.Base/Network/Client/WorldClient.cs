@@ -62,6 +62,7 @@ public class WorldClient : WorldClientBase, IWorldClient
     private readonly IWorldServer<WorldClient> _server;
     private readonly SoundCoalescer _soundCoalescer;
     private readonly HealthBarCoalescer _healthBarCoalescer;
+    private readonly BodyAnimationCoalescer _bodyAnimationCoalescer;
 
     public readonly WorldServerTimer SkillSpellTimer = new(TimeSpan.FromMilliseconds(1000));
     public readonly Stopwatch CooldownControl = new();
@@ -172,6 +173,7 @@ public class WorldClient : WorldClientBase, IWorldClient
         _server = server;
         _soundCoalescer = new SoundCoalescer(SendSoundImmediate, 150, 32);
         _healthBarCoalescer = new HealthBarCoalescer(SendHealthBarCoalesced, 150, 32);
+        _bodyAnimationCoalescer = new BodyAnimationCoalescer(SendBodyAnimationCoalesced, 150, 32);
 
         // Event-Driven Tasks
         Task.Factory.StartNew(ProcessExperienceEvents, TaskCreationOptions.LongRunning);
@@ -1721,6 +1723,11 @@ public class WorldClient : WorldClientBase, IWorldClient
     }
 
     /// <summary>
+    /// 0x1A - Player Body Animation - Coalesced Send
+    /// </summary>
+    private void SendBodyAnimationCoalesced(BodyAnimationArgs args) => Send(args);
+
+    /// <summary>
     /// 0x1A - Player Body Animation
     /// </summary>
     public void SendBodyAnimation(uint id, BodyAnimation bodyAnimation, ushort speed, byte? sound = null)
@@ -1735,7 +1742,7 @@ public class WorldClient : WorldClientBase, IWorldClient
             AnimationSpeed = speed
         };
 
-        Send(args);
+        _bodyAnimationCoalescer.Enqueue(args);
     }
 
     /// <summary>
