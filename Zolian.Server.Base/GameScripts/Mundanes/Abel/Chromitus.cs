@@ -69,7 +69,7 @@ public class Chromitus : MundaneScript
         }
     }
 
-    private void PopulateMapWithAppropriateMonsters(WorldClient client, Area area)
+    private static void PopulateMapWithAppropriateMonsters(WorldClient client, Area area)
     {
         var sprites = new List<int>
         {
@@ -99,66 +99,70 @@ public class Chromitus : MundaneScript
 
         var monsterTemplates = new List<MonsterTemplate>();
 
-        for (var i = 0; i < 10; i++)
+        try
         {
-            var temp = new MonsterTemplate
+            for (var i = 0; i < 10; i++)
             {
-                ScriptName = "RiftMob",
-                BaseName = "Rift Mob",
-                Name = $"{Random.Shared.NextInt64()}RiftMob",
-                AreaID = area.ID,
-                Image = (ushort)sprites.RandomIEnum(),
-                ElementType = ElementQualifer.Random,
-                PathQualifer = PathQualifer.Wander,
-                SpawnType = SpawnQualifer.Random,
-                SpawnSize = Random.Shared.Next(10, 20),
-                MoodType = MoodQualifer.Aggressive,
-                MonsterType = MonsterType.Rift,
-                MonsterArmorType = MonsterArmorType.Caster,
-                MonsterRace = Enum.GetValues<MonsterRace>().RandomIEnum(),
-                IgnoreCollision = false,
-                Waypoints = [],
-                MovementSpeed = 1000,
-                EngagedWalkingSpeed = Random.Shared.Next(800, 1400),
-                AttackSpeed = Random.Shared.Next(800, 1200),
-                CastSpeed = Random.Shared.Next(5000, 8000),
-                LootType = LootQualifer.RandomGold,
-                Level = (ushort)(client.Aisling.ExpLevel + client.Aisling.AbpLevel + Random.Shared.Next(1, 10)),
-                SkillScripts = [],
-                AbilityScripts = [],
-                SpellScripts = []
-            };
+                var temp = new MonsterTemplate
+                {
+                    ScriptName = "RiftMob",
+                    BaseName = "Rift Mob",
+                    Name = $"{Random.Shared.NextInt64()}RiftMob",
+                    AreaID = area.ID,
+                    Image = (ushort)sprites.RandomIEnum(),
+                    ElementType = ElementQualifer.Random,
+                    PathQualifer = PathQualifer.Wander,
+                    SpawnType = SpawnQualifer.Random,
+                    SpawnSize = Random.Shared.Next(10, 20),
+                    MoodType = MoodQualifer.Aggressive,
+                    MonsterType = MonsterType.Rift,
+                    MonsterArmorType = MonsterArmorType.Caster,
+                    MonsterRace = Enum.GetValues<MonsterRace>().RandomIEnum(),
+                    IgnoreCollision = false,
+                    Waypoints = [],
+                    MovementSpeed = 1000,
+                    EngagedWalkingSpeed = Random.Shared.Next(800, 1400),
+                    AttackSpeed = Random.Shared.Next(800, 1200),
+                    CastSpeed = Random.Shared.Next(5000, 8000),
+                    LootType = LootQualifer.RandomGold,
+                    Level = (ushort)(client.Aisling.ExpLevel + client.Aisling.AbpLevel + Random.Shared.Next(1, 10)),
+                    SkillScripts = [],
+                    AbilityScripts = [],
+                    SpellScripts = []
+                };
 
-            var randArmor = Random.Shared.Next(0, 1);
-            temp.MonsterArmorType = randArmor == 0 ? MonsterArmorType.Caster : MonsterArmorType.Tank;
+                var randArmor = Random.Shared.Next(0, 1);
+                temp.MonsterArmorType = randArmor == 0 ? MonsterArmorType.Caster : MonsterArmorType.Tank;
 
-            if (temp.OffenseElement == ElementManager.Element.Terror)
-                temp.OffenseElement = Enum.GetValues<ElementManager.Element>().RandomIEnum();
+                if (temp.OffenseElement == ElementManager.Element.Terror)
+                    temp.OffenseElement = Enum.GetValues<ElementManager.Element>().RandomIEnum();
 
-            if (temp.MonsterRace == MonsterRace.Bahamut)
-                temp.MonsterRace = MonsterRace.Dragon;
+                if (temp.MonsterRace == MonsterRace.Bahamut)
+                    temp.MonsterRace = MonsterRace.Dragon;
 
-            if (temp.MonsterRace == MonsterRace.HigherBeing)
-                temp.MonsterRace = MonsterRace.Aberration;
+                if (temp.MonsterRace == MonsterRace.HigherBeing)
+                    temp.MonsterRace = MonsterRace.Aberration;
 
-            if (temp.MonsterRace == MonsterRace.LowerBeing)
-                temp.MonsterRace = MonsterRace.Rodent;
+                if (temp.MonsterRace == MonsterRace.LowerBeing)
+                    temp.MonsterRace = MonsterRace.Rodent;
 
-            if (temp.MonsterRace.MonsterRaceIsSet(MonsterRace.Aberration))
-                temp.IgnoreCollision = true;
+                if (temp.MonsterRace.MonsterRaceIsSet(MonsterRace.Aberration))
+                    temp.IgnoreCollision = true;
 
-            monsterTemplates.Add(temp);
-        }
+                monsterTemplates.Add(temp);
+            }
 
-        foreach (var template in monsterTemplates)
-        {
-            for (var i = 0; i < template.SpawnSize; i++)
+            foreach (var template in monsterTemplates)
             {
-                var monster = Monster.Create(template, area);
-                if (monster == null) continue;
-                AddObject(monster);
+                for (var i = 0; i < template.SpawnSize; i++)
+                {
+                    var monster = Monster.Create(template, area);
+                    if (monster == null) continue;
+                    AddObject(monster);
+                }
             }
         }
+        catch { }
     }
 
     private static void PortGroup(WorldClient client, Area map, int rand)

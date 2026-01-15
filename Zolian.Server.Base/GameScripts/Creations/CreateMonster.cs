@@ -74,7 +74,7 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
             var currentMpMultiplier = 4000;
 
             // Generate multipliers for levels above 249
-            for (var level = 250; level <= 1000; level += 5)
+            for (var level = 250; level <= 1200; level += 5)
             {
                 currentHpMultiplier = (int)(currentHpMultiplier * 1.05);
                 currentMpMultiplier = (int)(currentMpMultiplier * 1.05);
@@ -298,14 +298,47 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
                 <= 100 => obj.Size = "Colossal",
                 _ => obj.Size = "Lessor"
             },
+            <= 250 => sizeRand switch
+            {
+                <= 7 => obj.Size = "Lessor",
+                <= 20 => obj.Size = "Small",
+                <= 35 => obj.Size = "Medium",
+                <= 50 => obj.Size = "Large",
+                <= 70 => obj.Size = "Great",
+                <= 85 => obj.Size = "Colossal",
+                <= 100 => obj.Size = "Deity",
+                _ => obj.Size = "Lessor"
+            },
+            <= 500 => sizeRand switch
+            {
+                <= 5 => obj.Size = "Lessor",
+                <= 15 => obj.Size = "Small",
+                <= 30 => obj.Size = "Medium",
+                <= 55 => obj.Size = "Large",
+                <= 65 => obj.Size = "Great",
+                <= 80 => obj.Size = "Colossal",
+                <= 100 => obj.Size = "Deity",
+                _ => obj.Size = "Lessor"
+            },
+            <= 750 => sizeRand switch
+            {
+                <= 3 => obj.Size = "Lessor",
+                <= 10 => obj.Size = "Small",
+                <= 20 => obj.Size = "Medium",
+                <= 30 => obj.Size = "Large",
+                <= 50 => obj.Size = "Great",
+                <= 70 => obj.Size = "Colossal",
+                <= 100 => obj.Size = "Deity",
+                _ => obj.Size = "Lessor"
+            },
             _ => sizeRand switch
             {
-                <= 10 => obj.Size = "Lessor",
-                <= 30 => obj.Size = "Small",
-                <= 50 => obj.Size = "Medium",
-                <= 70 => obj.Size = "Large",
-                <= 90 => obj.Size = "Great",
-                <= 95 => obj.Size = "Colossal",
+                <= 1 => obj.Size = "Lessor",
+                <= 5 => obj.Size = "Small",
+                <= 10 => obj.Size = "Medium",
+                <= 30 => obj.Size = "Large",
+                <= 50 => obj.Size = "Great",
+                <= 70 => obj.Size = "Colossal",
                 <= 100 => obj.Size = "Deity",
                 _ => obj.Size = "Lessor"
             }
@@ -453,7 +486,7 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
         };
 
         const long startLevel = 200;
-        const long endLevel = 1000;
+        const long endLevel = 1200;
         // ToDo: Increment this in the future if higher levels need more experience
         var stepSize = 5;
 
@@ -562,7 +595,7 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
         };
 
         const int startLevel = 500;
-        const int endLevel = 1000;
+        const int endLevel = 1200;
         // ToDo: Increment this in the future if higher levels need more experience
         var stepSize = 5;
 
@@ -807,25 +840,27 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
             { 190, (124, 323) },
             { 194, (126, 330) },
             { 200, (130, 340) },
-            { 215, (140, 366)},
-            { 230, (150, 391)},
-            { 245, (159, 417)},
-            { 260, (169, 442)},
-            { 275, (179, 468)},
-            { 300, (195, 510)},
-            { 315, (205, 536)},
-            { 330, (215, 561)},
-            { 345, (224, 587)},
-            { 360, (234, 612)},
-            { 375, (244, 638)},
-            { 400, (260, 680)},
-            { 415, (270, 706)},
-            { 430, (280, 731)},
-            { 445, (289, 757)},
-            { 460, (299, 782)},
-            { 475, (309, 808)},
-            { 500, (325, 850)},
-            { int.MaxValue, (345, 900) }
+            { 215, (140, 366) },
+            { 230, (150, 391) },
+            { 245, (159, 417) },
+            { 260, (169, 442) },
+            { 275, (179, 468) },
+            { 300, (195, 510) },
+            { 315, (205, 536) },
+            { 330, (215, 561) },
+            { 345, (224, 587) },
+            { 360, (234, 612) },
+            { 375, (244, 638) },
+            { 400, (260, 680) },
+            { 415, (270, 706) },
+            { 430, (280, 731) },
+            { 445, (289, 757) },
+            { 460, (299, 782) },
+            { 475, (309, 808) },
+            { 500, (325, 850) },
+            { 750, (345, 900) },
+            { 950, (365, 950) },
+            { 1000, (385, 1000) }
         };
 
         var statsToUpdate = new List<Action<int>>
