@@ -3638,6 +3638,7 @@ public class WorldClient : WorldClientBase, IWorldClient
     public async Task<bool> Save()
     {
         if (Aisling == null) return false;
+        if (Aisling.Serial == 0) return false;
         LastSave = DateTime.UtcNow;
         return await StorageManager.AislingBucket.Save(Aisling).ConfigureAwait(false);
     }
