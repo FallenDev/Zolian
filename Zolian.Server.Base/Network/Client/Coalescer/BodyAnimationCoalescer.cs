@@ -22,8 +22,8 @@ public sealed class BodyAnimationCoalescer : IDisposable
         sendImmediate ??= static _ => { };
 
         _sendImmediate = sendImmediate;
-        _windowMs = windowMs <= 0 ? 30 : windowMs;
-        _maxPerWindow = maxPerWindow <= 0 ? 64 : maxPerWindow;
+        _windowMs = windowMs <= 0 ? 50 : windowMs;
+        _maxPerWindow = maxPerWindow <= 0 ? 32 : maxPerWindow;
     }
 
     public void Enqueue(BodyAnimationArgs args)

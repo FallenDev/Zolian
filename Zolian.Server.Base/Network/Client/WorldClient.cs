@@ -81,16 +81,13 @@ public class WorldClient : WorldClientBase, IWorldClient
     public int RollingRtt15sMs { get; set; }
     public int SmoothedRttMs { get; set; }
 
-    private readonly Dictionary<string, Stopwatch> _clientStopwatches = new()
-    {
-        { "Affliction", new Stopwatch() },
-        { "Lantern", new Stopwatch() },
-        { "DayDreaming", new Stopwatch() },
-        { "MailMan", new Stopwatch() },
-        { "ItemAnimation", new Stopwatch() },
-        { "Invisible", new Stopwatch() },
-        { "DeathRattle", new Stopwatch() }
-    };
+    private readonly Stopwatch _afflictionSw = Stopwatch.StartNew();
+    private readonly Stopwatch _lanternSw = Stopwatch.StartNew();
+    private readonly Stopwatch _dayDreamSw = Stopwatch.StartNew();
+    private readonly Stopwatch _mailSw = Stopwatch.StartNew();
+    private readonly Stopwatch _itemAnimSw = Stopwatch.StartNew();
+    private readonly Stopwatch _invisibleSw = Stopwatch.StartNew();
+    private readonly Stopwatch _deathRattleSw = Stopwatch.StartNew();
 
     public Aisling Aisling { get; set; }
     public bool MapUpdating { get; set; }
@@ -159,53 +156,49 @@ public class WorldClient : WorldClientBase, IWorldClient
     public WorldPortal PendingNode { get; set; }
     public uint EntryCheck { get; set; }
     private readonly Lock _warpCheckLock = new();
-    private readonly ConcurrentDictionary<uint, ExperienceEvent> _expQueue = [];
-    private readonly ConcurrentDictionary<uint, AbilityEvent> _apQueue = [];
-    private readonly ConcurrentDictionary<uint, DebuffEvent> _debuffApplyQueue = [];
-    private readonly ConcurrentDictionary<uint, BuffEvent> _buffApplyQueue = [];
-    private readonly ConcurrentDictionary<uint, DebuffEvent> _debuffUpdateQueue = [];
-    private readonly ConcurrentDictionary<uint, BuffEvent> _buffUpdateQueue = [];
+    private readonly ConcurrentQueue<ExperienceEvent> _expQueue = [];
+    private readonly ConcurrentQueue<AbilityEvent> _apQueue = [];
+    private readonly ConcurrentQueue<DebuffEvent> _debuffApplyQueue = [];
+    private readonly ConcurrentQueue<BuffEvent> _buffApplyQueue = [];
+    private readonly ConcurrentQueue<DebuffEvent> _debuffUpdateQueue = [];
+    private readonly ConcurrentQueue<BuffEvent> _buffUpdateQueue = [];
 
     public WorldClient([NotNull] IWorldServer<IWorldClient> server, [NotNull] Socket socket,
         [NotNull] ICrypto crypto, [NotNull] IPacketSerializer packetSerializer,
         [NotNull] ILogger<WorldClient> logger) : base(socket, crypto, packetSerializer, logger)
     {
         _server = server;
-        _soundCoalescer = new SoundCoalescer(SendSoundImmediate, 150, 32);
-        _healthBarCoalescer = new HealthBarCoalescer(SendHealthBarCoalesced, 150, 32);
-        _bodyAnimationCoalescer = new BodyAnimationCoalescer(SendBodyAnimationCoalesced, 150, 32);
+        _soundCoalescer = new SoundCoalescer(SendSoundImmediate, 150, 24);
+        _healthBarCoalescer = new HealthBarCoalescer(SendHealthBarCoalesced, 150, 24);
+        _bodyAnimationCoalescer = new BodyAnimationCoalescer(SendBodyAnimationCoalesced, 150, 24);
 
         // Event-Driven Tasks
-        Task.Factory.StartNew(ProcessExperienceEvents, TaskCreationOptions.LongRunning);
-        Task.Factory.StartNew(ProcessAbilityEvents, TaskCreationOptions.LongRunning);
-        Task.Factory.StartNew(ProcessApplyingBuffsEvents, TaskCreationOptions.LongRunning);
-        Task.Factory.StartNew(ProcessApplyingDebuffsEvents, TaskCreationOptions.LongRunning);
-        Task.Factory.StartNew(ProcessUpdatingBuffsEvents, TaskCreationOptions.LongRunning);
-        Task.Factory.StartNew(ProcessUpdatingDebuffsEvents, TaskCreationOptions.LongRunning);
-
-        foreach (var stopwatch in _clientStopwatches.Values)
-            stopwatch.Start();
+        _ = Task.Factory.StartNew(ProcessExperienceEvents, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default).Unwrap();
+        _ = Task.Factory.StartNew(ProcessAbilityEvents, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default).Unwrap();
+        _ = Task.Factory.StartNew(ProcessApplyingBuffsEvents, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default).Unwrap();
+        _ = Task.Factory.StartNew(ProcessApplyingDebuffsEvents, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default).Unwrap();
+        _ = Task.Factory.StartNew(ProcessUpdatingBuffsEvents, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default).Unwrap();
+        _ = Task.Factory.StartNew(ProcessUpdatingDebuffsEvents, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default).Unwrap();
     }
 
     public Task Update()
     {
-        if (Aisling is not { LoggedIn: true }) return Task.CompletedTask;
+        if (Aisling is not { LoggedIn: true })
+            return Task.CompletedTask;
 
-        var elapsed = new Dictionary<string, TimeSpan>();
-        foreach (var kvp in _clientStopwatches)
-            elapsed[kvp.Key] = kvp.Value.Elapsed;
-
-        CheckInvisible(Aisling, elapsed);
-        EquipLantern(elapsed);
-        CheckDayDreaming(elapsed);
-        CheckForMail(elapsed);
-        DisplayQualityPillar(elapsed);
-        ApplyAffliction(elapsed);
-        HandleDeathRattleRefresh(elapsed);
+        CheckInvisible(Aisling, _invisibleSw);
+        EquipLantern(_lanternSw);
+        CheckDayDreaming(_dayDreamSw);
+        CheckForMail(_mailSw);
+        DisplayQualityPillar(_itemAnimSw);
+        ApplyAffliction(_afflictionSw);
+        HandleDeathRattleRefresh(_deathRattleSw);
         HandleBadTrades();
         HandleSecOffenseEle();
+
         return Task.CompletedTask;
     }
+
 
     #region Events
 
@@ -213,19 +206,15 @@ public class WorldClient : WorldClientBase, IWorldClient
     {
         while (ServerSetup.Instance.Running)
         {
-            if (_expQueue.HasNonDefaultValues())
+            if (_expQueue.IsEmpty)
             {
-                foreach (var kvp in _expQueue)
-                {
-                    if (_expQueue.TryRemove(kvp.Key, out var expEvent))
-                    {
-                        HandleExp(expEvent.Player, expEvent.Exp, expEvent.Hunting);
-                    }
-                }
+                await Task.Delay(50).ConfigureAwait(false);
+                continue;
             }
-            else
+
+            while (_expQueue.TryDequeue(out var expEvent))
             {
-                await Task.Delay(50);
+                HandleExp(expEvent.Player, expEvent.Exp, expEvent.Hunting);
             }
         }
     }
@@ -234,19 +223,15 @@ public class WorldClient : WorldClientBase, IWorldClient
     {
         while (ServerSetup.Instance.Running)
         {
-            if (_apQueue.HasNonDefaultValues())
+            if (_apQueue.IsEmpty)
             {
-                foreach (var kvp in _apQueue)
-                {
-                    if (_apQueue.TryRemove(kvp.Key, out var apEvent))
-                    {
-                        HandleAp(apEvent.Player, apEvent.Exp, apEvent.Hunting);
-                    }
-                }
+                await Task.Delay(50).ConfigureAwait(false);
+                continue;
             }
-            else
+
+            while (_apQueue.TryDequeue(out var apEvent))
             {
-                await Task.Delay(50);
+                HandleAp(apEvent.Player, apEvent.Exp, apEvent.Hunting);
             }
         }
     }
@@ -255,19 +240,15 @@ public class WorldClient : WorldClientBase, IWorldClient
     {
         while (ServerSetup.Instance.Running)
         {
-            if (_debuffApplyQueue.HasNonDefaultValues())
+            if (_debuffApplyQueue.IsEmpty)
             {
-                foreach (var kvp in _debuffApplyQueue)
-                {
-                    if (_debuffApplyQueue.TryRemove(kvp.Key, out var debuffEvent))
-                    {
-                        debuffEvent.Debuff.OnApplied(debuffEvent.Affected, debuffEvent.Debuff);
-                    }
-                }
+                await Task.Delay(50).ConfigureAwait(false);
+                continue;
             }
-            else
+
+            while (_debuffApplyQueue.TryDequeue(out var debuffEvent))
             {
-                await Task.Delay(50);
+                debuffEvent.Debuff.OnApplied(debuffEvent.Affected, debuffEvent.Debuff);
             }
         }
     }
@@ -276,19 +257,15 @@ public class WorldClient : WorldClientBase, IWorldClient
     {
         while (ServerSetup.Instance.Running)
         {
-            if (_buffApplyQueue.HasNonDefaultValues())
+            if (_buffApplyQueue.IsEmpty)
             {
-                foreach (var kvp in _buffApplyQueue)
-                {
-                    if (_buffApplyQueue.TryRemove(kvp.Key, out var buffEvent))
-                    {
-                        buffEvent.Buff.OnApplied(buffEvent.Affected, buffEvent.Buff);
-                    }
-                }
+                await Task.Delay(50).ConfigureAwait(false);
+                continue;
             }
-            else
+
+            while (_buffApplyQueue.TryDequeue(out var buffEvent))
             {
-                await Task.Delay(50);
+                buffEvent.Buff.OnApplied(buffEvent.Affected, buffEvent.Buff);
             }
         }
     }
@@ -297,19 +274,15 @@ public class WorldClient : WorldClientBase, IWorldClient
     {
         while (ServerSetup.Instance.Running)
         {
-            if (_debuffUpdateQueue.HasNonDefaultValues())
+            if (_debuffUpdateQueue.IsEmpty)
             {
-                foreach (var kvp in _debuffUpdateQueue)
-                {
-                    if (_debuffUpdateQueue.TryRemove(kvp.Key, out var debuffEvent))
-                    {
-                        debuffEvent.Debuff.Update(debuffEvent.Affected);
-                    }
-                }
+                await Task.Delay(50).ConfigureAwait(false);
+                continue;
             }
-            else
+
+            while (_debuffUpdateQueue.TryDequeue(out var debuffEvent))
             {
-                await Task.Delay(50);
+                debuffEvent.Debuff.Update(debuffEvent.Affected);
             }
         }
     }
@@ -318,42 +291,52 @@ public class WorldClient : WorldClientBase, IWorldClient
     {
         while (ServerSetup.Instance.Running)
         {
-            if (_buffUpdateQueue.HasNonDefaultValues())
+            if (_buffUpdateQueue.IsEmpty)
             {
-                foreach (var kvp in _buffUpdateQueue)
-                {
-                    if (_buffUpdateQueue.TryRemove(kvp.Key, out var buffEvent))
-                    {
-                        buffEvent.Buff.Update(buffEvent.Affected);
-                    }
-                }
+                await Task.Delay(50).ConfigureAwait(false);
+                continue;
             }
-            else
+
+            while (_buffUpdateQueue.TryDequeue(out var buffEvent))
             {
-                await Task.Delay(50);
+                buffEvent.Buff.Update(buffEvent.Affected);
             }
         }
     }
 
     #endregion
 
-    private void CheckInvisible(Aisling player, Dictionary<string, TimeSpan> elapsed)
+    private void CheckInvisible(Aisling player, Stopwatch sw)
     {
         if (player.IsInvisible) return;
-        if (elapsed["Invisible"].TotalMilliseconds < 50) return;
-        _clientStopwatches["Invisible"].Restart();
-        var hide = player.Buffs.Values.FirstOrDefault(b => b.Name is "Hide");
-        var shadowfade = player.Buffs.Values.FirstOrDefault(b => b.Name is "Shadowfade");
+        if (sw.ElapsedMilliseconds < 50) return;
+        sw.Restart();
+
+        Buff hide = null;
+        Buff shadowfade = null;
+
+        foreach (var buff in player.Buffs.Values)
+        {
+            if (buff is null) continue;
+
+            if (hide is null && buff.Name is "Hide") hide = buff;
+            else if (shadowfade is null && buff.Name is "Shadowfade") shadowfade = buff;
+
+            if (hide is not null && shadowfade is not null)
+                break;
+        }
+
         hide?.OnEnded(player, hide);
         shadowfade?.OnEnded(player, shadowfade);
     }
 
-    private void EquipLantern(Dictionary<string, TimeSpan> elapsed)
+    private void EquipLantern(Stopwatch sw)
     {
-        if (elapsed["Lantern"].TotalMilliseconds < 1500) return;
+        if (sw.ElapsedMilliseconds < 1500) return;
+        sw.Restart();
 
-        _clientStopwatches["Lantern"].Restart();
         if (Aisling.Map == null) return;
+
         if (Aisling.Map.Flags.MapFlagIsSet(MapFlags.Darkness))
         {
             if (Aisling.Lantern == 2) return;
@@ -367,44 +350,42 @@ public class WorldClient : WorldClientBase, IWorldClient
         SendDisplayAisling(Aisling);
     }
 
-    private void CheckDayDreaming(Dictionary<string, TimeSpan> elapsed)
+    private void CheckDayDreaming(Stopwatch sw)
     {
         switch (Aisling.ActiveStatus)
         {
-            case ActivityStatus.Awake:
-            case ActivityStatus.NeedGroup:
-            case ActivityStatus.LoneHunter:
-            case ActivityStatus.Grouped:
-            case ActivityStatus.GroupHunter:
-            case ActivityStatus.DoNotDisturb:
-                break;
             case ActivityStatus.DayDreaming:
             case ActivityStatus.NeedHelp:
-                DaydreamingRoutine(elapsed);
+                DaydreamingRoutine(sw);
+                break;
+            default:
                 break;
         }
     }
 
-    private void DaydreamingRoutine(Dictionary<string, TimeSpan> elapsed)
+    private void DaydreamingRoutine(Stopwatch sw)
     {
-        if (elapsed["DayDreaming"].TotalMilliseconds < 5000) return;
-        _clientStopwatches["DayDreaming"].Restart();
+        if (sw.ElapsedMilliseconds < 5000) return;
+        sw.Restart();
+
         if (Aisling.Direction is not (1 or 2)) return;
         if (!((DateTime.UtcNow - Aisling.AislingTracker).TotalMinutes > 2)) return;
         if (!Socket.Connected || !IsDayDreaming) return;
 
         Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(Aisling.Serial, (BodyAnimation)16, 100));
         Aisling.SendAnimationNearby(32, Aisling.Position);
+
         if (Aisling.Resting == Enums.RestPosition.RestPosition1) return;
         Aisling.Resting = Enums.RestPosition.RestPosition1;
         Aisling.Client.UpdateDisplay();
         Aisling.Client.SendDisplayAisling(Aisling);
     }
 
-    private void CheckForMail(Dictionary<string, TimeSpan> elapsed)
+    private void CheckForMail(Stopwatch sw)
     {
-        if (elapsed["MailMan"].TotalMilliseconds < 15000) return;
-        _clientStopwatches["MailMan"].Restart();
+        if (sw.ElapsedMilliseconds < 15000) return;
+        sw.Restart();
+
         BoardPostStorage.MailFromDatabase(this);
 
         var hasUnreadMail = false;
@@ -420,88 +401,77 @@ public class WorldClient : WorldClientBase, IWorldClient
             SendAttributes(StatUpdateType.Secondary);
     }
 
-    private void DisplayQualityPillar(Dictionary<string, TimeSpan> elapsed)
+    private void DisplayQualityPillar(Stopwatch sw)
     {
-        if (elapsed["ItemAnimation"].TotalMilliseconds < 100) return;
-        _clientStopwatches["ItemAnimation"].Restart();
-        var items = ObjectManager.GetObjects<Item>(Aisling.Map, item => item.Template.Enchantable).Values.ToList();
+        if (sw.ElapsedMilliseconds < 100) return;
+        sw.Restart();
+
+        if (!Aisling.GameSettings.GroundQualities) return;
+
+        var objects = ObjectManager.GetObjects<Item>(Aisling.Map, item => item.Template.Enchantable);
+        if (objects.IsEmpty) return;
 
         try
         {
-            if (Aisling.GameSettings.GroundQualities)
+            foreach (var entry in objects.Values)
             {
-                Parallel.ForEach(items, (entry) =>
+                if (entry is null) continue;
+
+                switch (entry.ItemQuality)
                 {
-                    switch (entry.ItemQuality)
-                    {
-                        case Item.Quality.Epic:
-                            Aisling.Client.SendAnimation(397, new Position(entry.Position.X, entry.Position.Y));
-                            break;
-                        case Item.Quality.Legendary:
-                            Aisling.Client.SendAnimation(398, new Position(entry.Position.X, entry.Position.Y));
-                            break;
-                        case Item.Quality.Forsaken:
-                            Aisling.Client.SendAnimation(399, new Position(entry.Position.X, entry.Position.Y));
-                            break;
-                        case Item.Quality.Mythic:
-                        case Item.Quality.Primordial:
-                        case Item.Quality.Transcendent:
-                            Aisling.Client.SendAnimation(400, new Position(entry.Position.X, entry.Position.Y));
-                            break;
-                        case Item.Quality.Damaged:
-                        case Item.Quality.Common:
-                        case Item.Quality.Uncommon:
-                        case Item.Quality.Rare:
-                            break;
-                    }
-                });
+                    case Item.Quality.Epic:
+                        Aisling.Client.SendAnimation(397, new Position(entry.Position.X, entry.Position.Y));
+                        break;
+                    case Item.Quality.Legendary:
+                        Aisling.Client.SendAnimation(398, new Position(entry.Position.X, entry.Position.Y));
+                        break;
+                    case Item.Quality.Forsaken:
+                        Aisling.Client.SendAnimation(399, new Position(entry.Position.X, entry.Position.Y));
+                        break;
+                    case Item.Quality.Mythic:
+                    case Item.Quality.Primordial:
+                    case Item.Quality.Transcendent:
+                        Aisling.Client.SendAnimation(400, new Position(entry.Position.X, entry.Position.Y));
+                        break;
+                }
             }
         }
-        catch
-        {
-            // Ignore
-        }
+        catch { }
     }
 
-    private void ApplyAffliction(Dictionary<string, TimeSpan> elapsed)
+    private void ApplyAffliction(Stopwatch sw)
     {
-        if (elapsed["Affliction"].TotalMilliseconds < 5000) return;
-        _clientStopwatches["Affliction"].Restart();
+        if (sw.ElapsedMilliseconds < 5000) return;
+        sw.Restart();
 
         if (Aisling.Afflictions.AfflictionFlagIsSet(Afflictions.Normal)) return;
-        var hasAnAffliction = false;
+
+        var hasAny = false;
 
         if (Aisling.Afflictions.AfflictionFlagIsSet(Afflictions.Lycanisim))
         {
-            hasAnAffliction = true;
-            var buff = Aisling.HasBuff("Lycanisim");
-            if (!buff)
-            {
-                var applyDebuff = new BuffLycanisim();
-                EnqueueBuffAppliedEvent(Aisling, applyDebuff);
-            }
+            hasAny = true;
+            if (!Aisling.HasBuff("Lycanisim"))
+                EnqueueBuffAppliedEvent(Aisling, new BuffLycanisim());
         }
 
         if (Aisling.Afflictions.AfflictionFlagIsSet(Afflictions.Vampirisim))
         {
-            hasAnAffliction = true;
-            var buff = Aisling.HasBuff("Vampirisim");
-            if (!buff)
-            {
-                var applyDebuff = new BuffVampirisim();
-                EnqueueBuffAppliedEvent(Aisling, applyDebuff);
-            }
+            hasAny = true;
+            if (!Aisling.HasBuff("Vampirisim"))
+                EnqueueBuffAppliedEvent(Aisling, new BuffVampirisim());
         }
 
-        if (hasAnAffliction) return;
-        Aisling.Afflictions |= Afflictions.Normal;
+        if (!hasAny)
+            Aisling.Afflictions |= Afflictions.Normal;
     }
 
-    private void HandleDeathRattleRefresh(Dictionary<string, TimeSpan> elapsed)
+    private void HandleDeathRattleRefresh(Stopwatch sw)
     {
         if (!Aisling.DeathRattle)
-            _clientStopwatches["DeathRattle"].Restart();
-        if (elapsed["DeathRattle"].TotalMilliseconds < 300000) return;
+            sw.Restart();
+
+        if (sw.ElapsedMilliseconds < 300000) return;
         Aisling.DeathRattle = false;
     }
 
@@ -582,53 +552,26 @@ public class WorldClient : WorldClientBase, IWorldClient
 
     private static void ReviveOnPlayerKillMap(Aisling aisling)
     {
-        Task.Delay(1000).ContinueWith(c =>
+        _ = ReviveOnPlayerKillMapAsync(aisling);
+
+        static async Task ReviveOnPlayerKillMapAsync(Aisling aisling)
         {
-            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Revive in 10");
-        });
-        Task.Delay(2000).ContinueWith(c =>
-        {
-            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Revive in 9");
-        });
-        Task.Delay(3000).ContinueWith(c =>
-        {
-            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Revive in 8");
-        });
-        Task.Delay(4000).ContinueWith(c =>
-        {
-            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Revive in 7");
-        });
-        Task.Delay(5000).ContinueWith(c =>
-        {
-            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Revive in 6");
-        });
-        Task.Delay(6000).ContinueWith(c =>
-        {
-            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Revive in 5");
-        });
-        Task.Delay(7000).ContinueWith(c =>
-        {
-            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Revive in 4");
-        });
-        Task.Delay(8000).ContinueWith(c =>
-        {
-            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Revive in 3");
-        });
-        Task.Delay(9000).ContinueWith(c =>
-        {
-            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Revive in 2");
-        });
-        Task.Delay(10000).ContinueWith(c =>
-        {
-            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Revive in 1");
-        });
-        Task.Delay(11000).ContinueWith(c =>
-        {
-            aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Revived");
-            aisling.Client.Recover();
-            aisling.Client.UpdateDisplay();
-            aisling.Client.SendDisplayAisling(aisling);
-        });
+            try
+            {
+                for (var i = 10; i >= 1; i--)
+                {
+                    await Task.Delay(1000).ConfigureAwait(false);
+                    aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"Revive in {i}");
+                }
+
+                await Task.Delay(1000).ConfigureAwait(false);
+                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Revived");
+                aisling.Client.Recover();
+                aisling.Client.UpdateDisplay();
+                aisling.Client.SendDisplayAisling(aisling);
+            }
+            catch { }
+        }
     }
 
     #region Player Load
@@ -1783,30 +1726,38 @@ public class WorldClient : WorldClientBase, IWorldClient
     /// </summary>
     public async void SendConfirmExit()
     {
-        // Close Popups
-        this.CloseDialog();
-        Aisling.CancelExchange();
-
-        // Exit Party
-        if (Aisling.GroupId != 0)
-            Party.RemovePartyMember(Aisling);
-
-        // Set Timestamps
-        Aisling.LastLogged = DateTime.UtcNow;
-        Aisling.LoggedIn = false;
-
-        // Save
-        ExitConfirmed = await Save().ConfigureAwait(false);
-
-        // Cleanup
-        Aisling.Remove(true);
-
-        var args = new ExitResponseArgs
+        try
         {
-            ExitConfirmed = ExitConfirmed
-        };
+            // Close Popups
+            this.CloseDialog();
+            Aisling.CancelExchange();
 
-        Send(args);
+            // Exit Party
+            if (Aisling.GroupId != 0)
+                Party.RemovePartyMember(Aisling);
+
+            // Set Timestamps
+            Aisling.LastLogged = DateTime.UtcNow;
+            Aisling.LoggedIn = false;
+
+            // Save
+            ExitConfirmed = await Save().ConfigureAwait(false);
+
+            // Cleanup
+            Aisling.Remove(true);
+
+            var args = new ExitResponseArgs
+            {
+                ExitConfirmed = ExitConfirmed
+            };
+
+            Send(args);
+        }
+        catch (Exception ex)
+        {
+            SentrySdk.CaptureException(ex);
+            CloseTransport();
+        }
     }
 
     /// <summary>
@@ -3455,6 +3406,9 @@ public class WorldClient : WorldClientBase, IWorldClient
             if (!jobClass.IsNullOrEmpty())
                 vitality = jobClass;
 
+            if (aisling.ExpLevel + aisling.AbpLevel == 1000)
+                vitality = "Ascendant";
+
             var arg = new WorldListMemberInfo
             {
                 BaseClass = (BaseClass)classList,
@@ -3464,7 +3418,7 @@ public class WorldClient : WorldClientBase, IWorldClient
                 SocialStatus = (SocialStatus)aisling.ActiveStatus,
                 Title = aisling.GameMaster
                     ? "Game Master"
-                    : $"{vitality}"
+                    : vitality
             };
 
             worldList.Add(arg);
@@ -3476,17 +3430,20 @@ public class WorldClient : WorldClientBase, IWorldClient
     private ListColor GetUserColor(Player user)
     {
         var color = ListColor.White;
+        // Players within level range are Orange
         if (Aisling.ExpLevel > user.ExpLevel)
-            if (Aisling.ExpLevel - user.ExpLevel < 15)
+            if (Aisling.ExpLevel - user.ExpLevel < 30)
                 color = ListColor.Orange;
-        if (!string.IsNullOrEmpty(user.Clan) && user.Clan == Aisling.Clan)
-            color = ListColor.Clan;
+        // Players who have ascended are Teal
+        if (user.ExpLevel + user.AbpLevel == 1000)
+            color = ListColor.Teal;
+        // Game Masters are Red
         if (user.GameMaster)
             color = ListColor.Red;
-        if (user.Knight)
-            color = ListColor.Green;
-        if (user.ArenaHost)
-            color = ListColor.Teal;
+        //if (user.Knight)
+        //    color = ListColor.Green;
+        //if (user.ArenaHost)
+        //    color = ListColor.Clan;
         return color;
     }
 
@@ -4127,12 +4084,12 @@ public class WorldClient : WorldClientBase, IWorldClient
 
     #region Events & Experience
 
-    public void EnqueueExperienceEvent(Aisling player, long exp, bool hunting) => _expQueue.TryAdd(EphemeralRandomIdGenerator<uint>.Shared.NextId, new ExperienceEvent(player, exp, hunting));
-    public void EnqueueAbilityEvent(Aisling player, int exp, bool hunting) => _apQueue.TryAdd(EphemeralRandomIdGenerator<uint>.Shared.NextId, new AbilityEvent(player, exp, hunting));
-    public void EnqueueDebuffAppliedEvent(Sprite affected, Debuff debuff) => _debuffApplyQueue.TryAdd(EphemeralRandomIdGenerator<uint>.Shared.NextId, new DebuffEvent(affected, debuff));
-    public void EnqueueBuffAppliedEvent(Sprite affected, Buff buff) => _buffApplyQueue.TryAdd(EphemeralRandomIdGenerator<uint>.Shared.NextId, new BuffEvent(affected, buff));
-    public void EnqueueDebuffUpdatedEvent(Sprite affected, Debuff debuff) => _debuffUpdateQueue.TryAdd(EphemeralRandomIdGenerator<uint>.Shared.NextId, new DebuffEvent(affected, debuff));
-    public void EnqueueBuffUpdatedEvent(Sprite affected, Buff buff) => _buffUpdateQueue.TryAdd(EphemeralRandomIdGenerator<uint>.Shared.NextId, new BuffEvent(affected, buff));
+    public void EnqueueExperienceEvent(Aisling player, long exp, bool hunting) => _expQueue.Enqueue(new ExperienceEvent(player, exp, hunting));
+    public void EnqueueAbilityEvent(Aisling player, int exp, bool hunting) => _apQueue.Enqueue(new AbilityEvent(player, exp, hunting));
+    public void EnqueueDebuffAppliedEvent(Sprite affected, Debuff debuff) => _debuffApplyQueue.Enqueue(new DebuffEvent(affected, debuff));
+    public void EnqueueBuffAppliedEvent(Sprite affected, Buff buff) => _buffApplyQueue.Enqueue(new BuffEvent(affected, buff));
+    public void EnqueueDebuffUpdatedEvent(Sprite affected, Debuff debuff) => _debuffUpdateQueue.Enqueue(new DebuffEvent(affected, debuff));
+    public void EnqueueBuffUpdatedEvent(Sprite affected, Buff buff) => _buffUpdateQueue.Enqueue(new BuffEvent(affected, buff));
 
     public void GiveExp(long exp)
     {
@@ -4422,22 +4379,29 @@ public class WorldClient : WorldClientBase, IWorldClient
 
     private WorldClient RefreshMap(bool updateView = false)
     {
-        MapUpdating = true;
+        try
+        {
+            MapUpdating = true;
 
-        if (Aisling.IsBlind)
-            SendAttributes(StatUpdateType.Secondary);
+            if (Aisling.IsBlind)
+                SendAttributes(StatUpdateType.Secondary);
 
-        SendMapChangePending();
-        SendMapInfo();
-        SendLocation();
+            SendMapChangePending();
+            SendMapInfo();
+            SendLocation();
 
-        if (Aisling.Map is not { Script.Item1: null }) return this;
+            if (Aisling.Map is not { Script.Item1: null }) return this;
 
-        if (string.IsNullOrEmpty(Aisling.Map.ScriptKey)) return this;
-        var scriptToType = ScriptManager.Load<AreaScript>(Aisling.Map.ScriptKey, Aisling.Map);
-        var scriptFoundGetValue = scriptToType.TryGetValue(Aisling.Map.ScriptKey, out var script);
-        if (scriptFoundGetValue)
-            Aisling.Map.Script = new Tuple<string, AreaScript>(Aisling.Map.ScriptKey, script);
+            if (string.IsNullOrEmpty(Aisling.Map.ScriptKey)) return this;
+            var scriptToType = ScriptManager.Load<AreaScript>(Aisling.Map.ScriptKey, Aisling.Map);
+            var scriptFoundGetValue = scriptToType.TryGetValue(Aisling.Map.ScriptKey, out var script);
+            if (scriptFoundGetValue)
+                Aisling.Map.Script = new Tuple<string, AreaScript>(Aisling.Map.ScriptKey, script);
+        }
+        catch
+        {
+            MapUpdating = false;
+        }
 
         return this;
     }
@@ -4655,61 +4619,68 @@ public class WorldClient : WorldClientBase, IWorldClient
 
     private void CompleteMapTransition()
     {
-        foreach (var (_, area) in ServerSetup.Instance.GlobalMapCache)
+        try
         {
-            if (Aisling.CurrentMapId != area.ID) continue;
-            var mapFound = ServerSetup.Instance.GlobalMapCache.TryGetValue(area.ID, out var newMap);
-            if (mapFound)
+            foreach (var (_, area) in ServerSetup.Instance.GlobalMapCache)
             {
-                Aisling.CurrentMapId = newMap.ID;
+                if (Aisling.CurrentMapId != area.ID) continue;
+                var mapFound = ServerSetup.Instance.GlobalMapCache.TryGetValue(area.ID, out var newMap);
+                if (mapFound)
+                {
+                    Aisling.CurrentMapId = newMap.ID;
 
-                var onMap = Area.IsLocationOnMap(Aisling);
-                if (!onMap)
+                    var onMap = Area.IsLocationOnMap(Aisling);
+                    if (!onMap)
+                    {
+                        TransitionToMap(3052, new Position(27, 18));
+                        SendServerMessage(ServerMessageType.OrangeBar1, "Something grabs your hand...");
+                        return;
+                    }
+
+                    if (newMap.ID == 7000)
+                    {
+                        SendServerMessage(ServerMessageType.ScrollWindow,
+                            "{=bLife{=a, all that you know, love, and cherish. Everything, and the very fabric of their being. \n\nThe aisling spark, creativity, passion. All of that lives within you." +
+                            "\n\nThis story begins shortly after Anaman Pact successfully revives {=bChadul{=a. \n\n-{=cYou feel a sense of unease come over you{=a-");
+                    }
+                }
+                else
                 {
                     TransitionToMap(3052, new Position(27, 18));
                     SendServerMessage(ServerMessageType.OrangeBar1, "Something grabs your hand...");
                     return;
                 }
-
-                if (newMap.ID == 7000)
-                {
-                    SendServerMessage(ServerMessageType.ScrollWindow,
-                        "{=bLife{=a, all that you know, love, and cherish. Everything, and the very fabric of their being. \n\nThe aisling spark, creativity, passion. All of that lives within you." +
-                        "\n\nThis story begins shortly after Anaman Pact successfully revives {=bChadul{=a. \n\n-{=cYou feel a sense of unease come over you{=a-");
-                }
             }
-            else
+
+            var objects = ObjectManager.GetObjects(Aisling.Map, s => s.WithinRangeOf(Aisling), ObjectManager.Get.AllButAislings).ToList();
+
+            if (objects.Count != 0)
             {
-                TransitionToMap(3052, new Position(27, 18));
-                SendServerMessage(ServerMessageType.OrangeBar1, "Something grabs your hand...");
-                return;
+                objects.Reverse();
+                SendVisibleEntities(objects);
             }
+
+            SendMapChangeComplete();
+
+            if (LastMap == null || LastMap.Music != Aisling.Map.Music)
+            {
+                SendSound((byte)Aisling.Map.Music, true);
+            }
+
+            Aisling.LastMapId = Aisling.CurrentMapId;
+            LastMap = Aisling.Map;
+
+            if (Aisling.DiscoveredMaps.All(i => i != Aisling.CurrentMapId))
+                AddDiscoveredMapToDb();
+
+            SendMapLoadComplete();
+            SendDisplayAisling(Aisling);
         }
-
-        var objects = ObjectManager.GetObjects(Aisling.Map, s => s.WithinRangeOf(Aisling), ObjectManager.Get.AllButAislings).ToList();
-
-        if (objects.Count != 0)
+        catch { }
+        finally
         {
-            objects.Reverse();
-            SendVisibleEntities(objects);
+            MapUpdating = false;
         }
-
-        SendMapChangeComplete();
-
-        if (LastMap == null || LastMap.Music != Aisling.Map.Music)
-        {
-            SendSound((byte)Aisling.Map.Music, true);
-        }
-
-        Aisling.LastMapId = Aisling.CurrentMapId;
-        LastMap = Aisling.Map;
-
-        if (Aisling.DiscoveredMaps.All(i => i != Aisling.CurrentMapId))
-            AddDiscoveredMapToDb();
-
-        SendMapLoadComplete();
-        SendDisplayAisling(Aisling);
-        MapUpdating = false;
     }
 
     #endregion
@@ -4718,8 +4689,8 @@ public class WorldClient : WorldClientBase, IWorldClient
 
     public void DeleteSkillFromDb(Skill skill)
     {
-        var sConn = new SqlConnection(AislingStorage.ConnectionString);
         if (skill.SkillName is null) return;
+        using var sConn = new SqlConnection(AislingStorage.ConnectionString);
 
         try
         {
@@ -4742,8 +4713,8 @@ public class WorldClient : WorldClientBase, IWorldClient
 
     public void DeleteSpellFromDb(Spell spell)
     {
-        var sConn = new SqlConnection(AislingStorage.ConnectionString);
         if (spell.SpellName is null) return;
+        using var sConn = new SqlConnection(AislingStorage.ConnectionString);
 
         try
         {

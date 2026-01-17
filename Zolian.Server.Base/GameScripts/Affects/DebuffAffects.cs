@@ -1555,7 +1555,7 @@ public class DebuffReaping : Debuff
 
     public override void OnEnded(Sprite affected, Debuff debuff)
     {
-        if (affected is Aisling mapCheck && mapCheck.Map.ID is >= 800 and <= 810)
+        if (!debuff.Cancelled && affected is Aisling mapCheck && mapCheck.Map.ID is >= 800 and <= 810)
         {
             if (mapCheck.Debuffs.TryRemove(debuff.Name, out var saved))
             {
