@@ -569,7 +569,7 @@ public class Shadow_Step(Skill skill) : SkillScript(skill)
 
     protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, _target);
 
-    protected override void OnSuccess(Sprite sprite)
+    protected override async void OnSuccess(Sprite sprite)
     {
         if (sprite is Aisling aisling)
             aisling.ActionUsed = "Shadow Step";
@@ -599,10 +599,17 @@ public class Shadow_Step(Skill skill) : SkillScript(skill)
             var dmgCalc = DamageCalc(damageDealer);
             if (damageDealer.IsInvisible)
                 dmgCalc *= 2;
-            GlobalSkillMethods.Step(damageDealer, targetPos.X, targetPos.Y);
+            var stepped = await damageDealer.StepAndRemove(damageDealer, targetPos.X, targetPos.Y);
+
+            if (!stepped)
+            {
+                OnFailed(sprite);
+                return;
+            }
+
             damageDealer.Facing(_target.X, _target.Y, out var direction);
             damageDealer.Direction = (byte)direction;
-            damageDealer.Turn();
+            damageDealer.StepAddAndUpdateDisplay(damageDealer);
             GlobalSkillMethods.OnSuccess(_target, damageDealer, Skill, dmgCalc, _crit, action);
         }
         catch

@@ -401,7 +401,7 @@ public class Hiraishin(Spell spell) : SpellScript(spell)
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"No suitable targets nearby.");
     }
 
-    public override void OnSuccess(Sprite sprite, Sprite target)
+    public override async void OnSuccess(Sprite sprite, Sprite target)
     {
         if (sprite is not Aisling damageDealingSprite) return;
         var client = damageDealingSprite.Client;
@@ -417,12 +417,20 @@ public class Hiraishin(Spell spell) : SpellScript(spell)
 
         var targetPos = damageDealingSprite.GetFromAllSidesEmpty(target);
         if (targetPos == null || targetPos == target.Position) return;
-        GlobalSpellMethods.Step(damageDealingSprite, targetPos.X, targetPos.Y);
+        var stepped = await damageDealingSprite.StepAndRemove(damageDealingSprite, targetPos.X, targetPos.Y);
+
+        if (!stepped)
+        {
+            OnFailed(sprite, target);
+            return;
+        }
+
         damageDealingSprite.Facing(target.X, target.Y, out var direction);
-        damageDealingSprite.SendAnimationNearby(76, damageDealingSprite.Position);
         damageDealingSprite.Direction = (byte)direction;
-        damageDealingSprite.Turn();
-        client.SendBodyAnimation(client.Aisling.Serial, (BodyAnimation)0x82, 20, Spell.Template.Sound);
+        damageDealingSprite.StepAddAndUpdateDisplay(damageDealingSprite);
+        damageDealingSprite.SendAnimationNearby(76, damageDealingSprite.Position);
+        client.SendBodyAnimation(client.Aisling.Serial, (BodyAnimation)0x82, 20);
+        client.SendSound(Spell.Template.Sound, false);
     }
 
     public override void OnUse(Sprite sprite, Sprite target)
@@ -527,7 +535,7 @@ public class Shunshin(Spell spell) : SpellScript(spell)
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"No suitable targets nearby.");
     }
 
-    public override void OnSuccess(Sprite sprite, Sprite target)
+    public override async void OnSuccess(Sprite sprite, Sprite target)
     {
         if (sprite is not Aisling damageDealingSprite) return;
         var client = damageDealingSprite.Client;
@@ -551,17 +559,23 @@ public class Shunshin(Spell spell) : SpellScript(spell)
         var buff = new buff_hide();
         client.EnqueueBuffAppliedEvent(damageDealingSprite, buff);
         client.SendServerMessage(ServerMessageType.OrangeBar1, "You've blended into the shadows.");
-        client.UpdateDisplay();
         var oldPos = damageDealingSprite.Pos;
 
-        GlobalSpellMethods.Step(damageDealingSprite, targetPos.X, targetPos.Y);
+        var stepped = await damageDealingSprite.StepAndRemove(damageDealingSprite, targetPos.X, targetPos.Y);
+
+        if (!stepped)
+        {
+            OnFailed(sprite, target);
+            return;
+        }
+
         damageDealingSprite.Facing(target.X, target.Y, out var direction);
+        damageDealingSprite.Direction = (byte)direction;
+        damageDealingSprite.StepAddAndUpdateDisplay(damageDealingSprite);
         damageDealingSprite.SendAnimationNearby(63, new Position(oldPos));
         damageDealingSprite.SendAnimationNearby(76, damageDealingSprite.Position);
-
-        damageDealingSprite.Direction = (byte)direction;
-        damageDealingSprite.Turn();
-        client.SendBodyAnimation(client.Aisling.Serial, (BodyAnimation)0x82, 20, Spell.Template.Sound);
+        client.SendBodyAnimation(client.Aisling.Serial, (BodyAnimation)0x82, 20);
+        client.SendSound(Spell.Template.Sound, false);
     }
 
     public override void OnUse(Sprite sprite, Sprite target)

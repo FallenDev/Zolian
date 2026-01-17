@@ -135,25 +135,6 @@ public static class GlobalSkillMethods
         }
     }
 
-    public static void Step(Sprite sprite, int savedXStep, int savedYStep)
-    {
-        try
-        {
-            if (sprite is not Aisling damageDealingSprite) return;
-            var warpPos = new Position(savedXStep, savedYStep);
-            damageDealingSprite.Client.WarpTo(warpPos);
-            damageDealingSprite.Client.CheckWarpTransitions(damageDealingSprite.Client, savedXStep, savedYStep);
-            damageDealingSprite.Client.SendRemoveObject(damageDealingSprite.Serial);
-            damageDealingSprite.Client.UpdateDisplay();
-            damageDealingSprite.Client.LastMovement = DateTime.UtcNow;
-        }
-        catch
-        {
-            ServerSetup.EventsLogger($"Issue with Step called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}");
-            SentrySdk.CaptureMessage($"Issue with Step called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
-        }
-    }
-
     public static void Train(WorldClient client, Skill skill) => client?.TrainSkill(skill);
 
     public static bool OnUse(Aisling aisling, Skill skill)

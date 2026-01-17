@@ -164,7 +164,7 @@ public class Blitz(Skill skill) : SkillScript(skill)
 
     protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, _target);
 
-    protected override void OnSuccess(Sprite sprite)
+    protected override async void OnSuccess(Sprite sprite)
     {
         if (sprite is Aisling aisling)
             aisling.ActionUsed = "Blitz";
@@ -189,10 +189,17 @@ public class Blitz(Skill skill) : SkillScript(skill)
             }
 
             var dmgCalc = DamageCalc(sprite);
-            GlobalSkillMethods.Step(damageDealer, targetPos.X, targetPos.Y);
+            var stepped = await damageDealer.StepAndRemove(damageDealer, targetPos.X, targetPos.Y);
+
+            if (!stepped)
+            {
+                OnFailed(sprite);
+                return;
+            }
+
             damageDealer.Facing(_target.X, _target.Y, out var direction);
             damageDealer.Direction = (byte)direction;
-            damageDealer.Turn();
+            damageDealer.StepAddAndUpdateDisplay(damageDealer);
             GlobalSkillMethods.OnSuccess(_target, damageDealer, Skill, dmgCalc, _crit, action);
         }
         catch
@@ -634,7 +641,7 @@ public class Rush(Skill skill) : SkillScript(skill)
         GlobalSkillMethods.OnFailed(sprite, Skill, _target);
     }
 
-    protected override void OnSuccess(Sprite sprite)
+    protected override async void OnSuccess(Sprite sprite)
     {
         if (sprite is Aisling aisling)
         {
@@ -680,7 +687,15 @@ public class Rush(Skill skill) : SkillScript(skill)
 
                 if (damageDealer.Position != position)
                 {
-                    GlobalSkillMethods.Step(damageDealer, position.X, position.Y);
+                    var stepped = await damageDealer.StepAndRemove(damageDealer, position.X, position.Y);
+
+                    if (!stepped)
+                    {
+                        OnFailed(sprite);
+                        return;
+                    }
+
+                    damageDealer.StepAddAndUpdateDisplay(damageDealer);
                 }
 
                 if (_target is not Damageable damageable) return;
@@ -692,7 +707,15 @@ public class Rush(Skill skill) : SkillScript(skill)
             }
             else
             {
-                GlobalSkillMethods.Step(damageDealer, wallPosition.X, wallPosition.Y);
+                var stepped = await damageDealer.StepAndRemove(damageDealer, wallPosition.X, wallPosition.Y);
+
+                if (!stepped)
+                {
+                    OnFailed(sprite);
+                    return;
+                }
+
+                damageDealer.StepAddAndUpdateDisplay(damageDealer);
                 var stunned = new DebuffBeagsuain();
                 GlobalSkillMethods.ApplyPhysicalDebuff(damageDealer, stunned, damageDealer, Skill);
                 damageDealer.SendAnimationNearby(208, null, damageDealer.Serial);
@@ -747,7 +770,7 @@ public class Rush(Skill skill) : SkillScript(skill)
         return critCheck.Item2;
     }
 
-    private void Target(Sprite sprite)
+    private async void Target(Sprite sprite)
     {
         if (sprite is not Damageable damageable) return;
 
@@ -771,7 +794,15 @@ public class Rush(Skill skill) : SkillScript(skill)
 
                 if (damageable.Position != wallPosition)
                 {
-                    GlobalSkillMethods.Step(damageable, wallPosition.X, wallPosition.Y);
+                    var stepped = await damageable.StepAndRemove(damageable, wallPosition.X, wallPosition.Y);
+
+                    if (!stepped)
+                    {
+                        OnFailed(sprite);
+                        return;
+                    }
+
+                    damageable.StepAddAndUpdateDisplay(damageable);
                 }
 
                 if (wallPos <= 2)
@@ -957,7 +988,7 @@ public class Sneak_Attack(Skill skill) : SkillScript(skill)
 
     protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, _target);
 
-    protected override void OnSuccess(Sprite sprite)
+    protected override async void OnSuccess(Sprite sprite)
     {
         if (sprite is Aisling aisling)
             aisling.ActionUsed = "Sneak Attack";
@@ -982,10 +1013,17 @@ public class Sneak_Attack(Skill skill) : SkillScript(skill)
             }
 
             var dmgCalc = DamageCalc(damageDealer);
-            GlobalSkillMethods.Step(damageDealer, targetPos.X, targetPos.Y);
+            var stepped = await damageDealer.StepAndRemove(damageDealer, targetPos.X, targetPos.Y);
+
+            if (!stepped)
+            {
+                OnFailed(sprite);
+                return;
+            }
+
             damageDealer.Facing(_target.X, _target.Y, out var direction);
             damageDealer.Direction = (byte)direction;
-            damageDealer.Turn();
+            damageDealer.StepAddAndUpdateDisplay(damageDealer);
             GlobalSkillMethods.OnSuccess(_target, damageDealer, Skill, dmgCalc, _crit, action);
         }
         catch

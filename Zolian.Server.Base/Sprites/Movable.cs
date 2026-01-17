@@ -203,6 +203,32 @@ public class Movable : Identifiable
         LastTurnUpdated = DateTime.UtcNow;
     }
 
+    public async Task<bool> StepAndRemove(Sprite sprite, int savedXStep, int savedYStep)
+    {
+        try
+        {
+            if (sprite is not Aisling movingPlayer) return await Task.FromResult(false);
+            var warpPos = new Position(savedXStep, savedYStep);
+            movingPlayer.Client.WarpTo(warpPos);
+            movingPlayer.Client.CheckWarpTransitions(movingPlayer.Client, savedXStep, savedYStep);
+            return await movingPlayer.Client.SendRemoveObject(movingPlayer.Serial);
+        }
+        catch
+        {
+            ServerSetup.EventsLogger($"Issue with Step called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}");
+            SentrySdk.CaptureMessage($"Issue with Step called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
+            return await Task.FromResult(false);
+        }
+    }
+
+    public void StepAddAndUpdateDisplay(Sprite sprite)
+    {
+        if (sprite is not Aisling movingPlayer) return;
+        movingPlayer.Client.UpdateDisplay();
+        movingPlayer.LastTurnUpdated = DateTime.UtcNow;
+        movingPlayer.Client.LastMovement = DateTime.UtcNow;
+    }
+
     /// <summary>
     /// Sends an Animation Server Packet to players nearby
     /// </summary>

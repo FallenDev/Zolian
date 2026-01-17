@@ -30,7 +30,7 @@ public class IronSprint(Skill skill) : SkillScript(skill)
         GlobalSkillMethods.OnFailed(sprite, Skill, null);
     }
 
-    protected override void OnSuccess(Sprite sprite)
+    protected override async void OnSuccess(Sprite sprite)
     {
         if (sprite is Aisling aisling)
         {
@@ -54,10 +54,17 @@ public class IronSprint(Skill skill) : SkillScript(skill)
                 return;
             }
 
-            GlobalSkillMethods.Step(damageDealer, targetPos.X, targetPos.Y);
+            var stepped = await damageDealer.StepAndRemove(damageDealer, targetPos.X, targetPos.Y);
+
+            if (!stepped)
+            {
+                OnFailed(sprite);
+                return;
+            }
+
             damageDealer.Facing(_target.X, _target.Y, out var direction);
             damageDealer.Direction = (byte)direction;
-            damageDealer.Turn();
+            damageDealer.StepAddAndUpdateDisplay(damageDealer);
             if (_target is not Damageable damageable) return;
             var dmgCalc = DamageCalc(damageDealer);
 
@@ -125,7 +132,7 @@ public class IronSprint(Skill skill) : SkillScript(skill)
         return critCheck.Item2;
     }
 
-    private void Target(Sprite sprite)
+    private async void Target(Sprite sprite)
     {
         if (sprite is not Damageable damageDealer) return;
 
@@ -157,7 +164,15 @@ public class IronSprint(Skill skill) : SkillScript(skill)
 
                 if (damageDealer.Position != wallPosition)
                 {
-                    GlobalSkillMethods.Step(damageDealer, wallPosition.X, wallPosition.Y);
+                    var stepped = await damageDealer.StepAndRemove(damageDealer, wallPosition.X, wallPosition.Y);
+
+                    if (!stepped)
+                    {
+                        OnFailed(sprite);
+                        return;
+                    }
+
+                    damageDealer.StepAddAndUpdateDisplay(damageDealer);
                 }
 
                 if (wallPos <= 2)

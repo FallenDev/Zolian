@@ -1696,7 +1696,7 @@ public class Dash(Skill skill) : SkillScript(skill)
         GlobalSkillMethods.OnFailed(sprite, Skill, _target);
     }
 
-    protected override void OnSuccess(Sprite sprite)
+    protected override async void OnSuccess(Sprite sprite)
     {
         if (sprite is Aisling aisling)
         {
@@ -1742,7 +1742,15 @@ public class Dash(Skill skill) : SkillScript(skill)
 
                 if (damageDealer.Position != position)
                 {
-                    GlobalSkillMethods.Step(damageDealer, position.X, position.Y);
+                    var stepped = await damageDealer.StepAndRemove(damageDealer, position.X, position.Y);
+
+                    if (!stepped)
+                    {
+                        OnFailed(sprite);
+                        return;
+                    }
+
+                    damageDealer.StepAddAndUpdateDisplay(damageDealer);
                 }
 
                 if (_target is not Damageable damageable) return;
@@ -1754,7 +1762,15 @@ public class Dash(Skill skill) : SkillScript(skill)
             }
             else
             {
-                GlobalSkillMethods.Step(damageDealer, wallPosition.X, wallPosition.Y);
+                var stepped = await damageDealer.StepAndRemove(damageDealer, wallPosition.X, wallPosition.Y);
+
+                if (!stepped)
+                {
+                    OnFailed(sprite);
+                    return;
+                }
+
+                damageDealer.StepAddAndUpdateDisplay(damageDealer);
                 var stunned = new DebuffBeagsuain();
                 GlobalSkillMethods.ApplyPhysicalDebuff(damageDealer, stunned, damageDealer, Skill);
                 damageDealer.SendAnimationNearby(208, null, damageDealer.Serial);
@@ -1809,7 +1825,7 @@ public class Dash(Skill skill) : SkillScript(skill)
         return critCheck.Item2;
     }
 
-    private void Target(Sprite sprite)
+    private async void Target(Sprite sprite)
     {
         if (sprite is not Damageable damageable) return;
 
@@ -1833,7 +1849,15 @@ public class Dash(Skill skill) : SkillScript(skill)
 
                 if (damageable.Position != wallPosition)
                 {
-                    GlobalSkillMethods.Step(damageable, wallPosition.X, wallPosition.Y);
+                    var stepped = await damageable.StepAndRemove(damageable, wallPosition.X, wallPosition.Y);
+
+                    if (!stepped)
+                    {
+                        OnFailed(sprite);
+                        return;
+                    }
+
+                    damageable.StepAddAndUpdateDisplay(damageable);
                 }
 
                 if (wallPos <= 2)

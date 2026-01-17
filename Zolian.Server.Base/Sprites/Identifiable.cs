@@ -659,7 +659,7 @@ public class Identifiable : Sprite
         return Direction == direction;
     }
 
-    public void UpdateAddAndRemove()
+    public async void UpdateAddAndRemove()
     {
         var nearby = AislingsEarShotNearby();
         if (nearby.IsEmpty()) return;
@@ -675,9 +675,12 @@ public class Identifiable : Sprite
                 else
                     objectId = Serial;
 
-                playerNearby.Client.SendRemoveObject(objectId);
-                var obj = new List<Sprite> { this };
-                playerNearby.Client.SendVisibleEntities(obj);
+                var removed = await playerNearby.Client.SendRemoveObject(objectId);
+                if (removed)
+                {
+                    var obj = new List<Sprite> { this };
+                    playerNearby.Client.SendVisibleEntities(obj);
+                }
             }
         }
         catch (Exception e)
@@ -707,7 +710,7 @@ public class Identifiable : Sprite
         try
         {
             foreach (var o in nearby)
-                o?.Client?.SendRemoveObject(objectId);
+                _ = o?.Client?.SendRemoveObject(objectId);
         }
         catch (Exception e)
         {
@@ -728,7 +731,7 @@ public class Identifiable : Sprite
         else
             objectId = Serial;
 
-        nearbyAisling.Client.SendRemoveObject(objectId);
+        _ = nearbyAisling.Client.SendRemoveObject(objectId);
     }
 
     private void DeleteObject()

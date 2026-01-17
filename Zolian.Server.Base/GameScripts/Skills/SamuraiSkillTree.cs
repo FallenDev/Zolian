@@ -27,7 +27,7 @@ public class Iaido(Skill skill) : SkillScript(skill)
         GlobalSkillMethods.OnFailed(sprite, Skill, null);
     }
 
-    protected override void OnSuccess(Sprite sprite)
+    protected override async void OnSuccess(Sprite sprite)
     {
         if (sprite is Aisling aisling)
         {
@@ -63,39 +63,50 @@ public class Iaido(Skill skill) : SkillScript(skill)
 
             if (damageDealer.Position != wallPosition)
             {
-                GlobalSkillMethods.Step(damageDealer, wallPosition.X, wallPosition.Y);
+                var stepped = await damageDealer.StepAndRemove(damageDealer, wallPosition.X, wallPosition.Y);
+
+                if (!stepped)
+                {
+                    OnFailed(sprite);
+                    return;
+                }
+
+                damageDealer.StepAddAndUpdateDisplay(damageDealer);
             }
 
-            foreach (var enemy in _enemyList)
+            var enemiesList = _enemyList.ToArray();
+
+            foreach (var enemy in enemiesList)
             {
                 if (enemy is not Damageable damageable) continue;
+                if (!enemy.Alive) continue;
                 var dmgCalc = DamageCalc(damageDealer);
 
                 GlobalSkillMethods.OnSuccessWithoutActionAnimation(enemy, damageDealer, Skill, dmgCalc, true);
-                Task.Delay(300).ContinueWith(c =>
-                {
-                    damageDealer.SendAnimationNearby(119, enemy.Position);
-                });
+                await Task.Delay(300).ConfigureAwait(false);
+                damageDealer.SendAnimationNearby(119, enemy.Position);
 
-                if (!(enemy.CurrentHp <= enemy.MaximumHp * 0.10)) continue;
-                switch (enemy)
+                try
                 {
-                    case Aisling:
-                    case Monster monster when monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.Boss)
-                                              || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.MiniBoss)
-                                              || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.Forsaken):
-                        if (damageDealer is Aisling player)
-                            player.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Death doesn't seem to work on them");
-                        continue;
+                    if (!(enemy.CurrentHp <= enemy.MaximumHp * 0.10)) continue;
+                    switch (enemy)
+                    {
+                        case Aisling:
+                        case Monster monster when monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.Boss)
+                                                  || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.MiniBoss)
+                                                  || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.Forsaken):
+                            if (damageDealer is Aisling player)
+                                player.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Death doesn't seem to work on them");
+                            continue;
+                    }
+                    var debuff = new DebuffReaping();
+                    GlobalSkillMethods.ApplyPhysicalDebuff(damageDealer, debuff, enemy, Skill);
                 }
-                var debuff = new DebuffReaping();
-                GlobalSkillMethods.ApplyPhysicalDebuff(damageDealer, debuff, enemy, Skill);
+                catch { }
             }
 
-            Task.Delay(300).ContinueWith(c =>
-            {
-                damageDealer.SendAnimationNearby(Skill.Template.TargetAnimation, damageDealer.Position);
-            });
+            await Task.Delay(300).ConfigureAwait(false);
+            damageDealer.SendAnimationNearby(Skill.Template.TargetAnimation, damageDealer.Position);
 
             if (wallPos > 5) return;
 
@@ -161,7 +172,7 @@ public class Iaido(Skill skill) : SkillScript(skill)
         return critCheck.Item2;
     }
 
-    private void Target(Sprite sprite)
+    private async void Target(Sprite sprite)
     {
         if (sprite is not Damageable damageDealer) return;
 
@@ -180,8 +191,21 @@ public class Iaido(Skill skill) : SkillScript(skill)
 
                 if (damageDealer.Position != wallPosition)
                 {
-                    GlobalSkillMethods.Step(damageDealer, wallPosition.X, wallPosition.Y);
+                    var stepped = await damageDealer.StepAndRemove(damageDealer, wallPosition.X, wallPosition.Y);
+
+                    if (!stepped)
+                    {
+                        OnFailed(sprite);
+                        return;
+                    }
+
+                    damageDealer.StepAddAndUpdateDisplay(damageDealer);
                 }
+
+                await Task.Delay(300).ContinueWith(c =>
+                {
+                    damageDealer.SendAnimationNearby(Skill.Template.TargetAnimation, damageDealer.Position);
+                }).ConfigureAwait(false);
 
                 if (wallPos <= 5)
                 {

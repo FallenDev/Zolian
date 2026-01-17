@@ -2762,14 +2762,22 @@ public class WorldClient : WorldClientBase, IWorldClient
     /// 0x0E - Remove World Object
     /// </summary>
     /// <param name="id"></param>
-    public void SendRemoveObject(uint id)
+    public async Task<bool> SendRemoveObject(uint id)
     {
-        var args = new RemoveEntityArgs
+        try
         {
-            SourceId = id
-        };
+            var args = new RemoveEntityArgs
+            {
+                SourceId = id
+            };
 
-        Send(args);
+            Send(args);
+            return await Task.FromResult(true);
+        }
+        catch
+        {
+            return await Task.FromResult(false);
+        }
     }
 
     /// <summary>
@@ -3605,7 +3613,7 @@ public class WorldClient : WorldClientBase, IWorldClient
         if (!excludeSelf)
             SendDisplayAisling(Aisling);
 
-        var nearbyAislings = Aisling.AislingsNearby().ToList();
+        var nearbyAislings = Aisling.AislingsNearby();
 
         if (nearbyAislings.Count == 0) return this;
 
