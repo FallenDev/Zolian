@@ -71,6 +71,9 @@ public class SpellBook : ObjectManager
 
     public bool AttemptSwap(WorldClient client, byte fromSlot, byte toSlot)
     {
+        // Mark the player's save as dirty
+        client?.Aisling?.PlayerSaveDirty = true;
+
         if (!IsValidSlot(fromSlot) || !IsValidSlot(toSlot)) return false;
         if (fromSlot == toSlot) return true;
 

@@ -433,7 +433,13 @@ public abstract class Sprite : INotifyPropertyChanged
         if (aisling.MonsterKillCounters.Values.Any(killRecord => DateTime.UtcNow.Subtract(killRecord.TimeKilled) <= TimeSpan.FromSeconds(60))) return;
 
         _threatControl.Restart();
-        aisling.ThreatMeter = 0;
+        var threatReduction = (long)(aisling.ThreatMeter * 0.33);
+
+        // Woodelf Passive: Camouflage
+        if (aisling.Camouflage)
+            threatReduction = (long)(aisling.ThreatMeter * 0.66);
+
+        aisling.ThreatMeter -= threatReduction;
         aisling.Client.SendServerMessage(ServerMessageType.PersistentMessage, "");
     }
 

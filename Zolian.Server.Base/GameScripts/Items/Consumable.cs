@@ -588,7 +588,6 @@ public class Consumable(Item item) : ItemScript(item)
 
                         if (skill.Template.SkillType == SkillScope.Assail)
                             aisling.Client.LastAssail = DateTime.UtcNow;
-                        script?.OnCleanup();
 
                         skill.InUse = false;
                     }
@@ -661,7 +660,6 @@ public class Consumable(Item item) : ItemScript(item)
 
                         if (skill.Template.SkillType == SkillScope.Assail)
                             aisling.Client.LastAssail = DateTime.UtcNow;
-                        script?.OnCleanup();
 
                         skill.InUse = false;
                     }
@@ -752,7 +750,6 @@ public class Consumable(Item item) : ItemScript(item)
 
                         if (skill.Template.SkillType == SkillScope.Assail)
                             aisling.Client.LastAssail = DateTime.UtcNow;
-                        script?.OnCleanup();
 
                         skill.InUse = false;
                     }
@@ -870,7 +867,6 @@ public class Consumable(Item item) : ItemScript(item)
 
                         if (skill.Template.SkillType == SkillScope.Assail)
                             aisling.Client.LastAssail = DateTime.UtcNow;
-                        script?.OnCleanup();
 
                         skill.InUse = false;
                     }

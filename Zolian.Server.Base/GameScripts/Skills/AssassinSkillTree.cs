@@ -14,10 +14,9 @@ namespace Darkages.GameScripts.Skills;
 [Script("Stab")]
 public class Stab(Skill skill) : SkillScript(skill)
 {
-    private Sprite _target;
     private bool _crit;
 
-    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, _target);
+    protected override void OnFailed(Sprite sprite, Sprite target) => GlobalSkillMethods.OnFailed(sprite, Skill, target);
 
     protected override void OnSuccess(Sprite sprite)
     {
@@ -39,8 +38,7 @@ public class Stab(Skill skill) : SkillScript(skill)
 
             if (enemy == null || enemy.Serial == sprite.Serial)
             {
-                _target = enemy;
-                OnFailed(sprite);
+                OnFailed(sprite, enemy);
                 return;
             }
 
@@ -55,11 +53,6 @@ public class Stab(Skill skill) : SkillScript(skill)
             ServerSetup.EventsLogger($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}");
             SentrySdk.CaptureMessage($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
         }
-    }
-
-    public override void OnCleanup()
-    {
-        _target = null;
     }
 
     private long DamageCalc(Sprite sprite)
@@ -89,10 +82,9 @@ public class Stab(Skill skill) : SkillScript(skill)
 [Script("Stab Twice")]
 public class Stab_Twice(Skill skill) : SkillScript(skill)
 {
-    private Sprite _target;
     private bool _crit;
 
-    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, _target);
+    protected override void OnFailed(Sprite sprite, Sprite target) => GlobalSkillMethods.OnFailed(sprite, Skill, target);
 
     protected override void OnSuccess(Sprite sprite)
     {
@@ -114,8 +106,7 @@ public class Stab_Twice(Skill skill) : SkillScript(skill)
 
             if (enemy == null || enemy.Serial == sprite.Serial)
             {
-                _target = enemy;
-                OnFailed(sprite);
+                OnFailed(sprite, enemy);
                 return;
             }
 
@@ -131,11 +122,6 @@ public class Stab_Twice(Skill skill) : SkillScript(skill)
             ServerSetup.EventsLogger($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}");
             SentrySdk.CaptureMessage($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
         }
-    }
-
-    public override void OnCleanup()
-    {
-        _target = null;
     }
 
     private long DamageCalc(Sprite sprite)
@@ -167,7 +153,7 @@ public class Stab_and_Twist(Skill skill) : SkillScript(skill)
 {
     private bool _crit;
 
-    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
+    protected override void OnFailed(Sprite sprite, Sprite target) => GlobalSkillMethods.OnFailed(sprite, Skill, target);
 
     protected override void OnSuccess(Sprite sprite)
     {
@@ -189,7 +175,7 @@ public class Stab_and_Twist(Skill skill) : SkillScript(skill)
 
             if (enemy.Count == 0)
             {
-                OnFailed(sprite);
+                OnFailed(sprite, null);
                 return;
             }
 
@@ -213,8 +199,6 @@ public class Stab_and_Twist(Skill skill) : SkillScript(skill)
         }
     }
 
-    public override void OnCleanup() { }
-    
     private long DamageCalc(Sprite sprite)
     {
         _crit = false;
@@ -242,7 +226,7 @@ public class Stab_and_Twist(Skill skill) : SkillScript(skill)
 [Script("Sneak")]
 public class Sneak(Skill skill) : SkillScript(skill)
 {
-    protected override void OnFailed(Sprite sprite)
+    protected override void OnFailed(Sprite sprite, Sprite target)
     {
         if (sprite is not Aisling damageDealingAisling) return;
         damageDealingAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Failed to blend in.");
@@ -254,7 +238,7 @@ public class Sneak(Skill skill) : SkillScript(skill)
 
         if (!sprite.Alive || sprite.IsInvisible)
         {
-            OnFailed(sprite);
+            OnFailed(sprite, null);
             return;
         }
 
@@ -265,8 +249,6 @@ public class Sneak(Skill skill) : SkillScript(skill)
         if (damageDealer is Aisling aisling)
             GlobalSkillMethods.Train(aisling.Client, Skill);
     }
-
-    public override void OnCleanup() { }
 }
 
 [Script("Flurry")]
@@ -274,7 +256,7 @@ public class Flurry(Skill skill) : SkillScript(skill)
 {
     private bool _crit;
 
-    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
+    protected override void OnFailed(Sprite sprite, Sprite target) => GlobalSkillMethods.OnFailed(sprite, Skill, target);
 
     protected override void OnSuccess(Sprite sprite)
     {
@@ -296,7 +278,7 @@ public class Flurry(Skill skill) : SkillScript(skill)
 
             if (enemy.Count == 0)
             {
-                OnFailed(sprite);
+                OnFailed(sprite, null);
                 return;
             }
 
@@ -321,8 +303,6 @@ public class Flurry(Skill skill) : SkillScript(skill)
             SentrySdk.CaptureMessage($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
         }
     }
-
-    public override void OnCleanup() { }
 
     private long DamageCalc(Sprite sprite)
     {
@@ -351,7 +331,7 @@ public class Flurry(Skill skill) : SkillScript(skill)
 [Script("Entice")]
 public class Enticed(Skill skill) : SkillScript(skill)
 {
-    protected override void OnFailed(Sprite sprite)
+    protected override void OnFailed(Sprite sprite, Sprite target)
     {
         if (sprite is not Aisling damageDealingAisling) return;
         damageDealingAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "... What?");
@@ -369,7 +349,7 @@ public class Enticed(Skill skill) : SkillScript(skill)
 
             if (enemy.Count == 0)
             {
-                OnFailed(sprite);
+                OnFailed(sprite, null);
                 return;
             }
 
@@ -402,8 +382,6 @@ public class Enticed(Skill skill) : SkillScript(skill)
             SentrySdk.CaptureMessage($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
         }
     }
-
-    public override void OnCleanup() { }
 }
 
 [Script("Double-Edged Dance")]
@@ -411,7 +389,7 @@ public class Double_Edged_Dance(Skill skill) : SkillScript(skill)
 {
     private bool _crit;
 
-    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
+    protected override void OnFailed(Sprite sprite, Sprite target) => GlobalSkillMethods.OnFailed(sprite, Skill, target);
 
     protected override void OnSuccess(Sprite sprite)
     {
@@ -435,7 +413,7 @@ public class Double_Edged_Dance(Skill skill) : SkillScript(skill)
 
             if (enemy.Count == 0)
             {
-                OnFailed(sprite);
+                OnFailed(sprite, null);
                 return;
             }
 
@@ -456,8 +434,6 @@ public class Double_Edged_Dance(Skill skill) : SkillScript(skill)
             SentrySdk.CaptureMessage($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
         }
     }
-
-    public override void OnCleanup() { }
 
     private long DamageCalc(Sprite sprite)
     {
@@ -488,7 +464,7 @@ public class Ebb_and_Flow(Skill skill) : SkillScript(skill)
 {
     private bool _crit;
 
-    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
+    protected override void OnFailed(Sprite sprite, Sprite target) => GlobalSkillMethods.OnFailed(sprite, Skill, target);
 
     protected override void OnSuccess(Sprite sprite)
     {
@@ -512,7 +488,7 @@ public class Ebb_and_Flow(Skill skill) : SkillScript(skill)
 
             if (enemy.Count == 0)
             {
-                OnFailed(sprite);
+                OnFailed(sprite, null);
                 return;
             }
 
@@ -533,8 +509,6 @@ public class Ebb_and_Flow(Skill skill) : SkillScript(skill)
             SentrySdk.CaptureMessage($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
         }
     }
-
-    public override void OnCleanup() { }
 
     private long DamageCalc(Sprite sprite)
     {
@@ -563,13 +537,13 @@ public class Ebb_and_Flow(Skill skill) : SkillScript(skill)
 [Script("Shadow Step")]
 public class Shadow_Step(Skill skill) : SkillScript(skill)
 {
-    private Sprite _target;
     private bool _crit;
-    private List<Sprite> _enemyList;
 
-    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, _target);
+    protected override void OnFailed(Sprite sprite, Sprite target) => GlobalSkillMethods.OnFailed(sprite, Skill, target);
 
-    protected override async void OnSuccess(Sprite sprite)
+    protected override void OnSuccess(Sprite sprite) { }
+
+    protected override async void OnSuccess(Sprite sprite, Sprite target)
     {
         if (sprite is Aisling aisling)
             aisling.ActionUsed = "Shadow Step";
@@ -585,11 +559,11 @@ public class Shadow_Step(Skill skill) : SkillScript(skill)
         try
         {
             if (sprite is not Damageable damageDealer) return;
-            var targetPos = damageDealer.GetFromAllSidesEmpty(_target);
+            var targetPos = damageDealer.GetFromAllSidesEmpty(target);
 
-            if (_target == null || _target.Serial == sprite.Serial || targetPos == _target.Position)
+            if (target == null || target.Serial == sprite.Serial || targetPos == target.Position)
             {
-                OnFailed(sprite);
+                OnFailed(sprite, target);
                 return;
             }
 
@@ -603,26 +577,20 @@ public class Shadow_Step(Skill skill) : SkillScript(skill)
 
             if (!stepped)
             {
-                OnFailed(sprite);
+                OnFailed(sprite, target);
                 return;
             }
 
-            damageDealer.Facing(_target.X, _target.Y, out var direction);
+            damageDealer.Facing(target.X, target.Y, out var direction);
             damageDealer.Direction = (byte)direction;
             damageDealer.StepAddAndUpdateDisplay(damageDealer);
-            GlobalSkillMethods.OnSuccess(_target, damageDealer, Skill, dmgCalc, _crit, action);
+            GlobalSkillMethods.OnSuccess(target, damageDealer, Skill, dmgCalc, _crit, action);
         }
         catch
         {
             ServerSetup.EventsLogger($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}");
             SentrySdk.CaptureMessage($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
         }
-    }
-
-    public override void OnCleanup()
-    {
-        _target = null;
-        _enemyList?.Clear();
     }
 
     public override void OnUse(Sprite sprite)
@@ -661,12 +629,12 @@ public class Shadow_Step(Skill skill) : SkillScript(skill)
 
         try
         {
-            _enemyList = damageDealingSprite.DamageableGetInFront();
-            _target = _enemyList.FirstOrDefault();
+            var _enemyList = damageDealingSprite.DamageableGetInFront().ToArray();
+            var _target = _enemyList.FirstOrDefault();
 
             if (_target == null)
             {
-                OnFailed(damageDealingSprite);
+                OnFailed(damageDealingSprite, _target);
             }
             else if (damageDealingSprite is Aisling aisling)
             {
@@ -674,16 +642,16 @@ public class Shadow_Step(Skill skill) : SkillScript(skill)
 
                 if (success)
                 {
-                    OnSuccess(damageDealingSprite);
+                    OnSuccess(damageDealingSprite, _target);
                 }
                 else
                 {
-                    OnFailed(damageDealingSprite);
+                    OnFailed(damageDealingSprite, _target);
                 }
             }
             else
             {
-                OnSuccess(damageDealingSprite);
+                OnSuccess(damageDealingSprite, _target);
             }
         }
         catch

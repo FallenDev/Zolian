@@ -12,7 +12,7 @@ namespace Darkages.GameScripts.Skills;
 [Script("Identify Weapon")]
 public class IdentifyWeapon(Skill skill) : SkillScript(skill)
 {
-    protected override void OnFailed(Sprite sprite)
+    protected override void OnFailed(Sprite sprite, Sprite target)
     {
         if (sprite is not Aisling aisling) return;
         aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Hmm, can't seem to identify that.");
@@ -38,13 +38,13 @@ public class IdentifyWeapon(Skill skill) : SkillScript(skill)
 
             if (itemToBeIdentified == null)
             {
-                OnFailed(aisling);
+                OnFailed(aisling, null);
                 return;
             }
 
             if (itemToBeIdentified.Template.ScriptName != "Weapon")
             {
-                OnFailed(aisling);
+                OnFailed(aisling, null);
                 return;
             }
 
@@ -82,15 +82,13 @@ public class IdentifyWeapon(Skill skill) : SkillScript(skill)
         }
         catch
         {
-            OnFailed(aisling);
+            OnFailed(aisling, null);
             return;
         }
 
         aisling.SendAnimationNearby(Skill.Template.TargetAnimation, null, aisling.Serial);
         aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
     }
-
-    public override void OnCleanup() { }
 
     public override void OnUse(Sprite sprite)
     {
@@ -104,7 +102,7 @@ public class IdentifyWeapon(Skill skill) : SkillScript(skill)
 [Script("Identify Armor")]
 public class IdentifyArmor(Skill skill) : SkillScript(skill)
 {
-    protected override void OnFailed(Sprite sprite)
+    protected override void OnFailed(Sprite sprite, Sprite target)
     {
         if (sprite is not Aisling aisling) return;
         aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Hmm, can't seem to identify that.");
@@ -130,13 +128,13 @@ public class IdentifyArmor(Skill skill) : SkillScript(skill)
 
             if (itemToBeIdentified == null)
             {
-                OnFailed(aisling);
+                OnFailed(aisling, null);
                 return;
             }
 
             if (itemToBeIdentified.Template.ScriptName is not ("Armor" or "Helmet"))
             {
-                OnFailed(aisling);
+                OnFailed(aisling, null);
                 return;
             }
 
@@ -151,15 +149,13 @@ public class IdentifyArmor(Skill skill) : SkillScript(skill)
         }
         catch
         {
-            OnFailed(aisling);
+            OnFailed(aisling, null);
             return;
         }
 
         aisling.SendAnimationNearby(Skill.Template.TargetAnimation, null, aisling.Serial);
         aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
     }
-
-    public override void OnCleanup() { }
 
     public override void OnUse(Sprite sprite)
     {
@@ -173,7 +169,7 @@ public class IdentifyArmor(Skill skill) : SkillScript(skill)
 [Script("Inspect Item")]
 public class InspectItem(Skill skill) : SkillScript(skill)
 {
-    protected override void OnFailed(Sprite sprite)
+    protected override void OnFailed(Sprite sprite, Sprite target)
     {
         if (sprite is not Aisling aisling) return;
         aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Hmm, can't seem to identify that.");
@@ -199,7 +195,7 @@ public class InspectItem(Skill skill) : SkillScript(skill)
 
             if (itemToBeIdentified == null)
             {
-                OnFailed(aisling);
+                OnFailed(aisling, null);
                 return;
             }
 
@@ -220,15 +216,13 @@ public class InspectItem(Skill skill) : SkillScript(skill)
         }
         catch
         {
-            OnFailed(aisling);
+            OnFailed(aisling, null);
             return;
         }
 
         aisling.SendAnimationNearby(Skill.Template.TargetAnimation, null, aisling.Serial);
         aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
     }
-
-    public override void OnCleanup() { }
 
     public override void OnUse(Sprite sprite)
     {

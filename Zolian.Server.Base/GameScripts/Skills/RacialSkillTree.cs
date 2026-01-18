@@ -19,7 +19,7 @@ public class Shadowfade(Skill skill) : SkillScript(skill)
 {
     private bool _success;
 
-    protected override void OnFailed(Sprite sprite)
+    protected override void OnFailed(Sprite sprite, Sprite target)
     {
         if (sprite is not Aisling damageDealingAisling) return;
         damageDealingAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Failed to fade into the shadows.");
@@ -31,7 +31,7 @@ public class Shadowfade(Skill skill) : SkillScript(skill)
 
         if (!sprite.Alive || sprite.IsInvisible)
         {
-            OnFailed(sprite);
+            OnFailed(sprite, null);
             return;
         }
 
@@ -42,8 +42,6 @@ public class Shadowfade(Skill skill) : SkillScript(skill)
         if (damageDealer is Aisling aisling)
             GlobalSkillMethods.Train(aisling.Client, Skill);
     }
-
-    public override void OnCleanup() { }
 }
 
 // Wood Elf
@@ -54,7 +52,7 @@ public class Archery(Skill skill) : SkillScript(skill)
     private bool _crit;
     private AnimationArgs _animationArgs;
 
-    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
+    protected override void OnFailed(Sprite sprite, Sprite target) => GlobalSkillMethods.OnFailed(sprite, Skill, target);
 
     protected override void OnSuccess(Sprite sprite)
     {
@@ -73,7 +71,7 @@ public class Archery(Skill skill) : SkillScript(skill)
 
             if (enemy.Count == 0)
             {
-                OnFailed(sprite);
+                OnFailed(sprite, null);
                 return;
             }
 
@@ -121,8 +119,6 @@ public class Archery(Skill skill) : SkillScript(skill)
         }
     }
 
-    public override void OnCleanup() { }
-
     public override void OnUse(Sprite sprite)
     {
         if (!Skill.CanUse()) return;
@@ -133,7 +129,7 @@ public class Archery(Skill skill) : SkillScript(skill)
 
             if (client.Aisling.EquipmentManager.Equipment[1]?.Item?.Template.Group is not ("Bows" or "Guns"))
             {
-                OnFailed(aisling);
+                OnFailed(aisling, null);
                 return;
             }
 
@@ -145,7 +141,7 @@ public class Archery(Skill skill) : SkillScript(skill)
             }
             else
             {
-                OnFailed(aisling);
+                OnFailed(aisling, null);
             }
         }
         else
@@ -183,9 +179,7 @@ public class Archery(Skill skill) : SkillScript(skill)
 [Script("Splash")]
 public class Splash(Skill skill) : SkillScript(skill)
 {
-    private bool _success;
-
-    protected override void OnFailed(Sprite sprite)
+    protected override void OnFailed(Sprite sprite, Sprite target)
     {
         if (sprite is not Aisling damageDealingAisling) return;
         damageDealingAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{damageDealingAisling.Username} used Splash. It's super effective!");
@@ -214,8 +208,6 @@ public class Splash(Skill skill) : SkillScript(skill)
         damageDealer.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
     }
 
-    public override void OnCleanup() { }
-
     public override void OnUse(Sprite sprite)
     {
         if (!Skill.CanUse()) return;
@@ -234,7 +226,7 @@ public class Splash(Skill skill) : SkillScript(skill)
                 return;
             }
 
-            _success = GlobalSkillMethods.OnUse(aisling, Skill);
+            var _success = GlobalSkillMethods.OnUse(aisling, Skill);
 
             if (_success)
             {
@@ -242,7 +234,7 @@ public class Splash(Skill skill) : SkillScript(skill)
             }
             else
             {
-                OnFailed(aisling);
+                OnFailed(aisling, null);
             }
         }
         else
@@ -257,10 +249,9 @@ public class Splash(Skill skill) : SkillScript(skill)
 [Script("Slash")]
 public class Slash(Skill skill) : SkillScript(skill)
 {
-    private Sprite _target;
     private bool _crit;
 
-    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, _target);
+    protected override void OnFailed(Sprite sprite, Sprite target) => GlobalSkillMethods.OnFailed(sprite, Skill, target);
 
     protected override void OnSuccess(Sprite sprite)
     {
@@ -282,8 +273,7 @@ public class Slash(Skill skill) : SkillScript(skill)
 
             if (enemy == null || enemy.Serial == sprite.Serial)
             {
-                _target = enemy;
-                OnFailed(sprite);
+                OnFailed(sprite, null);
                 return;
             }
 
@@ -299,11 +289,6 @@ public class Slash(Skill skill) : SkillScript(skill)
             ServerSetup.EventsLogger($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}");
             SentrySdk.CaptureMessage($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
         }
-    }
-
-    public override void OnCleanup()
-    {
-        _target = null;
     }
 
     private long DamageCalc(Sprite sprite)
@@ -335,7 +320,7 @@ public class Slash(Skill skill) : SkillScript(skill)
 [Script("Adrenaline")]
 public class Adrenaline(Skill skill) : SkillScript(skill)
 {
-    protected override void OnFailed(Sprite sprite)
+    protected override void OnFailed(Sprite sprite, Sprite target)
     {
         if (sprite is not Aisling damageDealingAisling) return;
         damageDealingAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You're out of stamina");
@@ -361,7 +346,7 @@ public class Adrenaline(Skill skill) : SkillScript(skill)
 
         if (damageDealer.HasBuff("Adrenaline"))
         {
-            OnFailed(sprite);
+            OnFailed(sprite, damageDealer);
             return;
         }
 
@@ -370,8 +355,6 @@ public class Adrenaline(Skill skill) : SkillScript(skill)
         damageDealer.SendTargetedClientMethod(PlayerScope.NearbyAislings,
             c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
     }
-
-    public override void OnCleanup() { }
 }
 
 // Half-Elf
@@ -379,9 +362,7 @@ public class Adrenaline(Skill skill) : SkillScript(skill)
 [Script("Atlantean Weapon")]
 public class Atlantean_Weapon(Skill skill) : SkillScript(skill)
 {
-    private bool _success;
-
-    protected override void OnFailed(Sprite sprite)
+    protected override void OnFailed(Sprite sprite, Sprite target)
     {
         if (sprite is not Aisling damageDealingAisling) return;
         damageDealingAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Failed to enhance offense");
@@ -414,7 +395,7 @@ public class Atlantean_Weapon(Skill skill) : SkillScript(skill)
 
         if (damageDealer.HasBuff("Atlantean Weapon"))
         {
-            OnFailed(sprite);
+            OnFailed(sprite, damageDealer);
             return;
         }
 
@@ -423,15 +404,13 @@ public class Atlantean_Weapon(Skill skill) : SkillScript(skill)
         damageDealer.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
     }
 
-    public override void OnCleanup() { }
-
     public override void OnUse(Sprite sprite)
     {
         if (!Skill.CanUse()) return;
 
         if (sprite is Aisling aisling)
         {
-            _success = GlobalSkillMethods.OnUse(aisling, Skill);
+            var _success = GlobalSkillMethods.OnUse(aisling, Skill);
 
             if (_success)
             {
@@ -439,7 +418,7 @@ public class Atlantean_Weapon(Skill skill) : SkillScript(skill)
             }
             else
             {
-                OnFailed(aisling);
+                OnFailed(aisling, null);
             }
         }
         else
@@ -454,9 +433,7 @@ public class Atlantean_Weapon(Skill skill) : SkillScript(skill)
 [Script("Elemental Bane")]
 public class Elemental_Bane(Skill skill) : SkillScript(skill)
 {
-    private bool _success;
-
-    protected override void OnFailed(Sprite sprite)
+    protected override void OnFailed(Sprite sprite, Sprite target)
     {
         if (sprite is not Aisling damageDealingAisling) return;
         damageDealingAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Failed to increase elemental fortitude");
@@ -478,7 +455,7 @@ public class Elemental_Bane(Skill skill) : SkillScript(skill)
 
         if (aisling.HasBuff("Elemental Bane"))
         {
-            OnFailed(aisling);
+            OnFailed(aisling, null);
             return;
         }
 
@@ -493,8 +470,6 @@ public class Elemental_Bane(Skill skill) : SkillScript(skill)
         aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
     }
 
-    public override void OnCleanup() { }
-
     public override void OnUse(Sprite sprite)
     {
         if (!Skill.CanUse()) return;
@@ -507,7 +482,7 @@ public class Elemental_Bane(Skill skill) : SkillScript(skill)
             return;
         }
 
-        _success = GlobalSkillMethods.OnUse(aisling, Skill);
+        var _success = GlobalSkillMethods.OnUse(aisling, Skill);
 
         if (_success)
         {
@@ -515,7 +490,7 @@ public class Elemental_Bane(Skill skill) : SkillScript(skill)
         }
         else
         {
-            OnFailed(aisling);
+            OnFailed(aisling, null);
         }
     }
 }
@@ -525,7 +500,7 @@ public class Elemental_Bane(Skill skill) : SkillScript(skill)
 [Script("Appraise")]
 public class Appraise(Skill skill) : SkillScript(skill)
 {
-    protected override void OnFailed(Sprite sprite)
+    protected override void OnFailed(Sprite sprite, Sprite target)
     {
         if (sprite is not Aisling aisling) return;
         aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Hmm, can't seem to identify that.");
@@ -551,7 +526,7 @@ public class Appraise(Skill skill) : SkillScript(skill)
 
             if (itemToBeIdentified == null)
             {
-                OnFailed(aisling);
+                OnFailed(aisling, null);
                 return;
             }
 
@@ -571,15 +546,13 @@ public class Appraise(Skill skill) : SkillScript(skill)
         }
         catch
         {
-            OnFailed(aisling);
+            OnFailed(aisling, null);
             return;
         }
 
         aisling.SendAnimationNearby(Skill.Template.TargetAnimation, null, aisling.Serial);
         aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
     }
-
-    public override void OnCleanup() { }
 
     public override void OnUse(Sprite sprite)
     {
@@ -596,7 +569,7 @@ public class Appraise(Skill skill) : SkillScript(skill)
 
         if (itemToBeIdentified.Template.ScriptName != "Weapon")
         {
-            OnFailed(aisling);
+            OnFailed(aisling, null);
             return;
         }
 
@@ -640,7 +613,7 @@ public class Appraise(Skill skill) : SkillScript(skill)
 
         if (itemToBeIdentified.Template.ScriptName is not ("Armor" or "Helmet"))
         {
-            OnFailed(aisling);
+            OnFailed(aisling, null);
             return;
         }
 
@@ -682,7 +655,7 @@ public class Fire_Breath(Skill skill) : SkillScript(skill)
 {
     private bool _crit;
 
-    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
+    protected override void OnFailed(Sprite sprite, Sprite target) => GlobalSkillMethods.OnFailed(sprite, Skill, target);
 
     protected override void OnSuccess(Sprite sprite)
     {
@@ -705,7 +678,7 @@ public class Fire_Breath(Skill skill) : SkillScript(skill)
         {
             if (sprite is Aisling manaOwed)
                 manaOwed.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
-            OnFailed(sprite);
+            OnFailed(sprite, null);
             return;
         }
 
@@ -716,7 +689,7 @@ public class Fire_Breath(Skill skill) : SkillScript(skill)
 
             if (enemy.Count == 0)
             {
-                OnFailed(sprite);
+                OnFailed(sprite, null);
                 return;
             }
 
@@ -759,8 +732,6 @@ public class Fire_Breath(Skill skill) : SkillScript(skill)
         }
     }
 
-    public override void OnCleanup() { }
-
     private long DamageCalc(Sprite sprite, Sprite target)
     {
         _crit = false;
@@ -792,7 +763,7 @@ public class Bubble_Burst(Skill skill) : SkillScript(skill)
 {
     private bool _crit;
 
-    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
+    protected override void OnFailed(Sprite sprite, Sprite target) => GlobalSkillMethods.OnFailed(sprite, Skill, target);
 
     protected override void OnSuccess(Sprite sprite)
     {
@@ -815,7 +786,7 @@ public class Bubble_Burst(Skill skill) : SkillScript(skill)
         {
             if (sprite is Aisling manaOwed)
                 manaOwed.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
-            OnFailed(sprite);
+            OnFailed(sprite, null);
             return;
         }
 
@@ -826,7 +797,7 @@ public class Bubble_Burst(Skill skill) : SkillScript(skill)
 
             if (enemy.Count == 0)
             {
-                OnFailed(sprite);
+                OnFailed(sprite, null);
                 return;
             }
 
@@ -869,8 +840,6 @@ public class Bubble_Burst(Skill skill) : SkillScript(skill)
         }
     }
 
-    public override void OnCleanup() { }
-
     private long DamageCalc(Sprite sprite, Sprite target)
     {
         _crit = false;
@@ -901,9 +870,8 @@ public class Bubble_Burst(Skill skill) : SkillScript(skill)
 public class Icy_Blast(Skill skill) : SkillScript(skill)
 {
     private bool _crit;
-    private DebuffFrozen _debuff;
 
-    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
+    protected override void OnFailed(Sprite sprite, Sprite target) => GlobalSkillMethods.OnFailed(sprite, Skill, target);
 
     protected override void OnSuccess(Sprite sprite)
     {
@@ -926,7 +894,7 @@ public class Icy_Blast(Skill skill) : SkillScript(skill)
         {
             if (sprite is Aisling manaOwed)
                 manaOwed.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
-            OnFailed(sprite);
+            OnFailed(sprite, null);
             return;
         }
 
@@ -937,7 +905,7 @@ public class Icy_Blast(Skill skill) : SkillScript(skill)
 
             if (enemy.Count == 0)
             {
-                OnFailed(sprite);
+                OnFailed(sprite, null);
                 return;
             }
 
@@ -971,7 +939,7 @@ public class Icy_Blast(Skill skill) : SkillScript(skill)
                 if (target is Aisling && !damageable.Map.Flags.MapFlagIsSet(MapFlags.PlayerKill)) continue;
 
                 var dmgCalc = DamageCalc(sprite, target);
-                _debuff = new DebuffFrozen();
+                var _debuff = new DebuffFrozen();
                 GlobalSkillMethods.ApplyPhysicalDebuff(damageDealer, _debuff, target, Skill);
                 damageable.ApplyElementalSkillDamage(damageDealer, dmgCalc, ElementManager.Element.Wind, Skill);
                 GlobalSkillMethods.OnSuccess(target, damageDealer, Skill, 0, _crit, action);
@@ -983,8 +951,6 @@ public class Icy_Blast(Skill skill) : SkillScript(skill)
             SentrySdk.CaptureMessage($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
         }
     }
-
-    public override void OnCleanup() { }
 
     private long DamageCalc(Sprite sprite, Sprite target)
     {
@@ -1019,7 +985,7 @@ public class Earthly_Delights(Skill skill) : SkillScript(skill)
 {
     private bool _crit;
 
-    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
+    protected override void OnFailed(Sprite sprite, Sprite target) => GlobalSkillMethods.OnFailed(sprite, Skill, target);
 
     protected override void OnSuccess(Sprite sprite)
     {
@@ -1044,7 +1010,7 @@ public class Earthly_Delights(Skill skill) : SkillScript(skill)
         {
             if (sprite is Aisling manaOwed)
                 manaOwed.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
-            OnFailed(sprite);
+            OnFailed(sprite, null);
             return;
         }
 
@@ -1055,7 +1021,7 @@ public class Earthly_Delights(Skill skill) : SkillScript(skill)
 
             if (enemy.Count == 0)
             {
-                OnFailed(sprite);
+                OnFailed(sprite, null);
                 return;
             }
 
@@ -1082,8 +1048,6 @@ public class Earthly_Delights(Skill skill) : SkillScript(skill)
             SentrySdk.CaptureMessage($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
         }
     }
-
-    public override void OnCleanup() { }
 
     private long DamageCalc(Sprite sprite, Sprite target)
     {
@@ -1116,7 +1080,7 @@ public class Heavenly_Gaze(Skill skill) : SkillScript(skill)
 {
     private bool _crit;
 
-    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
+    protected override void OnFailed(Sprite sprite, Sprite target) => GlobalSkillMethods.OnFailed(sprite, Skill, target);
 
     protected override void OnSuccess(Sprite sprite)
     {
@@ -1139,7 +1103,7 @@ public class Heavenly_Gaze(Skill skill) : SkillScript(skill)
         {
             if (sprite is Aisling manaOwed)
                 manaOwed.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
-            OnFailed(sprite);
+            OnFailed(sprite, null);
             return;
         }
 
@@ -1150,7 +1114,7 @@ public class Heavenly_Gaze(Skill skill) : SkillScript(skill)
 
             if (enemy.Count == 0)
             {
-                OnFailed(sprite);
+                OnFailed(sprite, null);
                 return;
             }
 
@@ -1195,8 +1159,6 @@ public class Heavenly_Gaze(Skill skill) : SkillScript(skill)
         }
     }
 
-    public override void OnCleanup() { }
-
     private long DamageCalc(Sprite sprite, Sprite target)
     {
         _crit = false;
@@ -1228,7 +1190,7 @@ public class Silent_Siren(Skill skill) : SkillScript(skill)
 {
     private bool _crit;
 
-    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
+    protected override void OnFailed(Sprite sprite, Sprite target) => GlobalSkillMethods.OnFailed(sprite, Skill, target);
 
     protected override void OnSuccess(Sprite sprite)
     {
@@ -1251,7 +1213,7 @@ public class Silent_Siren(Skill skill) : SkillScript(skill)
         {
             if (sprite is Aisling manaOwed)
                 manaOwed.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
-            OnFailed(sprite);
+            OnFailed(sprite, null);
             return;
         }
 
@@ -1262,7 +1224,7 @@ public class Silent_Siren(Skill skill) : SkillScript(skill)
 
             if (enemy.Count == 0)
             {
-                OnFailed(sprite);
+                OnFailed(sprite, null);
                 return;
             }
 
@@ -1309,8 +1271,6 @@ public class Silent_Siren(Skill skill) : SkillScript(skill)
         }
     }
 
-    public override void OnCleanup() { }
-
     private long DamageCalc(Sprite sprite, Sprite target)
     {
         _crit = false;
@@ -1342,7 +1302,7 @@ public class Poison_Talon(Skill skill) : SkillScript(skill)
 {
     private bool _crit;
 
-    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
+    protected override void OnFailed(Sprite sprite, Sprite target) => GlobalSkillMethods.OnFailed(sprite, Skill, target);
 
     protected override void OnSuccess(Sprite sprite)
     {
@@ -1365,7 +1325,7 @@ public class Poison_Talon(Skill skill) : SkillScript(skill)
         {
             if (sprite is Aisling manaOwed)
                 manaOwed.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
-            OnFailed(sprite);
+            OnFailed(sprite, null);
             return;
         }
 
@@ -1376,7 +1336,7 @@ public class Poison_Talon(Skill skill) : SkillScript(skill)
 
             if (enemy.Count == 0)
             {
-                OnFailed(sprite);
+                OnFailed(sprite, null);
                 return;
             }
 
@@ -1423,8 +1383,6 @@ public class Poison_Talon(Skill skill) : SkillScript(skill)
         }
     }
 
-    public override void OnCleanup() { }
-
     private long DamageCalc(Sprite sprite, Sprite target)
     {
         _crit = false;
@@ -1456,7 +1414,7 @@ public class Toxic_Breath(Skill skill) : SkillScript(skill)
 {
     private bool _crit;
 
-    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
+    protected override void OnFailed(Sprite sprite, Sprite target) => GlobalSkillMethods.OnFailed(sprite, Skill, target);
 
     protected override void OnSuccess(Sprite sprite)
     {
@@ -1479,7 +1437,7 @@ public class Toxic_Breath(Skill skill) : SkillScript(skill)
         {
             if (sprite is Aisling manaOwed)
                 manaOwed.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
-            OnFailed(sprite);
+            OnFailed(sprite, null);
             return;
         }
 
@@ -1490,7 +1448,7 @@ public class Toxic_Breath(Skill skill) : SkillScript(skill)
 
             if (enemy.Count == 0)
             {
-                OnFailed(sprite);
+                OnFailed(sprite, null);
                 return;
             }
 
@@ -1537,8 +1495,6 @@ public class Toxic_Breath(Skill skill) : SkillScript(skill)
         }
     }
 
-    public override void OnCleanup() { }
-
     private long DamageCalc(Sprite sprite, Sprite target)
     {
         _crit = false;
@@ -1568,11 +1524,11 @@ public class Toxic_Breath(Skill skill) : SkillScript(skill)
 [Script("Golden Lair")]
 public class Golden_Lair(Skill skill) : SkillScript(skill)
 {
-    protected override void OnFailed(Sprite sprite)
+    protected override void OnFailed(Sprite sprite, Sprite target)
     {
         if (sprite is not Aisling damageDealingAisling) return;
         damageDealingAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You've lost focus.");
-        GlobalSkillMethods.OnFailed(sprite, Skill, null);
+        GlobalSkillMethods.OnFailed(sprite, Skill, target);
     }
 
     protected override void OnSuccess(Sprite sprite)
@@ -1588,13 +1544,13 @@ public class Golden_Lair(Skill skill) : SkillScript(skill)
         {
             if (sprite is Aisling manaOwed)
                 manaOwed.Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
-            OnFailed(sprite);
+            OnFailed(sprite, null);
             return;
         }
 
         try
         {
-            var party = aisling.GroupParty?.PartyMembers;
+            var party = aisling.GroupParty?.PartyMembers.ToArray();
             var action = new BodyAnimationArgs
             {
                 AnimationSpeed = 30,
@@ -1606,19 +1562,19 @@ public class Golden_Lair(Skill skill) : SkillScript(skill)
             GlobalSkillMethods.Train(aisling.Client, Skill);
             var buff = new buff_Hasten();
 
-            if (party == null || party.IsEmpty)
+            if (party == null || party.Length == 0)
             {
                 GlobalSkillMethods.ApplyPhysicalBuff(aisling, buff);
                 return;
             }
 
-            foreach (var entity in party.Values.Where(entity => entity is not null))
+            foreach (var entity in party.Where(entity => entity.Value is not null))
             {
-                if (entity.Map.ID != aisling.Map.ID) continue;
+                if (entity.Value.Map.ID != aisling.Map.ID) continue;
                 var groupBuff = new buff_Hasten();
-                GlobalSkillMethods.ApplyPhysicalBuff(entity, groupBuff);
+                GlobalSkillMethods.ApplyPhysicalBuff(entity.Value, groupBuff);
                 aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
-                aisling.SendAnimationNearby(Skill.Template.TargetAnimation, null, entity.Serial, 170);
+                aisling.SendAnimationNearby(Skill.Template.TargetAnimation, null, entity.Value.Serial, 170);
             }
         }
         catch
@@ -1627,8 +1583,6 @@ public class Golden_Lair(Skill skill) : SkillScript(skill)
             SentrySdk.CaptureMessage($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
         }
     }
-
-    public override void OnCleanup() { }
 }
 
 // Copper Dragonkin
@@ -1636,11 +1590,11 @@ public class Golden_Lair(Skill skill) : SkillScript(skill)
 [Script("Vicious Roar")]
 public class Vicious_Roar(Skill skill) : SkillScript(skill)
 {
-    protected override void OnFailed(Sprite sprite)
+    protected override void OnFailed(Sprite sprite, Sprite target)
     {
         if (sprite is not Aisling damageDealingAisling) return;
         damageDealingAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You've lost focus.");
-        GlobalSkillMethods.OnFailed(sprite, Skill, null);
+        GlobalSkillMethods.OnFailed(sprite, Skill, target);
     }
 
     protected override void OnSuccess(Sprite sprite)
@@ -1678,25 +1632,23 @@ public class Vicious_Roar(Skill skill) : SkillScript(skill)
         damageDealer.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(action.SourceId, action.BodyAnimation, action.AnimationSpeed));
         Skill.LastUsedSkill = DateTime.UtcNow;
     }
-
-    public override void OnCleanup() { }
 }
 
 [Script("Dash")]
 public class Dash(Skill skill) : SkillScript(skill)
 {
-    private Sprite _target;
     private bool _crit;
-    private List<Sprite> _enemyList;
 
-    protected override void OnFailed(Sprite sprite)
+    protected override void OnFailed(Sprite sprite, Sprite target)
     {
         if (sprite is not Aisling damageDealingAisling) return;
         damageDealingAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "*Stumbled*");
-        GlobalSkillMethods.OnFailed(sprite, Skill, _target);
+        GlobalSkillMethods.OnFailed(sprite, Skill, target);
     }
 
-    protected override async void OnSuccess(Sprite sprite)
+    protected override void OnSuccess(Sprite sprite) { }
+
+    protected override async void OnSuccess(Sprite sprite, Sprite target)
     {
         if (sprite is Aisling aisling)
         {
@@ -1704,9 +1656,9 @@ public class Dash(Skill skill) : SkillScript(skill)
             GlobalSkillMethods.Train(aisling.Client, Skill);
         }
 
-        if (_target == null)
+        if (target == null)
         {
-            OnFailed(sprite);
+            OnFailed(sprite, null);
             return;
         }
 
@@ -1714,7 +1666,7 @@ public class Dash(Skill skill) : SkillScript(skill)
         {
             if (sprite is not Damageable damageDealer) return;
             var dmgCalc = DamageCalc(damageDealer);
-            var position = _target.Position;
+            var position = target.Position;
             var mapCheck = damageDealer.Map.ID;
             var wallPosition = damageDealer.GetPendingChargePosition(3, damageDealer);
             var targetPos = GlobalSkillMethods.DistanceTo(damageDealer.Position, position);
@@ -1746,16 +1698,16 @@ public class Dash(Skill skill) : SkillScript(skill)
 
                     if (!stepped)
                     {
-                        OnFailed(sprite);
+                        OnFailed(sprite, target);
                         return;
                     }
 
                     damageDealer.StepAddAndUpdateDisplay(damageDealer);
                 }
 
-                if (_target is not Damageable damageable) return;
+                if (target is not Damageable damageable) return;
                 damageable.ApplyDamage(damageable, dmgCalc, Skill);
-                damageDealer.SendAnimationNearby(Skill.Template.TargetAnimation, null, _target.Serial);
+                damageDealer.SendAnimationNearby(Skill.Template.TargetAnimation, null, target.Serial);
 
                 if (!_crit) return;
                 damageDealer.SendAnimationNearby(387, null, sprite.Serial);
@@ -1766,7 +1718,7 @@ public class Dash(Skill skill) : SkillScript(skill)
 
                 if (!stepped)
                 {
-                    OnFailed(sprite);
+                    OnFailed(sprite, target);
                     return;
                 }
 
@@ -1783,12 +1735,6 @@ public class Dash(Skill skill) : SkillScript(skill)
         }
     }
 
-    public override void OnCleanup()
-    {
-        _target = null;
-        _enemyList?.Clear();
-    }
-
     public override void OnUse(Sprite sprite)
     {
         if (!Skill.CanUse()) return;
@@ -1796,7 +1742,7 @@ public class Dash(Skill skill) : SkillScript(skill)
 
         if (damageDealer.CantAttack)
         {
-            OnFailed(damageDealer);
+            OnFailed(damageDealer, null);
             return;
         }
 
@@ -1831,8 +1777,8 @@ public class Dash(Skill skill) : SkillScript(skill)
 
         try
         {
-            _enemyList = damageable.DamageableGetInFront(3);
-            _target = _enemyList.FirstOrDefault();
+            var _enemyList = damageable.DamageableGetInFront(3).ToArray();
+            var _target = _enemyList.FirstOrDefault();
 
             if (_target == null)
             {
@@ -1843,7 +1789,7 @@ public class Dash(Skill skill) : SkillScript(skill)
                 if (mapCheck != damageable.Map.ID) return;
                 if (!(wallPos > 0))
                 {
-                    OnFailed(damageable);
+                    OnFailed(damageable, null);
                     return;
                 }
 
@@ -1853,7 +1799,7 @@ public class Dash(Skill skill) : SkillScript(skill)
 
                     if (!stepped)
                     {
-                        OnFailed(sprite);
+                        OnFailed(sprite, null);
                         return;
                     }
 
@@ -1872,7 +1818,7 @@ public class Dash(Skill skill) : SkillScript(skill)
             }
             else
             {
-                OnSuccess(sprite);
+                OnSuccess(sprite, _target);
             }
         }
         catch

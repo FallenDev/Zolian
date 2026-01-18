@@ -18,34 +18,35 @@ namespace Darkages.GameScripts.Skills;
 public class Iaido(Skill skill) : SkillScript(skill)
 {
     private bool _crit;
-    private List<Sprite> _enemyList;
 
-    protected override void OnFailed(Sprite sprite)
+    protected override void OnFailed(Sprite sprite, Sprite target)
     {
         if (sprite is not Aisling damageDealingAisling) return;
         damageDealingAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "My honour has not faltered..");
-        GlobalSkillMethods.OnFailed(sprite, Skill, null);
+        GlobalSkillMethods.OnFailed(sprite, Skill, target);
     }
 
-    protected override async void OnSuccess(Sprite sprite)
+    protected override void OnSuccess(Sprite sprite) { }
+
+    protected override async void OnSuccess(Sprite sprite, Sprite[] enemies)
     {
         if (sprite is Aisling aisling)
         {
             aisling.ActionUsed = "Iaido";
         }
 
-        if (_enemyList.Count == 0)
+        if (enemies.Length == 0)
         {
-            OnFailed(sprite);
+            OnFailed(sprite, null);
             return;
         }
 
         try
         {
-            var position = _enemyList.Last()?.Position;
+            var position = enemies.Last()?.Position;
             if (position == null)
             {
-                OnFailed(sprite);
+                OnFailed(sprite, null);
                 return;
             }
 
@@ -57,7 +58,7 @@ public class Iaido(Skill skill) : SkillScript(skill)
             if (mapCheck != damageDealer.Map.ID) return;
             if (!(wallPos > 0))
             {
-                OnFailed(damageDealer);
+                OnFailed(damageDealer, null);
                 return;
             }
 
@@ -67,16 +68,14 @@ public class Iaido(Skill skill) : SkillScript(skill)
 
                 if (!stepped)
                 {
-                    OnFailed(sprite);
+                    OnFailed(sprite, null);
                     return;
                 }
 
                 damageDealer.StepAddAndUpdateDisplay(damageDealer);
             }
 
-            var enemiesList = _enemyList.ToArray();
-
-            foreach (var enemy in enemiesList)
+            foreach (var enemy in enemies)
             {
                 if (enemy is not Damageable damageable) continue;
                 if (!enemy.Alive) continue;
@@ -121,11 +120,6 @@ public class Iaido(Skill skill) : SkillScript(skill)
         }
     }
 
-    public override void OnCleanup()
-    {
-        _enemyList?.Clear();
-    }
-
     public override void OnUse(Sprite sprite)
     {
         if (!Skill.CanUse()) return;
@@ -133,7 +127,7 @@ public class Iaido(Skill skill) : SkillScript(skill)
 
         if (damageDealer.CantAttack)
         {
-            OnFailed(sprite);
+            OnFailed(sprite, null);
             return;
         }
 
@@ -142,7 +136,7 @@ public class Iaido(Skill skill) : SkillScript(skill)
             if (aisling.Map.Flags.MapFlagIsSet(MapFlags.SafeMap))
             {
                 GlobalSkillMethods.Train(aisling.Client, Skill);
-                OnFailed(aisling);
+                OnFailed(aisling, null);
                 return;
             }
 
@@ -178,16 +172,16 @@ public class Iaido(Skill skill) : SkillScript(skill)
 
         try
         {
-            _enemyList = damageDealer.DamageableGetInFrontColumn(6);
+            var _enemyList = damageDealer.DamageableGetInFrontColumn(6).ToArray();
 
-            if (_enemyList.Count == 0)
+            if (_enemyList.Length == 0)
             {
                 var mapCheck = damageDealer.Map.ID;
                 var wallPosition = damageDealer.GetPendingChargePositionNoTarget(6, damageDealer);
                 var wallPos = GlobalSkillMethods.DistanceTo(damageDealer.Position, wallPosition);
 
                 if (mapCheck != damageDealer.Map.ID) return;
-                if (!(wallPos > 0)) OnFailed(damageDealer);
+                if (!(wallPos > 0)) OnFailed(damageDealer, null);
 
                 if (damageDealer.Position != wallPosition)
                 {
@@ -195,17 +189,15 @@ public class Iaido(Skill skill) : SkillScript(skill)
 
                     if (!stepped)
                     {
-                        OnFailed(sprite);
+                        OnFailed(sprite, null);
                         return;
                     }
 
                     damageDealer.StepAddAndUpdateDisplay(damageDealer);
                 }
 
-                await Task.Delay(300).ContinueWith(c =>
-                {
-                    damageDealer.SendAnimationNearby(Skill.Template.TargetAnimation, damageDealer.Position);
-                }).ConfigureAwait(false);
+                await Task.Delay(300).ConfigureAwait(false);
+                damageDealer.SendAnimationNearby(Skill.Template.TargetAnimation, damageDealer.Position);
 
                 if (wallPos <= 5)
                 {
@@ -225,16 +217,16 @@ public class Iaido(Skill skill) : SkillScript(skill)
 
                     if (success)
                     {
-                        OnSuccess(aisling);
+                        OnSuccess(aisling, _enemyList);
                     }
                     else
                     {
-                        OnFailed(aisling);
+                        OnFailed(aisling, null);
                     }
                 }
                 else
                 {
-                    OnSuccess(sprite);
+                    OnSuccess(sprite, _enemyList);
                 }
             }
         }
@@ -252,7 +244,7 @@ public class MugaiRyu(Skill skill) : SkillScript(skill)
 {
     private bool _crit;
 
-    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
+    protected override void OnFailed(Sprite sprite, Sprite target) => GlobalSkillMethods.OnFailed(sprite, Skill, target);
 
     protected override void OnSuccess(Sprite sprite)
     {
@@ -274,7 +266,7 @@ public class MugaiRyu(Skill skill) : SkillScript(skill)
 
             if (enemy.Count == 0)
             {
-                OnFailed(sprite);
+                OnFailed(sprite, null);
                 return;
             }
 
@@ -302,8 +294,6 @@ public class MugaiRyu(Skill skill) : SkillScript(skill)
             SentrySdk.CaptureMessage($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
         }
     }
-
-    public override void OnCleanup() { }
 
     private long DamageCalc(Sprite sprite)
     {
@@ -334,7 +324,7 @@ public class NitenIchiRyu(Skill skill) : SkillScript(skill)
 {
     private bool _crit;
 
-    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
+    protected override void OnFailed(Sprite sprite, Sprite target) => GlobalSkillMethods.OnFailed(sprite, Skill, target);
 
     protected override void OnSuccess(Sprite sprite)
     {
@@ -356,7 +346,7 @@ public class NitenIchiRyu(Skill skill) : SkillScript(skill)
 
             if (enemy.Count == 0)
             {
-                OnFailed(sprite);
+                OnFailed(sprite, null);
                 return;
             }
 
@@ -384,8 +374,6 @@ public class NitenIchiRyu(Skill skill) : SkillScript(skill)
             SentrySdk.CaptureMessage($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
         }
     }
-
-    public override void OnCleanup() { }
 
     private long DamageCalc(Sprite sprite)
     {
@@ -416,7 +404,7 @@ public class ShintoRyu(Skill skill) : SkillScript(skill)
 {
     private bool _crit;
 
-    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
+    protected override void OnFailed(Sprite sprite, Sprite target) => GlobalSkillMethods.OnFailed(sprite, Skill, target);
 
     protected override void OnSuccess(Sprite sprite)
     {
@@ -438,7 +426,7 @@ public class ShintoRyu(Skill skill) : SkillScript(skill)
 
             if (enemy == null || enemy.Serial == sprite.Serial)
             {
-                OnFailed(sprite);
+                OnFailed(sprite, null);
                 return;
             }
 
@@ -495,8 +483,6 @@ public class ShintoRyu(Skill skill) : SkillScript(skill)
         }
     }
 
-    public override void OnCleanup() { }
-
     private long DamageCalc(Sprite sprite)
     {
         _crit = false;
@@ -526,7 +512,7 @@ public class IttoRu(Skill skill) : SkillScript(skill)
 {
     private bool _crit;
 
-    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
+    protected override void OnFailed(Sprite sprite, Sprite target) => GlobalSkillMethods.OnFailed(sprite, Skill, target);
 
     protected override void OnSuccess(Sprite sprite)
     {
@@ -548,7 +534,7 @@ public class IttoRu(Skill skill) : SkillScript(skill)
 
             if (enemy.Count == 0)
             {
-                OnFailed(sprite);
+                OnFailed(sprite, null);
                 return;
             }
 
@@ -571,8 +557,6 @@ public class IttoRu(Skill skill) : SkillScript(skill)
             SentrySdk.CaptureMessage($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
         }
     }
-
-    public override void OnCleanup() { }
 
     private long DamageCalc(Sprite sprite)
     {
@@ -603,7 +587,7 @@ public class TamiyaRyu(Skill skill) : SkillScript(skill)
 {
     private bool _crit;
 
-    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
+    protected override void OnFailed(Sprite sprite, Sprite target) => GlobalSkillMethods.OnFailed(sprite, Skill, target);
 
     protected override void OnSuccess(Sprite sprite)
     {
@@ -628,7 +612,7 @@ public class TamiyaRyu(Skill skill) : SkillScript(skill)
 
             if (enemy.Count == 0)
             {
-                OnFailed(sprite);
+                OnFailed(sprite, null);
                 return;
             }
 
@@ -647,8 +631,6 @@ public class TamiyaRyu(Skill skill) : SkillScript(skill)
             SentrySdk.CaptureMessage($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
         }
     }
-
-    public override void OnCleanup() { }
 
     private long DamageCalc(Sprite sprite)
     {

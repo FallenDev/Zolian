@@ -18,7 +18,7 @@ public class Amenotejikara(Skill skill) : SkillScript(skill)
 {
     private Position _oldPosition;
 
-    protected override void OnFailed(Sprite sprite)
+    protected override void OnFailed(Sprite sprite, Sprite target)
     {
         if (sprite is Aisling aisling)
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "I can't move there");
@@ -41,8 +41,6 @@ public class Amenotejikara(Skill skill) : SkillScript(skill)
             // ignored
         }
     }
-
-    public override void OnCleanup() { }
 
     public override void OnUse(Sprite sprite)
     {
@@ -135,7 +133,7 @@ public class Rasengan(Skill skill) : SkillScript(skill)
 {
     private bool _crit;
 
-    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
+    protected override void OnFailed(Sprite sprite, Sprite target) => GlobalSkillMethods.OnFailed(sprite, Skill, target);
 
     protected override void OnSuccess(Sprite sprite)
     {
@@ -157,7 +155,7 @@ public class Rasengan(Skill skill) : SkillScript(skill)
 
             if (enemy.Count == 0)
             {
-                OnFailed(sprite);
+                OnFailed(sprite, null);
                 return;
             }
 
@@ -182,8 +180,6 @@ public class Rasengan(Skill skill) : SkillScript(skill)
             SentrySdk.CaptureMessage($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
         }
     }
-
-    public override void OnCleanup() { }
 
     private long DamageCalc(Sprite sprite, Sprite target)
     {
@@ -212,7 +208,7 @@ public class Rasengan(Skill skill) : SkillScript(skill)
 [Script("Rasen Shoheki")]
 public class RasenShoheki(Skill skill) : SkillScript(skill)
 {
-    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
+    protected override void OnFailed(Sprite sprite, Sprite target) => GlobalSkillMethods.OnFailed(sprite, Skill, target);
 
     protected override void OnSuccess(Sprite sprite)
     {
@@ -239,8 +235,6 @@ public class RasenShoheki(Skill skill) : SkillScript(skill)
             SentrySdk.CaptureMessage($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
         }
     }
-
-    public override void OnCleanup() { }
 }
 
 // Shadow Shuriken deals high damage and hits twice
@@ -250,7 +244,7 @@ public class ShadowShuriken(Skill skill) : SkillScript(skill)
     private bool _crit;
     private AnimationArgs _animationArgs;
 
-    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
+    protected override void OnFailed(Sprite sprite, Sprite target) => GlobalSkillMethods.OnFailed(sprite, Skill, target);
 
     protected override void OnSuccess(Sprite sprite)
     {
@@ -271,7 +265,7 @@ public class ShadowShuriken(Skill skill) : SkillScript(skill)
 
             if (enemy.Count == 0)
             {
-                OnFailed(sprite);
+                OnFailed(sprite, null);
                 return;
             }
 
@@ -307,8 +301,6 @@ public class ShadowShuriken(Skill skill) : SkillScript(skill)
         }
     }
 
-    public override void OnCleanup() { }
-
     private long DamageCalc(Sprite sprite, Sprite target)
     {
         _crit = false;
@@ -338,7 +330,7 @@ public class Amaterasu(Skill skill) : SkillScript(skill)
 {
     private bool _crit;
 
-    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
+    protected override void OnFailed(Sprite sprite, Sprite target) => GlobalSkillMethods.OnFailed(sprite, Skill, target);
 
     protected override void OnSuccess(Sprite sprite)
     {
@@ -359,7 +351,7 @@ public class Amaterasu(Skill skill) : SkillScript(skill)
 
             if (enemy.Count == 0)
             {
-                OnFailed(sprite);
+                OnFailed(sprite, null);
                 return;
             }
 
@@ -385,8 +377,6 @@ public class Amaterasu(Skill skill) : SkillScript(skill)
             SentrySdk.CaptureMessage($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
         }
     }
-
-    public override void OnCleanup() { }
 
     private long DamageCalc(Sprite sprite, Sprite target)
     {
@@ -418,7 +408,7 @@ public class Kunai(Skill skill) : SkillScript(skill)
     private bool _crit;
     private AnimationArgs _animationArgs;
 
-    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
+    protected override void OnFailed(Sprite sprite, Sprite target) => GlobalSkillMethods.OnFailed(sprite, Skill, target);
 
     protected override void OnSuccess(Sprite sprite)
     {
@@ -439,7 +429,7 @@ public class Kunai(Skill skill) : SkillScript(skill)
 
             if (enemy.Count == 0)
             {
-                OnFailed(sprite);
+                OnFailed(sprite, null);
                 return;
             }
 
@@ -474,8 +464,6 @@ public class Kunai(Skill skill) : SkillScript(skill)
         }
     }
 
-    public override void OnCleanup() { }
-
     private long DamageCalc(Sprite sprite, Sprite target)
     {
         _crit = false;
@@ -503,7 +491,7 @@ public class Kunai(Skill skill) : SkillScript(skill)
 [Script("Blend")]
 public class Blend(Skill skill) : SkillScript(skill)
 {
-    protected override void OnFailed(Sprite sprite)
+    protected override void OnFailed(Sprite sprite, Sprite target)
     {
         if (sprite is not Aisling damageDealingAisling) return;
         damageDealingAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Failed to blend in.");
@@ -515,7 +503,7 @@ public class Blend(Skill skill) : SkillScript(skill)
 
         if (!sprite.Alive || sprite.IsInvisible)
         {
-            OnFailed(sprite);
+            OnFailed(sprite, null);
             return;
         }
 
@@ -526,6 +514,4 @@ public class Blend(Skill skill) : SkillScript(skill)
         if (damageDealer is Aisling aisling)
             GlobalSkillMethods.Train(aisling.Client, Skill);
     }
-
-    public override void OnCleanup() { }
 }

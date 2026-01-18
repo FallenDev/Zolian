@@ -37,7 +37,6 @@ public sealed class Aisling : Player, IAisling
     public WorldClient Client { get; set; }
     public bool DeathRattle { get; set; }
     public bool PlayerSaveDirty { get; set; } = false;
-    public bool ObjectsUpdating { get; set; }
     public readonly ConcurrentDictionary<uint, Sprite> SpritesInView = [];
     public bool GameMasterChaosCancel { get; set; }
     public int EquipmentDamageTaken = 0;
@@ -99,7 +98,6 @@ public sealed class Aisling : Player, IAisling
     public long DamageCounter { get; set; }
     public long ThreatMeter { get; set; }
     public ExchangeSession Exchange { get; set; }
-    public NameDisplayStyle NameStyle { get; set; }
     public ElementManager.Element TempOffensiveHold { get; set; }
     public ElementManager.Element TempDefensiveHold { get; set; }
     public bool IsCastingSpell { get; set; }
@@ -109,7 +107,6 @@ public sealed class Aisling : Player, IAisling
     public WorldServerTimer AttackDmgTrack { get; }
     public WorldServerTimer ThreatTimer { get; set; }
     public UserOptions GameSettings { get; init; } = new();
-    public Mail MailFlags { get; set; }
     public SkillBook SkillBook { get; set; }
     public SpellBook SpellBook { get; set; }
     public string ActionUsed { get; set; }
@@ -148,20 +145,11 @@ public sealed class Aisling : Player, IAisling
         }
     }
 
-    public bool CantReact => CantAttack || CantCast || CantMove;
     public bool Camouflage => SkillBook.HasSkill("Camouflage");
     public bool PainBane => SkillBook.HasSkill("Pain Bane");
     public bool CraneStance => SkillBook.HasSkill("Crane Stance");
     public bool Lycanisim => Afflictions.AfflictionFlagIsSet(Afflictions.Lycanisim);
     public bool Vampirisim => Afflictions.AfflictionFlagIsSet(Afflictions.Vampirisim);
-
-    public bool Poisoned
-    {
-        get
-        {
-            return HasDebuff(i => i.Name.Contains("Puinsein"));
-        }
-    }
 
     public bool TwoHandedBasher
     {
@@ -244,17 +232,6 @@ public sealed class Aisling : Player, IAisling
 
             return false;
         }
-    }
-
-    public void AStarPath(List<Vector2> pathList)
-    {
-        if (pathList == null) return;
-        if (pathList.Count == 0) return;
-
-        var nodeX = pathList[0].X;
-        var nodeY = pathList[0].Y;
-
-        WalkTo((int)nodeX, (int)nodeY);
     }
 
     public void CancelExchange()
@@ -464,29 +441,6 @@ public sealed class Aisling : Player, IAisling
         return false;
     }
 
-    public Aisling GiveHealth(Sprite target, long value)
-    {
-        target.CurrentHp += value;
-
-        if (target.CurrentHp > target.MaximumHp) target.CurrentHp = target.MaximumHp;
-
-        return this;
-    }
-
-    public void GoHome()
-    {
-        var destinationMap = ServerSetup.Instance.Config.TransitionZone;
-
-        if (ServerSetup.Instance.GlobalMapCache.ContainsKey(destinationMap))
-        {
-            Client.Aisling.Pos = new Vector2(ServerSetup.Instance.Config.TransitionPointX, ServerSetup.Instance.Config.TransitionPointY);
-            Client.Aisling.CurrentMapId = destinationMap;
-        }
-
-        Client.LeaveArea(destinationMap, true, true);
-        Client.Enter();
-    }
-
     public bool HasInInventory(string item, int count)
     {
         var found = ServerSetup.Instance.GlobalItemTemplateCache.TryGetValue(item, out var template);
@@ -521,15 +475,6 @@ public sealed class Aisling : Player, IAisling
         if (MonsterKillCounters.TryGetValue(value, out var killRecord)) return killRecord.TotalKills >= number;
 
         return false;
-    }
-
-    public Aisling HasManaFor(Spell spell)
-    {
-        if (CurrentMp >= spell.Template.ManaCost)
-            return this;
-        Client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
-
-        return null;
     }
 
     public bool HasVisitedMap(int mapId)
@@ -633,20 +578,6 @@ public sealed class Aisling : Player, IAisling
         Death.Reap(this);
         RemoveBuffsAndDebuffs();
         WarpToHell();
-    }
-
-    public override string ToString() => Username;
-
-    public Aisling TrainSpell(Spell lpSpell)
-    {
-        Client.TrainSpell(lpSpell);
-        return this;
-    }
-
-    public Aisling UpdateStats(Spell lpSpell)
-    {
-        Client.SendAttributes(StatUpdateType.Full);
-        return this;
     }
 
     public void UpdateStats()
@@ -792,7 +723,6 @@ public sealed class Aisling : Player, IAisling
             if (skill.Template.SkillType == SkillScope.Assail)
                 Client.LastAssail = DateTime.UtcNow;
 
-            script.OnCleanup();
             skill.InUse = false;
         }
         catch (Exception ex)

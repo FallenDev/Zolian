@@ -16,7 +16,7 @@ public class Flame_Thrower(Skill skill) : SkillScript(skill)
     private bool _crit;
     private int _strength;
 
-    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
+    protected override void OnFailed(Sprite sprite, Sprite target) => GlobalSkillMethods.OnFailed(sprite, Skill, target);
 
     protected override void OnSuccess(Sprite sprite)
     {
@@ -38,7 +38,7 @@ public class Flame_Thrower(Skill skill) : SkillScript(skill)
 
             if (enemy.Count == 0)
             {
-                OnFailed(sprite);
+                OnFailed(sprite, null);
                 return;
             }
 
@@ -48,7 +48,7 @@ public class Flame_Thrower(Skill skill) : SkillScript(skill)
 
             if (target is null || target.Serial == sprite.Serial)
             {
-                OnFailed(sprite);
+                OnFailed(sprite, null);
                 return;
             }
 
@@ -82,8 +82,6 @@ public class Flame_Thrower(Skill skill) : SkillScript(skill)
         }
     }
 
-    public override void OnCleanup() { }
-
     public override void OnUse(Sprite sprite)
     {
         if (sprite is Aisling aisling)
@@ -98,7 +96,7 @@ public class Flame_Thrower(Skill skill) : SkillScript(skill)
             else
             {
                 client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
-                OnFailed(sprite);
+                OnFailed(sprite, null);
                 return;
             }
 
@@ -107,7 +105,7 @@ public class Flame_Thrower(Skill skill) : SkillScript(skill)
                 if (client.Aisling.EquipmentManager.Equipment[3]?.Item?.Template.Group is not "Sources")
                 {
                     client.SendServerMessage(ServerMessageType.ActiveMessage, "I'm unable to channel with this equipment!");
-                    OnFailed(aisling);
+                    OnFailed(aisling, null);
                     return;
                 }
             }
@@ -120,7 +118,7 @@ public class Flame_Thrower(Skill skill) : SkillScript(skill)
             }
             else
             {
-                OnFailed(aisling);
+                OnFailed(aisling, null);
             }
         }
         else
@@ -223,7 +221,7 @@ public class Water_Cannon(Skill skill) : SkillScript(skill)
     private bool _crit;
     private int _strength;
 
-    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
+    protected override void OnFailed(Sprite sprite, Sprite target) => GlobalSkillMethods.OnFailed(sprite, Skill, target);
 
     protected override void OnSuccess(Sprite sprite)
     {
@@ -245,7 +243,7 @@ public class Water_Cannon(Skill skill) : SkillScript(skill)
 
             if (enemy.Count == 0)
             {
-                OnFailed(sprite);
+                OnFailed(sprite, null);
                 return;
             }
 
@@ -255,7 +253,7 @@ public class Water_Cannon(Skill skill) : SkillScript(skill)
 
             if (target is null || target.Serial == sprite.Serial)
             {
-                OnFailed(sprite);
+                OnFailed(sprite, null);
                 return;
             }
 
@@ -289,8 +287,6 @@ public class Water_Cannon(Skill skill) : SkillScript(skill)
         }
     }
 
-    public override void OnCleanup() { }
-
     public override void OnUse(Sprite sprite)
     {
         if (sprite is Aisling aisling)
@@ -305,7 +301,7 @@ public class Water_Cannon(Skill skill) : SkillScript(skill)
             else
             {
                 client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
-                OnFailed(sprite);
+                OnFailed(sprite, null);
                 return;
             }
 
@@ -314,7 +310,7 @@ public class Water_Cannon(Skill skill) : SkillScript(skill)
                 if (client.Aisling.EquipmentManager.Equipment[3]?.Item?.Template.Group is not "Sources")
                 {
                     client.SendServerMessage(ServerMessageType.ActiveMessage, "I'm unable to channel with this equipment!");
-                    OnFailed(aisling);
+                    OnFailed(aisling, null);
                     return;
                 }
             }
@@ -327,7 +323,7 @@ public class Water_Cannon(Skill skill) : SkillScript(skill)
             }
             else
             {
-                OnFailed(aisling);
+                OnFailed(aisling, null);
             }
         }
         else
@@ -429,7 +425,7 @@ public class Tornado_Vector(Skill skill) : SkillScript(skill)
     private bool _crit;
     private int _strength;
 
-    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
+    protected override void OnFailed(Sprite sprite, Sprite target) => GlobalSkillMethods.OnFailed(sprite, Skill, target);
 
     protected override void OnSuccess(Sprite sprite)
     {
@@ -451,7 +447,7 @@ public class Tornado_Vector(Skill skill) : SkillScript(skill)
 
             if (enemy.Count == 0)
             {
-                OnFailed(sprite);
+                OnFailed(sprite, null);
                 return;
             }
 
@@ -461,7 +457,7 @@ public class Tornado_Vector(Skill skill) : SkillScript(skill)
 
             if (target is null || target.Serial == sprite.Serial)
             {
-                OnFailed(sprite);
+                OnFailed(sprite, null);
                 return;
             }
 
@@ -495,8 +491,6 @@ public class Tornado_Vector(Skill skill) : SkillScript(skill)
         }
     }
 
-    public override void OnCleanup() { }
-
     public override void OnUse(Sprite sprite)
     {
         if (sprite is Aisling aisling)
@@ -511,7 +505,7 @@ public class Tornado_Vector(Skill skill) : SkillScript(skill)
             else
             {
                 client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
-                OnFailed(sprite);
+                OnFailed(sprite, null);
                 return;
             }
 
@@ -520,7 +514,7 @@ public class Tornado_Vector(Skill skill) : SkillScript(skill)
                 if (client.Aisling.EquipmentManager.Equipment[3]?.Item?.Template.Group is not "Sources")
                 {
                     client.SendServerMessage(ServerMessageType.ActiveMessage, "I'm unable to channel with this equipment!");
-                    OnFailed(aisling);
+                    OnFailed(aisling, null);
                     return;
                 }
             }
@@ -533,7 +527,7 @@ public class Tornado_Vector(Skill skill) : SkillScript(skill)
             }
             else
             {
-                OnFailed(aisling);
+                OnFailed(aisling, null);
             }
         }
         else
@@ -635,7 +629,7 @@ public class Earth_Shatter(Skill skill) : SkillScript(skill)
     private bool _crit;
     private int _strength;
 
-    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
+    protected override void OnFailed(Sprite sprite, Sprite target) => GlobalSkillMethods.OnFailed(sprite, Skill, target);
 
     protected override async void OnSuccess(Sprite sprite)
     {
@@ -657,7 +651,7 @@ public class Earth_Shatter(Skill skill) : SkillScript(skill)
 
             if (enemy.Count == 0)
             {
-                OnFailed(sprite);
+                OnFailed(sprite, null);
                 return;
             }
 
@@ -667,7 +661,7 @@ public class Earth_Shatter(Skill skill) : SkillScript(skill)
 
             if (target is null || target.Serial == sprite.Serial)
             {
-                OnFailed(sprite);
+                OnFailed(sprite, null);
                 return;
             }
 
@@ -701,8 +695,6 @@ public class Earth_Shatter(Skill skill) : SkillScript(skill)
         }
     }
 
-    public override void OnCleanup() { }
-
     public override void OnUse(Sprite sprite)
     {
         if (sprite is Aisling aisling)
@@ -717,7 +709,7 @@ public class Earth_Shatter(Skill skill) : SkillScript(skill)
             else
             {
                 client.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.NoManaMessage}");
-                OnFailed(sprite);
+                OnFailed(sprite, null);
                 return;
             }
 
@@ -726,7 +718,7 @@ public class Earth_Shatter(Skill skill) : SkillScript(skill)
                 if (client.Aisling.EquipmentManager.Equipment[3]?.Item?.Template.Group is not "Sources")
                 {
                     client.SendServerMessage(ServerMessageType.ActiveMessage, "I'm unable to channel with this equipment!");
-                    OnFailed(aisling);
+                    OnFailed(aisling, null);
                     return;
                 }
             }
@@ -739,7 +731,7 @@ public class Earth_Shatter(Skill skill) : SkillScript(skill)
             }
             else
             {
-                OnFailed(aisling);
+                OnFailed(aisling, null);
             }
         }
         else

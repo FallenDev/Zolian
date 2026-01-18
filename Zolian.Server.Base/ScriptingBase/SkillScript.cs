@@ -10,9 +10,12 @@ public abstract class SkillScript(Skill skill) : ObjectManager
 {
     public Skill Skill { get; set; } = skill;
 
-    protected abstract void OnFailed(Sprite sprite);
+    protected abstract void OnFailed(Sprite sprite, Sprite target = null);
     protected abstract void OnSuccess(Sprite sprite);
-    public abstract void OnCleanup();
+    // For skills that pass a single target
+    protected virtual void OnSuccess(Sprite sprite, Sprite target) { }
+    // For skills that pass multiple targets as an array
+    protected virtual void OnSuccess(Sprite sprite, Sprite[] targets) { }
 
     public virtual void OnUse(Sprite sprite)
     {

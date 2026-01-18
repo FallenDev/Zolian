@@ -286,7 +286,6 @@ public class ShapeShifter : MonsterScript
                 readyTime = readyTime.AddMilliseconds(Monster.Template.AttackSpeed);
                 s.Skill.NextAvailableUse = readyTime;
             }
-            s.OnCleanup();
             s.Skill.InUse = false;
         });
     }
@@ -302,7 +301,6 @@ public class ShapeShifter : MonsterScript
 
         if (Monster.AbilityScripts[abilityIdx] is null) return;
         Monster.AbilityScripts[abilityIdx].OnUse(Monster);
-        Monster.AbilityScripts[abilityIdx].OnCleanup();
     }
 
     private void CastSpell()
@@ -852,7 +850,6 @@ public class AlertSummon : MonsterScript
                 readyTime = readyTime.AddMilliseconds(Monster.Template.AttackSpeed);
                 s.Skill.NextAvailableUse = readyTime;
             }
-            s.OnCleanup();
             s.Skill.InUse = false;
         });
     }
@@ -868,7 +865,6 @@ public class AlertSummon : MonsterScript
 
         if (Monster.AbilityScripts[abilityIdx] is null) return;
         Monster.AbilityScripts[abilityIdx].OnUse(Monster);
-        Monster.AbilityScripts[abilityIdx].OnCleanup();
     }
 
     private void SummonMonsterNearby()
@@ -1112,7 +1108,6 @@ public class Turret : MonsterScript
             readyTime = readyTime.AddMilliseconds(Monster.Template.AttackSpeed);
             gatling.Skill.NextAvailableUse = readyTime;
         }
-        gatling.OnCleanup();
         gatling.Skill.InUse = false;
     }
 
@@ -1381,7 +1376,6 @@ public class GeneralPirate : MonsterScript
                 readyTime = readyTime.AddMilliseconds(Monster.Template.AttackSpeed);
                 s.Skill.NextAvailableUse = readyTime;
             }
-            s.OnCleanup();
             s.Skill.InUse = false;
         });
     }
@@ -1397,7 +1391,6 @@ public class GeneralPirate : MonsterScript
 
         if (Monster.AbilityScripts[abilityIdx] is null) return;
         Monster.AbilityScripts[abilityIdx].OnUse(Monster);
-        Monster.AbilityScripts[abilityIdx].OnCleanup();
     }
 
     private void CastSpell()
@@ -1680,7 +1673,6 @@ public class PirateOfficer : MonsterScript
                 readyTime = readyTime.AddMilliseconds(Monster.Template.AttackSpeed);
                 s.Skill.NextAvailableUse = readyTime;
             }
-            s.OnCleanup();
             s.Skill.InUse = false;
         });
     }
@@ -1696,7 +1688,6 @@ public class PirateOfficer : MonsterScript
 
         if (Monster.AbilityScripts[abilityIdx] is null) return;
         Monster.AbilityScripts[abilityIdx].OnUse(Monster);
-        Monster.AbilityScripts[abilityIdx].OnCleanup();
     }
 
     private void CastSpell()
@@ -1980,7 +1971,6 @@ public class AosdaRemnant : MonsterScript
                 readyTime = readyTime.AddMilliseconds(Monster.Template.AttackSpeed);
                 s.Skill.NextAvailableUse = readyTime;
             }
-            s.OnCleanup();
             s.Skill.InUse = false;
         });
     }
@@ -1996,7 +1986,6 @@ public class AosdaRemnant : MonsterScript
 
         if (Monster.AbilityScripts[abilityIdx] is null) return;
         Monster.AbilityScripts[abilityIdx].OnUse(Monster);
-        Monster.AbilityScripts[abilityIdx].OnCleanup();
     }
 
     private void CastSpell()
@@ -2286,7 +2275,6 @@ public class AosdaHero : MonsterScript
                 readyTime = readyTime.AddMilliseconds(Monster.Template.AttackSpeed);
                 s.Skill.NextAvailableUse = readyTime;
             }
-            s.OnCleanup();
             s.Skill.InUse = false;
         });
     }
@@ -2302,7 +2290,6 @@ public class AosdaHero : MonsterScript
 
         if (Monster.AbilityScripts[abilityIdx] is null) return;
         Monster.AbilityScripts[abilityIdx].OnUse(Monster);
-        Monster.AbilityScripts[abilityIdx].OnCleanup();
     }
 
     private void CastSpell()
@@ -2583,7 +2570,6 @@ public class AncientDragon : MonsterScript
                 readyTime = readyTime.AddMilliseconds(Monster.Template.AttackSpeed);
                 s.Skill.NextAvailableUse = readyTime;
             }
-            s.OnCleanup();
             s.Skill.InUse = false;
         });
     }
@@ -2599,7 +2585,6 @@ public class AncientDragon : MonsterScript
 
         if (Monster.AbilityScripts[abilityIdx] is null) return;
         Monster.AbilityScripts[abilityIdx].OnUse(Monster);
-        Monster.AbilityScripts[abilityIdx].OnCleanup();
     }
 
     private void CastSpell()
@@ -2878,7 +2863,6 @@ public class Swarm : MonsterScript
                 readyTime = readyTime.AddMilliseconds(Monster.Template.AttackSpeed);
                 s.Skill.NextAvailableUse = readyTime;
             }
-            s.OnCleanup();
             s.Skill.InUse = false;
         });
     }
@@ -2894,7 +2878,6 @@ public class Swarm : MonsterScript
 
         if (Monster.AbilityScripts[abilityIdx] is null) return;
         Monster.AbilityScripts[abilityIdx].OnUse(Monster);
-        Monster.AbilityScripts[abilityIdx].OnCleanup();
     }
 
     private void CastSpell()
@@ -3171,7 +3154,6 @@ public class DbSwarm : MonsterScript
                 readyTime = readyTime.AddMilliseconds(Monster.Template.AttackSpeed);
                 s.Skill.NextAvailableUse = readyTime;
             }
-            s.OnCleanup();
             s.Skill.InUse = false;
         });
     }
@@ -3187,7 +3169,6 @@ public class DbSwarm : MonsterScript
 
         if (Monster.AbilityScripts[abilityIdx] is null) return;
         Monster.AbilityScripts[abilityIdx].OnUse(Monster);
-        Monster.AbilityScripts[abilityIdx].OnCleanup();
     }
 
     private void CastSpell()

@@ -2539,7 +2539,6 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
             skill.CurrentCooldown = skill.Template.Cooldown;
             localClient.SendCooldown(true, skill.Slot, skill.CurrentCooldown);
             skill.LastUsedSkill = DateTime.UtcNow;
-            script?.OnCleanup();
 
             skill.InUse = false;
             return default;

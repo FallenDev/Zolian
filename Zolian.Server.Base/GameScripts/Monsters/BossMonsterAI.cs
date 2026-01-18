@@ -267,7 +267,6 @@ public class DraconicOmega : MonsterScript
                 readyTime = readyTime.AddMilliseconds(Monster.Template.AttackSpeed);
                 s.Skill.NextAvailableUse = readyTime;
             }
-            s.OnCleanup();
             s.Skill.InUse = false;
         });
     }
@@ -283,7 +282,6 @@ public class DraconicOmega : MonsterScript
 
         if (Monster.AbilityScripts[abilityIdx] is null) return;
         Monster.AbilityScripts[abilityIdx].OnUse(Monster);
-        Monster.AbilityScripts[abilityIdx].OnCleanup();
     }
 
     private void CastSpell()
@@ -564,7 +562,6 @@ public class JackFrost : MonsterScript
                 readyTime = readyTime.AddMilliseconds(Monster.Template.AttackSpeed);
                 s.Skill.NextAvailableUse = readyTime;
             }
-            s.OnCleanup();
             s.Skill.InUse = false;
         });
     }
@@ -580,7 +577,6 @@ public class JackFrost : MonsterScript
 
         if (Monster.AbilityScripts[abilityIdx] is null) return;
         Monster.AbilityScripts[abilityIdx].OnUse(Monster);
-        Monster.AbilityScripts[abilityIdx].OnCleanup();
     }
 
     private void CastSpell()
@@ -922,7 +918,6 @@ public class Yeti : MonsterScript
                 readyTime = readyTime.AddMilliseconds(Monster.Template.AttackSpeed);
                 s.Skill.NextAvailableUse = readyTime;
             }
-            s.OnCleanup();
             s.Skill.InUse = false;
         });
     }
@@ -938,7 +933,6 @@ public class Yeti : MonsterScript
 
         if (Monster.AbilityScripts[abilityIdx] is null) return;
         Monster.AbilityScripts[abilityIdx].OnUse(Monster);
-        Monster.AbilityScripts[abilityIdx].OnCleanup();
     }
 
     private void CastSpell()
@@ -1263,7 +1257,6 @@ public class WorldBossBahamut : MonsterScript
                 readyTime = readyTime.AddMilliseconds(Monster.Template.AttackSpeed);
                 s.Skill.NextAvailableUse = readyTime;
             }
-            s.OnCleanup();
             s.Skill.InUse = false;
         });
     }
@@ -1279,7 +1272,6 @@ public class WorldBossBahamut : MonsterScript
 
         if (Monster.AbilityScripts[abilityIdx] is null) return;
         Monster.AbilityScripts[abilityIdx].OnUse(Monster);
-        Monster.AbilityScripts[abilityIdx].OnCleanup();
     }
 
     private void CastSpell()
@@ -1605,7 +1597,6 @@ public class BBShade : MonsterScript
                 readyTime = readyTime.AddMilliseconds(Monster.Template.AttackSpeed);
                 s.Skill.NextAvailableUse = readyTime;
             }
-            s.OnCleanup();
             s.Skill.InUse = false;
         });
     }
@@ -1621,7 +1612,6 @@ public class BBShade : MonsterScript
 
         if (Monster.AbilityScripts[abilityIdx] is null) return;
         Monster.AbilityScripts[abilityIdx].OnUse(Monster);
-        Monster.AbilityScripts[abilityIdx].OnCleanup();
     }
 
     private void CastSpell()

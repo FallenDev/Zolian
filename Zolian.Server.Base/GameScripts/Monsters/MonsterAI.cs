@@ -247,7 +247,6 @@ public class BaseMonsterIntelligence : MonsterScript
                 readyTime = readyTime.AddMilliseconds(Monster.Template.AttackSpeed);
                 s.Skill.NextAvailableUse = readyTime;
             }
-            s.OnCleanup();
             s.Skill.InUse = false;
         });
     }
@@ -264,7 +263,6 @@ public class BaseMonsterIntelligence : MonsterScript
 
         if (Monster.AbilityScripts[abilityIdx] is null) return;
         Monster.AbilityScripts[abilityIdx].OnUse(Monster);
-        Monster.AbilityScripts[abilityIdx].OnCleanup();
     }
 
     private void CastSpell()
@@ -523,7 +521,6 @@ public class WeakCommon : MonsterScript
                 readyTime = readyTime.AddMilliseconds(Monster.Template.AttackSpeed);
                 s.Skill.NextAvailableUse = readyTime;
             }
-            s.OnCleanup();
             s.Skill.InUse = false;
         });
     }
@@ -539,7 +536,6 @@ public class WeakCommon : MonsterScript
 
         if (Monster.AbilityScripts[abilityIdx] is null) return;
         Monster.AbilityScripts[abilityIdx].OnUse(Monster);
-        Monster.AbilityScripts[abilityIdx].OnCleanup();
     }
 
     private void CastSpell()
@@ -973,7 +969,6 @@ public class ShadowSight : MonsterScript
                 readyTime = readyTime.AddMilliseconds(Monster.Template.AttackSpeed);
                 s.Skill.NextAvailableUse = readyTime;
             }
-            s.OnCleanup();
             s.Skill.InUse = false;
         });
     }
@@ -989,7 +984,6 @@ public class ShadowSight : MonsterScript
 
         if (Monster.AbilityScripts[abilityIdx] is null) return;
         Monster.AbilityScripts[abilityIdx].OnUse(Monster);
-        Monster.AbilityScripts[abilityIdx].OnCleanup();
     }
 
     private void CastSpell()
@@ -1248,7 +1242,6 @@ public class WeakShadowSight : MonsterScript
                 readyTime = readyTime.AddMilliseconds(Monster.Template.AttackSpeed);
                 s.Skill.NextAvailableUse = readyTime;
             }
-            s.OnCleanup();
             s.Skill.InUse = false;
         });
     }
@@ -1264,7 +1257,6 @@ public class WeakShadowSight : MonsterScript
 
         if (Monster.AbilityScripts[abilityIdx] is null) return;
         Monster.AbilityScripts[abilityIdx].OnUse(Monster);
-        Monster.AbilityScripts[abilityIdx].OnCleanup();
     }
 
     private void CastSpell()
@@ -1523,7 +1515,6 @@ public class RiftMob : MonsterScript
                 readyTime = readyTime.AddMilliseconds(Monster.Template.AttackSpeed);
                 s.Skill.NextAvailableUse = readyTime;
             }
-            s.OnCleanup();
             s.Skill.InUse = false;
         });
     }
@@ -1539,7 +1530,6 @@ public class RiftMob : MonsterScript
 
         if (Monster.AbilityScripts[abilityIdx] is null) return;
         Monster.AbilityScripts[abilityIdx].OnUse(Monster);
-        Monster.AbilityScripts[abilityIdx].OnCleanup();
     }
 
     private void CastSpell()

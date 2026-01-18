@@ -18,7 +18,7 @@ public class Bang(Skill skill) : SkillScript(skill)
     private bool _crit;
     private AnimationArgs _animationArgs;
 
-    protected override void OnFailed(Sprite sprite) => GlobalSkillMethods.OnFailed(sprite, Skill, null);
+    protected override void OnFailed(Sprite sprite, Sprite target) => GlobalSkillMethods.OnFailed(sprite, Skill, target);
 
     protected override void OnSuccess(Sprite sprite)
     {
@@ -37,7 +37,7 @@ public class Bang(Skill skill) : SkillScript(skill)
 
             if (enemy.Count == 0)
             {
-                OnFailed(sprite);
+                OnFailed(sprite, null);
                 return;
             }
 
@@ -84,8 +84,6 @@ public class Bang(Skill skill) : SkillScript(skill)
         }
     }
 
-    public override void OnCleanup() { }
-
     private long DamageCalc(Sprite sprite, Sprite target)
     {
         _crit = false;
@@ -116,7 +114,7 @@ public class Snipe(Skill skill) : SkillScript(skill)
     private bool _crit;
     private AnimationArgs _animationArgs;
 
-    protected override void OnFailed(Sprite sprite)
+    protected override void OnFailed(Sprite sprite, Sprite target)
     {
         if (sprite is not Aisling aisling) return;
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Snipe failed to set the target!");
@@ -139,7 +137,7 @@ public class Snipe(Skill skill) : SkillScript(skill)
 
             if (enemy.Count == 0)
             {
-                OnFailed(sprite);
+                OnFailed(sprite, null);
                 return;
             }
 
@@ -200,8 +198,6 @@ public class Snipe(Skill skill) : SkillScript(skill)
         }
     }
 
-    public override void OnCleanup() { }
-
     private long DamageCalc(Sprite sprite, Sprite target)
     {
         _crit = false;
@@ -232,7 +228,7 @@ public class Volley(Skill skill) : SkillScript(skill)
     private bool _crit;
     private AnimationArgs _animationArgs;
 
-    protected override void OnFailed(Sprite sprite)
+    protected override void OnFailed(Sprite sprite, Sprite target)
     {
         if (sprite is not Aisling aisling) return;
         aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Volley failed!");
@@ -268,7 +264,7 @@ public class Volley(Skill skill) : SkillScript(skill)
 
             if (targets.IsEmpty())
             {
-                OnFailed(sprite);
+                OnFailed(sprite, null);
                 return;
             }
 
@@ -315,8 +311,6 @@ public class Volley(Skill skill) : SkillScript(skill)
             SentrySdk.CaptureMessage($"Issue with {Skill.Name} within OnSuccess called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
         }
     }
-
-    public override void OnCleanup() { }
 
     private long DamageCalc(Sprite sprite, Sprite target)
     {

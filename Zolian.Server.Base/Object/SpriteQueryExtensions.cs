@@ -26,6 +26,7 @@ namespace Darkages.Object
 
         /// <summary>
         /// Normalizes a list to never be null or empty
+        /// Note: returns the same empty list instance for efficiency
         /// </summary>
         private static List<Sprite> Normalize(List<Sprite>? list) => list is null || list.Count == 0 ? [] : list;
 
