@@ -22,13 +22,20 @@ public class Metafile : CompressableObject
 
             for (var i = 0; i < length; i++)
             {
-                var node = new MetafileNode(reader.ReadStringA());
+                var name = reader.ReadStringA();
                 var atomSize = reader.ReadUInt16();
 
-                for (var j = 0; j < atomSize; j++)
-                    node.Atoms.Add(reader.ReadStringB());
+                if (atomSize == 0)
+                {
+                    Nodes.Add(new MetafileNode(name));
+                    continue;
+                }
 
-                Nodes.Add(node);
+                var atoms = new string[atomSize];
+                for (var j = 0; j < atomSize; j++)
+                    atoms[j] = reader.ReadStringB();
+
+                Nodes.Add(new MetafileNode(name, atoms));
             }
         }
 
@@ -44,7 +51,7 @@ public class Metafile : CompressableObject
         foreach (var node in Nodes)
         {
             writer.WriteStringA(node.Name);
-            writer.Write((ushort)node.Atoms.Count);
+            writer.Write((ushort)node.Atoms.Length);
 
             foreach (var atom in node.Atoms)
                 writer.WriteStringB(atom);
