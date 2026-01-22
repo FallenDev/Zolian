@@ -235,6 +235,24 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
         }
     }
 
+    private void LoadSkills(string[] skills, Monster monster)
+    {
+        for (int i = 0; i < skills.Length; i++)
+            LoadSkillScript(skills[i], monster);
+    }
+
+    private void LoadAbilities(string[] abilities, Monster monster)
+    {
+        for (int i = 0; i < abilities.Length; i++)
+            LoadAbilityScript(abilities[i], monster);
+    }
+
+    private void LoadSpells(string[] spells, Monster monster)
+    {
+        for (int i = 0; i < spells.Length; i++)
+            LoadSpellScript(spells[i], monster);
+    }
+
     private void LoadSkillScript(string skillScriptStr, Monster obj)
     {
         if (string.IsNullOrWhiteSpace(skillScriptStr)) return;
@@ -251,7 +269,6 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
                 return;
             }
 
-            skillScript.Skill.NextAvailableUse = DateTime.UtcNow;
             skillScript.Skill.Level = 100;
             obj.SkillScripts.Add(skillScript);
         }
@@ -303,7 +320,6 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
                 return;
             }
 
-            skillScript.Skill.NextAvailableUse = DateTime.UtcNow;
             skillScript.Skill.Level = 100;
             obj.AbilityScripts.Add(skillScript);
         }
@@ -320,18 +336,9 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
     {
         IReadOnlyList<string> skillList = monster.Template.Level switch
         {
-            <= 11 => ["Onslaught", "Assault", "Clobber", "Bite", "Claw"],
-            <= 50 =>
-            [
-                "Double Punch", "Punch", "Clobber x2", "Onslaught", "Thrust",
-                "Wallop", "Assault", "Clobber", "Bite", "Claw", "Stomp", "Tail Slap"
-            ],
-            _ =>
-            [
-                "Double Punch", "Punch", "Thrash", "Clobber x2", "Onslaught",
-                "Thrust", "Wallop", "Assault", "Clobber", "Slash", "Bite", "Claw",
-                "Head Butt", "Mule Kick", "Stomp", "Tail Slap"
-            ]
+            <= 11 => Assails_11,
+            <= 50 => Assails_50,
+            _ => Assails_Any
         };
 
         var skillCount = (int)(Math.Round(monster.Level / 30d) + 1);
@@ -354,40 +361,11 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
 
         IReadOnlyList<string> skillList = monster.Template.Level switch
         {
-            <= 25 => ["Stab", "Dual Slice", "Wind Slice", "Wind Blade"],
-            <= 60 =>
-            [
-                "Claw Fist", "Cross Body Punch", "Knife Hand Strike", "Krane Kick", "Palm Heel Strike",
-                "Wolf Fang Fist", "Stab", "Stab'n Twist", "Stab Twice", "Desolate", "Dual Slice", "Rush",
-                "Wind Slice", "Beag Suain", "Wind Blade", "Double-Edged Dance", "Bite'n Shake", "Howl'n Call",
-                "Death From Above", "Pounce", "Roll Over", "Corrosive Touch"
-            ],
-            <= 75 =>
-            [
-                "Ambush", "Claw Fist", "Cross Body Punch", "Hammer Twist", "Hurricane Kick", "Knife Hand Strike",
-                "Krane Kick", "Palm Heel Strike", "Wolf Fang Fist", "Stab", "Stab'n Twist", "Stab Twice", "Desolate",
-                "Dual Slice", "Lullaby Strike", "Rush", "Sever", "Wind Slice", "Beag Suain", "Charge", "Vampiric Slash",
-                "Wind Blade", "Double-Edged Dance", "Ebb'n Flow", "Bite'n Shake", "Howl'n Call", "Death From Above",
-                "Pounce", "Roll Over", "Swallow Whole", "Tentacle", "Corrosive Touch"
-            ],
-            <= 120 =>
-            [
-                "Ambush", "Claw Fist", "Cross Body Punch", "Hammer Twist", "Hurricane Kick", "Knife Hand Strike",
-                "Krane Kick", "Palm Heel Strike", "Wolf Fang Fist", "Flurry", "Stab", "Stab'n Twist", "Stab Twice",
-                "Titan's Cleave", "Desolate", "Dual Slice", "Lullaby Strike", "Rush", "Sever", "Wind Slice", "Beag Suain",
-                "Charge", "Vampiric Slash", "Wind Blade", "Double-Edged Dance", "Ebb'n Flow", "Retribution",
-                "Flame Thrower", "Bite'n Shake", "Howl'n Call", "Death From Above", "Pounce", "Roll Over", "Swallow Whole",
-                "Tentacle", "Corrosive Touch", "Tantalizing Gaze"
-            ],
-            _ =>
-            [
-                "Ambush", "Claw Fist", "Cross Body Punch", "Hammer Twist", "Hurricane Kick", "Knife Hand Strike",
-                "Krane Kick", "Palm Heel Strike", "Wolf Fang Fist", "Flurry", "Stab", "Stab'n Twist", "Stab Twice",
-                "Titan's Cleave", "Desolate", "Dual Slice", "Lullaby Strike", "Rush", "Sever", "Wind Slice", "Beag Suain",
-                "Charge", "Vampiric Slash", "Wind Blade", "Double-Edged Dance", "Ebb'n Flow", "Retribution",
-                "Flame Thrower", "Bite'n Shake", "Howl'n Call", "Death From Above", "Pounce", "Roll Over", "Swallow Whole",
-                "Tentacle", "Corrosive Touch", "Tantalizing Gaze"
-            ]
+            <= 25 => BasicAbilities_25,
+            <= 60 => BasicAbilities_60,
+            <= 75 => BasicAbilities_75,
+            <= 120 => BasicAbilities_120,
+            _ => BasicAbilities_Any
         };
 
         var count = (int)(Math.Round(monster.Level / 30d) + 1);
@@ -399,6 +377,8 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
                 LoadAbilityScript(ability, monster);
         });
     }
+
+    #region Level-Based Spells
 
     /// <summary>
     /// Give beag spells randomly depending on their level
@@ -412,16 +392,10 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
                 return;
         }
 
-        IReadOnlyList<string> spellList = 
-        [
-            "Beag Srad", "Beag Sal", "Beag Athar", "Beag Creag", "Beag Dorcha", "Beag Eadrom", "Beag Puinsein", "Beag Cradh",
-            "Ao Beag Cradh"
-        ];
-
         var count = (int)(Math.Round(monster.Level / 30d) + 1);
         count = Math.Min(count, 5);
 
-        PickUniqueAndApply(spellList, count, spell =>
+        PickUniqueAndApply(BeagSpellTable, count, spell =>
         {
             if (!ContainsSpell(monster.SpellScripts, spell))
                 LoadSpellScript(spell, monster);
@@ -440,15 +414,10 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
                 return;
         }
 
-        IReadOnlyList<string> spellList =
-        [
-            "Srad", "Sal", "Athar", "Creag", "Dorcha", "Eadrom", "Puinsein", "Cradh", "Ao Cradh"
-        ];
-
         var count = (int)(Math.Round(monster.Level / 30d) + 1);
         count = Math.Min(count, 5);
 
-        PickUniqueAndApply(spellList, count, spell =>
+        PickUniqueAndApply(NormalSpellTable, count, spell =>
         {
             if (!ContainsSpell(monster.SpellScripts, spell))
                 LoadSpellScript(spell, monster);
@@ -467,16 +436,10 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
                 return;
         }
 
-        IReadOnlyList<string> spellList =
-        [
-            "Mor Srad", "Mor Sal", "Mor Athar", "Mor Creag", "Mor Dorcha", "Mor Eadrom", "Mor Puinsein", "Mor Cradh",
-            "Fas Nadur", "Blind", "Pramh", "Ao Mor Cradh"
-        ];
-
         var count = (int)(Math.Round(monster.Level / 30d) + 1);
         count = Math.Min(count, 5);
 
-        PickUniqueAndApply(spellList, count, spell =>
+        PickUniqueAndApply(MorSpellTable, count, spell =>
         {
             if (!ContainsSpell(monster.SpellScripts, spell))
                 LoadSpellScript(spell, monster);
@@ -495,16 +458,10 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
                 return;
         }
 
-        IReadOnlyList<string> spellList =
-        [
-            "Ard Srad", "Ard Sal", "Ard Athar", "Ard Creag", "Ard Dorcha", "Ard Eadrom", "Ard Puinsein", "Ard Cradh",
-            "Mor Fas Nadur", "Blind", "Pramh", "Silence", "Ao Ard Cradh"
-        ];
-
         var count = (int)(Math.Round(monster.Level / 30d) + 1);
         count = Math.Min(count, 5);
 
-        PickUniqueAndApply(spellList, count, spell =>
+        PickUniqueAndApply(ArdSpellTable, count, spell =>
         {
             if (!ContainsSpell(monster.SpellScripts, spell))
                 LoadSpellScript(spell, monster);
@@ -523,16 +480,10 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
                 return;
         }
 
-        IReadOnlyList<string> spellList =
-        [
-            "Ard Srad", "Ard Sal", "Ard Athar", "Ard Creag", "Ard Dorcha", "Ard Eadrom", "Ard Puinsein", "Ard Cradh",
-            "Ard Fas Nadur", "Blind", "Pramh", "Silence", "Ao Ard Cradh", "Ao Puinsein", "Dark Chain", "Defensive Stance"
-        ];
-
         var count = (int)(Math.Round(monster.Level / 30d) + 1);
         count = Math.Min(count, 5);
 
-        PickUniqueAndApply(spellList, count, spell =>
+        PickUniqueAndApply(MasterSpellTable, count, spell =>
         {
             if (!ContainsSpell(monster.SpellScripts, spell))
                 LoadSpellScript(spell, monster);
@@ -546,264 +497,248 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
     {
         if (monster.Template.Level <= 250) return;
 
-        var spellList = new List<string>
-        {
-            "Ard Srad", "Ard Sal", "Ard Athar", "Ard Creag", "Ard Dorcha", "Ard Eadrom", "Ard Puinsein",
-            "Croich Beag Cradh", "Ard Fas Nadur", "Blind", "Pramh", "Silence", "Ao Ard Cradh", "Ao Puinsein",
-            "Dark Chain", "Defensive Stance"
-        };
-
-        if (monster.Template.Level >= 500)
-        {
-            spellList.AddRange([
-                "Uas Athar", "Uas Creag", "Uas Sal", "Uas Srad", "Uas Dorcha", "Uas Eadrom",
-                "Croich Mor Cradh", "Penta Seal", "Decay"
-            ]);
-        }
-
         var count = (int)(Math.Round(monster.Level / 30d) + 1);
         count = Math.Min(count, 5);
 
-        PickUniqueAndApply(spellList, count, spell =>
+        if (monster.Template.Level < 500)
+        {
+            PickUniqueAndApply(JobSpellBase, count, spell =>
+            {
+                if (!ContainsSpell(monster.SpellScripts, spell))
+                    LoadSpellScript(spell, monster);
+            });
+            return;
+        }
+
+        PickUniqueAndApplyConcat(JobSpellBase, JobSpell500Plus, count, spell =>
         {
             if (!ContainsSpell(monster.SpellScripts, spell))
                 LoadSpellScript(spell, monster);
         });
     }
 
+    #endregion
+
+    #region Racial Abilities and Racial Spells
+
     internal void AberrationSet(Monster monster)
     {
-        var skillList = new List<string> { "Thrust" };
-        var abilityList = new List<string> { "Lullaby Strike", "Vampiric Slash" };
-        var spellList = new List<string> { "Spectral Shield", "Silence" };
-        MonsterLoader(skillList, abilityList, spellList, monster);
+        LoadSkills(AberrationSkills, monster);
+        LoadAbilities(AberrationAbilities, monster);
+        LoadSpells(AberrationSpells, monster);
     }
 
     internal void AnimalSet(Monster monster)
     {
-        var skillList = new List<string> { "Bite", "Claw" };
-        var abilityList = new List<string> { "Howl'n Call", "Bite'n Shake" };
-        var spellList = new List<string> { "Defensive Stance" };
-        MonsterLoader(skillList, abilityList, spellList, monster);
+        LoadSkills(AnimalSkills, monster);
+        LoadAbilities(AnimalAbilities, monster);
+        LoadSpells(AnimalSpells, monster);
     }
 
     internal void AquaticSet(Monster monster)
     {
-        var skillList = new List<string> { "Bite", "Tail Slap" };
-        var abilityList = new List<string> { "Bubble Burst", "Swallow Whole" };
-        MonsterLoader(skillList, abilityList, [], monster);
+        LoadSkills(AquaticSkills, monster);
+        LoadAbilities(AquaticAbilities, monster);
+        LoadSpells(AquaticSpells, monster);
     }
 
     internal void BeastSet(Monster monster)
     {
-        var skillList = new List<string> { "Bite", "Claw" };
-        var abilityList = new List<string> { "Bite'n Shake", "Pounce", "Poison Talon" };
-        var spellList = new List<string> { "Asgall" };
-        MonsterLoader(skillList, abilityList, spellList, monster);
+        LoadSkills(BeastSkills, monster);
+        LoadAbilities(BeastAbilities, monster);
+        LoadSpells(BeastSpells, monster);
     }
 
     internal void CelestialSet(Monster monster)
     {
-        var skillList = new List<string> { "Thrash", "Divine Thrust", "Slash", "Wallop" };
-        var abilityList = new List<string> { "Titan's Cleave", "Shadow Step", "Entice", "Smite" };
-        var spellList = new List<string> { "Deireas Faileas", "Asgall", "Perfect Defense", "Dion", "Silence" };
-        MonsterLoader(skillList, abilityList, spellList, monster);
+        LoadSkills(CelestialSkills, monster);
+        LoadAbilities(CelestialAbilities, monster);
+        LoadSpells(CelestialSpells, monster);
     }
 
     internal void ConstructSet(Monster monster)
     {
-        var skillList = new List<string> { "Stomp" };
-        var abilityList = new List<string> { "Titan's Cleave", "Earthly Delights" };
-        var spellList = new List<string> { "Dion", "Defensive Stance" };
-        MonsterLoader(skillList, abilityList, spellList, monster);
+        LoadSkills(ConstructSkills, monster);
+        LoadAbilities(ConstructAbilities, monster);
+        LoadSpells(ConstructSpells, monster);
     }
 
     internal void DemonSet(Monster monster)
     {
-        var skillList = new List<string> { "Onslaught", "Two-Handed Attack", "Dual Wield", "Slash", "Thrash" };
-        var abilityList = new List<string> { "Titan's Cleave", "Sever", "Earthly Delights", "Entice" };
-        var spellList = new List<string> { "Asgall", "Perfect Defense", "Dion" };
-        MonsterLoader(skillList, abilityList, spellList, monster);
+        LoadSkills(DemonSkills, monster);
+        LoadAbilities(DemonAbilities, monster);
+        LoadSpells(DemonSpells, monster);
     }
 
     internal void DragonSet(Monster monster)
     {
-        var skillList = new List<string> { "Thrash", "Ambidextrous", "Slash", "Claw", "Tail Slap" };
-        var abilityList = new List<string> { "Titan's Cleave", "Sever", "Earthly Delights", "Hurricane Kick" };
-        var spellList = new List<string> { "Asgall", "Perfect Defense", "Dion", "Deireas Faileas" };
-        MonsterLoader(skillList, abilityList, spellList, monster);
+        LoadSkills(DragonSkills, monster);
+        LoadAbilities(DragonAbilities, monster);
+        LoadSpells(DragonSpells, monster);
     }
 
     internal void BahamutDragonSet(Monster monster)
     {
-        var skillList = new List<string> { "Fire Wheel", "Thrash", "Ambidextrous", "Slash", "Claw" };
-        var abilityList = new List<string> { "Megaflare", "Lava Armor", "Ember Strike", "Silent Siren" };
-        var spellList = new List<string> { "Heavens Fall", "Liquid Hell", "Ao Sith Gar" };
-        MonsterLoader(skillList, abilityList, spellList, monster);
+        LoadSkills(BahamutSkills, monster);
+        LoadAbilities(BahamutAbilities, monster);
+        LoadSpells(BahamutSpells, monster);
     }
 
     internal void ElementalSet(Monster monster)
     {
-        var skillList = new List<string> { "Flame Thrower", "Water Cannon", "Tornado Vector", "Earth Shatter" };
-        var abilityList = new List<string> { "Elemental Bane" };
-        MonsterLoader(skillList, abilityList, [], monster);
+        LoadSkills(ElementalSkills, monster);
+        LoadAbilities(ElementalAbilities, monster);
+        LoadSpells(ElementalSpells, monster);
     }
 
     internal void FairySet(Monster monster)
     {
-        var skillList = new List<string> { "Ambidextrous", "Divine Thrust", "Clobber x2" };
-        var abilityList = new List<string> { "Earthly Delights", "Claw Fist", "Lullaby Strike" };
-        var spellList = new List<string> { "Asgall", "Spectral Shield", "Deireas Faileas" };
-        MonsterLoader(skillList, abilityList, spellList, monster);
+        LoadSkills(FairySkills, monster);
+        LoadAbilities(FairyAbilities, monster);
+        LoadSpells(FairySpells, monster);
     }
 
     internal void FiendSet(Monster monster)
     {
-        var skillList = new List<string> { "Punch", "Double Punch" };
-        var abilityList = new List<string> { "Stab", "Stab Twice" };
-        var spellList = new List<string> { "Blind" };
-        MonsterLoader(skillList, abilityList, spellList, monster);
+        LoadSkills(FiendSkills, monster);
+        LoadAbilities(FiendAbilities, monster);
+        LoadSpells(FiendSpells, monster);
     }
 
     internal void FungiSet(Monster monster)
     {
-        var skillList = new List<string> { "Wallop", "Clobber" };
-        var abilityList = new List<string> { "Dual Slice", "Wind Blade", "Vampiric Slash" };
-        MonsterLoader(skillList, abilityList, [], monster);
+        LoadSkills(FungiSkills, monster);
+        LoadAbilities(FungiAbilities, monster);
+        LoadSpells(FungiSpells, monster);
     }
 
     internal void GargoyleSet(Monster monster)
     {
-        var skillList = new List<string> { "Slash" };
-        var abilityList = new List<string> { "Palm Heel Strike" };
-        var spellList = new List<string> { "Mor Dion" };
-        MonsterLoader(skillList, abilityList, spellList, monster);
+        LoadSkills(GargoyleSkills, monster);
+        LoadAbilities(GargoyleAbilities, monster);
+        LoadSpells(GargoyleSpells, monster);
     }
 
     internal void GiantSet(Monster monster)
     {
-        var skillList = new List<string> { "Stomp", "Head Butt" };
-        var abilityList = new List<string> { "Golden Lair", "Double-Edged Dance" };
-        var spellList = new List<string> { "Silence", "Pramh" };
-        MonsterLoader(skillList, abilityList, spellList, monster);
+        LoadSkills(GiantSkills, monster);
+        LoadAbilities(GiantAbilities, monster);
+        LoadSpells(GiantSpells, monster);
     }
 
     internal void GoblinSet(Monster monster)
     {
-        var skillList = new List<string> { "Assault", "Clobber", "Wallop" };
-        var abilityList = new List<string> { "Wind Slice", "Wind Blade" };
-        var spellList = new List<string> { "Beag Puinsein" };
-        MonsterLoader(skillList, abilityList, spellList, monster);
+        LoadSkills(GoblinSkills, monster);
+        LoadAbilities(GoblinAbilities, monster);
+        LoadSpells(GoblinSpells, monster);
     }
 
     internal void GrimlokSet(Monster monster)
     {
-        var skillList = new List<string> { "Wallop", "Clobber" };
-        var abilityList = new List<string> { "Dual Slice", "Wind Blade" };
-        var spellList = new List<string> { "Silence" };
-        MonsterLoader(skillList, abilityList, spellList, monster);
+        LoadSkills(GrimlokSkills, monster);
+        LoadAbilities(GrimlokAbilities, monster);
+        LoadSpells(GrimlokSpells, monster);
     }
 
     internal void HumanoidSet(Monster monster)
     {
-        var skillList = new List<string> { "Thrust", "Thrash", "Wallop" };
-        var abilityList = new List<string> { "Camouflage", "Adrenaline" };
-        MonsterLoader(skillList, abilityList, [], monster);
+        LoadSkills(HumanoidSkills, monster);
+        LoadAbilities(HumanoidAbilities, monster);
+        LoadSpells(HumanoidSpells, monster);
     }
 
     internal void ShapeShifter(Monster monster)
     {
-        var skillList = new List<string> { "Thrust", "Thrash", "Wallop" };
-        var spellList = new List<string> { "Spring Trap", "Snare Trap", "Blind", "Prahm" };
-        MonsterLoader(skillList, [], spellList, monster);
+        LoadSkills(ShapeShifterSkills, monster);
+        LoadAbilities(ShapeShifterAbilities, monster);
+        LoadSpells(ShapeShifterSpells, monster);
     }
 
     internal void InsectSet(Monster monster)
     {
-        var skillList = new List<string> { "Bite" };
-        var abilityList = new List<string> { "Corrosive Touch" };
-        MonsterLoader(skillList, abilityList, [], monster);
+        LoadSkills(InsectSkills, monster);
+        LoadAbilities(InsectAbilities, monster);
+        LoadSpells(InsectSpells, monster);
     }
 
     internal void KoboldSet(Monster monster)
     {
-        var skillList = new List<string> { "Clobber x2", "Assault" };
-        var abilityList = new List<string> { "Ebb'n Flow", "Stab", "Stab'n Twist" };
-        var spellList = new List<string> { "Blind" };
-        MonsterLoader(skillList, abilityList, spellList, monster);
+        LoadSkills(KoboldSkills, monster);
+        LoadAbilities(KoboldAbilities, monster);
+        LoadSpells(KoboldSpells, monster);
     }
 
     internal void MagicalSet(Monster monster)
     {
-        var spellList = new List<string> { "Aite", "Mor Fas Nadur", "Deireas Faileas" };
-        MonsterLoader([], [], spellList, monster);
+        LoadSkills(MagicalSkills, monster);
+        LoadAbilities(MagicalAbilities, monster);
+        LoadSpells(MagicalSpells, monster);
     }
 
     internal void MukulSet(Monster monster)
     {
-        var skillList = new List<string> { "Clobber", "Mule Kick", "Onslaught" };
-        var abilityList = new List<string> { "Krane Kick", "Wolf Fang Fist", "Flurry", "Desolate" };
-        var spellList = new List<string> { "Perfect Defense" };
-        MonsterLoader(skillList, abilityList, spellList, monster);
+        LoadSkills(MukulSkills, monster);
+        LoadAbilities(MukulAbilities, monster);
+        LoadSpells(MukulSpells, monster);
     }
 
     internal void OozeSet(Monster monster)
     {
-        var skillList = new List<string> { "Wallop", "Clobber", "Clobber x2" };
-        var abilityList = new List<string> { "Dual Slice", "Wind Blade", "Vampiric Slash", "Retribution" };
-        var spellList = new List<string> { "Asgall" };
-        MonsterLoader(skillList, abilityList, spellList, monster);
+        LoadSkills(OozeSkills, monster);
+        LoadAbilities(OozeAbilities, monster);
+        LoadSpells(OozeSpells, monster);
     }
 
     internal void OrcSet(Monster monster)
     {
-        var skillList = new List<string> { "Clobber", "Thrash" };
-        var abilityList = new List<string> { "Titan's Cleave", "Corrosive Touch" };
-        var spellList = new List<string> { "Asgall" };
-        MonsterLoader(skillList, abilityList, spellList, monster);
+        LoadSkills(OrcSkills, monster);
+        LoadAbilities(OrcAbilities, monster);
+        LoadSpells(OrcSpells, monster);
     }
 
     internal void PlantSet(Monster monster)
     {
-        var skillList = new List<string> { "Thrust" };
-        var abilityList = new List<string> { "Corrosive Touch" };
-        var spellList = new List<string> { "Silence" };
-        MonsterLoader(skillList, abilityList, spellList, monster);
+        LoadSkills(PlantSkills, monster);
+        LoadAbilities(PlantAbilities, monster);
+        LoadSpells(PlantSpells, monster);
     }
 
     internal void ReptileSet(Monster monster)
     {
-        var skillList = new List<string> { "Tail Slap", "Head Butt" };
-        var abilityList = new List<string> { "Pounce", "Death From Above" };
-        MonsterLoader(skillList, abilityList, [], monster);
+        LoadSkills(ReptileSkills, monster);
+        LoadAbilities(ReptileAbilities, monster);
+        LoadSpells(ReptileSpells, monster);
     }
 
     internal void RoboticSet(Monster monster)
     {
-        var spellList = new List<string> { "Mor Dion", "Perfect Defense" };
-        MonsterLoader([], [], spellList, monster);
+        LoadSkills(RoboticSkills, monster);
+        LoadAbilities(RoboticAbilities, monster);
+        LoadSpells(RoboticSpells, monster);
     }
 
     internal void ShadowSet(Monster monster)
     {
-        var skillList = new List<string> { "Thrust" };
-        var abilityList = new List<string> { "Lullaby Strike", "Vampiric Slash" };
-        MonsterLoader(skillList, abilityList, [], monster);
+        LoadSkills(ShadowSkills, monster);
+        LoadAbilities(ShadowAbilities, monster);
+        LoadSpells(ShadowSpells, monster);
     }
 
     internal void RodentSet(Monster monster)
     {
-        var skillList = new List<string> { "Bite", "Assault" };
-        var abilityList = new List<string> { "Rush" };
-        MonsterLoader(skillList, abilityList, [], monster);
+        LoadSkills(RodentSkills, monster);
+        LoadAbilities(RodentAbilities, monster);
+        LoadSpells(RodentSpells, monster);
     }
 
     internal void UndeadSet(Monster monster)
     {
-        var skillList = new List<string> { "Wallop" };
-        var abilityList = new List<string> { "Corrosive Touch", "Retribution" };
-        MonsterLoader(skillList, abilityList, [], monster);
+        LoadSkills(UndeadSkills, monster);
+        LoadAbilities(UndeadAbilities, monster);
+        LoadSpells(UndeadSpells, monster);
     }
+
+    #endregion
 
     private static void PickUniqueAndApply(IReadOnlyList<string> list, int pickCount, Action<string> apply)
     {
@@ -825,6 +760,30 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
             (idx[i], idx[j]) = (idx[j], idx[i]);
 
             apply(list[idx[i]]);
+        }
+    }
+
+    private static void PickUniqueAndApplyConcat(IReadOnlyList<string> a, IReadOnlyList<string> b, int pickCount, Action<string> apply)
+    {
+        int total = a.Count + b.Count;
+        if (pickCount <= 0 || total == 0)
+            return;
+
+        if (pickCount > total)
+            pickCount = total;
+
+        Span<int> idx = total <= 128 ? stackalloc int[total] : new int[total];
+
+        for (int i = 0; i < total; i++)
+            idx[i] = i;
+
+        for (int i = 0; i < pickCount; i++)
+        {
+            int j = Random.Shared.Next(i, total);
+            (idx[i], idx[j]) = (idx[j], idx[i]);
+
+            int k = idx[i];
+            apply(k < a.Count ? a[k] : b[k - a.Count]);
         }
     }
 
@@ -850,20 +809,5 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
             if (scripts[i].Spell.Template.ScriptName == name)
                 return true;
         return false;
-    }
-
-    private void MonsterLoader(List<string> skills, List<string> abilities, List<string> spells, Monster monster)
-    {
-        if (skills.Count != 0)
-            foreach (var skill in skills)
-                LoadSkillScript(skill, monster);
-
-        if (abilities.Count != 0)
-            foreach (var ability in abilities)
-                LoadAbilityScript(ability, monster);
-
-        if (spells.Count == 0) return;
-        foreach (var spell in spells)
-            LoadSpellScript(spell, monster);
     }
 }

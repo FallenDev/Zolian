@@ -46,7 +46,7 @@ public class Skill
     }
 
     // Used for Monster Scripts Only
-    public DateTime NextAvailableUse { get; set; }
+    public DateTime NextAvailableUse { get; set; } = DateTime.UtcNow;
 
     public bool CanUse() => Ready;
 
