@@ -192,14 +192,21 @@ public class InventoryManager : ObjectManager
     {
         try
         {
-            item.Scripts = ScriptManager.Load<ItemScript>(item.Template.ScriptName, item);
+            ScriptManager.TryCreate<ItemScript>(item.Template.ScriptName, out var itemScript, item);
+            item.Script = itemScript;
+
             if (!string.IsNullOrEmpty(item.Template.WeaponScript))
-                item.WeaponScripts = ScriptManager.Load<WeaponScript>(item.Template.WeaponScript, item);
+            {
+                ScriptManager.TryCreate<WeaponScript>(item.Template.WeaponScript, out var weaponScript, item);
+                item.WeaponScript = weaponScript;
+            }
+
             client.SendAddItemToPane(item);
             UpdatePlayersWeight(client);
         }
-        catch
+        catch (Exception ex)
         {
+            SentrySdk.CaptureException(ex);
             ServerSetup.EventsLogger($"Issue updating slot on item {item.ItemId} from {client.RemoteIp} - {client.Aisling.Serial}");
         }
     }

@@ -365,9 +365,10 @@ public class Damageable : Movable
 
     private long ComputeDmgFromAc(long dmg)
     {
-        var script = ScriptManager.Load<FormulaScript>(ServerSetup.Instance.Config.ACFormulaScript, this);
+        if (ScriptManager.TryCreate<FormulaScript>(ServerSetup.Instance.Config.ACFormulaScript, out var formula, this) && formula != null)
+            return formula.Calculate(this, dmg);
 
-        return script?.Aggregate(dmg, (current, s) => s.Value.Calculate(this, current)) ?? dmg;
+        return dmg;
     }
 
     #endregion
@@ -444,9 +445,10 @@ public class Damageable : Movable
 
     private long ComputeDmgFromWillSavingThrow(long dmg)
     {
-        var script = ScriptManager.Load<FormulaScript>("Will Saving Throw", this);
+        if (ScriptManager.TryCreate<FormulaScript>("Will Saving Throw", out var formula, this) && formula != null)
+            return formula.Calculate(this, dmg);
 
-        return script?.Aggregate(dmg, (current, s) => s.Value.Calculate(this, current)) ?? dmg;
+        return dmg;
     }
 
     #endregion
@@ -1177,8 +1179,8 @@ public class Damageable : Movable
 
     private double CalculateElementalDamageMod(Sprite attacker, ElementManager.Element element)
     {
-        var script = ScriptManager.Load<ElementFormulaScript>(ServerSetup.Instance.Config.ElementTableScript, this);
-        return script?.Values.Sum(s => s.Calculate(this, attacker, element)) ?? 0.0;
+        ScriptManager.TryCreate<ElementFormulaScript>(ServerSetup.Instance.Config.ElementTableScript, out var formula, this);
+        return formula?.Calculate(this, attacker, element) ?? 0.0;
     }
 
     private long LuckModifier(long dmg)

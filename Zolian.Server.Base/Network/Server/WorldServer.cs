@@ -712,9 +712,8 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
                 if (item.GiveTo(localClient.Aisling))
                 {
                     item.Remove();
-                    if (item.Scripts is null) return default;
-                    foreach (var itemScript in item.Scripts.Values)
-                        itemScript?.OnPickedUp(localClient.Aisling, new Position(localArgs.SourcePoint.X, localArgs.SourcePoint.Y), map);
+                    if (item.Script is null) return default;
+                    item.Script.OnPickedUp(localClient.Aisling, new Position(localArgs.SourcePoint.X, localArgs.SourcePoint.Y), map);
                     return default;
                 }
             }
@@ -858,11 +857,8 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
                 localClient.Aisling.Map?.Script.Item2?.OnItemDropped(localClient.Aisling.Client, item, itemPosition);
             }
 
-            if (item.Scripts == null) return default;
-            foreach (var itemScript in item.Scripts.Values)
-            {
-                itemScript?.OnDropped(localClient.Aisling, new Position(localArgs.DestinationPoint.X, localArgs.DestinationPoint.Y), localClient.Aisling.Map);
-            }
+            if (item.Script == null) return default;
+            item.Script.OnDropped(localClient.Aisling, new Position(localArgs.DestinationPoint.X, localArgs.DestinationPoint.Y), localClient.Aisling.Map);
 
             return default;
         }
@@ -1396,66 +1392,45 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
 
     private static void AssailRoutine(IWorldClient lpClient)
     {
-        var lastTemplate = string.Empty;
-
         foreach (var skill in lpClient.Aisling.GetAssails())
         {
             // Skill exists check
             if (skill?.Template == null) continue;
-            if (lastTemplate == skill.Template.Name) continue;
             if (skill.Scripts == null) continue;
+            var script = skill.Scripts.Values.FirstOrDefault();
+            if (script == null) continue;
 
             // Skill can be used check
             if (!skill.Ready && skill.InUse) continue;
 
             skill.InUse = true;
 
-            // Skill animation and execute
-            ExecuteAssail(lpClient, skill);
-            // Stress Test
-            //AnimationOnAssailStressTest(lpClient);
-
-            // Skill cleanup
-            skill.CurrentCooldown = skill.Template.Cooldown;
-            lpClient.SendCooldown(true, skill.Slot, skill.CurrentCooldown);
-            lastTemplate = skill.Template.Name;
-            lpClient.LastAssail = DateTime.UtcNow;
+            // Skill & Weapon script
+            script.OnUse(lpClient.Aisling);
+            ExecuteWeaponScriptsOnAssail(lpClient, skill);
+            
             skill.LastUsedSkill = DateTime.UtcNow;
+            skill.CurrentCooldown = skill.Template.Cooldown;
 
             skill.InUse = false;
         }
-
-        if (lpClient.Aisling.Overburden)
-            lpClient.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=bOverburdened!");
+        
+        lpClient.LastAssail = DateTime.UtcNow;
     }
 
-    // Stress test
-    //private async static void AnimationOnAssailStressTest(IWorldClient lpClient)
-    //{
-    //    while (true)
-    //    {
-    //        lpClient.Aisling.SendAnimationNearby((ushort)Random.Shared.Next(0, 300), null, lpClient.Aisling.Serial);
-    //        await Task.Delay(50);
-    //    }
-    //}
-
-    private static void ExecuteAssail(IWorldClient lpClient, Skill lpSkill, bool optExecuteScript = true)
+    private static void ExecuteWeaponScriptsOnAssail(IWorldClient lpClient, Skill lpSkill)
     {
         // On skill "Assail" also use weapon script, if there is one
         if (lpSkill.Template.ScriptName == "Assail")
         {
             // Uses a script equipped to the main-hand item if there is one
-            var mainHandScript = lpClient.Aisling.EquipmentManager.Equipment[1]?.Item?.WeaponScripts;
-            mainHandScript?.FirstOrDefault().Value.OnUse(lpClient.Aisling);
+            var mainHandScript = lpClient.Aisling.EquipmentManager.Equipment[1]?.Item?.WeaponScript;
+            mainHandScript?.OnUse(lpClient.Aisling);
 
             // Uses a script associated with an accessory like Quivers
-            var accessoryScript = lpClient.Aisling.EquipmentManager.Equipment[14]?.Item?.WeaponScripts;
-            accessoryScript?.FirstOrDefault().Value.OnUse(lpClient.Aisling);
+            var accessoryScript = lpClient.Aisling.EquipmentManager.Equipment[14]?.Item?.WeaponScript;
+            accessoryScript?.OnUse(lpClient.Aisling);
         }
-
-        if (!optExecuteScript) return;
-        var script = lpSkill.Scripts.Values.FirstOrDefault();
-        script?.OnUse(lpClient.Aisling);
     }
 
     /// <summary>
@@ -1645,14 +1620,23 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
             }
 
             // Run Scripts on item on use
-            if (!string.IsNullOrEmpty(item.Template.ScriptName)) item.Scripts ??= ScriptManager.Load<ItemScript>(item.Template.ScriptName, item);
-            if (!string.IsNullOrEmpty(item.Template.WeaponScript)) item.WeaponScripts ??= ScriptManager.Load<WeaponScript>(item.Template.WeaponScript, item);
+            if (!string.IsNullOrEmpty(item.Template.ScriptName))
+            {
+                ScriptManager.TryCreate<ItemScript>(item.Template.ScriptName, out var itemScript, item);
+                item.Script = itemScript;
+            }
+
+            if (!string.IsNullOrEmpty(item.Template.WeaponScript))
+            {
+                ScriptManager.TryCreate<WeaponScript>(item.Template.WeaponScript, out var weaponScript, item);
+                item.WeaponScript = weaponScript;
+            }
 
             if (!item.GiftWrapped.IsNullOrEmpty())
             {
-                var consumeScript = ScriptManager.Load<ItemScript>("Consumable", item);
-                var script = consumeScript.Values.FirstOrDefault();
-                script?.OnUse(localClient.Aisling, localArgs.SourceSlot);
+                if (ScriptManager.TryCreate<ItemScript>("Consumable", out var script, item) && script != null)
+                    script.OnUse(localClient.Aisling, localArgs.SourceSlot);
+
                 return default;
             }
 
@@ -1661,14 +1645,13 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
 
             var activated = false;
 
-            if (item.Scripts == null)
+            if (item.Script == null)
             {
                 localClient.SendServerMessage(ServerMessageType.OrangeBar1, $"{ServerSetup.Instance.Config.CantUseThat}");
             }
             else
             {
-                var script = item.Scripts.Values.FirstOrDefault();
-                script?.OnUse(localClient.Aisling, localArgs.SourceSlot);
+                item.Script?.OnUse(localClient.Aisling, localArgs.SourceSlot);
                 activated = true;
             }
 
@@ -1813,12 +1796,11 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
                             var item = localClient.Aisling.Inventory.FindInSlot(localArgs.SourceSlot);
 
                             if (item.DisplayName.StringContains("deum"))
-                            {
-                                var script = item.Scripts?.Values.FirstOrDefault();
-                                if (script is null) return default;
+                            {                                
+                                if (item.Script is null) return default;
                                 localClient.Aisling.Inventory.RemoveRange(localClient.Aisling.Client, item, 1);
                                 localClient.Aisling.ThrewHealingPot = true;
-                                script?.OnUse(aisling, localArgs.SourceSlot);
+                                item.Script?.OnUse(aisling, localArgs.SourceSlot);
                                 localClient.SendBodyAnimation(localClient.Aisling.Serial, BodyAnimation.Assail, 50);
                                 return default;
                             }
@@ -2531,14 +2513,40 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
                 if (!skill.CanUseZeroLineAbility) return default;
             if (!skill.CanUse()) return default;
             if (skill.InUse) return default;
+            
+            var script = skill.Scripts.Values.FirstOrDefault();
 
+            // Execute Ability or Assail Logic
             skill.InUse = true;
 
-            var script = skill.Scripts.Values.FirstOrDefault();
-            script?.OnUse(localClient.Aisling);
-            skill.CurrentCooldown = skill.Template.Cooldown;
-            localClient.SendCooldown(true, skill.Slot, skill.CurrentCooldown);
-            skill.LastUsedSkill = DateTime.UtcNow;
+            var readyTime = DateTime.UtcNow;
+            var overburden = 0;
+            if (localClient.Aisling.Overburden)
+                overburden = 2;
+
+            if (skill.Template.SkillType != SkillScope.Assail)
+            {
+                script?.OnUse(localClient.Aisling);
+
+                skill.LastUsedSkill = DateTime.UtcNow;
+                skill.CurrentCooldown = skill.Template.Cooldown;
+
+                localClient.SendCooldown(true, skill.Slot, skill.CurrentCooldown);
+            }
+            else
+            {
+                if (readyTime.Subtract(localClient.LastAssail).TotalSeconds < 1 + overburden)
+                {
+                    skill.InUse = false;
+                    return default;
+                }
+
+                script?.OnUse(localClient.Aisling);
+
+                skill.LastUsedSkill = DateTime.UtcNow;
+                skill.CurrentCooldown = skill.Template.Cooldown;
+                localClient.LastAssail = DateTime.UtcNow;
+            }
 
             skill.InUse = false;
             return default;

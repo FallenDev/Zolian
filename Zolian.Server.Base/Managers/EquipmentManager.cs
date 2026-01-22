@@ -8,6 +8,8 @@ using Darkages.Network.Server;
 using Darkages.Sprites.Entity;
 using Darkages.Types;
 
+using ServiceStack.Script;
+
 using EquipmentSlot = Darkages.Models.EquipmentSlot;
 
 namespace Darkages.Managers;
@@ -214,13 +216,8 @@ public class EquipmentManager
 
     private void OnEquipmentAdded(byte displaySlot)
     {
-        var scripts = Equipment[displaySlot].Item?.Scripts;
-        if (scripts != null)
-        {
-            var scriptValues = scripts.Values;
-            foreach (var script in scriptValues)
-                script.Equipped(Client.Aisling, displaySlot);
-        }
+        var script = Equipment[displaySlot].Item?.Script;
+        script?.Equipped(Client.Aisling, displaySlot);
 
         var item = Equipment[displaySlot].Item;
         if (item != null)
@@ -236,16 +233,11 @@ public class EquipmentManager
     {
         if (Equipment[displaySlot] == null) return;
 
-        var scripts = Equipment[displaySlot].Item?.Scripts;
-        if (scripts != null)
-        {
-            var scriptValues = scripts.Values;
-            foreach (var script in scriptValues)
-                script.UnEquipped(Client.Aisling, displaySlot);
-        }
+        var script = Equipment[displaySlot].Item?.Script;
+        script?.UnEquipped(Client.Aisling, displaySlot);
 
         var item = Equipment[displaySlot].Item;
-        if (item != null) item.ItemPane = Item.ItemPanes.Inventory;
+        item?.ItemPane = Item.ItemPanes.Inventory;
 
         Client.UpdateDisplay();
     }

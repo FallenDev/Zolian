@@ -1484,7 +1484,7 @@ public class Consumable(Item item) : ItemScript(item)
                     return;
                 }
 
-            #endregion
+                #endregion
         }
     }
 
@@ -1503,23 +1503,21 @@ public class Consumable(Item item) : ItemScript(item)
             case "Cleric's Feather":
                 {
                     const string script = "Blink";
-                    ServerSetup.Instance.GlobalSkillTemplateCache.TryGetValue(script, out var skill);
-                    if (skill == null) return;
-                    var scripts = ScriptManager.Load<SkillScript>(script,
-                        Skill.Create(1, ServerSetup.Instance.GlobalSkillTemplateCache[script]));
-                    scripts.TryGetValue(skill.ScriptName, out var skillScript);
-                    skillScript?.ItemOnDropped(aisling, droppedPosition, map);
+
+                    if (!ServerSetup.Instance.GlobalSkillTemplateCache.TryGetValue(script, out var skill)) return;
+                    if (!ScriptManager.TryCreate<SkillScript>(script, out var skillScript, Skill.Create(1, skill))) return;
+
+                    skillScript.ItemOnDropped(aisling, droppedPosition, map);
                     return;
                 }
             case "Chakra Stone":
                 {
                     const string script = "Amenotejikara";
-                    ServerSetup.Instance.GlobalSkillTemplateCache.TryGetValue(script, out var skill);
-                    if (skill == null) return;
-                    var scripts = ScriptManager.Load<SkillScript>(script,
-                        Skill.Create(1, ServerSetup.Instance.GlobalSkillTemplateCache[script]));
-                    scripts.TryGetValue(skill.ScriptName, out var skillScript);
-                    skillScript?.ItemOnDropped(aisling, droppedPosition, map);
+
+                    if (!ServerSetup.Instance.GlobalSkillTemplateCache.TryGetValue(script, out var skill)) return;
+                    if (!ScriptManager.TryCreate<SkillScript>(script, out var skillScript, Skill.Create(1, skill))) return;
+
+                    skillScript.ItemOnDropped(aisling, droppedPosition, map);
                     return;
                 }
         }

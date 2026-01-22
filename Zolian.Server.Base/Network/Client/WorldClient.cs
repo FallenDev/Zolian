@@ -819,10 +819,6 @@ public class WorldClient : WorldClientBase, IWorldClient
             Aisling.CurrentWeight += item.Template.CarryWeight;
             Aisling.Inventory.Items.TryUpdate(item.InventorySlot, item, null);
             Aisling.Inventory.UpdateSlot(Aisling.Client, item);
-            item.Scripts = ScriptManager.Load<ItemScript>(item.Template.ScriptName, item);
-
-            if (!string.IsNullOrEmpty(item.Template.WeaponScript))
-                item.WeaponScripts = ScriptManager.Load<WeaponScript>(item.Template.WeaponScript, item);
         }
 
         return this;
@@ -1300,14 +1296,16 @@ public class WorldClient : WorldClientBase, IWorldClient
 
             Aisling.CurrentWeight += equipment.Item.Template.CarryWeight;
             SendEquipment(equipment.Item.Slot, equipment.Item);
-            equipment.Item.Scripts = ScriptManager.Load<ItemScript>(equipment.Item.Template.ScriptName, equipment.Item);
+            ScriptManager.TryCreate<ItemScript>(equipment.Item.Template.ScriptName, out var itemScript, equipment.Item);
+            equipment.Item.Script = itemScript;
 
             if (!string.IsNullOrEmpty(equipment.Item.Template.WeaponScript))
-                equipment.Item.WeaponScripts = ScriptManager.Load<WeaponScript>(equipment.Item.Template.WeaponScript, equipment.Item);
+            {
+                ScriptManager.TryCreate<WeaponScript>(equipment.Item.Template.WeaponScript, out var weaponScript, equipment.Item);
+                equipment.Item.WeaponScript = weaponScript;
+            }
 
-            var script = equipment.Item.Scripts.Values.FirstOrDefault();
-            script?.Equipped(Aisling, equipment.Item.Slot);
-
+            equipment.Item.Script.Equipped(Aisling, equipment.Item.Slot);
         }
 
         var item = new Item();
@@ -1686,25 +1684,6 @@ public class WorldClient : WorldClientBase, IWorldClient
         };
 
         _bodyAnimationCoalescer.Enqueue(args);
-    }
-
-    /// <summary>
-    /// Attempts to cast a spell from cache, creating a temporary copy of it
-    /// </summary>
-    /// <param name="spellName">Used for finding the spell in cache</param>
-    /// <param name="caster">Sprite that cast the spell</param>
-    /// <param name="target">Sprite the spell is cast on</param>
-    /// <returns>Spell with an attached script was found and called</returns>
-    public bool AttemptCastSpellFromCache(string spellName, Sprite caster, Sprite target = null)
-    {
-        if (!ServerSetup.Instance.GlobalSpellTemplateCache.TryGetValue(spellName, out var value)) return false;
-
-        var scripts = ScriptManager.Load<SpellScript>(spellName, Spell.Create(1, value));
-        if (scripts == null) return false;
-
-        scripts.Values.FirstOrDefault()?.OnUse(caster, target);
-
-        return true;
     }
 
     /// <summary>
@@ -4399,12 +4378,10 @@ public class WorldClient : WorldClientBase, IWorldClient
             SendLocation();
 
             if (Aisling.Map is not { Script.Item1: null }) return this;
-
             if (string.IsNullOrEmpty(Aisling.Map.ScriptKey)) return this;
-            var scriptToType = ScriptManager.Load<AreaScript>(Aisling.Map.ScriptKey, Aisling.Map);
-            var scriptFoundGetValue = scriptToType.TryGetValue(Aisling.Map.ScriptKey, out var script);
-            if (scriptFoundGetValue)
-                Aisling.Map.Script = new Tuple<string, AreaScript>(Aisling.Map.ScriptKey, script);
+
+            if (ScriptManager.TryCreate<AreaScript>(Aisling.Map.ScriptKey, out var script, Aisling.Map) && script != null)
+                Aisling.Map.Script = Tuple.Create(Aisling.Map.ScriptKey, script);
         }
         catch
         {

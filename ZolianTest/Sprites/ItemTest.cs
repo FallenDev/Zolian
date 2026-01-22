@@ -39,8 +39,8 @@ public class ItemTest
             Stacks = 0,
             Enchantable = false,
             Tarnished = false,
-            Scripts = null,
-            WeaponScripts = null,
+            Script = null,
+            WeaponScript = null,
             Dropping = 0,
             Image = 0,
             DisplayImage = 0

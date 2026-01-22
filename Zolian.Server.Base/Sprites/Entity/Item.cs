@@ -142,8 +142,8 @@ public sealed class Item : Identifiable
     public GearEnhancements GearEnhancement { get; set; }
     public ItemMaterials ItemMaterial { get; set; }
     public string GiftWrapped { get; set; }
-    public ConcurrentDictionary<string, ItemScript> Scripts { get; set; }
-    public ConcurrentDictionary<string, WeaponScript> WeaponScripts { get; set; }
+    public ItemScript Script { get; set; }
+    public WeaponScript WeaponScript { get; set; }
     public int Dropping { get; set; }
     public bool[] Warnings { get; set; }
     public ushort Image { get; set; }
@@ -478,9 +478,14 @@ public sealed class Item : Identifiable
         obj.ItemId = EphemeralRandomIdGenerator<long>.Shared.NextId;
         obj.ItemId = CheckAndAmendItemIdIfItExists(obj);
 
-        obj.Scripts = ScriptManager.Load<ItemScript>(template.ScriptName, obj);
+        ScriptManager.TryCreate<ItemScript>(obj.Template.ScriptName, out var itemScript, obj);
+        obj.Script = itemScript;
+
         if (!string.IsNullOrEmpty(obj.Template.WeaponScript))
-            obj.WeaponScripts = ScriptManager.Load<WeaponScript>(obj.Template.WeaponScript, obj);
+        {
+            ScriptManager.TryCreate<WeaponScript>(obj.Template.WeaponScript, out var weaponScript, obj);
+            obj.WeaponScript = weaponScript;
+        }
 
         return obj;
     }
@@ -542,9 +547,14 @@ public sealed class Item : Identifiable
         obj.ItemId = EphemeralRandomIdGenerator<long>.Shared.NextId;
         obj.ItemId = CheckAndAmendItemIdIfItExists(obj);
 
-        obj.Scripts = ScriptManager.Load<ItemScript>(template.ScriptName, obj);
+        ScriptManager.TryCreate<ItemScript>(obj.Template.ScriptName, out var itemScript, obj);
+        obj.Script = itemScript;
+
         if (!string.IsNullOrEmpty(obj.Template.WeaponScript))
-            obj.WeaponScripts = ScriptManager.Load<WeaponScript>(obj.Template.WeaponScript, obj);
+        {
+            ScriptManager.TryCreate<WeaponScript>(obj.Template.WeaponScript, out var weaponScript, obj);
+            obj.WeaponScript = weaponScript;
+        }
 
         return obj;
     }
@@ -593,9 +603,14 @@ public sealed class Item : Identifiable
         obj.ItemId = EphemeralRandomIdGenerator<long>.Shared.NextId;
         obj.ItemId = CheckAndAmendItemIdIfItExists(obj);
 
-        obj.Scripts = ScriptManager.Load<ItemScript>(template.ScriptName, obj);
+        ScriptManager.TryCreate<ItemScript>(obj.Template.ScriptName, out var itemScript, obj);
+        obj.Script = itemScript;
+
         if (!string.IsNullOrEmpty(obj.Template.WeaponScript))
-            obj.WeaponScripts = ScriptManager.Load<WeaponScript>(obj.Template.WeaponScript, obj);
+        {
+            ScriptManager.TryCreate<WeaponScript>(obj.Template.WeaponScript, out var weaponScript, obj);
+            obj.WeaponScript = weaponScript;
+        }
 
         return obj;
     }

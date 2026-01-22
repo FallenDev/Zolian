@@ -1,15 +1,18 @@
-﻿using Darkages.Common;
-using Darkages.Enums;
-using Darkages.GameScripts.Creations;
-using Darkages.ScriptingBase;
-using Darkages.Templates;
-using Darkages.Types;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Numerics;
-using Darkages.Sprites.Abstractions;
+
+using Darkages.Common;
+using Darkages.Enums;
+using Darkages.GameScripts.Creations;
+using Darkages.Models;
 using Darkages.Network.Server;
 using Darkages.Object;
+using Darkages.ScriptingBase;
+using Darkages.Sprites.Abstractions;
+using Darkages.Templates;
+using Darkages.Types;
+
 using ServiceStack;
 
 namespace Darkages.Sprites.Entity;
@@ -87,23 +90,15 @@ public sealed class Monster : Damageable
 
     public static Monster Create(MonsterTemplate template, Area map)
     {
-        var monsterCreateScript = ScriptManager.Load<MonsterCreateScript>(ServerSetup.Instance.Config.MonsterCreationScript,
-                template,
-                map)
-            .FirstOrDefault();
-
-        return monsterCreateScript.Value?.Create();
+        ScriptManager.TryCreate<MonsterCreateScript>(ServerSetup.Instance.Config.MonsterCreationScript, out var monsterCreateScript, template, map);
+        return monsterCreateScript?.Create();
     }
 
     public static Monster Summon(MonsterTemplate template, Aisling summoner)
     {
         SummonerId = summoner.Serial;
-        var monsterCreateScript = ScriptManager.Load<MonsterCreateScript>(ServerSetup.Instance.Config.MonsterCreationScript,
-                template,
-                summoner.Map)
-            .FirstOrDefault();
-
-        return monsterCreateScript.Value?.Create();
+        ScriptManager.TryCreate<MonsterCreateScript>(ServerSetup.Instance.Config.MonsterCreationScript, out var monsterCreateScript, template, summoner.Map);
+        return monsterCreateScript?.Create();
     }
 
     public static void InitScripting(MonsterTemplate template, Area map, Monster obj) => obj.Scripts = ScriptManager.Load<MonsterScript>(template.ScriptName, obj, map);
@@ -172,8 +167,8 @@ public sealed class Monster : Damageable
         if (player.Equals(null)) return;
         if (player.Client.Aisling == null) return;
 
-        var script = ScriptManager.Load<RewardScript>(ServerSetup.Instance.Config.MonsterRewardScript, this, player).FirstOrDefault();
-        script.Value?.GenerateRewards(this, player);
+        ScriptManager.TryCreate<RewardScript>(ServerSetup.Instance.Config.MonsterRewardScript, out var script, this, player);
+        script?.GenerateRewards(this, player);
 
         Rewarded = true;
         player.UpdateStats();
@@ -185,8 +180,8 @@ public sealed class Monster : Damageable
         if (player.Equals(null)) return;
         if (player.Client.Aisling == null) return;
 
-        var script = ScriptManager.Load<RewardScript>("Rift Rewards", this, player).FirstOrDefault();
-        script.Value?.GenerateRewards(this, player);
+        ScriptManager.TryCreate<RewardScript>("Rift Rewards", out var script, this, player);
+        script?.GenerateRewards(this, player);
 
         Rewarded = true;
         player.UpdateStats();
@@ -198,8 +193,8 @@ public sealed class Monster : Damageable
         if (player.Equals(null)) return;
         if (player.Client.Aisling == null) return;
 
-        var script = ScriptManager.Load<RewardScript>(ServerSetup.Instance.Config.MonsterRewardScript, this, player).FirstOrDefault();
-        script.Value?.GenerateInanimateRewards(this, player);
+        ScriptManager.TryCreate<RewardScript>(ServerSetup.Instance.Config.MonsterRewardScript, out var script, this, player);
+        script?.GenerateInanimateRewards(this, player);
 
         Rewarded = true;
         player.UpdateStats();
@@ -210,16 +205,14 @@ public sealed class Monster : Damageable
         try
         {
             if (!ServerSetup.Instance.GlobalSpellTemplateCache.TryGetValue(spellTemplate, out var template)) return;
-            var script = ScriptManager.Load<SpellScript>(spellTemplate,
-                Spell.Create(1, ServerSetup.Instance.GlobalSpellTemplateCache[spellTemplate]));
 
-            if (script == null)
+            if (!ScriptManager.TryCreate<SpellScript>(spellTemplate, out var script, Spell.Create(1, template)) || script == null)
             {
                 SentrySdk.CaptureMessage($"{template.Name}: is missing a script for {spellTemplate}\n");
                 return;
             }
 
-            script.FirstOrDefault().Value?.OnUse(this, this);
+            script.OnUse(this, this);
         }
         catch (Exception ex)
         {

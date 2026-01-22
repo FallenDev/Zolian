@@ -172,44 +172,9 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
 
     private void MonsterSkillSet(Monster obj)
     {
-        var monsterRaceActions = new Dictionary<MonsterRace, Action<Monster>>
+        if (_monsterRaceActions.TryGetValue(template.MonsterRace, out var raceAction))
         {
-            [MonsterRace.Aberration] = AberrationSet,
-            [MonsterRace.Animal] = AnimalSet,
-            [MonsterRace.Aquatic] = AquaticSet,
-            [MonsterRace.Beast] = BeastSet,
-            [MonsterRace.Celestial] = CelestialSet,
-            [MonsterRace.Construct] = ContructSet,
-            [MonsterRace.Demon] = DemonSet,
-            [MonsterRace.Dragon] = DragonSet,
-            [MonsterRace.Bahamut] = BahamutDragonSet,
-            [MonsterRace.Elemental] = ElementalSet,
-            [MonsterRace.Fairy] = FairySet,
-            [MonsterRace.Fiend] = FiendSet,
-            [MonsterRace.Fungi] = FungiSet,
-            [MonsterRace.Gargoyle] = GargoyleSet,
-            [MonsterRace.Giant] = GiantSet,
-            [MonsterRace.Goblin] = GoblinSet,
-            [MonsterRace.Grimlok] = GrimlokSet,
-            [MonsterRace.Humanoid] = HumanoidSet,
-            [MonsterRace.ShapeShifter] = ShapeShifter,
-            [MonsterRace.Insect] = InsectSet,
-            [MonsterRace.Kobold] = KoboldSet,
-            [MonsterRace.Magical] = MagicalSet,
-            [MonsterRace.Mukul] = MukulSet,
-            [MonsterRace.Ooze] = OozeSet,
-            [MonsterRace.Orc] = OrcSet,
-            [MonsterRace.Plant] = PlantSet,
-            [MonsterRace.Reptile] = ReptileSet,
-            [MonsterRace.Robotic] = RoboticSet,
-            [MonsterRace.Shadow] = ShadowSet,
-            [MonsterRace.Rodent] = RodentSet,
-            [MonsterRace.Undead] = UndeadSet,
-        };
-
-        if (monsterRaceActions.TryGetValue(template.MonsterRace, out var raceAction))
-        {
-            raceAction(obj);
+            raceAction(this, obj);
         }
 
         // Load Random Generated Abilities to Monster
@@ -230,33 +195,62 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
         }
 
         // Load Abilities from Template to Monster
-        if (template.SkillScripts != null)
-            foreach (var skillScriptStr in template.SkillScripts.Where(skillScriptStr => !string.IsNullOrWhiteSpace(skillScriptStr)))
-                LoadSkillScript(skillScriptStr, obj);
+        var skillNames = template.SkillScripts;
+        if (skillNames != null && skillNames.Count > 0)
+        {
+            obj.SkillScripts.EnsureCapacity(obj.SkillScripts.Count + skillNames.Count);
 
-        if (template.AbilityScripts != null)
-            foreach (var abilityScriptStr in template.AbilityScripts.Where(abilityScriptStr => !string.IsNullOrWhiteSpace(abilityScriptStr)))
-                LoadAbilityScript(abilityScriptStr, obj);
+            for (var i = 0; i < skillNames.Count; i++)
+            {
+                var name = skillNames[i];
+                if (!string.IsNullOrWhiteSpace(name))
+                    LoadSkillScript(name, obj);
+            }
+        }
 
-        if (template.SpellScripts == null) return;
-        foreach (var spellScriptStr in template.SpellScripts.Where(spellScriptStr => !string.IsNullOrWhiteSpace(spellScriptStr)))
-            LoadSpellScript(spellScriptStr, obj);
+        var abilityNames = template.AbilityScripts;
+        if (abilityNames != null && abilityNames.Count > 0)
+        {
+            obj.AbilityScripts.EnsureCapacity(obj.AbilityScripts.Count + abilityNames.Count);
+
+            for (var i = 0; i < abilityNames.Count; i++)
+            {
+                var name = abilityNames[i];
+                if (!string.IsNullOrWhiteSpace(name))
+                    LoadAbilityScript(name, obj);
+            }
+        }
+
+        var spellNames = template.SpellScripts;
+        if (spellNames != null && spellNames.Count > 0)
+        {
+            obj.SpellScripts.EnsureCapacity(obj.SpellScripts.Count + spellNames.Count);
+
+            for (var i = 0; i < spellNames.Count; i++)
+            {
+                var name = spellNames[i];
+                if (!string.IsNullOrWhiteSpace(name))
+                    LoadSpellScript(name, obj);
+            }
+        }
     }
 
     private void LoadSkillScript(string skillScriptStr, Monster obj)
     {
+        if (string.IsNullOrWhiteSpace(skillScriptStr)) return;
+
         try
         {
             if (!ServerSetup.Instance.GlobalSkillTemplateCache.TryGetValue(skillScriptStr, out var script)) return;
-            var scripts = ScriptManager.Load<SkillScript>(script.ScriptName, Skill.Create(1, script));
 
-            if (scripts == null)
+            var scriptName = script.ScriptName;
+
+            if (!ScriptManager.TryCreate<SkillScript>(scriptName, out var skillScript, Skill.Create(1, script)))
             {
                 SentrySdk.CaptureMessage($"{template.Name}: is missing a script for {skillScriptStr}\n");
                 return;
             }
 
-            if (!scripts.TryGetValue(script.ScriptName, out var skillScript)) return;
             skillScript.Skill.NextAvailableUse = DateTime.UtcNow;
             skillScript.Skill.Level = 100;
             obj.SkillScripts.Add(skillScript);
@@ -269,24 +263,23 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
 
     private void LoadSpellScript(string spellScriptStr, Monster obj, bool primary = false)
     {
+        if (string.IsNullOrWhiteSpace(spellScriptStr)) return;
+
         try
         {
             if (!ServerSetup.Instance.GlobalSpellTemplateCache.TryGetValue(spellScriptStr, out var script)) return;
-            var scripts = ScriptManager.Load<SpellScript>(spellScriptStr,
-                Spell.Create(1, ServerSetup.Instance.GlobalSpellTemplateCache[spellScriptStr]));
 
-            if (scripts == null)
+            var scriptName = script.ScriptName;
+
+            if (!ScriptManager.TryCreate<SpellScript>(scriptName, out var spellScript, Spell.Create(1, script)))
             {
                 SentrySdk.CaptureMessage($"{template.Name}: is missing a script for {spellScriptStr}\n");
                 return;
             }
 
-            if (!scripts.TryGetValue(script.ScriptName, out var spellScript)) return;
-            {
-                spellScript.Spell.Level = 100;
-                spellScript.IsScriptDefault = primary;
-                obj.SpellScripts.Add(spellScript);
-            }
+            spellScript.Spell.Level = 100;
+            spellScript.IsScriptDefault = primary;
+            obj.SpellScripts.Add(spellScript);
         }
         catch (Exception ex)
         {
@@ -296,18 +289,20 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
 
     private void LoadAbilityScript(string skillScriptStr, Monster obj)
     {
+        if (string.IsNullOrWhiteSpace(skillScriptStr)) return;
+
         try
         {
             if (!ServerSetup.Instance.GlobalSkillTemplateCache.TryGetValue(skillScriptStr, out var script)) return;
-            var scripts = ScriptManager.Load<SkillScript>(script.ScriptName, Skill.Create(1, script));
 
-            if (scripts == null)
+            var scriptName = script.ScriptName;
+
+            if (!ScriptManager.TryCreate<SkillScript>(scriptName, out var skillScript, Skill.Create(1, script)))
             {
                 SentrySdk.CaptureMessage($"{template.Name}: is missing a script for {skillScriptStr}\n");
                 return;
             }
 
-            if (!scripts.TryGetValue(script.ScriptName, out var skillScript)) return;
             skillScript.Skill.NextAvailableUse = DateTime.UtcNow;
             skillScript.Skill.Level = 100;
             obj.AbilityScripts.Add(skillScript);
@@ -323,7 +318,7 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
     /// </summary>
     private void Assails(Monster monster)
     {
-        var skillList = monster.Template.Level switch
+        IReadOnlyList<string> skillList = monster.Template.Level switch
         {
             <= 11 => ["Onslaught", "Assault", "Clobber", "Bite", "Claw"],
             <= 50 =>
@@ -331,31 +326,22 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
                 "Double Punch", "Punch", "Clobber x2", "Onslaught", "Thrust",
                 "Wallop", "Assault", "Clobber", "Bite", "Claw", "Stomp", "Tail Slap"
             ],
-            _ => new List<string>
-            {
+            _ =>
+            [
                 "Double Punch", "Punch", "Thrash", "Clobber x2", "Onslaught",
                 "Thrust", "Wallop", "Assault", "Clobber", "Slash", "Bite", "Claw",
                 "Head Butt", "Mule Kick", "Stomp", "Tail Slap"
-            }
+            ]
         };
 
-        var skillCount = Math.Round(monster.Level / 30d) + 1;
-        skillCount = Math.Min(skillCount, 12); // Max 12 skills regardless of level
-        var randomIndices = Enumerable.Range(0, skillList.Count).ToList();
+        var skillCount = (int)(Math.Round(monster.Level / 30d) + 1);
+        skillCount = Math.Min(skillCount, 12);
 
-        for (var i = 0; i < skillCount; i++)
+        PickUniqueAndApply(skillList, skillCount, skill =>
         {
-            if (randomIndices.Count == 0) break;
-
-            var index = Random.Shared.Next(randomIndices.Count);
-            var skill = skillList[randomIndices[index]];
-            var check = monster.SkillScripts.Any(script => script.Skill.Template.ScriptName == skill);
-
-            if (!check)
+            if (!ContainsSkill(monster.SkillScripts, skill))
                 LoadSkillScript(skill, monster);
-
-            randomIndices.RemoveAt(index);
-        }
+        });
     }
 
     /// <summary>
@@ -366,12 +352,9 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
     {
         if (monster.Template.Level <= 11) return;
 
-        var skillList = monster.Template.Level switch
+        IReadOnlyList<string> skillList = monster.Template.Level switch
         {
-            <= 25 =>
-            [
-                "Stab", "Dual Slice", "Wind Slice", "Wind Blade"
-            ],
+            <= 25 => ["Stab", "Dual Slice", "Wind Slice", "Wind Blade"],
             <= 60 =>
             [
                 "Claw Fist", "Cross Body Punch", "Knife Hand Strike", "Krane Kick", "Palm Heel Strike",
@@ -396,34 +379,25 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
                 "Flame Thrower", "Bite'n Shake", "Howl'n Call", "Death From Above", "Pounce", "Roll Over", "Swallow Whole",
                 "Tentacle", "Corrosive Touch", "Tantalizing Gaze"
             ],
-            _ => new List<string>
-            {
+            _ =>
+            [
                 "Ambush", "Claw Fist", "Cross Body Punch", "Hammer Twist", "Hurricane Kick", "Knife Hand Strike",
                 "Krane Kick", "Palm Heel Strike", "Wolf Fang Fist", "Flurry", "Stab", "Stab'n Twist", "Stab Twice",
                 "Titan's Cleave", "Desolate", "Dual Slice", "Lullaby Strike", "Rush", "Sever", "Wind Slice", "Beag Suain",
                 "Charge", "Vampiric Slash", "Wind Blade", "Double-Edged Dance", "Ebb'n Flow", "Retribution",
                 "Flame Thrower", "Bite'n Shake", "Howl'n Call", "Death From Above", "Pounce", "Roll Over", "Swallow Whole",
                 "Tentacle", "Corrosive Touch", "Tantalizing Gaze"
-            }
+            ]
         };
 
-        var skillCount = Math.Round(monster.Level / 30d) + 1;
-        skillCount = Math.Min(skillCount, 5); // Max 5 abilities regardless of level
-        var randomIndices = Enumerable.Range(0, skillList.Count).ToList();
+        var count = (int)(Math.Round(monster.Level / 30d) + 1);
+        count = Math.Min(count, 5);
 
-        for (var i = 0; i < skillCount; i++)
+        PickUniqueAndApply(skillList, count, ability =>
         {
-            if (randomIndices.Count == 0) break;
-
-            var index = Random.Shared.Next(randomIndices.Count);
-            var skill = skillList[randomIndices[index]];
-            var check = monster.AbilityScripts.Any(script => script.Skill.Template.ScriptName == skill);
-
-            if (!check)
-                LoadAbilityScript(skill, monster);
-
-            randomIndices.RemoveAt(index);
-        }
+            if (!ContainsAbility(monster.AbilityScripts, ability))
+                LoadAbilityScript(ability, monster);
+        });
     }
 
     /// <summary>
@@ -438,29 +412,20 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
                 return;
         }
 
-        var spellList = new[]
-        {
+        IReadOnlyList<string> spellList = 
+        [
             "Beag Srad", "Beag Sal", "Beag Athar", "Beag Creag", "Beag Dorcha", "Beag Eadrom", "Beag Puinsein", "Beag Cradh",
             "Ao Beag Cradh"
-        };
+        ];
 
-        var spellCount = Math.Round(monster.Level / 20d) + 2;
-        spellCount = Math.Min(spellCount, 5); // Max 5 spells regardless of level
-        var randomIndices = Enumerable.Range(0, spellList.Length).ToList();
+        var count = (int)(Math.Round(monster.Level / 30d) + 1);
+        count = Math.Min(count, 5);
 
-        for (var i = 0; i < spellCount; i++)
+        PickUniqueAndApply(spellList, count, spell =>
         {
-            if (randomIndices.Count == 0) break;
-
-            var index = Random.Shared.Next(randomIndices.Count);
-            var spell = spellList[randomIndices[index]];
-            var check = monster.SpellScripts.Any(script => script.Spell.Template.ScriptName == spell);
-
-            if (!check)
+            if (!ContainsSpell(monster.SpellScripts, spell))
                 LoadSpellScript(spell, monster);
-
-            randomIndices.RemoveAt(index);
-        }
+        });
     }
 
     /// <summary>
@@ -475,28 +440,19 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
                 return;
         }
 
-        var spellList = new[]
-        {
+        IReadOnlyList<string> spellList =
+        [
             "Srad", "Sal", "Athar", "Creag", "Dorcha", "Eadrom", "Puinsein", "Cradh", "Ao Cradh"
-        };
+        ];
 
-        var spellCount = Math.Round(monster.Level / 30d) + 2;
-        spellCount = Math.Min(spellCount, 5); // Max 5 spells regardless of level
-        var randomIndices = Enumerable.Range(0, spellList.Length).ToList();
+        var count = (int)(Math.Round(monster.Level / 30d) + 1);
+        count = Math.Min(count, 5);
 
-        for (var i = 0; i < spellCount; i++)
+        PickUniqueAndApply(spellList, count, spell =>
         {
-            if (randomIndices.Count == 0) break;
-
-            var index = Random.Shared.Next(randomIndices.Count);
-            var spell = spellList[randomIndices[index]];
-            var check = monster.SpellScripts.Any(script => script.Spell.Template.ScriptName == spell);
-
-            if (!check)
+            if (!ContainsSpell(monster.SpellScripts, spell))
                 LoadSpellScript(spell, monster);
-
-            randomIndices.RemoveAt(index);
-        }
+        });
     }
 
     /// <summary>
@@ -511,29 +467,20 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
                 return;
         }
 
-        var spellList = new[]
-        {
+        IReadOnlyList<string> spellList =
+        [
             "Mor Srad", "Mor Sal", "Mor Athar", "Mor Creag", "Mor Dorcha", "Mor Eadrom", "Mor Puinsein", "Mor Cradh",
             "Fas Nadur", "Blind", "Pramh", "Ao Mor Cradh"
-        };
+        ];
 
-        var spellCount = Math.Round(monster.Level / 70d) + 2;
-        spellCount = Math.Min(spellCount, 5);
-        var randomIndices = Enumerable.Range(0, spellList.Length).ToList();
+        var count = (int)(Math.Round(monster.Level / 30d) + 1);
+        count = Math.Min(count, 5);
 
-        for (var i = 0; i < spellCount; i++)
+        PickUniqueAndApply(spellList, count, spell =>
         {
-            if (randomIndices.Count == 0) break;
-
-            var index = Random.Shared.Next(randomIndices.Count);
-            var spell = spellList[randomIndices[index]];
-            var check = monster.SpellScripts.Any(script => script.Spell.Template.ScriptName == spell);
-
-            if (!check)
+            if (!ContainsSpell(monster.SpellScripts, spell))
                 LoadSpellScript(spell, monster);
-
-            randomIndices.RemoveAt(index);
-        }
+        });
     }
 
     /// <summary>
@@ -548,29 +495,20 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
                 return;
         }
 
-        var spellList = new[]
-        {
+        IReadOnlyList<string> spellList =
+        [
             "Ard Srad", "Ard Sal", "Ard Athar", "Ard Creag", "Ard Dorcha", "Ard Eadrom", "Ard Puinsein", "Ard Cradh",
             "Mor Fas Nadur", "Blind", "Pramh", "Silence", "Ao Ard Cradh"
-        };
+        ];
 
-        var spellCount = Math.Round(monster.Level / 100d) + 2;
-        spellCount = Math.Min(spellCount, 5);
-        var randomIndices = Enumerable.Range(0, spellList.Length).ToList();
+        var count = (int)(Math.Round(monster.Level / 30d) + 1);
+        count = Math.Min(count, 5);
 
-        for (var i = 0; i < spellCount; i++)
+        PickUniqueAndApply(spellList, count, spell =>
         {
-            if (randomIndices.Count == 0) break;
-
-            var index = Random.Shared.Next(randomIndices.Count);
-            var spell = spellList[randomIndices[index]];
-            var check = monster.SpellScripts.Any(script => script.Spell.Template.ScriptName == spell);
-
-            if (!check)
+            if (!ContainsSpell(monster.SpellScripts, spell))
                 LoadSpellScript(spell, monster);
-
-            randomIndices.RemoveAt(index);
-        }
+        });
     }
 
     /// <summary>
@@ -585,29 +523,20 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
                 return;
         }
 
-        var spellList = new[]
-        {
+        IReadOnlyList<string> spellList =
+        [
             "Ard Srad", "Ard Sal", "Ard Athar", "Ard Creag", "Ard Dorcha", "Ard Eadrom", "Ard Puinsein", "Ard Cradh",
             "Ard Fas Nadur", "Blind", "Pramh", "Silence", "Ao Ard Cradh", "Ao Puinsein", "Dark Chain", "Defensive Stance"
-        };
+        ];
 
-        var spellCount = Math.Round(monster.Level / 150d) + 2;
-        spellCount = Math.Min(spellCount, 5);
-        var randomIndices = Enumerable.Range(0, spellList.Length).ToList();
+        var count = (int)(Math.Round(monster.Level / 30d) + 1);
+        count = Math.Min(count, 5);
 
-        for (var i = 0; i < spellCount; i++)
+        PickUniqueAndApply(spellList, count, spell =>
         {
-            if (randomIndices.Count == 0) break;
-
-            var index = Random.Shared.Next(randomIndices.Count);
-            var spell = spellList[randomIndices[index]];
-            var check = monster.SpellScripts.Any(script => script.Spell.Template.ScriptName == spell);
-
-            if (!check)
+            if (!ContainsSpell(monster.SpellScripts, spell))
                 LoadSpellScript(spell, monster);
-
-            randomIndices.RemoveAt(index);
-        }
+        });
     }
 
     /// <summary>
@@ -632,288 +561,295 @@ public class CreateMonster(MonsterTemplate template, Area map) : MonsterCreateSc
             ]);
         }
 
-        var spellCount = Math.Round(monster.Level / 200d) + 2;
-        spellCount = Math.Min(spellCount, 5);
-        var randomIndices = Enumerable.Range(0, spellList.Count).ToList();
+        var count = (int)(Math.Round(monster.Level / 30d) + 1);
+        count = Math.Min(count, 5);
 
-        for (var i = 0; i < spellCount; i++)
+        PickUniqueAndApply(spellList, count, spell =>
         {
-            if (randomIndices.Count == 0) break;
-
-            var index = Random.Shared.Next(randomIndices.Count);
-            var spell = spellList[randomIndices[index]];
-            var check = monster.SpellScripts.Any(script => script.Spell.Template.ScriptName == spell);
-
-            if (!check)
+            if (!ContainsSpell(monster.SpellScripts, spell))
                 LoadSpellScript(spell, monster);
-
-            randomIndices.RemoveAt(index);
-        }
+        });
     }
 
-    private void AberrationSet(Monster monster)
+    internal void AberrationSet(Monster monster)
     {
-        if (!monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Aberration)) return;
         var skillList = new List<string> { "Thrust" };
         var abilityList = new List<string> { "Lullaby Strike", "Vampiric Slash" };
         var spellList = new List<string> { "Spectral Shield", "Silence" };
         MonsterLoader(skillList, abilityList, spellList, monster);
     }
 
-    private void AnimalSet(Monster monster)
+    internal void AnimalSet(Monster monster)
     {
-        if (!monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Animal)) return;
         var skillList = new List<string> { "Bite", "Claw" };
         var abilityList = new List<string> { "Howl'n Call", "Bite'n Shake" };
         var spellList = new List<string> { "Defensive Stance" };
         MonsterLoader(skillList, abilityList, spellList, monster);
     }
 
-    private void AquaticSet(Monster monster)
+    internal void AquaticSet(Monster monster)
     {
-        if (!monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Aquatic)) return;
         var skillList = new List<string> { "Bite", "Tail Slap" };
         var abilityList = new List<string> { "Bubble Burst", "Swallow Whole" };
         MonsterLoader(skillList, abilityList, [], monster);
     }
 
-    private void BeastSet(Monster monster)
+    internal void BeastSet(Monster monster)
     {
-        if (!monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Beast)) return;
         var skillList = new List<string> { "Bite", "Claw" };
         var abilityList = new List<string> { "Bite'n Shake", "Pounce", "Poison Talon" };
         var spellList = new List<string> { "Asgall" };
         MonsterLoader(skillList, abilityList, spellList, monster);
     }
 
-    private void CelestialSet(Monster monster)
+    internal void CelestialSet(Monster monster)
     {
-        if (!monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Celestial)) return;
         var skillList = new List<string> { "Thrash", "Divine Thrust", "Slash", "Wallop" };
         var abilityList = new List<string> { "Titan's Cleave", "Shadow Step", "Entice", "Smite" };
         var spellList = new List<string> { "Deireas Faileas", "Asgall", "Perfect Defense", "Dion", "Silence" };
         MonsterLoader(skillList, abilityList, spellList, monster);
     }
 
-    private void ContructSet(Monster monster)
+    internal void ConstructSet(Monster monster)
     {
-        if (!monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Construct)) return;
         var skillList = new List<string> { "Stomp" };
         var abilityList = new List<string> { "Titan's Cleave", "Earthly Delights" };
         var spellList = new List<string> { "Dion", "Defensive Stance" };
         MonsterLoader(skillList, abilityList, spellList, monster);
     }
 
-    private void DemonSet(Monster monster)
+    internal void DemonSet(Monster monster)
     {
-        if (!monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Demon)) return;
         var skillList = new List<string> { "Onslaught", "Two-Handed Attack", "Dual Wield", "Slash", "Thrash" };
         var abilityList = new List<string> { "Titan's Cleave", "Sever", "Earthly Delights", "Entice" };
         var spellList = new List<string> { "Asgall", "Perfect Defense", "Dion" };
         MonsterLoader(skillList, abilityList, spellList, monster);
     }
 
-    private void DragonSet(Monster monster)
+    internal void DragonSet(Monster monster)
     {
-        if (!monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Dragon)) return;
         var skillList = new List<string> { "Thrash", "Ambidextrous", "Slash", "Claw", "Tail Slap" };
         var abilityList = new List<string> { "Titan's Cleave", "Sever", "Earthly Delights", "Hurricane Kick" };
         var spellList = new List<string> { "Asgall", "Perfect Defense", "Dion", "Deireas Faileas" };
         MonsterLoader(skillList, abilityList, spellList, monster);
     }
 
-    private void BahamutDragonSet(Monster monster)
+    internal void BahamutDragonSet(Monster monster)
     {
-        if (!monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Bahamut)) return;
         var skillList = new List<string> { "Fire Wheel", "Thrash", "Ambidextrous", "Slash", "Claw" };
         var abilityList = new List<string> { "Megaflare", "Lava Armor", "Ember Strike", "Silent Siren" };
         var spellList = new List<string> { "Heavens Fall", "Liquid Hell", "Ao Sith Gar" };
         MonsterLoader(skillList, abilityList, spellList, monster);
     }
 
-    private void ElementalSet(Monster monster)
+    internal void ElementalSet(Monster monster)
     {
-        if (!monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Elemental)) return;
         var skillList = new List<string> { "Flame Thrower", "Water Cannon", "Tornado Vector", "Earth Shatter" };
         var abilityList = new List<string> { "Elemental Bane" };
         MonsterLoader(skillList, abilityList, [], monster);
     }
 
-    private void FairySet(Monster monster)
+    internal void FairySet(Monster monster)
     {
-        if (!monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Fairy)) return;
         var skillList = new List<string> { "Ambidextrous", "Divine Thrust", "Clobber x2" };
         var abilityList = new List<string> { "Earthly Delights", "Claw Fist", "Lullaby Strike" };
         var spellList = new List<string> { "Asgall", "Spectral Shield", "Deireas Faileas" };
         MonsterLoader(skillList, abilityList, spellList, monster);
     }
 
-    private void FiendSet(Monster monster)
+    internal void FiendSet(Monster monster)
     {
-        if (!monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Fiend)) return;
         var skillList = new List<string> { "Punch", "Double Punch" };
         var abilityList = new List<string> { "Stab", "Stab Twice" };
         var spellList = new List<string> { "Blind" };
         MonsterLoader(skillList, abilityList, spellList, monster);
     }
 
-    private void FungiSet(Monster monster)
+    internal void FungiSet(Monster monster)
     {
-        if (!monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Fungi)) return;
         var skillList = new List<string> { "Wallop", "Clobber" };
         var abilityList = new List<string> { "Dual Slice", "Wind Blade", "Vampiric Slash" };
         MonsterLoader(skillList, abilityList, [], monster);
     }
 
-    private void GargoyleSet(Monster monster)
+    internal void GargoyleSet(Monster monster)
     {
-        if (!monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Gargoyle)) return;
         var skillList = new List<string> { "Slash" };
         var abilityList = new List<string> { "Palm Heel Strike" };
         var spellList = new List<string> { "Mor Dion" };
         MonsterLoader(skillList, abilityList, spellList, monster);
     }
 
-    private void GiantSet(Monster monster)
+    internal void GiantSet(Monster monster)
     {
-        if (!monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Giant)) return;
         var skillList = new List<string> { "Stomp", "Head Butt" };
         var abilityList = new List<string> { "Golden Lair", "Double-Edged Dance" };
         var spellList = new List<string> { "Silence", "Pramh" };
         MonsterLoader(skillList, abilityList, spellList, monster);
     }
 
-    private void GoblinSet(Monster monster)
+    internal void GoblinSet(Monster monster)
     {
-        if (!monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Goblin)) return;
         var skillList = new List<string> { "Assault", "Clobber", "Wallop" };
         var abilityList = new List<string> { "Wind Slice", "Wind Blade" };
         var spellList = new List<string> { "Beag Puinsein" };
         MonsterLoader(skillList, abilityList, spellList, monster);
     }
 
-    private void GrimlokSet(Monster monster)
+    internal void GrimlokSet(Monster monster)
     {
-        if (!monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Grimlok)) return;
         var skillList = new List<string> { "Wallop", "Clobber" };
         var abilityList = new List<string> { "Dual Slice", "Wind Blade" };
         var spellList = new List<string> { "Silence" };
         MonsterLoader(skillList, abilityList, spellList, monster);
     }
 
-    private void HumanoidSet(Monster monster)
+    internal void HumanoidSet(Monster monster)
     {
-        if (!monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Humanoid)) return;
         var skillList = new List<string> { "Thrust", "Thrash", "Wallop" };
         var abilityList = new List<string> { "Camouflage", "Adrenaline" };
         MonsterLoader(skillList, abilityList, [], monster);
     }
 
-    private void ShapeShifter(Monster monster)
+    internal void ShapeShifter(Monster monster)
     {
-        if (!monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.ShapeShifter)) return;
         var skillList = new List<string> { "Thrust", "Thrash", "Wallop" };
         var spellList = new List<string> { "Spring Trap", "Snare Trap", "Blind", "Prahm" };
         MonsterLoader(skillList, [], spellList, monster);
     }
 
-    private void InsectSet(Monster monster)
+    internal void InsectSet(Monster monster)
     {
-        if (!monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Insect)) return;
         var skillList = new List<string> { "Bite" };
         var abilityList = new List<string> { "Corrosive Touch" };
         MonsterLoader(skillList, abilityList, [], monster);
     }
 
-    private void KoboldSet(Monster monster)
+    internal void KoboldSet(Monster monster)
     {
-        if (!monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Kobold)) return;
         var skillList = new List<string> { "Clobber x2", "Assault" };
         var abilityList = new List<string> { "Ebb'n Flow", "Stab", "Stab'n Twist" };
         var spellList = new List<string> { "Blind" };
         MonsterLoader(skillList, abilityList, spellList, monster);
     }
 
-    private void MagicalSet(Monster monster)
+    internal void MagicalSet(Monster monster)
     {
-        if (!monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Magical)) return;
         var spellList = new List<string> { "Aite", "Mor Fas Nadur", "Deireas Faileas" };
         MonsterLoader([], [], spellList, monster);
     }
 
-    private void MukulSet(Monster monster)
+    internal void MukulSet(Monster monster)
     {
-        if (!monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Mukul)) return;
         var skillList = new List<string> { "Clobber", "Mule Kick", "Onslaught" };
         var abilityList = new List<string> { "Krane Kick", "Wolf Fang Fist", "Flurry", "Desolate" };
         var spellList = new List<string> { "Perfect Defense" };
         MonsterLoader(skillList, abilityList, spellList, monster);
     }
 
-    private void OozeSet(Monster monster)
+    internal void OozeSet(Monster monster)
     {
-        if (!monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Ooze)) return;
         var skillList = new List<string> { "Wallop", "Clobber", "Clobber x2" };
         var abilityList = new List<string> { "Dual Slice", "Wind Blade", "Vampiric Slash", "Retribution" };
         var spellList = new List<string> { "Asgall" };
         MonsterLoader(skillList, abilityList, spellList, monster);
     }
 
-    private void OrcSet(Monster monster)
+    internal void OrcSet(Monster monster)
     {
-        if (!monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Orc)) return;
         var skillList = new List<string> { "Clobber", "Thrash" };
         var abilityList = new List<string> { "Titan's Cleave", "Corrosive Touch" };
         var spellList = new List<string> { "Asgall" };
         MonsterLoader(skillList, abilityList, spellList, monster);
     }
 
-    private void PlantSet(Monster monster)
+    internal void PlantSet(Monster monster)
     {
-        if (!monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Plant)) return;
         var skillList = new List<string> { "Thrust" };
         var abilityList = new List<string> { "Corrosive Touch" };
         var spellList = new List<string> { "Silence" };
         MonsterLoader(skillList, abilityList, spellList, monster);
     }
 
-    private void ReptileSet(Monster monster)
+    internal void ReptileSet(Monster monster)
     {
-        if (!monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Reptile)) return;
         var skillList = new List<string> { "Tail Slap", "Head Butt" };
         var abilityList = new List<string> { "Pounce", "Death From Above" };
         MonsterLoader(skillList, abilityList, [], monster);
     }
 
-    private void RoboticSet(Monster monster)
+    internal void RoboticSet(Monster monster)
     {
-        if (!monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Robotic)) return;
         var spellList = new List<string> { "Mor Dion", "Perfect Defense" };
         MonsterLoader([], [], spellList, monster);
     }
 
-    private void ShadowSet(Monster monster)
+    internal void ShadowSet(Monster monster)
     {
-        if (!monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Shadow)) return;
         var skillList = new List<string> { "Thrust" };
         var abilityList = new List<string> { "Lullaby Strike", "Vampiric Slash" };
         MonsterLoader(skillList, abilityList, [], monster);
     }
 
-    private void RodentSet(Monster monster)
+    internal void RodentSet(Monster monster)
     {
-        if (!monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Rodent)) return;
         var skillList = new List<string> { "Bite", "Assault" };
         var abilityList = new List<string> { "Rush" };
         MonsterLoader(skillList, abilityList, [], monster);
     }
 
-    private void UndeadSet(Monster monster)
+    internal void UndeadSet(Monster monster)
     {
-        if (!monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Undead)) return;
         var skillList = new List<string> { "Wallop" };
         var abilityList = new List<string> { "Corrosive Touch", "Retribution" };
         MonsterLoader(skillList, abilityList, [], monster);
+    }
+
+    private static void PickUniqueAndApply(IReadOnlyList<string> list, int pickCount, Action<string> apply)
+    {
+        if (pickCount <= 0 || list.Count == 0)
+            return;
+
+        if (pickCount > list.Count)
+            pickCount = list.Count;
+
+        Span<int> idx = list.Count <= 128 ? stackalloc int[list.Count] : new int[list.Count];
+
+        for (int i = 0; i < idx.Length; i++)
+            idx[i] = i;
+
+        // Partial shuffle: only shuffle the first pickCount positions
+        for (int i = 0; i < pickCount; i++)
+        {
+            int j = Random.Shared.Next(i, idx.Length);
+            (idx[i], idx[j]) = (idx[j], idx[i]);
+
+            apply(list[idx[i]]);
+        }
+    }
+
+    private static bool ContainsSkill(List<SkillScript> scripts, string name)
+    {
+        for (int i = 0; i < scripts.Count; i++)
+            if (scripts[i].Skill.Template.ScriptName == name)
+                return true;
+        return false;
+    }
+
+    private static bool ContainsAbility(List<SkillScript> scripts, string name)
+    {
+        for (int i = 0; i < scripts.Count; i++)
+            if (scripts[i].Skill.Template.ScriptName == name)
+                return true;
+        return false;
+    }
+
+    private static bool ContainsSpell(List<SpellScript> scripts, string name)
+    {
+        for (int i = 0; i < scripts.Count; i++)
+            if (scripts[i].Spell.Template.ScriptName == name)
+                return true;
+        return false;
     }
 
     private void MonsterLoader(List<string> skills, List<string> abilities, List<string> spells, Monster monster)
