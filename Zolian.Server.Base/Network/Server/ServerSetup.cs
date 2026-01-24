@@ -66,6 +66,8 @@ public class ServerSetup : IServerContext
     public Dictionary<string, NationTemplate> TempGlobalNationTemplateCache { get; set; } = [];
     public FrozenDictionary<string, MonsterTemplate> GlobalMonsterTemplateCache { get; set; }
     public Dictionary<string, MonsterTemplate> TempGlobalMonsterTemplateCache { get; set; } = [];
+    public FrozenDictionary<int, MonsterTemplate[]> MonsterTemplateByMapCache { get; set; }
+    public Dictionary<int, List<MonsterTemplate>> TempMonsterTemplateByMapCache { get; set; } = [];
     public FrozenDictionary<string, MundaneTemplate> GlobalMundaneTemplateCache { get; set; }
     public Dictionary<string, MundaneTemplate> TempGlobalMundaneTemplateCache { get; set; } = [];
     public FrozenDictionary<uint, string> GlobalKnownGoodActorsCache { get; set; }

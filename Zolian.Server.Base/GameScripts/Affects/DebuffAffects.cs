@@ -1614,7 +1614,7 @@ public class DebuffReaping : Debuff
         }
 
         if (affected is not Monster monster) return;
-        monster.Scripts?.Values.FirstOrDefault(_ => monster.IsAlive)?.OnDeath();
+        monster.AIScript?.OnDeath();
     }
 }
 

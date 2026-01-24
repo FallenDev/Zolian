@@ -471,6 +471,8 @@ public abstract class DatabaseLoad
 
         ServerSetup.Instance.GlobalMonsterTemplateCache = ServerSetup.Instance.TempGlobalMonsterTemplateCache.ToFrozenDictionary();
         ServerSetup.Instance.TempGlobalMonsterTemplateCache.Clear();
+        ServerSetup.Instance.MonsterTemplateByMapCache = ServerSetup.Instance.TempMonsterTemplateByMapCache.ToFrozenDictionary(kvp => kvp.Key, kvp => kvp.Value.ToArray());
+        ServerSetup.Instance.TempMonsterTemplateByMapCache.Clear();
         ServerSetup.EventsLogger($"Monster Templates: {ServerSetup.Instance.GlobalMonsterTemplateCache.Count}");
     }
 

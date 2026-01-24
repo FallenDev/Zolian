@@ -2829,7 +2829,10 @@ public class Swarm : MonsterScript
         if (Monster.SwarmOnApproach) return;
         Monster.SwarmOnApproach = true;
         Task.Delay(500).Wait();
-        ServerSetup.Instance.GlobalMonsterTemplateCache.TryGetValue("SRat0", out var rat);
+
+        // Per-map monster template cache
+        if (!ServerSetup.Instance.MonsterTemplateByMapCache.TryGetValue(client.Aisling.Map.ID, out var templates) || templates.Length == 0) return;
+        templates.TryGetValue(t => t.Name == "SRat0", out var rat);
 
         for (var i = 0; i < Random.Shared.Next(1, 2); i++)
         {
@@ -3120,11 +3123,14 @@ public class DbSwarm : MonsterScript
         if (Monster.SwarmOnApproach) return;
         Monster.SwarmOnApproach = true;
         Task.Delay(500).Wait();
-        ServerSetup.Instance.GlobalMonsterTemplateCache.TryGetValue("SkSpS1", out var rat);
+
+        // Per-map monster template cache
+        if (!ServerSetup.Instance.MonsterTemplateByMapCache.TryGetValue(client.Aisling.Map.ID, out var templates) || templates.Length == 0) return;
+        templates.TryGetValue(t => t.Name == "SkSpS1", out var beetle);
 
         for (var i = 0; i < Random.Shared.Next(1, 2); i++)
         {
-            var summoned = Monster.Create(rat, Monster.Map);
+            var summoned = Monster.Create(beetle, Monster.Map);
             if (summoned == null) return;
             summoned.X = Monster.X + Random.Shared.Next(0, 4);
             summoned.Y = Monster.Y + Random.Shared.Next(0, 4);

@@ -1,4 +1,6 @@
-﻿using Darkages.Common;
+﻿using System.Security.Cryptography;
+
+using Darkages.Common;
 using Darkages.Enums;
 using Darkages.Network.Client;
 using Darkages.Network.Server;
@@ -6,7 +8,6 @@ using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Sprites.Entity;
 using Darkages.Types;
-using System.Security.Cryptography;
 
 namespace Darkages.GameScripts.Monsters;
 
@@ -662,9 +663,11 @@ public class Yeti : MonsterScript
         if (Monster.CurrentHp <= Monster.MaximumHp * 0.75 && !_phaseOne)
         {
             Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Shout, $"{Monster.Name}: AHHHHH That Hurts! You made Yeti Mad!"));
-            var foundA = ServerSetup.Instance.GlobalMonsterTemplateCache.TryGetValue("SnowmanA", out var templateA);
-            var foundB = ServerSetup.Instance.GlobalMonsterTemplateCache.TryGetValue("SnowmanB", out var templateB);
-            var foundC = ServerSetup.Instance.GlobalMonsterTemplateCache.TryGetValue("SnowmanC", out var templateC);
+            // Per-map monster template cache
+            if (!ServerSetup.Instance.MonsterTemplateByMapCache.TryGetValue(Monster.Map.ID, out var templates) || templates.Length == 0) return;
+            var foundA = templates.TryGetValue(t => t.Name == "SnowmanA", out var templateA);
+            var foundB = templates.TryGetValue(t => t.Name == "SnowmanB", out var templateB);
+            var foundC = templates.TryGetValue(t => t.Name == "SnowmanC", out var templateC);
 
             if (foundA) Monster.CreateFromTemplate(templateA, Monster.Map);
             if (foundB) Monster.CreateFromTemplate(templateB, Monster.Map);
@@ -676,11 +679,13 @@ public class Yeti : MonsterScript
         if (Monster.CurrentHp <= Monster.MaximumHp * 0.50 && !_phaseTwo)
         {
             Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Shout, $"{Monster.Name}: AHHHHH That Hurts! You made Yeti Really Mad!"));
-            var foundA = ServerSetup.Instance.GlobalMonsterTemplateCache.TryGetValue("SnowmanA", out var templateA);
-            var foundB = ServerSetup.Instance.GlobalMonsterTemplateCache.TryGetValue("SnowmanB", out var templateB);
-            var foundC = ServerSetup.Instance.GlobalMonsterTemplateCache.TryGetValue("SnowmanC", out var templateC);
-            var foundD = ServerSetup.Instance.GlobalMonsterTemplateCache.TryGetValue("SnowmanD", out var templateD);
-            var foundE = ServerSetup.Instance.GlobalMonsterTemplateCache.TryGetValue("SnowmanE", out var templateE);
+            // Per-map monster template cache
+            if (!ServerSetup.Instance.MonsterTemplateByMapCache.TryGetValue(Monster.Map.ID, out var templates) || templates.Length == 0) return;
+            var foundA = templates.TryGetValue(t => t.Name == "SnowmanA", out var templateA);
+            var foundB = templates.TryGetValue(t => t.Name == "SnowmanB", out var templateB);
+            var foundC = templates.TryGetValue(t => t.Name == "SnowmanC", out var templateC);
+            var foundD = templates.TryGetValue(t => t.Name == "SnowmanD", out var templateD);
+            var foundE = templates.TryGetValue(t => t.Name == "SnowmanE", out var templateE);
 
             if (foundA) Monster.CreateFromTemplate(templateA, Monster.Map);
             if (foundB) Monster.CreateFromTemplate(templateB, Monster.Map);
@@ -694,13 +699,15 @@ public class Yeti : MonsterScript
         if (Monster.CurrentHp <= Monster.MaximumHp * 0.25 && !_phaseThree)
         {
             Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Shout, $"{Monster.Name}: AHHHHH That Hurts! Time to die!!"));
-            var foundA = ServerSetup.Instance.GlobalMonsterTemplateCache.TryGetValue("SnowmanA", out var templateA);
-            var foundB = ServerSetup.Instance.GlobalMonsterTemplateCache.TryGetValue("SnowmanB", out var templateB);
-            var foundC = ServerSetup.Instance.GlobalMonsterTemplateCache.TryGetValue("SnowmanC", out var templateC);
-            var foundD = ServerSetup.Instance.GlobalMonsterTemplateCache.TryGetValue("SnowmanD", out var templateD);
-            var foundE = ServerSetup.Instance.GlobalMonsterTemplateCache.TryGetValue("SnowmanE", out var templateE);
-            var foundF = ServerSetup.Instance.GlobalMonsterTemplateCache.TryGetValue("SnowmanF", out var templateF);
-            var foundG = ServerSetup.Instance.GlobalMonsterTemplateCache.TryGetValue("SnowmanG", out var templateG);
+            // Per-map monster template cache
+            if (!ServerSetup.Instance.MonsterTemplateByMapCache.TryGetValue(Monster.Map.ID, out var templates) || templates.Length == 0) return;
+            var foundA = templates.TryGetValue(t => t.Name == "SnowmanA", out var templateA);
+            var foundB = templates.TryGetValue(t => t.Name == "SnowmanB", out var templateB);
+            var foundC = templates.TryGetValue(t => t.Name == "SnowmanC", out var templateC);
+            var foundD = templates.TryGetValue(t => t.Name == "SnowmanD", out var templateD);
+            var foundE = templates.TryGetValue(t => t.Name == "SnowmanE", out var templateE);
+            var foundF = templates.TryGetValue(t => t.Name == "SnowmanF", out var templateF);
+            var foundG = templates.TryGetValue(t => t.Name == "SnowmanG", out var templateG);
 
             if (foundA) Monster.CreateFromTemplate(templateA, Monster.Map);
             if (foundB) Monster.CreateFromTemplate(templateB, Monster.Map);

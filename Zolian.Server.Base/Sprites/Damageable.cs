@@ -1376,7 +1376,7 @@ public class Damageable : Movable
         // Trigger any scripts on damage taken
         if (this is not Monster monster) return;
         if (monster.Template?.ScriptName == null) return;
-        monster.Scripts?.FirstOrDefault().Value.OnDamaged(playerDamageDealer.Client, dmg, source);
+        monster.AIScript?.OnDamaged(playerDamageDealer.Client, dmg, source);
     }
 
     private static void ShowDmg(Aisling aisling, TimeSpan elapsedTime)

@@ -74,15 +74,37 @@ public static class ScriptManager
     {
         instance = null;
 
-        if (scriptName == null)
+        if (string.IsNullOrWhiteSpace(scriptName))
             return false;
 
         if (!Scripts.TryGetValue(scriptName, out var scriptType) || scriptType == null)
             return false;
 
-        var obj = Activator.CreateInstance(scriptType, args);
-        instance = obj as TScript;
-        return instance != null;
+        if (!typeof(TScript).IsAssignableFrom(scriptType))
+            return false;
+
+        try
+        {
+            object? obj;
+
+            try
+            {
+                obj = Activator.CreateInstance(scriptType, args);
+            }
+            catch (MissingMethodException)
+            {
+                // Fallback to parameterless
+                obj = Activator.CreateInstance(scriptType);
+            }
+
+            instance = obj as TScript;
+            return instance != null;
+        }
+        catch
+        {
+            instance = null;
+            return false;
+        }
     }
 }
 

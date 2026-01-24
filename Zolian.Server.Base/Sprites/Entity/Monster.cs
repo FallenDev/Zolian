@@ -5,7 +5,6 @@ using System.Numerics;
 using Darkages.Common;
 using Darkages.Enums;
 using Darkages.GameScripts.Creations;
-using Darkages.Models;
 using Darkages.Network.Server;
 using Darkages.Object;
 using Darkages.ScriptingBase;
@@ -68,11 +67,11 @@ public sealed class Monster : Damageable
     public WorldServerTimer CastTimer { get; init; }
     public MonsterTemplate Template { get; init; }
     public WorldServerTimer WalkTimer { get; init; }
-    public WorldServerTimer ObjectUpdateTimer { get; init; } = new(TimeSpan.FromMilliseconds(250));
+    public WorldServerTimer ObjectUpdateTimer { get; init; } = new(TimeSpan.FromMilliseconds(200));
 
     public bool IsAlive => CurrentHp > 0;
     private bool Rewarded { get; set; }
-    public ConcurrentDictionary<string, MonsterScript> Scripts { get; private set; }
+    public MonsterScript AIScript { get; set; }
     public readonly List<SkillScript> SkillScripts = [];
     public readonly List<SkillScript> AbilityScripts = [];
     public readonly List<SpellScript> SpellScripts = [];
@@ -101,7 +100,11 @@ public sealed class Monster : Damageable
         return monsterCreateScript?.Create();
     }
 
-    public static void InitScripting(MonsterTemplate template, Area map, Monster obj) => obj.Scripts = ScriptManager.Load<MonsterScript>(template.ScriptName, obj, map);
+    public static void InitScripting(MonsterTemplate template, Area map, Monster obj)
+    {
+        if (ScriptManager.TryCreate<MonsterScript>(template.ScriptName, out var aiScript, obj, map))
+            obj.AIScript = aiScript;
+    }
 
     public void TryAddPlayerAndHisGroup(Sprite target)
     {

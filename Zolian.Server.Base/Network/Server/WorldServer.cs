@@ -1,7 +1,6 @@
 using System.Collections.Concurrent;
 using System.Collections.Frozen;
 using System.Diagnostics;
-using System.Diagnostics.Metrics;
 using System.Net;
 using System.Net.Sockets;
 using System.Numerics;
@@ -53,6 +52,7 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
     public ClientPacketLogger ClientPacketLogger { get; } = new();
     private readonly MServerTable _serverTable;
     private static readonly string[] GameMastersIPs = ServerSetup.Instance.GameMastersIPs;
+    public static readonly Lock MapReloadLock = new();
     public readonly MetafileManager MetafileManager;
     public FrozenDictionary<int, Metafile> Metafiles { get; set; }
     private ConcurrentDictionary<Type, WorldServerComponent> _serverComponents;
@@ -60,13 +60,12 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
     private const int GameSpeed = 50;
 
     // Subsystem intervals (ms)
-    private const int MonstersIntervalMs = 250;       // 4x per second
+    private const int MonstersIntervalMs = 200;       // 5x per second
     private const int MundanesIntervalMs = 1500;      // 1.5 seconds
     private const int GroundItemsIntervalMs = 60000;  // 60 seconds
     private const int GroundMoneyIntervalMs = 60000;  // 60 seconds
 
-    public IEnumerable<Aisling> Aislings => ClientRegistry
-        .Where(c => c is { Aisling.LoggedIn: true }).Select(c => c.Aisling);
+    public IEnumerable<Aisling> Aislings => ClientRegistry.Where(c => c is { Aisling.LoggedIn: true }).Select(c => c.Aisling);
 
     public WorldServer(
         IClientRegistry<IWorldClient> clientRegistry,
@@ -99,10 +98,10 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        // Start base server (socket accept / recv loop)
         _ = base.ExecuteAsync(stoppingToken);
 
-        var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken);
+        using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken);
+        var ct = linkedCts.Token;
 
         try
         {
@@ -111,100 +110,81 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
             // Components keep their own internal loops
             UpdateComponentsRoutine();
 
-            // Main world loops: keep each system focused and periodic
-            var playerLoop = PeriodicTaskRunner.RunPeriodicAsync(ct =>
-            {
-                if (ct.IsCancellationRequested || !ServerSetup.Instance.Running)
-                    return Task.CompletedTask;
+            // Tick cadence: player loop frequency (GameSpeed)
+            var tickInterval = TimeSpan.FromMilliseconds(GameSpeed);
+            using var timer = new PeriodicTimer(tickInterval);
 
-                var dt = TimeSpan.FromMilliseconds(GameSpeed);
+            // Accumulators preserve per-system update rates
+            var monstersAccMs = 0;
+            var mundanesAccMs = 0;
+            var groundItemsAccMs = 0;
+            var groundMoneyAccMs = 0;
+
+            // Use high resolution time to compute dt
+            var lastTick = Stopwatch.GetTimestamp();
+
+            while (await timer.WaitForNextTickAsync(ct).ConfigureAwait(false))
+            {
+                if (!ServerSetup.Instance.Running)
+                    continue;
+
+                var now = Stopwatch.GetTimestamp();
+                var dt = Stopwatch.GetElapsedTime(lastTick, now);
+                lastTick = now;
+
+                // Convert dt to ms for accumulators
+                var dtMs = (int)Math.Clamp(dt.TotalMilliseconds, 0, 10_000);
+                monstersAccMs += dtMs;
+                mundanesAccMs += dtMs;
+                groundItemsAccMs += dtMs;
+                groundMoneyAccMs += dtMs;
 
                 try
                 {
-                    // Player focused work – keep this lean for low latency
-                    UpdateClients();
+                    // Phase 1: low-latency player work
+                    await UpdateClientsAsync(ct).ConfigureAwait(false);
+
+                    // Phase 2: maps & traps (still at GameSpeed cadence)
                     UpdateMaps(dt);
                     CheckTraps(dt);
+
+                    // Phase 3: slower systems, gated by their intervals
+                    if (monstersAccMs >= MonstersIntervalMs)
+                    {
+                        var monsterDt = TimeSpan.FromMilliseconds(monstersAccMs);
+                        monstersAccMs = 0;
+                        UpdateMonsters(monsterDt);
+                    }
+
+                    if (mundanesAccMs >= MundanesIntervalMs)
+                    {
+                        var mundaneDt = TimeSpan.FromMilliseconds(mundanesAccMs);
+                        mundanesAccMs = 0;
+                        UpdateMundanes(mundaneDt);
+                    }
+
+                    if (groundItemsAccMs >= GroundItemsIntervalMs)
+                    {
+                        groundItemsAccMs = 0;
+                        UpdateGroundItems();
+                    }
+
+                    if (groundMoneyAccMs >= GroundMoneyIntervalMs)
+                    {
+                        groundMoneyAccMs = 0;
+                        UpdateGroundMoney();
+                    }
+                }
+                catch (OperationCanceledException) when (ct.IsCancellationRequested)
+                {
+                    // Normal shutdown
+                    break;
                 }
                 catch (Exception ex)
                 {
                     SentrySdk.CaptureException(ex);
                 }
-
-                return Task.CompletedTask;
-            }, GameSpeed, linkedCts.Token);
-
-            var monstersLoop = PeriodicTaskRunner.RunPeriodicAsync(ct =>
-            {
-                if (ct.IsCancellationRequested || !ServerSetup.Instance.Running)
-                    return Task.CompletedTask;
-
-                try
-                {
-                    UpdateMonsters(TimeSpan.FromMilliseconds(MonstersIntervalMs));
-                }
-                catch (Exception ex)
-                {
-                    SentrySdk.CaptureException(ex);
-                }
-
-                return Task.CompletedTask;
-            }, MonstersIntervalMs, linkedCts.Token);
-
-            var mundanesLoop = PeriodicTaskRunner.RunPeriodicAsync(ct =>
-            {
-                if (ct.IsCancellationRequested || !ServerSetup.Instance.Running)
-                    return Task.CompletedTask;
-
-                try
-                {
-                    UpdateMundanes(TimeSpan.FromMilliseconds(MundanesIntervalMs));
-                }
-                catch (Exception ex)
-                {
-                    SentrySdk.CaptureException(ex);
-                }
-
-                return Task.CompletedTask;
-            }, MundanesIntervalMs, linkedCts.Token);
-
-            var groundItemsLoop = PeriodicTaskRunner.RunPeriodicAsync(ct =>
-            {
-                if (ct.IsCancellationRequested || !ServerSetup.Instance.Running)
-                    return Task.CompletedTask;
-
-                try
-                {
-                    UpdateGroundItems();
-                }
-                catch (Exception ex)
-                {
-                    SentrySdk.CaptureException(ex);
-                }
-
-                return Task.CompletedTask;
-            }, GroundItemsIntervalMs, linkedCts.Token);
-
-            var groundMoneyLoop = PeriodicTaskRunner.RunPeriodicAsync(ct =>
-            {
-                if (ct.IsCancellationRequested || !ServerSetup.Instance.Running)
-                    return Task.CompletedTask;
-
-                try
-                {
-                    UpdateGroundMoney();
-                }
-                catch (Exception ex)
-                {
-                    SentrySdk.CaptureException(ex);
-                }
-
-                return Task.CompletedTask;
-            }, GroundMoneyIntervalMs, linkedCts.Token);
-
-            // Wait on all world loops – they all honour cancellation
-            await Task.WhenAll(playerLoop, monstersLoop, mundanesLoop, groundItemsLoop, groundMoneyLoop)
-                      .ConfigureAwait(false);
+            }
         }
         catch (OperationCanceledException)
         {
@@ -251,42 +231,34 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
         }
     }
 
-    private static class PeriodicTaskRunner
+    private async Task UpdateClientsAsync(CancellationToken ct)
     {
-        public static async Task RunPeriodicAsync(Func<CancellationToken, Task> action, int intervalMs, CancellationToken ct)
-        {
-            var sw = new Stopwatch();
-
-            while (!ct.IsCancellationRequested)
-            {
-                sw.Restart();
-
-                await action(ct).ConfigureAwait(false);
-
-                var elapsed = (int)sw.ElapsedMilliseconds;
-                var delay = intervalMs - elapsed;
-                if (delay > 0)
-                    await Task.Delay(delay, ct).ConfigureAwait(false);
-            }
-        }
-    }
-
-    private void UpdateClients()
-    {
-        // Snapshot to avoid concurrent modifications
-        var players = Aislings.Where(p => p?.Client != null).ToList();
-        if (players.Count == 0)
+        // Snapshot once to avoid concurrent modifications during update
+        var players = Aislings.ToArray();
+        if (players.Length == 0)
             return;
 
-        Parallel.ForEach(
-            players,
-            new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount },
-            ProcessClientSafely);
+        // Bounded concurrency prevents threadpool starvation / oversubscription
+        var maxDop = Environment.ProcessorCount;
+        using var gate = new SemaphoreSlim(maxDop, maxDop);
+
+        var tasks = new Task[players.Length];
+
+        for (var i = 0; i < players.Length; i++)
+        {
+            var player = players[i];
+            tasks[i] = ProcessClientSafelyAsync(player, gate, ct);
+        }
+
+        await Task.WhenAll(tasks).ConfigureAwait(false);
     }
 
-    private void ProcessClientSafely(Aisling player)
+    private async Task ProcessClientSafelyAsync(Aisling player, SemaphoreSlim gate, CancellationToken ct)
     {
-        if (player?.Client == null) return;
+        if (player?.Client == null)
+            return;
+
+        await gate.WaitAsync(ct).ConfigureAwait(false);
 
         try
         {
@@ -296,9 +268,7 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
                 return;
             }
 
-            var updateTask = player.Client.Update();
-            if (!updateTask.IsCompleted)
-                updateTask.GetAwaiter().GetResult();
+            await player.Client.Update().ConfigureAwait(false);
         }
         catch (Exception ex)
         {
@@ -308,12 +278,13 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
             {
                 player.Client.CloseTransport();
             }
-            catch
-            {
-                // ignore secondary failures
-            }
+            catch { }
 
             ClientRegistry.TryRemove(player.Client.Id, out _);
+        }
+        finally
+        {
+            gate.Release();
         }
     }
 
@@ -321,25 +292,31 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
     {
         try
         {
-            // Flatten all ground items from every map area into a single list
-            var items = ServerSetup.Instance.GlobalMapCache.Values
-                .SelectMany(area => ObjectManager.GetObjects<Item>(area, i => i.ItemPane == Item.ItemPanes.Ground))
-                .ToList();
+            var items = ServerSetup.Instance.GlobalMapCache
+                .SelectMany(kvp => ObjectManager.GetObjects<Item>(kvp.Value, i => i.ItemPane == Item.ItemPanes.Ground).Select(innerKvp => innerKvp.Value))
+                .ToArray();
 
-            // Process each item in parallel using PLINQ
-            items.AsParallel()
-                .WithDegreeOfParallelism(Environment.ProcessorCount)
-                .ForAll(item =>
+            if (items.Length == 0)
+                return;
+
+            var now = DateTime.UtcNow;
+
+            Parallel.ForEach(
+                items,
+                new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount },
+                item =>
                 {
-                    var abandonedDiff = DateTime.UtcNow - item.Value.AbandonedDate;
+                    var abandonedDiff = now - item.AbandonedDate;
 
                     // For corpses: remove if abandoned for more than 3 minutes
-                    if (abandonedDiff.TotalMinutes > 3 && item.Value.Template.Name == "Corpse")
-                        item.Value.Remove();
+                    if (abandonedDiff.TotalMinutes > 3 && item.Template.Name == "Corpse")
+                    {
+                        item.Remove();
+                        return;
+                    }
 
-                    // For all items: remove if abandoned for more than 30 minutes
                     if (abandonedDiff.TotalMinutes > 30)
-                        item.Value.Remove();
+                        item.Remove();
                 });
         }
         catch (Exception ex)
@@ -352,22 +329,23 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
     {
         try
         {
-            // Flatten all money drops into a list
-            var moneyDrops = ServerSetup.Instance.GlobalGroundMoneyCache.Values.ToList();
+            var moneyDrops = ServerSetup.Instance.GlobalGroundMoneyCache.Select(kvp => kvp.Value).ToArray();
+            if (moneyDrops.Length == 0)
+                return;
 
-            // Process each money drop in parallel
-            moneyDrops.AsParallel()
-                .WithDegreeOfParallelism(Environment.ProcessorCount)
-                .ForAll(money =>
+            var now = DateTime.UtcNow;
+
+            Parallel.ForEach(moneyDrops,
+                new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount },
+                money =>
                 {
-                    var abandonedDiff = DateTime.UtcNow - money.AbandonedDate;
+                    var abandonedDiff = now - money.AbandonedDate;
 
-                    // Remove money drops abandoned for more than 30 minutes
-                    if (!(abandonedDiff.TotalMinutes > 30)) return;
+                    if (abandonedDiff.TotalMinutes <= 30)
+                        return;
+
                     if (ServerSetup.Instance.GlobalGroundMoneyCache.TryRemove(money.MoneyId, out _))
-                    {
                         money.Remove();
-                    }
                 });
         }
         catch (Exception ex)
@@ -380,12 +358,13 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
     {
         try
         {
-            var monsters = ServerSetup.Instance.GlobalMapCache.Values
-                .SelectMany(area => ObjectManager.GetObjects<Monster>(area, i => !i.Skulled).Values);
+            var monsters = ServerSetup.Instance.GlobalMapCache
+                .SelectMany(kvp => ObjectManager.GetObjects<Monster>(kvp.Value, i => !i.Skulled).Select(innerKvp => innerKvp.Value))
+                .ToArray();
 
-            monsters.AsParallel()
-                .WithDegreeOfParallelism(Environment.ProcessorCount)
-                .ForAll(monster => ProcessMonster(monster, elapsedTime));
+            Parallel.ForEach(monsters,
+                new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount },
+                monster => ProcessMonster(monster, elapsedTime));
         }
         catch (Exception ex)
         {
@@ -395,25 +374,19 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
 
     private static void ProcessMonster(Monster monster, TimeSpan elapsedTime)
     {
+        if (monster == null) return;
+
         if (monster.CurrentHp <= 0)
         {
             monster.Skulled = true;
-
-            // Handle OnDeath logic
             if (monster.Target is Aisling aisling)
-            {
-                monster.Scripts?.Values.FirstOrDefault()?.OnDeath(aisling.Client);
-            }
+                monster.AIScript?.OnDeath(aisling.Client);
             else
-            {
-                monster.Scripts?.Values.FirstOrDefault()?.OnDeath();
-            }
-
+                monster.AIScript?.OnDeath();
             return;
         }
 
-        // Update monster scripts
-        monster.Scripts?.Values.FirstOrDefault()?.Update(elapsedTime);
+        monster.AIScript?.Update(elapsedTime);
         monster.LastUpdated = DateTime.UtcNow;
 
         // Handle buffs and debuffs
@@ -430,12 +403,16 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
     {
         try
         {
-            var mundanes = ServerSetup.Instance.GlobalMapCache.Values
-                .SelectMany(area => ObjectManager.GetObjects<Mundane>(area, mundane => mundane != null).Values);
+            var mundanes = ServerSetup.Instance.GlobalMapCache
+                .SelectMany(kvp => ObjectManager.GetObjects<Mundane>(kvp.Value, m => m != null).Select(innerKvp => innerKvp.Value))
+                .ToArray();
 
-            mundanes.AsParallel()
-                .WithDegreeOfParallelism(Environment.ProcessorCount)
-                .ForAll(mundane => ProcessMundane(mundane, elapsedTime));
+            if (mundanes.Length == 0)
+                return;
+
+            Parallel.ForEach(mundanes,
+                new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount },
+                mundane => ProcessMundane(mundane, elapsedTime));
         }
         catch (Exception ex)
         {
@@ -454,50 +431,85 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
     {
         if (!_trapTimer.Update(elapsedTime)) return;
 
-        try
+        var traps = ServerSetup.Instance.Traps.Values.ToArray();
+        foreach (var trap in traps)
         {
-            foreach (var trap in ServerSetup.Instance.Traps.Values) { trap?.Update(); }
-        }
-        catch (Exception ex)
-        {
-            SentrySdk.CaptureException(ex);
+            try
+            {
+                trap?.Update();
+            }
+            catch (Exception ex)
+            {
+                SentrySdk.CaptureException(ex);
+            }
         }
     }
 
+    /// <summary>
+    /// Updates the state of all maps in the game world.
+    /// </summary>
+    /// <param name="elapsedTime"></param>
     private static void UpdateMaps(TimeSpan elapsedTime)
     {
         try
         {
-            // Process each area in parallel directly
             Parallel.ForEach(
-                ServerSetup.Instance.GlobalMapCache.Values,
+                ServerSetup.Instance.GlobalMapCache,
                 new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount },
-                area => area?.Update(elapsedTime));
+                kvp => kvp.Value?.Update(elapsedTime));
         }
         catch (Exception ex)
         {
             SentrySdk.CaptureException(ex);
             SentrySdk.CaptureMessage($"Map failed to update; Reload Maps initiated: {DateTime.UtcNow}");
 
-            // Wipe Caches
-            ServerSetup.Instance.TempGlobalMapCache = [];
-            ServerSetup.Instance.TempGlobalWarpTemplateCache = [];
-
-            foreach (var npc in ServerSetup.Instance.GlobalMundaneCache.Values)
+            // Ensure only one reload routine runs at a time and avoid races with readers
+            lock (MapReloadLock)
             {
-                ObjectManager.DelObject(npc);
-            }
+                try
+                {
+                    // Take a snapshot of current mundanes and remove them safely.
+                    var mundanesSnapshot = ServerSetup.Instance.GlobalMundaneCache?.Values.ToArray() ?? Array.Empty<Mundane>();
+                    foreach (var npc in mundanesSnapshot)
+                    {
+                        try
+                        {
+                            ObjectManager.DelObject(npc);
+                        }
+                        catch (Exception delEx)
+                        {
+                            SentrySdk.CaptureException(delEx);
+                        }
+                    }
 
-            ServerSetup.Instance.GlobalMundaneCache = [];
+                    // Try to clear caches in a best-effort, safe manner.
+                    // Use dynamic invocation so this code will attempt Clear() on
+                    // common collection types (ConcurrentDictionary, Dictionary, etc.)
+                    // and will not crash if Clear is not available.
+                    try { (ServerSetup.Instance.TempGlobalMapCache as dynamic)?.Clear(); } catch { }
+                    try { (ServerSetup.Instance.TempGlobalWarpTemplateCache as dynamic)?.Clear(); } catch { }
+                    try { (ServerSetup.Instance.GlobalMundaneCache as dynamic)?.Clear(); } catch { }
 
-            // Reload
-            AreaStorage.Instance.CacheFromDatabase();
-            DatabaseLoad.CacheFromDatabase(new WarpTemplate());
+                    // Reload authoritative sources from the database
+                    AreaStorage.Instance.CacheFromDatabase();
+                    DatabaseLoad.CacheFromDatabase(new WarpTemplate());
 
-            foreach (var connected in ServerSetup.Instance.Game.Aislings)
-            {
-                connected.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=qSelf-Heal Routine Invokes Reload Maps");
-                connected.Client.ClientRefreshed();
+                    // Notify connected players (snapshot to avoid modifying collection during iteration)
+                    var connectedPlayers = ServerSetup.Instance.Game.Aislings.ToArray();
+                    foreach (var connected in connectedPlayers)
+                    {
+                        try
+                        {
+                            connected.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=qSelf-Heal Routine Invokes Reload Maps");
+                            connected.Client.ClientRefreshed();
+                        }
+                        catch { }
+                    }
+                }
+                catch (Exception reloadEx)
+                {
+                    SentrySdk.CaptureException(reloadEx);
+                }
             }
         }
     }
@@ -936,8 +948,7 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
             if (sprite is null) return default;
             if (aisling.CanSeeSprite(sprite)) return default;
             if (sprite is not Monster monster) return default;
-            var script = monster.Scripts.FirstOrDefault().Value;
-            script?.OnLeave(aisling.Client);
+            monster.AIScript?.OnLeave(aisling.Client);
             return default;
         }
     }
@@ -1408,13 +1419,13 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
             // Skill & Weapon script
             script.OnUse(lpClient.Aisling);
             ExecuteWeaponScriptsOnAssail(lpClient, skill);
-            
+
             skill.LastUsedSkill = DateTime.UtcNow;
             skill.CurrentCooldown = skill.Template.Cooldown;
 
             skill.InUse = false;
         }
-        
+
         lpClient.LastAssail = DateTime.UtcNow;
     }
 
@@ -1769,7 +1780,7 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
                 {
                     case Monster monster:
                         {
-                            var script = monster.Scripts?.Values.FirstOrDefault();
+                            var script = monster.AIScript;
                             if (script is null) return default;
                             var item = localClient.Aisling.Inventory.FindInSlot(localArgs.SourceSlot);
                             item.Serial = monster.Serial;
@@ -1796,7 +1807,7 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
                             var item = localClient.Aisling.Inventory.FindInSlot(localArgs.SourceSlot);
 
                             if (item.DisplayName.StringContains("deum"))
-                            {                                
+                            {
                                 if (item.Script is null) return default;
                                 localClient.Aisling.Inventory.RemoveRange(localClient.Aisling.Client, item, 1);
                                 localClient.Aisling.ThrewHealingPot = true;
@@ -1894,7 +1905,7 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
                 {
                     case Monster monster:
                         {
-                            var script = monster.Scripts.Values.FirstOrDefault();
+                            var script = monster.AIScript;
                             if (localArgs.Amount <= 0) return default;
                             script?.OnGoldDropped(localClient.Aisling.Client, (uint)localArgs.Amount);
                             break;
@@ -2513,7 +2524,7 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
                 if (!skill.CanUseZeroLineAbility) return default;
             if (!skill.CanUse()) return default;
             if (skill.InUse) return default;
-            
+
             var script = skill.Scripts.Values.FirstOrDefault();
 
             // Execute Ability or Assail Logic
@@ -2638,10 +2649,8 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
             if (monsterCheck != null)
             {
                 if (monsterCheck.Template?.ScriptName == null) return default;
-                var scripts = monsterCheck.Scripts?.Values;
-                if (scripts == null) return default;
-                foreach (var script in scripts)
-                    script.OnClick(localClient.Aisling.Client);
+                var script = monsterCheck.AIScript;
+                script?.OnClick(localClient.Aisling.Client);
                 return default;
             }
 

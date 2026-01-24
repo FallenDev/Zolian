@@ -21,6 +21,11 @@ public class Area : Map
     private int _maxXBounds;
     private int _maxYBounds;
 
+    private int _playerCount;
+    public bool HasPlayers => Volatile.Read(ref _playerCount) > 0;
+    public void OnPlayerEnter() => Interlocked.Increment(ref _playerCount);
+    public void OnPlayerLeave() => Interlocked.Decrement(ref _playerCount);
+
     public ConcurrentDictionary<Tuple<int, Type>, object> SpriteCollections { get; } = [];
     private FrozenDictionary<int, Vector2> MapGridDict { get; set; }
     private Dictionary<int, Vector2> TempMapGridDict { get; } = [];

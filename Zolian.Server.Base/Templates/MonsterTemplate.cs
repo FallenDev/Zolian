@@ -1,6 +1,7 @@
 ﻿using Darkages.Enums;
 using Darkages.Network.Server;
 using Darkages.Types;
+
 using Microsoft.Data.SqlClient;
 
 using ServiceStack;
@@ -163,6 +164,7 @@ public static class MonsterStorage
 
                 if (temp.Name == null) continue;
                 ServerSetup.Instance.TempGlobalMonsterTemplateCache[temp.Name] = temp;
+                AddMonsterTemplateByArea(ServerSetup.Instance.TempMonsterTemplateByMapCache, temp);
             }
 
             reader.Close();
@@ -199,5 +201,18 @@ public static class MonsterStorage
         }
 
         return new Position(x, y);
+    }
+
+    private static void AddMonsterTemplateByArea(Dictionary<int, List<MonsterTemplate>> byArea, MonsterTemplate template)
+    {
+        var areaId = template.AreaID;
+
+        if (!byArea.TryGetValue(areaId, out var list))
+        {
+            list = [];
+            byArea[areaId] = list;
+        }
+
+        list.Add(template);
     }
 }

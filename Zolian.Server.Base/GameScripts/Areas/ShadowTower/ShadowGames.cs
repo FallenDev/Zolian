@@ -1,11 +1,13 @@
-﻿using Darkages.Enums;
+﻿using System.Numerics;
+
+using Darkages.Common;
+using Darkages.Enums;
 using Darkages.Network.Client;
-using Darkages.ScriptingBase;
-using Darkages.Types;
-using System.Numerics;
-using Darkages.Object;
 using Darkages.Network.Server;
+using Darkages.Object;
+using Darkages.ScriptingBase;
 using Darkages.Sprites.Entity;
+using Darkages.Types;
 
 namespace Darkages.GameScripts.Areas.ShadowTower;
 
@@ -22,8 +24,10 @@ public class ShadowGames : AreaScript
         var vectorMap = new Vector2(newLocation.X, newLocation.Y);
         if (client.Aisling.Pos != vectorMap) return;
 
-        ServerSetup.Instance.GlobalMonsterTemplateCache.TryGetValue("Rob33", out var boss1);
-        ServerSetup.Instance.GlobalMonsterTemplateCache.TryGetValue("Rob32", out var boss2);
+        // Per-map monster template cache
+        if (!ServerSetup.Instance.MonsterTemplateByMapCache.TryGetValue(client.Aisling.Map.ID, out var templates) || templates.Length == 0) return;
+        templates.TryGetValue(t => t.Name == "Rob32", out var boss2);
+        templates.TryGetValue(t => t.Name == "Rob33", out var boss1);
 
         switch (newLocation.X)
         {

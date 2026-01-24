@@ -1,4 +1,5 @@
-﻿using Darkages.Enums;
+﻿using Darkages.Common;
+using Darkages.Enums;
 using Darkages.Network.Client;
 using Darkages.ScriptingBase;
 using Darkages.Types;
@@ -24,7 +25,10 @@ public class ShadowTowerOmega : AreaScript
         var vectorMap = new Vector2(newLocation.X, newLocation.Y);
         if (client.Aisling.Pos != vectorMap) return;
 
-        ServerSetup.Instance.GlobalMonsterTemplateCache.TryGetValue("Rob34", out var boss);
+        // Per-map monster template cache
+        if (!ServerSetup.Instance.MonsterTemplateByMapCache.TryGetValue(client.Aisling.Map.ID, out var templates) || templates.Length == 0) return;
+        templates.TryGetValue(t => t.Name == "Rob34", out var boss);
+
         var mobsOnMap = client.Aisling.MonstersOnMap();
         if (!mobsOnMap.IsNullOrEmpty()) return;
         var bossCreate = Monster.Create(boss, client.Aisling.Map);

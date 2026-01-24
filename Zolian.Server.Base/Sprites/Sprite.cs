@@ -64,12 +64,10 @@ public abstract class Sprite : INotifyPropertyChanged
         get
         {
             if (this is not Monster monster) return HasBuff("Shadow Sight");
-            var canSee = monster.Scripts.TryGetValue("Aosda Remnant", out _);
-            if (canSee) return true;
-            canSee = monster.Scripts.TryGetValue("ShadowSight", out _);
-            if (canSee) return true;
-            canSee = monster.Scripts.TryGetValue("Weak ShadowSight", out _);
-            return canSee || HasBuff("Shadow Sight");
+            if (monster.Template.ScriptName.Equals("Aosda Remnant")) return true;
+            if (monster.Template.ScriptName.Equals("ShadowSight")) return true;
+            if (monster.Template.ScriptName.Equals("Weak ShadowSight")) return true;
+            return HasBuff("Shadow Sight");
         }
     }
 

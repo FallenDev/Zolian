@@ -134,7 +134,7 @@ public class ObjectComponent(WorldServer server) : WorldServerComponent(server)
 
         if (obj is Monster monster)
         {
-            var script = monster.Scripts?.Values.FirstOrDefault();
+            var script = monster.AIScript;
             script?.OnLeave(self.Client);
         }
 
@@ -158,7 +158,7 @@ public class ObjectComponent(WorldServer server) : WorldServerComponent(server)
             switch (obj)
             {
                 case Monster monster:
-                    monster.Scripts?.Values.FirstOrDefault()?.OnApproach(self.Client);
+                    monster.AIScript?.OnApproach(self.Client);
                     break;
 
                 case Mundane npc:

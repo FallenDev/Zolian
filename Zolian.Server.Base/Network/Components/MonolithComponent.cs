@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Numerics;
+
 using Darkages.Common;
 using Darkages.Enums;
 using Darkages.Network.Server;
@@ -53,24 +54,44 @@ public class MonolithComponent(WorldServer server) : WorldServerComponent(server
             PlaceNode(map);
             PlaceFlower(map);
 
-            // Monsters
-            var monstersOnMap = ObjectManager
-                .GetObjects<Monster>(map, m => m.IsAlive)
-                .Values
-                .ToList();
+            // Templates for this map only
+            if (!ServerSetup.Instance.MonsterTemplateByMapCache.TryGetValue(map.ID, out var templates) || templates.Length == 0) continue;
+
+            var monsters = ObjectManager.GetObjects<Monster>(map, m => m.IsAlive);
 
             // Map based overload guard
             var maxMonsters = CalculateMaxMonsters(map);
-            if (monstersOnMap.Count >= maxMonsters) continue;
+            if (monsters.Count >= maxMonsters) continue;
 
-            foreach (var template in ServerSetup.Instance.GlobalMonsterTemplateCache.Values)
+            var countsByName = new Dictionary<string, int>(StringComparer.Ordinal);
+
+            // Count existing monsters by template name
+            foreach (var kvp in monsters)
             {
-                if (template.AreaID != map.ID) continue;
-                var count = monstersOnMap.Count(m => m.Template.Name == template.Name);
+                var monster = kvp.Value;
+                var name = monster?.Template?.Name;
+                if (string.IsNullOrEmpty(name))
+                    continue;
+
+                countsByName.TryGetValue(name, out var c);
+                countsByName[name] = c + 1;
+            }
+
+            var remaining = maxMonsters - monsters.Count;
+
+            foreach (var template in templates)
+            {
+                if (remaining <= 0) break;
+
+                countsByName.TryGetValue(template.Name, out var count);
+
                 if (count >= template.SpawnMax) continue;
                 if (!template.ReadyToSpawn()) continue;
 
                 CreateFromTemplate(template, map);
+
+                countsByName[template.Name] = count + 1;
+                remaining--;
             }
         }
     }

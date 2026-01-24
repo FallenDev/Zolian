@@ -1,10 +1,11 @@
-﻿using Darkages.Enums;
-using Darkages.Sprites;
-using Darkages.Sprites.Entity;
-
+﻿using System.Collections.Concurrent;
 using System.Numerics;
 using System.Text;
 using System.Text.RegularExpressions;
+
+using Darkages.Enums;
+using Darkages.Sprites;
+using Darkages.Sprites.Entity;
 
 namespace Darkages.Common;
 
@@ -179,5 +180,72 @@ public static class Extensions
         }
 
         return current;
+    }
+
+    /// <summary>
+    /// Retrieves the first script instance from the specified dictionary, or null if the dictionary is null or empty.
+    /// </summary>
+    /// <typeparam name="TScript">The type of script to retrieve. Must be a reference type.</typeparam>
+    /// <param name="dict">A thread-safe dictionary containing script instances, keyed by string. Can be null.</param>
+    /// <returns>The first script instance found in the dictionary, or null if the dictionary is null or contains no elements.</returns>
+    public static TScript? GetFirstScript<TScript>(ConcurrentDictionary<string, TScript>? dict) where TScript : class
+    {
+        if (dict == null) return null;
+        foreach (var kvp in dict)
+            return kvp.Value;
+
+        return null;
+    }
+
+    /// <summary>
+    /// Attempts to retrieve the element at the specified index in the array.
+    /// </summary>
+    /// <remarks>This method does not throw an exception if the index is outside the bounds of the array.
+    /// Instead, it returns <see langword="false"/> and sets <paramref name="value"/> to the default value for the
+    /// type.</remarks>
+    /// <typeparam name="T">The type of elements in the array.</typeparam>
+    /// <param name="array">The array from which to retrieve the value. Cannot be null.</param>
+    /// <param name="index">The zero-based index of the element to retrieve.</param>
+    /// <param name="value">When this method returns, contains the element at the specified index if the index is within the bounds of the
+    /// array; otherwise, the default value for the type of the array elements.</param>
+    /// <returns><see langword="true"/> if the element at the specified index was found; otherwise, <see langword="false"/>.</returns>
+    public static bool TryGetValue<T>(this T[] array, int index, out T value)
+    {
+        if ((uint)index < (uint)array.Length)
+        {
+            value = array[index];
+            return true;
+        }
+
+        value = default!;
+        return false;
+    }
+
+    /// <summary>
+    /// Attempts to find the first element in the array that matches the specified predicate.
+    /// </summary>
+    /// <remarks>If multiple elements match the predicate, only the first occurrence is returned. This method
+    /// does not throw an exception if no match is found; instead, it returns false and sets the out parameter to the
+    /// default value of the type.</remarks>
+    /// <typeparam name="T">The type of elements in the array.</typeparam>
+    /// <param name="array">The array to search for a matching element. Cannot be null.</param>
+    /// <param name="predicate">A function that defines the conditions of the element to search for. Cannot be null.</param>
+    /// <param name="value">When this method returns, contains the first element that matches the predicate, if found; otherwise, the
+    /// default value for the type of the element.</param>
+    /// <returns>true if a matching element is found; otherwise, false.</returns>
+    public static bool TryGetValue<T>(this T[] array, Func<T, bool> predicate, out T value)
+    {
+        for (int i = 0; i < array.Length; i++)
+        {
+            var item = array[i];
+            if (predicate(item))
+            {
+                value = item;
+                return true;
+            }
+        }
+
+        value = default!;
+        return false;
     }
 }
