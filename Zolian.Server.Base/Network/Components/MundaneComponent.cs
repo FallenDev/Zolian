@@ -1,4 +1,6 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Frozen;
+using System.Diagnostics;
+
 using Darkages.Network.Server;
 using Darkages.Object;
 using Darkages.Sprites.Entity;
@@ -59,5 +61,11 @@ public class MundaneComponent(WorldServer server) : WorldServerComponent(server)
             if (existing != null) continue;
             Mundane.Create(template);
         }
+
+        // Update the MundaneByMapCache
+        if (ServerSetup.Instance.TempMundaneByMapCache.Count == 0) return;
+        ServerSetup.Instance.MundaneByMapCache = ServerSetup.Instance.TempMundaneByMapCache.ToFrozenDictionary(kvp => kvp.Key, kvp => kvp.Value.ToArray());
+        ServerSetup.Instance.TempMundaneByMapCache.Clear();
+        ServerSetup.EventsLogger($"Mundanes Spawned: {ServerSetup.Instance.MundaneByMapCache.Count}");
     }
 }

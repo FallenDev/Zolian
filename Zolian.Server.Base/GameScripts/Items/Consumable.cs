@@ -27,13 +27,9 @@ public class Consumable(Item item) : ItemScript(item)
         {
             case "Zolian Guide":
                 {
-                    foreach (var npc in ServerSetup.Instance.GlobalMundaneCache)
-                    {
-                        if (npc.Value.Scripts is null) continue;
-                        if (!npc.Value.Scripts.TryGetValue("Guide", out var scriptObj)) continue;
-                        scriptObj.OnClick(client, npc.Value.Serial);
-                        break;
-                    }
+                    if (!ServerSetup.Instance.MundaneByMapCache.TryGetValue(14759, out var npcArray) || npcArray.Length == 0) return;
+                    if (!npcArray.TryGetValue<Mundane>(t => t.Name == "Guide", out var mundane) || mundane == null) return;
+                    mundane.AIScript?.OnClick(client, mundane.Serial);
                     return;
                 }
 
@@ -236,79 +232,51 @@ public class Consumable(Item item) : ItemScript(item)
 
             case "Raw Dark Iron":
                 {
-                    foreach (var npc in ServerSetup.Instance.GlobalMundaneCache)
-                    {
-                        if (npc.Value.Scripts is null) continue;
-                        if (!npc.Value.Scripts.TryGetValue("DarkIron", out var scriptObj)) continue;
-                        scriptObj.OnClick(client, npc.Value.Serial);
-                        break;
-                    }
+                    if (!ServerSetup.Instance.MundaneByMapCache.TryGetValue(14759, out var npcArray) || npcArray.Length == 0) return;
+                    if (!npcArray.TryGetValue<Mundane>(t => t.Name == "Dark Iron", out var mundane) || mundane == null) return;
+                    mundane.AIScript?.OnClick(client, mundane.Serial);
                     return;
                 }
             case "Raw Copper":
                 {
-                    foreach (var npc in ServerSetup.Instance.GlobalMundaneCache)
-                    {
-                        if (npc.Value.Scripts is null) continue;
-                        if (!npc.Value.Scripts.TryGetValue("Copper", out var scriptObj)) continue;
-                        scriptObj.OnClick(client, npc.Value.Serial);
-                        break;
-                    }
+                    if (!ServerSetup.Instance.MundaneByMapCache.TryGetValue(14759, out var npcArray) || npcArray.Length == 0) return;
+                    if (!npcArray.TryGetValue<Mundane>(t => t.Name == "Copper", out var mundane) || mundane == null) return;
+                    mundane.AIScript?.OnClick(client, mundane.Serial);
                     return;
                 }
             case "Raw Obsidian":
                 {
-                    foreach (var npc in ServerSetup.Instance.GlobalMundaneCache)
-                    {
-                        if (npc.Value.Scripts is null) continue;
-                        if (!npc.Value.Scripts.TryGetValue("Obsidian", out var scriptObj)) continue;
-                        scriptObj.OnClick(client, npc.Value.Serial);
-                        break;
-                    }
+                    if (!ServerSetup.Instance.MundaneByMapCache.TryGetValue(14759, out var npcArray) || npcArray.Length == 0) return;
+                    if (!npcArray.TryGetValue<Mundane>(t => t.Name == "Obsidian", out var mundane) || mundane == null) return;
+                    mundane.AIScript?.OnClick(client, mundane.Serial);
                     return;
                 }
             case "Raw Cobalt Steel":
                 {
-                    foreach (var npc in ServerSetup.Instance.GlobalMundaneCache)
-                    {
-                        if (npc.Value.Scripts is null) continue;
-                        if (!npc.Value.Scripts.TryGetValue("CobaltSteel", out var scriptObj)) continue;
-                        scriptObj.OnClick(client, npc.Value.Serial);
-                        break;
-                    }
+                    if (!ServerSetup.Instance.MundaneByMapCache.TryGetValue(14759, out var npcArray) || npcArray.Length == 0) return;
+                    if (!npcArray.TryGetValue<Mundane>(t => t.Name == "Cobalt Steel", out var mundane) || mundane == null) return;
+                    mundane.AIScript?.OnClick(client, mundane.Serial);
                     return;
                 }
             case "Raw Hybrasyl":
                 {
-                    foreach (var npc in ServerSetup.Instance.GlobalMundaneCache)
-                    {
-                        if (npc.Value.Scripts is null) continue;
-                        if (!npc.Value.Scripts.TryGetValue("Hybrasyl", out var scriptObj)) continue;
-                        scriptObj.OnClick(client, npc.Value.Serial);
-                        break;
-                    }
+                    if (!ServerSetup.Instance.MundaneByMapCache.TryGetValue(14759, out var npcArray) || npcArray.Length == 0) return;
+                    if (!npcArray.TryGetValue<Mundane>(t => t.Name == "Hybrasyl", out var mundane) || mundane == null) return;
+                    mundane.AIScript?.OnClick(client, mundane.Serial);
                     return;
                 }
             case "Raw Talos":
                 {
-                    foreach (var npc in ServerSetup.Instance.GlobalMundaneCache)
-                    {
-                        if (npc.Value.Scripts is null) continue;
-                        if (!npc.Value.Scripts.TryGetValue("Talos", out var scriptObj)) continue;
-                        scriptObj.OnClick(client, npc.Value.Serial);
-                        break;
-                    }
+                    if (!ServerSetup.Instance.MundaneByMapCache.TryGetValue(14759, out var npcArray) || npcArray.Length == 0) return;
+                    if (!npcArray.TryGetValue<Mundane>(t => t.Name == "Talos", out var mundane) || mundane == null) return;
+                    mundane.AIScript?.OnClick(client, mundane.Serial);
                     return;
                 }
             case "Chaos Ore":
                 {
-                    foreach (var npc in ServerSetup.Instance.GlobalMundaneCache)
-                    {
-                        if (npc.Value.Scripts is null) continue;
-                        if (!npc.Value.Scripts.TryGetValue("ChaosOre", out var scriptObj)) continue;
-                        scriptObj.OnClick(client, npc.Value.Serial);
-                        break;
-                    }
+                    if (!ServerSetup.Instance.MundaneByMapCache.TryGetValue(14759, out var npcArray) || npcArray.Length == 0) return;
+                    if (!npcArray.TryGetValue<Mundane>(t => t.Name == "Chaos Ore", out var mundane) || mundane == null) return;
+                    mundane.AIScript?.OnClick(client, mundane.Serial);
                     return;
                 }
 
@@ -1400,35 +1368,23 @@ public class Consumable(Item item) : ItemScript(item)
                 }
             case "Santa Gift Box":
                 {
-                    foreach (var npc in ServerSetup.Instance.GlobalMundaneCache)
-                    {
-                        if (npc.Value.Scripts is null) continue;
-                        if (!npc.Value.Scripts.TryGetValue("Gift Wrapping Santa", out var scriptObj)) continue;
-                        scriptObj.OnClick(client, npc.Value.Serial);
-                        break;
-                    }
+                    if (!ServerSetup.Instance.MundaneByMapCache.TryGetValue(14759, out var npcArray) || npcArray.Length == 0) return;
+                    if (!npcArray.TryGetValue<Mundane>(t => t.Name == "Yule Santa", out var mundane) || mundane == null) return;
+                    mundane.AIScript?.OnClick(client, mundane.Serial);
                     return;
                 }
             case "Snowman Gift Box":
                 {
-                    foreach (var npc in ServerSetup.Instance.GlobalMundaneCache)
-                    {
-                        if (npc.Value.Scripts is null) continue;
-                        if (!npc.Value.Scripts.TryGetValue("Gift Wrapping Snowman", out var scriptObj)) continue;
-                        scriptObj.OnClick(client, npc.Value.Serial);
-                        break;
-                    }
+                    if (!ServerSetup.Instance.MundaneByMapCache.TryGetValue(14759, out var npcArray) || npcArray.Length == 0) return;
+                    if (!npcArray.TryGetValue<Mundane>(t => t.Name == "Yule Snowman", out var mundane) || mundane == null) return;
+                    mundane.AIScript?.OnClick(client, mundane.Serial);
                     return;
                 }
             case "Heart Gift Box":
                 {
-                    foreach (var npc in ServerSetup.Instance.GlobalMundaneCache)
-                    {
-                        if (npc.Value.Scripts is null) continue;
-                        if (!npc.Value.Scripts.TryGetValue("Gift Wrapping Heart", out var scriptObj)) continue;
-                        scriptObj.OnClick(client, npc.Value.Serial);
-                        break;
-                    }
+                    if (!ServerSetup.Instance.MundaneByMapCache.TryGetValue(14759, out var npcArray) || npcArray.Length == 0) return;
+                    if (!npcArray.TryGetValue<Mundane>(t => t.Name == "Yule Heart", out var mundane) || mundane == null) return;
+                    mundane.AIScript?.OnClick(client, mundane.Serial);
                     return;
                 }
 

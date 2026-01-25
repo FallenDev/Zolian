@@ -14,6 +14,8 @@ using Darkages.Types;
 
 using ServiceStack;
 
+using static ServiceStack.Diagnostics.Events;
+
 namespace Darkages.Sprites.Entity;
 
 public record TargetRecord
@@ -311,7 +313,7 @@ public sealed class Monster : Damageable
             TrackingNpcAndText(player, 0x05, returnPlayer, $"{{=aMead Quest: {{=q{value?.TotalKills} {{=akilled");
         }
 
-        if (monster.Template.BaseName is "Undead Guard" or "Undead Wizard" && !player.LegendBook.HasKey("LLau1"))
+        if (monster.Template.BaseName is "Undead Guard" or "Undead Wizard" && player.QuestManager.Lau == 1 && !player.LegendBook.HasKey("LLau1"))
         {
             var returnPlayer = player.HasKilled("Undead Guard", 5) && player.HasKilled("Undead Wizard", 5);
             player.MonsterKillCounters.TryGetValue("Undead Guard", out var monA);
@@ -325,15 +327,9 @@ public sealed class Monster : Damageable
     {
         aisling.Client.SendServerMessage(ServerMessageType.PersistentMessage, text);
         if (!returnPlayer) return;
-
-        foreach (var npc in ServerSetup.Instance.GlobalMundaneCache)
-        {
-            if (npc.Value.Scripts is null) continue;
-            if (npc.Value.Scripts.TryGetValue("Quest Helper", out var scriptObj))
-            {
-                scriptObj.OnResponse(aisling.Client, responseId, $"{npc.Value.Serial}");
-            }
-        }
+        if (!ServerSetup.Instance.MundaneByMapCache.TryGetValue(14759, out var questHelper) || questHelper.Length == 0) return;
+        if (!questHelper.TryGetValue<Mundane>(t => t.Name == "Nadia", out var mundane) || mundane == null) return;
+        mundane.AIScript?.OnResponse(aisling.Client, responseId, $"{mundane.Serial}");
     }
 
     public static void CreateFromTemplate(MonsterTemplate template, Area map)

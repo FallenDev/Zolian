@@ -1,4 +1,7 @@
-﻿using Darkages.Common;
+﻿using System.Numerics;
+using System.Security.Cryptography;
+
+using Darkages.Common;
 using Darkages.Enums;
 using Darkages.Network.Server;
 using Darkages.Object;
@@ -6,18 +9,17 @@ using Darkages.ScriptingBase;
 using Darkages.Templates;
 using Darkages.Types;
 
-using ServiceStack;
+using Microsoft.Extensions.Logging;
 
-using System.Collections.Concurrent;
-using System.Numerics;
-using System.Security.Cryptography;
+using ServiceStack;
 
 namespace Darkages.Sprites.Entity;
 
 public sealed class Mundane : Movable
 {
-    private readonly List<SkillScript> _skillScripts = [];
-    private readonly List<SpellScript> _spellScripts = [];
+    public string Name => Template.Name;
+    public ushort Sprite => Template.Image;
+
     private int _waypointIndex;
     private Position CurrentWaypoint
     {
@@ -25,7 +27,7 @@ public sealed class Mundane : Movable
         set => Template.Waypoints[_waypointIndex] = value;
     }
 
-    public ConcurrentDictionary<string, MundaneScript> Scripts { get; private set; }
+    public MundaneScript AIScript { get; set; }
     public MundaneTemplate Template { get; init; }
     public bool Bypass { get; set; }
     public bool GuardModeActivated { get; set; }
@@ -63,63 +65,28 @@ public sealed class Mundane : Movable
         npc.Pos = new Vector2(template.X, template.Y);
         npc.Direction = npc.Template.Direction;
         npc.CurrentMapId = npc.Template.AreaID;
+        npc.InitMundane(npc.Template, ServerSetup.Instance.Game, npc);
 
         if (npc.Template.ChatRate == 0) npc.Template.ChatRate = 5;
-
         if (npc.Template.TurnRate == 0) npc.Template.TurnRate = 8;
 
-        npc.DefenseElement = Generator.RandomEnumValue<ElementManager.Element>();
-        npc.OffenseElement = Generator.RandomEnumValue<ElementManager.Element>();
-        npc.Scripts = ScriptManager.Load<MundaneScript>(template.ScriptKey, ServerSetup.Instance.Game, npc);
-        npc.Template.AttackTimer = new WorldServerTimer(TimeSpan.FromMilliseconds(450));
         npc.Template.EnableTurning = false;
         npc.Template.WalkTimer = new WorldServerTimer(TimeSpan.FromSeconds(npc.Template.WalkRate));
         npc.Template.ChatTimer = new WorldServerTimer(TimeSpan.FromSeconds(npc.Template.ChatRate));
         npc.Template.TurnTimer = new WorldServerTimer(TimeSpan.FromSeconds(npc.Template.TurnRate));
-        npc.Template.SpellTimer = new WorldServerTimer(TimeSpan.FromSeconds(npc.Template.CastRate));
 
-        npc.InitMundane();
         ServerSetup.Instance.GlobalMundaneCache.TryAdd(npc.Serial, npc);
+
+        // Temporary npc by map cache
+        AddMundaneByArea(ServerSetup.Instance.TempMundaneByMapCache, npc);
+
         ObjectManager.AddObject(npc);
     }
 
-    private void InitMundane()
+    private void InitMundane(MundaneTemplate template, WorldServer server, Mundane obj)
     {
-        if (Template.Spells != null)
-            foreach (var spellScriptStr in Template.Spells)
-                LoadSpellScript(spellScriptStr);
-
-        if (Template.Skills != null)
-            foreach (var skillScriptStr in Template.Skills)
-                LoadSkillScript(skillScriptStr);
-
-        LoadSkillScript("Assail", true);
-    }
-
-    private void LoadSkillScript(string skillScriptStr, bool primary = false)
-    {
-        Skill obj;
-        var scripts = ScriptManager.Load<SkillScript>(skillScriptStr,
-            obj = Skill.Create(1, ServerSetup.Instance.GlobalSkillTemplateCache[skillScriptStr]));
-
-        foreach (var script in scripts.Values)
-        {
-            if (script == null) continue;
-            script.Skill = obj;
-            _skillScripts.Add(script);
-        }
-    }
-
-    private void LoadSpellScript(string spellScriptStr, bool primary = false)
-    {
-        var scripts = ScriptManager.Load<SpellScript>(spellScriptStr,
-            Spell.Create(1, ServerSetup.Instance.GlobalSpellTemplateCache[spellScriptStr]));
-
-        foreach (var script in scripts.Values.Where(script => script != null))
-        {
-            script.IsScriptDefault = primary;
-            _spellScripts.Add(script);
-        }
+        if (ScriptManager.TryCreate<MundaneScript>(template.ScriptKey, out var aiScript, server, obj))
+            obj.AIScript = aiScript;
     }
 
     private void Patrol()
@@ -202,6 +169,16 @@ public sealed class Mundane : Movable
         }
     }
 
-    public string Name => Template.Name;
-    public ushort Sprite => Template.Image;
+    private static void AddMundaneByArea(Dictionary<int, List<Mundane>> byArea, Mundane template)
+    {
+        var areaId = template.CurrentMapId;
+
+        if (!byArea.TryGetValue(areaId, out var list))
+        {
+            list = [];
+            byArea[areaId] = list;
+        }
+
+        list.Add(template);
+    }
 }

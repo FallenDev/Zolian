@@ -162,7 +162,7 @@ public class ObjectComponent(WorldServer server) : WorldServerComponent(server)
                     break;
 
                 case Mundane npc:
-                    npc.Scripts?.Values.FirstOrDefault()?.OnApproach(self.Client);
+                    npc.AIScript?.OnApproach(self.Client);
                     break;
 
                 case Aisling other:

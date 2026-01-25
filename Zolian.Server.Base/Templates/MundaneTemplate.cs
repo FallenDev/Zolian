@@ -23,8 +23,6 @@ public class MundaneTemplate : Template
     public List<Position> Waypoints { get; set; }
     public PathQualifer PathQualifer { get; set; }
 
-    public WorldServerTimer AttackTimer { get; set; }
-    public WorldServerTimer SpellTimer { get; set; }
     public WorldServerTimer ChatTimer { get; set; }
     public WorldServerTimer TurnTimer { get; set; }
     public WorldServerTimer WalkTimer { get; set; }
@@ -33,9 +31,6 @@ public class MundaneTemplate : Template
     public int ChatRate { get; set; }
     public int TurnRate { get; set; }
     public int WalkRate { get; set; }
-
-    public List<string> Skills { get; set; }
-    public List<string> Spells { get; set; }
     public List<string> DefaultMerchantStock { get; set; } = new();
 }
 

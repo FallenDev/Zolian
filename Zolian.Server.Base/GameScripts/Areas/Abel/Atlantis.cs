@@ -1,11 +1,13 @@
-﻿using Darkages.Network.Client;
-using Darkages.ScriptingBase;
-using Darkages.Types;
-using System.Numerics;
+﻿using System.Numerics;
+
+using Darkages.Common;
 using Darkages.Enums;
-using Darkages.Sprites.Entity;
 using Darkages.GameScripts.Affects;
+using Darkages.Network.Client;
 using Darkages.Network.Server;
+using Darkages.ScriptingBase;
+using Darkages.Sprites.Entity;
+using Darkages.Types;
 
 namespace Darkages.GameScripts.Areas.Abel;
 
@@ -27,13 +29,9 @@ public class Atlantis : AreaScript
             client.Aisling.Pos == new Vector2(30, 28) ||
             client.Aisling.Pos == new Vector2(31, 28))
         {
-            foreach (var npc in ServerSetup.Instance.GlobalMundaneCache)
-            {
-                if (npc.Value.Scripts is null) continue;
-                if (!npc.Value.Scripts.TryGetValue("Rifting Warden", out var scriptObj)) continue;
-                scriptObj.OnClick(client, npc.Value.Serial);
-                break;
-            }
+            if (!ServerSetup.Instance.MundaneByMapCache.TryGetValue(14759, out var npcArray) || npcArray.Length == 0) return;
+            if (!npcArray.TryGetValue<Mundane>(t => t.Name == "Chromitus", out var mundane) || mundane == null) return;
+            mundane.AIScript?.OnClick(client, mundane.Serial);
         }
 
         if (client.Aisling.EquipmentManager.Equipment[16]?.Item?.Template.Name == "Scuba Gear") return;

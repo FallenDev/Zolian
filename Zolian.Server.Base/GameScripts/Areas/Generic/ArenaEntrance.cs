@@ -1,9 +1,11 @@
-﻿using Darkages.Network.Client;
+﻿using System.Numerics;
+
+using Darkages.Common;
+using Darkages.Network.Client;
 using Darkages.Network.Server;
 using Darkages.ScriptingBase;
 using Darkages.Sprites.Entity;
 using Darkages.Types;
-using System.Numerics;
 
 namespace Darkages.GameScripts.Areas.Generic;
 
@@ -47,9 +49,9 @@ public class ArenaEntrance : AreaScript
             case 13 when newLocation.Y == 8:
             case 13 when newLocation.Y == 9:
             case 13 when newLocation.Y == 10:
-                var npc = ServerSetup.Instance.GlobalMundaneCache.Values.First(npc => npc.Name == "Arena Host");
-                var script = npc.Scripts.Values.FirstOrDefault();
-                script?.OnClick(client, npc.Serial);
+                if (!ServerSetup.Instance.MundaneByMapCache.TryGetValue(14759, out var npcArray) || npcArray.Length == 0) return;
+                if (!npcArray.TryGetValue<Mundane>(t => t.Name == "Arena Host", out var mundane) || mundane == null) return;
+                mundane.AIScript?.OnClick(client, mundane.Serial);
                 break;
         }
     }

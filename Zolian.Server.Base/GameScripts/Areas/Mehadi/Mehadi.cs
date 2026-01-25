@@ -1,6 +1,8 @@
-﻿using Darkages.Network.Client;
+﻿using Darkages.Common;
+using Darkages.Network.Client;
 using Darkages.Network.Server;
 using Darkages.ScriptingBase;
+using Darkages.Sprites.Entity;
 using Darkages.Types;
 
 namespace Darkages.GameScripts.Areas.Mehadi;
@@ -14,15 +16,9 @@ public class Mehadi : AreaScript
     public override void OnMapEnter(WorldClient client)
     {
         if (client.Aisling.QuestManager.SwampAccess) return;
-
-        foreach (var npc in ServerSetup.Instance.GlobalMundaneCache)
-        {
-            if (npc.Value.Scripts is null) continue;
-            if (npc.Value.Scripts.TryGetValue("Shreek", out var scriptObj))
-            {
-                scriptObj.OnClick(client, npc.Value.Serial);
-            }
-        }
+        if (!ServerSetup.Instance.MundaneByMapCache.TryGetValue(3071, out var npcArray) || npcArray.Length == 0) return;
+        if (!npcArray.TryGetValue<Mundane>(t => t.Name == "Shreek", out var mundane) || mundane == null) return;
+        mundane.AIScript?.OnClick(client, mundane.Serial);
 
         client.TransitionToMap(3071, new Position(3, 7));
     }
@@ -34,15 +30,9 @@ public class Mehadi : AreaScript
         if (client == null) return;
         if (client.Aisling.QuestManager.SwampAccess) return;
         if (client.Aisling.Map.ID == 3071) return;
-
-        foreach (var npc in ServerSetup.Instance.GlobalMundaneCache)
-        {
-            if (npc.Value.Scripts is null) continue;
-            if (npc.Value.Scripts.TryGetValue("Shreek Warn", out var scriptObj))
-            {
-                scriptObj.OnClick(client, npc.Value.Serial);
-            }
-        }
+        if (!ServerSetup.Instance.MundaneByMapCache.TryGetValue(14759, out var npcArray) || npcArray.Length == 0) return;
+        if (!npcArray.TryGetValue<Mundane>(t => t.Name == "Shreek The Mad", out var mundane) || mundane == null) return;
+        mundane.AIScript?.OnClick(client, mundane.Serial);
 
         client.TransitionToMap(3071, new Position(3, 7));
     }

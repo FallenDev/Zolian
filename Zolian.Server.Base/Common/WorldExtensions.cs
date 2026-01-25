@@ -1,6 +1,7 @@
 ﻿using Chaos.Networking.Entities.Server;
 
 using Darkages.Network.Client.Abstractions;
+using Darkages.Sprites;
 using Darkages.Sprites.Entity;
 using Darkages.Templates;
 using Darkages.Types;
@@ -55,6 +56,28 @@ public static class WorldExtensions
         };
 
         worldClient.Send(args);
+    }
+
+    public static void SendDialogSequenceMenu(this IWorldClient worldClient, Mundane npc, string message, ushort dialogId, ushort pursuitId, params Dialog.OptionsDataItem[] options)
+    {
+        var dialog = new DisplayDialogArgs
+        {
+            Color = DisplayColor.Default,
+            DialogId = dialogId,
+            DialogType = DialogType.DialogMenu,
+            EntityType = EntityType.Creature, // Creature (npc & monster)
+            HasNextButton = false,
+            HasPreviousButton = false,
+            Name = npc.Name,
+            Options = options.Select(op => op.Text).ToList(),
+            PursuitId = pursuitId,
+            SourceId = npc.Serial,
+            Sprite = npc.Sprite,
+            Text = message,
+            TextBoxLength = (ushort)message.Length
+        };
+
+        worldClient.Send(dialog);
     }
 
     #endregion

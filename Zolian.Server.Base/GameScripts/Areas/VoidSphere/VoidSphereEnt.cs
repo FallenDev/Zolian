@@ -1,10 +1,12 @@
-﻿using Darkages.GameScripts.Affects;
+﻿using System.Numerics;
+
+using Darkages.Common;
+using Darkages.GameScripts.Affects;
 using Darkages.Network.Client;
 using Darkages.Network.Server;
 using Darkages.ScriptingBase;
 using Darkages.Sprites.Entity;
 using Darkages.Types;
-using System.Numerics;
 
 namespace Darkages.GameScripts.Areas.VoidSphere;
 
@@ -25,9 +27,9 @@ public class VoidSphereEnt : AreaScript
         {
             case 15 when newLocation.Y == 9:
             case 15 when newLocation.Y == 8:
-                var npc = ServerSetup.Instance.GlobalMundaneCache.Values.First(npc => npc.Name == "Void Crystal");
-                var script = npc.Scripts.Values.FirstOrDefault();
-                script?.OnClick(client, npc.Serial);
+                if (!ServerSetup.Instance.MundaneByMapCache.TryGetValue(14759, out var npcArray) || npcArray.Length == 0) return;
+                if (!npcArray.TryGetValue<Mundane>(t => t.Name == "Void Crystal", out var mundane) || mundane == null) return;
+                mundane.AIScript?.OnClick(client, mundane.Serial);
                 break;
         }
 

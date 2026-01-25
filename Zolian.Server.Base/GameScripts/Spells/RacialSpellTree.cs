@@ -1,4 +1,6 @@
-﻿using Chaos.Geometry;
+﻿using System.Numerics;
+
+using Chaos.Geometry;
 using Chaos.Geometry.Abstractions.Definitions;
 
 using Darkages.Common;
@@ -10,7 +12,7 @@ using Darkages.Sprites;
 using Darkages.Sprites.Entity;
 using Darkages.Types;
 
-using System.Numerics;
+using static ServiceStack.Diagnostics.Events;
 
 namespace Darkages.GameScripts.Spells;
 
@@ -409,13 +411,9 @@ public class Remote_Bank(Spell spell) : SpellScript(spell)
         playerAction.SendAnimationNearby(Spell.Template.TargetAnimation, playerAction.Position);
         playerAction.ActionUsed = "Remote Bank";
 
-        foreach (var npc in ServerSetup.Instance.GlobalMundaneCache)
-        {
-            if (npc.Value.Scripts is null) continue;
-            if (!npc.Value.Scripts.TryGetValue("Banker", out var scriptObj)) continue;
-            scriptObj.OnClick(playerAction.Client, npc.Value.Serial);
-            break;
-        }
+        if (!ServerSetup.Instance.MundaneByMapCache.TryGetValue(14759, out var npcArray) || npcArray.Length == 0) return;
+        if (!npcArray.TryGetValue<Mundane>(t => t.Name == "Brewvius", out var mundane) || mundane == null) return;
+        mundane.AIScript?.OnClick(playerAction.Client, mundane.Serial);
     }
 }
 

@@ -1045,10 +1045,8 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
 
             foreach (var npc in nearbyMundanes)
             {
-                if (npc?.Scripts is null) continue;
-
-                foreach (var script in npc.Scripts.Values)
-                    script?.OnGossip(localClient.Aisling.Client, localArgs.Message);
+                if (npc?.AIScript is null) continue;
+                npc.AIScript?.OnGossip(localClient.Aisling.Client, localArgs.Message);
             }
 
             localClient.Aisling.Map.Script.Item2.OnGossip(localClient.Aisling.Client, localArgs.Message);
@@ -1780,25 +1778,23 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
                 {
                     case Monster monster:
                         {
-                            var script = monster.AIScript;
-                            if (script is null) return default;
+                            if (monster.AIScript is null) return default;
                             var item = localClient.Aisling.Inventory.FindInSlot(localArgs.SourceSlot);
                             item.Serial = monster.Serial;
                             if (item.Template.Flags.FlagIsSet(ItemFlags.Dropable) && !item.Template.Flags.FlagIsSet(ItemFlags.DropScript))
-                                script?.OnItemDropped(localClient.Aisling.Client, item);
+                                monster.AIScript?.OnItemDropped(localClient.Aisling.Client, item);
                             else
                                 localClient.SendServerMessage(ServerMessageType.ActiveMessage, "I can't seem to do that");
                             break;
                         }
                     case Mundane mundane:
                         {
-                            var script = mundane.Scripts?.Values.FirstOrDefault();
-                            if (script is null) return default;
+                            if (mundane.AIScript is null) return default;
                             var item = localClient.Aisling.Inventory.FindInSlot(localArgs.SourceSlot);
                             item.Serial = mundane.Serial;
                             localClient.EntryCheck = mundane.Serial;
                             mundane.Bypass = true;
-                            script?.OnItemDropped(localClient.Aisling.Client, item);
+                            mundane.AIScript?.OnItemDropped(localClient.Aisling.Client, item);
                             break;
                         }
                     case Aisling aisling:
@@ -1905,16 +1901,14 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
                 {
                     case Monster monster:
                         {
-                            var script = monster.AIScript;
                             if (localArgs.Amount <= 0) return default;
-                            script?.OnGoldDropped(localClient.Aisling.Client, (uint)localArgs.Amount);
+                            monster.AIScript?.OnGoldDropped(localClient.Aisling.Client, (uint)localArgs.Amount);
                             break;
                         }
                     case Mundane mundane:
                         {
-                            var script = mundane.Scripts.Values.FirstOrDefault();
                             if (localArgs.Amount <= 0) return default;
-                            script?.OnGoldDropped(localClient.Aisling.Client, (uint)localArgs.Amount);
+                            mundane.AIScript?.OnGoldDropped(localClient.Aisling.Client, (uint)localArgs.Amount);
                             break;
                         }
                     case Aisling aisling:
@@ -2161,16 +2155,14 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
                 ServerSetup.Instance.GlobalMundaneCache.TryGetValue(localArgs.EntityId, out var npc);
                 if (npc == null) return default;
 
-                var script = npc.Scripts.FirstOrDefault();
-
                 if (localArgs.Slot is not null && localArgs.Slot != 0)
                 {
                     var slotToString = localArgs.Slot.ToString();
-                    script.Value?.OnResponse(localClient.Aisling.Client, localArgs.PursuitId, slotToString);
+                    npc.AIScript?.OnResponse(localClient.Aisling.Client, localArgs.PursuitId, slotToString);
                     return default;
                 }
 
-                script.Value?.OnResponse(localClient.Aisling.Client, localArgs.PursuitId, localArgs.Args?[0]);
+                npc.AIScript?.OnResponse(localClient.Aisling.Client, localArgs.PursuitId, localArgs.Args?[0]);
             }
             catch (Exception e)
             {
@@ -2204,8 +2196,7 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
 
             if (localArgs.EntityId is > 0 and < uint.MaxValue)
             {
-                var script = npc.Scripts.FirstOrDefault();
-                script.Value?.OnResponse(localClient.Aisling.Client, localArgs.DialogId, (localArgs.Args?[0]));
+                npc.AIScript?.OnResponse(localClient.Aisling.Client, localArgs.DialogId, (localArgs.Args?[0]));
 
                 return default;
             }
@@ -2214,18 +2205,16 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
 
             if (localArgs.PursuitId == ushort.MaxValue)
             {
-                var pursuitScript = npc.Scripts.FirstOrDefault();
-
                 switch (result)
                 {
                     case DialogResult.Previous:
-                        pursuitScript.Value?.OnBack(localClient.Aisling);
+                        npc.AIScript?.OnBack(localClient.Aisling);
                         break;
                     case DialogResult.Next:
-                        pursuitScript.Value?.OnNext(localClient.Aisling);
+                        npc.AIScript?.OnNext(localClient.Aisling);
                         break;
                     case DialogResult.Close:
-                        pursuitScript.Value?.OnClose(localClient.Aisling);
+                        npc.AIScript?.OnClose(localClient.Aisling);
                         break;
                 }
             }
@@ -2644,7 +2633,7 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
             }
 
             var monsterCheck = ObjectManager.GetObject<Monster>(localClient.Aisling.Map, i => i.Serial == localArgs.TargetId);
-            var npcCheck = ServerSetup.Instance.GlobalMundaneCache.Where(i => i.Key == localArgs.TargetId);
+            ServerSetup.Instance.MundaneByMapCache.TryGetValue(localClient.Aisling.CurrentMapId, out var npcArray);
 
             if (monsterCheck != null)
             {
@@ -2654,13 +2643,10 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
                 return default;
             }
 
-            foreach (var (_, npc) in npcCheck)
+            foreach (var npc in npcArray)
             {
-                if (npc?.Template?.ScriptKey == null) continue;
-                var scripts = npc.Scripts?.Values;
-                if (scripts == null || localArgs.TargetId == null) return default;
-                foreach (var script in scripts)
-                    script.OnClick(localClient.Aisling.Client, (uint)localArgs.TargetId);
+                if (npc.Serial != localArgs.TargetId) continue;
+                npc.AIScript?.OnClick(localClient.Aisling.Client, (uint)localArgs.TargetId);
                 return default;
             }
 

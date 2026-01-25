@@ -85,27 +85,17 @@ public class Mileth : AreaScript
         {
             case "Succubus Hair":
                 {
-                    foreach (var npc in ServerSetup.Instance.GlobalMundaneCache)
-                    {
-                        if (npc.Value.Scripts is null) continue;
-                        if (npc.Value.Scripts.TryGetValue("Temple of Light", out var scriptObj))
-                        {
-                            scriptObj.OnClick(client, npc.Value.Serial);
-                        }
-                    }
+                    if (!ServerSetup.Instance.MundaneByMapCache.TryGetValue(14759, out var npcArray) || npcArray.Length == 0) return;
+                    if (!npcArray.TryGetValue<Mundane>(t => t.Name == "Hallowed Voice", out var mundane) || mundane == null) return;
+                    mundane.AIScript?.OnClick(client, mundane.Serial);
 
                     return;
                 }
             case "Succibi Hair":
                 {
-                    foreach (var npc in ServerSetup.Instance.GlobalMundaneCache)
-                    {
-                        if (npc.Value.Scripts is null) continue;
-                        if (npc.Value.Scripts.TryGetValue("Temple of Void", out var scriptObj))
-                        {
-                            scriptObj.OnClick(client, npc.Value.Serial);
-                        }
-                    }
+                    if (!ServerSetup.Instance.MundaneByMapCache.TryGetValue(14759, out var npcArray) || npcArray.Length == 0) return;
+                    if (!npcArray.TryGetValue<Mundane>(t => t.Name == "Tormented Voice", out var mundane) || mundane == null) return;
+                    mundane.AIScript?.OnClick(client, mundane.Serial);
 
                     return;
                 }

@@ -3,7 +3,6 @@ using Darkages.Enums;
 using Darkages.Network.Client;
 using Darkages.Network.Server;
 using Darkages.Object;
-using Darkages.Sprites;
 using Darkages.Sprites.Entity;
 using Darkages.Templates;
 
@@ -13,12 +12,12 @@ namespace Darkages.ScriptingBase;
 
 public abstract class MundaneScript(WorldServer server, Mundane mundane) : ObjectManager
 {
+    protected WorldServer Server = server;
+    protected Mundane Mundane = mundane;
     private long _onClickCheck;
+
     private static string[] Messages => ServerSetup.Instance.Config.NpcInteraction.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
     private static int Count => Messages.Length;
-
-    protected Mundane Mundane { get; init; } = mundane;
-    protected WorldServer Server { get; } = server;
 
     public abstract void OnResponse(WorldClient client, ushort responseId, string args);
 

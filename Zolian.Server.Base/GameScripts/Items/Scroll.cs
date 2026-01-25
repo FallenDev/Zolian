@@ -1,4 +1,5 @@
-﻿using Darkages.Enums;
+﻿using Darkages.Common;
+using Darkages.Enums;
 using Darkages.Network.Server;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;
@@ -64,15 +65,11 @@ public class Scroll(Item item) : ItemScript(item)
                             return;
                         case "Cthonic Guild Scroll":
                             {
-                                foreach (var npc in ServerSetup.Instance.GlobalMundaneCache)
-                                {
-                                    if (npc.Value.Scripts is null) continue;
-                                    if (!npc.Value.Scripts.TryGetValue("Cthonic Portals", out var scriptObj)) continue;
-                                    scriptObj.OnClick(client, npc.Value.Serial);
-                                    break;
-                                }
+                                if (!ServerSetup.Instance.MundaneByMapCache.TryGetValue(14759, out var npcArray) || npcArray.Length == 0) return;
+                                if (!npcArray.TryGetValue<Mundane>(t => t.Name == "Cthonic Scroll", out var mundane) || mundane == null) return;
+                                mundane.AIScript?.OnClick(client, mundane.Serial);
+                                return;
                             }
-                            return;
                     }
 
                     return;
