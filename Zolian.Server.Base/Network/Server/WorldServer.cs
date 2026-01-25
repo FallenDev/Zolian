@@ -2643,12 +2643,13 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
                 return default;
             }
 
-            foreach (var npc in npcArray)
-            {
-                if (npc.Serial != localArgs.TargetId) continue;
-                npc.AIScript?.OnClick(localClient.Aisling.Client, (uint)localArgs.TargetId);
-                return default;
-            }
+            if (npcArray != null)
+                foreach (var npc in npcArray)
+                {
+                    if (npc.Serial != localArgs.TargetId) continue;
+                    npc.AIScript?.OnClick(localClient.Aisling.Client, (uint)localArgs.TargetId);
+                    return default;
+                }
 
             var obj = ObjectManager.GetObject(localClient.Aisling.Map, i => i.Serial == localArgs.TargetId, ObjectManager.Get.Aislings);
             switch (obj)

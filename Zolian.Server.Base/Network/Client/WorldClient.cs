@@ -4672,21 +4672,69 @@ public class WorldClient : WorldClientBase, IWorldClient
 
     #region SQL
 
+    private static bool ExecuteWithRetry(Action action, int maxAttempts = 4, int baseDelayMs = 40)
+    {
+        for (var attempt = 1; attempt <= maxAttempts; attempt++)
+        {
+            try
+            {
+                action();
+                return true;
+            }
+            catch (SqlException ex) when (IsTransient(ex) && attempt < maxAttempts)
+            {
+                Thread.Sleep(Math.Min(500, baseDelayMs * (1 << (attempt - 1))));
+                continue;
+            }
+        }
+
+        return false;
+    }
+
+    private static bool IsTransient(SqlException ex)
+    {
+        foreach (SqlError err in ex.Errors)
+        {
+            // -2   = Command timeout
+            // 1205 = Deadlock victim
+            // 1222 = Lock request timeout
+            if (err.Number is -2 or 1205 or 1222)
+                return true;
+        }
+
+        return false;
+    }
+
     public void DeleteSkillFromDb(Skill skill)
     {
-        if (skill.SkillName is null) return;
-        using var sConn = new SqlConnection(AislingStorage.ConnectionString);
+        if (skill.SkillName is null)
+            return;
 
         try
         {
-            sConn.Open();
-            const string cmd = "DELETE FROM ZolianPlayers.dbo.PlayersSkillBook WHERE SkillName = @SkillName AND Serial = @AislingSerial";
-            sConn.Execute(cmd, new
+            var success = ExecuteWithRetry(() =>
             {
-                skill.SkillName,
-                AislingSerial = (long)Aisling.Serial
+                using var sConn = new SqlConnection(AislingStorage.ConnectionString);
+                sConn.Open();
+
+                const string sql =
+                    "DELETE FROM dbo.PlayersSkillBook " +
+                    "WHERE SkillName = @SkillName AND Serial = @AislingSerial";
+
+                sConn.Execute(
+                    sql,
+                    new
+                    {
+                        skill.SkillName,
+                        AislingSerial = (long)Aisling.Serial
+                    },
+                    commandTimeout: 5);
             });
-            sConn.Close();
+
+            if (!success)
+            {
+                ServerSetup.EventsLogger($"DeleteSkillFromDb failed after retries for {skill.SkillName}", LogLevel.Error);
+            }
         }
         catch (Exception e)
         {
@@ -4698,19 +4746,34 @@ public class WorldClient : WorldClientBase, IWorldClient
 
     public void DeleteSpellFromDb(Spell spell)
     {
-        if (spell.SpellName is null) return;
-        using var sConn = new SqlConnection(AislingStorage.ConnectionString);
+        if (spell.SpellName is null)
+            return;
 
         try
         {
-            sConn.Open();
-            const string cmd = "DELETE FROM ZolianPlayers.dbo.PlayersSpellBook WHERE SpellName = @SpellName AND Serial = @AislingSerial";
-            sConn.Execute(cmd, new
+            var success = ExecuteWithRetry(() =>
             {
-                spell.SpellName,
-                AislingSerial = (long)Aisling.Serial
+                using var sConn = new SqlConnection(AislingStorage.ConnectionString);
+                sConn.Open();
+
+                const string sql =
+                    "DELETE FROM dbo.PlayersSpellBook " +
+                    "WHERE SpellName = @SpellName AND Serial = @AislingSerial";
+
+                sConn.Execute(
+                    sql,
+                    new
+                    {
+                        spell.SpellName,
+                        AislingSerial = (long)Aisling.Serial
+                    },
+                    commandTimeout: 5);
             });
-            sConn.Close();
+
+            if (!success)
+            {
+                ServerSetup.EventsLogger($"DeleteSpellFromDb failed after retries for {spell.SpellName}", LogLevel.Error);
+            }
         }
         catch (Exception e)
         {
@@ -4798,19 +4861,36 @@ public class WorldClient : WorldClientBase, IWorldClient
 
     public void RemoveFromIgnoreListDb(string ignored)
     {
+        if (string.IsNullOrWhiteSpace(ignored))
+            return;
+
+        Aisling.IgnoredList.Remove(ignored);
+
         try
         {
-            Aisling.IgnoredList.Remove(ignored);
-
-            var sConn = new SqlConnection(AislingStorage.ConnectionString);
-            sConn.Open();
-            const string playerIgnored = "DELETE FROM ZolianPlayers.dbo.PlayersIgnoreList WHERE Serial = @AislingSerial AND PlayerIgnored = @ignored";
-            sConn.Execute(playerIgnored, new
+            var success = ExecuteWithRetry(() =>
             {
-                AislingSerial = (long)Aisling.Serial,
-                ignored
+                using var sConn = new SqlConnection(AislingStorage.ConnectionString);
+                sConn.Open();
+
+                const string sql =
+                    "DELETE FROM dbo.PlayersIgnoreList " +
+                    "WHERE Serial = @AislingSerial AND PlayerIgnored = @ignored";
+
+                sConn.Execute(
+                    sql,
+                    new
+                    {
+                        AislingSerial = (long)Aisling.Serial,
+                        ignored
+                    },
+                    commandTimeout: 5);
             });
-            sConn.Close();
+
+            if (!success)
+            {
+                ServerSetup.EventsLogger($"RemoveFromIgnoreListDb failed after retries for '{ignored}'", LogLevel.Error);
+            }
         }
         catch (Exception e)
         {

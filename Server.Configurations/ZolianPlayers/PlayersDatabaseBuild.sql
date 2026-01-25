@@ -225,24 +225,36 @@ CREATE TABLE PlayersDebuffs
 	[TimeLeft] INT NOT NULL DEFAULT 0
 )
 
-CREATE TABLE PlayersSpellBook
+CREATE TABLE dbo.PlayersSpellBook
 (
-	[Serial] BIGINT FOREIGN KEY REFERENCES Players(Serial),
-	[Level] INT NOT NULL DEFAULT 0,
-	[Slot] INT NULL,
-	[SpellName] VARCHAR(30) NULL,
-	[CurrentCooldown] INT NULL,
-	[Casts] INT NOT NULL DEFAULT 0
+    [Serial]          BIGINT       NOT NULL,
+    [SpellName]       VARCHAR(30)  NOT NULL,
+    [Level]           INT          NOT NULL DEFAULT 0,
+    [Slot]            INT          NOT NULL,
+    [CurrentCooldown] INT          NOT NULL DEFAULT 0,
+    [Casts]           INT          NOT NULL DEFAULT 0,
+
+    CONSTRAINT FK_PlayersSpellBook_Players
+        FOREIGN KEY ([Serial]) REFERENCES dbo.Players([Serial]),
+
+    CONSTRAINT PK_PlayersSpellBook
+        PRIMARY KEY CLUSTERED ([Serial], [SpellName])
 )
 
-CREATE TABLE PlayersSkillBook
+CREATE TABLE dbo.PlayersSkillBook
 (
-	[Serial] BIGINT FOREIGN KEY REFERENCES Players(Serial),
-	[Level] INT NOT NULL DEFAULT 0,
-	[Slot] INT NULL,
-	[SkillName] VARCHAR(30) NULL,
-	[CurrentCooldown] INT NULL,
-    [Uses] INT NOT NULL DEFAULT 0
+    [Serial]          BIGINT       NOT NULL,
+    [SkillName]       VARCHAR(30)  NOT NULL,
+    [Level]           INT          NOT NULL DEFAULT 0,
+    [Slot]            INT          NOT NULL,
+    [CurrentCooldown] INT          NOT NULL DEFAULT 0,
+    [Uses]            INT          NOT NULL DEFAULT 0,
+
+    CONSTRAINT FK_PlayersSkillBook_Players
+        FOREIGN KEY ([Serial]) REFERENCES dbo.Players([Serial]),
+
+    CONSTRAINT PK_PlayersSkillBook
+        PRIMARY KEY CLUSTERED ([Serial], [SkillName])
 )
 
 CREATE TABLE PlayersLegend
@@ -1261,21 +1273,42 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE PROCEDURE [dbo].[PlayerSaveSkills]
+CREATE OR ALTER PROCEDURE dbo.PlayerSaveSkills
     @Skills dbo.SkillType READONLY
 AS
 BEGIN
     SET NOCOUNT ON;
+    SET XACT_ABORT ON;
 
-    UPDATE target
-    SET    target.[Level] = source.[Level],
-           target.[Slot] = source.[Slot],
-           target.[SkillName] = source.[Skill],
-           target.[Uses] = source.[Uses],
-           target.[CurrentCooldown] = source.[Cooldown]
-    FROM [dbo].[PlayersSkillBook] AS target
-    INNER JOIN @Skills AS source
-    ON target.Serial = source.Serial AND target.SkillName = source.Skill;
+    -- Update existing
+    UPDATE t
+        SET t.[Level]           = s.[Level],
+            t.[Slot]            = s.[Slot],
+            t.[Uses]            = s.[Uses],
+            t.[CurrentCooldown] = s.[Cooldown]
+    FROM dbo.PlayersSkillBook AS t
+    INNER JOIN @Skills AS s
+        ON t.Serial    = s.Serial
+       AND t.SkillName = s.Skill;
+
+    -- Insert missing
+    INSERT INTO dbo.PlayersSkillBook
+        ([Serial], [SkillName], [Level], [Slot], [Uses], [CurrentCooldown])
+    SELECT
+        s.Serial,
+        s.Skill,
+        s.[Level],
+        s.[Slot],
+        s.[Uses],
+        s.[Cooldown]
+    FROM @Skills AS s
+    WHERE NOT EXISTS
+    (
+        SELECT 1
+        FROM dbo.PlayersSkillBook AS t
+        WHERE t.Serial    = s.Serial
+          AND t.SkillName = s.Skill
+    );
 END
 GO
 
@@ -1284,21 +1317,42 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE PROCEDURE [dbo].[PlayerSaveSpells]
+CREATE OR ALTER PROCEDURE dbo.PlayerSaveSpells
     @Spells dbo.SpellType READONLY
 AS
 BEGIN
     SET NOCOUNT ON;
+    SET XACT_ABORT ON;
 
-    UPDATE target
-    SET    target.[Level] = source.[Level],
-           target.[Slot] = source.[Slot],
-           target.[SpellName] = source.[Spell],
-           target.[Casts] = source.[Casts],
-           target.[CurrentCooldown] = source.[Cooldown]
-    FROM [dbo].[PlayersSpellBook] AS target
-    INNER JOIN @Spells AS source
-    ON target.Serial = source.Serial AND target.SpellName = source.Spell;
+    -- Update existing
+    UPDATE t
+        SET t.[Level]           = s.[Level],
+            t.[Slot]            = s.[Slot],
+            t.[Casts]           = s.[Casts],
+            t.[CurrentCooldown] = s.[Cooldown]
+    FROM dbo.PlayersSpellBook AS t
+    INNER JOIN @Spells AS s
+        ON t.Serial    = s.Serial
+       AND t.SpellName = s.Spell;
+
+    -- Insert missing
+    INSERT INTO dbo.PlayersSpellBook
+        ([Serial], [SpellName], [Level], [Slot], [Casts], [CurrentCooldown])
+    SELECT
+        s.Serial,
+        s.Spell,
+        s.[Level],
+        s.[Slot],
+        s.[Casts],
+        s.[Cooldown]
+    FROM @Spells AS s
+    WHERE NOT EXISTS
+    (
+        SELECT 1
+        FROM dbo.PlayersSpellBook AS t
+        WHERE t.Serial    = s.Serial
+          AND t.SpellName = s.Spell
+    );
 END
 GO
 
@@ -1707,15 +1761,37 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE PROCEDURE [dbo].[SkillToPlayer]
-@Serial BIGINT, @Level INT, @Slot INT,
-@SkillName VARCHAR (30), @Uses INT, @CurrentCooldown INT
+CREATE OR ALTER PROCEDURE dbo.SkillToPlayer
+    @Serial BIGINT,
+    @Level INT,
+    @Slot INT,
+    @SkillName VARCHAR(30),
+    @Uses INT,
+    @CurrentCooldown INT
 AS
 BEGIN
     SET NOCOUNT ON;
-    INSERT  INTO [dbo].[PlayersSkillBook]
-	([Serial], [Level], [Slot], [SkillName], [Uses], [CurrentCooldown])
-    VALUES	(@Serial, @Level, @Slot, @SkillName, @Uses, @CurrentCooldown);
+    SET XACT_ABORT ON;
+
+    BEGIN TRY
+        INSERT INTO dbo.PlayersSkillBook
+            ([Serial], [SkillName], [Level], [Slot], [Uses], [CurrentCooldown])
+        VALUES
+            (@Serial, @SkillName, @Level, @Slot, @Uses, @CurrentCooldown);
+    END TRY
+    BEGIN CATCH
+        -- Already exists? treat as success (idempotent grant)
+        IF ERROR_NUMBER() IN (2601, 2627)
+            RETURN;
+
+        DECLARE
+            @Msg NVARCHAR(2048) = ERROR_MESSAGE(),
+            @Sev INT = ERROR_SEVERITY(),
+            @Sta INT = ERROR_STATE();
+
+        RAISERROR (@Msg, @Sev, @Sta);
+        RETURN;
+    END CATCH
 END
 GO
 
@@ -1724,15 +1800,36 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE PROCEDURE [dbo].[SpellToPlayer]
-@Serial BIGINT, @Level INT, @Slot INT,
-@SpellName VARCHAR (30), @Casts INT, @CurrentCooldown INT
+CREATE OR ALTER PROCEDURE dbo.SpellToPlayer
+    @Serial BIGINT,
+    @Level INT,
+    @Slot INT,
+    @SpellName VARCHAR(30),
+    @Casts INT,
+    @CurrentCooldown INT
 AS
 BEGIN
     SET NOCOUNT ON;
-    INSERT  INTO [dbo].[PlayersSpellBook]
-	([Serial], [Level], [Slot], [SpellName], [Casts], [CurrentCooldown])
-    VALUES	(@Serial, @Level, @Slot, @SpellName, @Casts, @CurrentCooldown);
+    SET XACT_ABORT ON;
+
+    BEGIN TRY
+        INSERT INTO dbo.PlayersSpellBook
+            ([Serial], [SpellName], [Level], [Slot], [Casts], [CurrentCooldown])
+        VALUES
+            (@Serial, @SpellName, @Level, @Slot, @Casts, @CurrentCooldown);
+    END TRY
+    BEGIN CATCH
+        IF ERROR_NUMBER() IN (2601, 2627)
+            RETURN;
+
+        DECLARE
+            @Msg NVARCHAR(2048) = ERROR_MESSAGE(),
+            @Sev INT = ERROR_SEVERITY(),
+            @Sta INT = ERROR_STATE();
+
+        RAISERROR (@Msg, @Sev, @Sta);
+        RETURN;
+    END CATCH
 END
 GO
 
