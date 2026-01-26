@@ -368,49 +368,57 @@ public record AislingStorage : Sql, IEqualityOperators<AislingStorage, AislingSt
 
     private async Task PlayerSaveRoutine(Aisling player, CancellationToken ct)
     {
-        await using var conn = new SqlConnection(ConnectionString);
-        await conn.OpenAsync(ct).ConfigureAwait(false);
-        await using var tx = (SqlTransaction)await conn.BeginTransactionAsync(IsolationLevel.ReadCommitted, ct).ConfigureAwait(false);
-
-        try
+        var ok = await ExecuteWithRetryAsync(async token =>
         {
-            player.Client.LastSave = DateTime.UtcNow;
-            var dt = PlayerDataTable();
-            var qDt = QuestDataTable();
-            var cDt = ComboScrollDataTable();
-            var iDt = ItemsDataTable();
-            var skillDt = SkillDataTable();
-            var spellDt = SpellDataTable();
-            var buffDt = BuffsDataTable();
-            var debuffDt = DeBuffsDataTable();
-            dt = PlayerStatSave(player, dt);
-            qDt = PlayerQuestSave(player, qDt);
-            cDt = PlayerComboSave(player, cDt);
-            iDt = PlayerItemSave(player, iDt);
-            skillDt = PlayerSkillSave(player, skillDt);
-            spellDt = PlayerSpellSave(player, spellDt);
-            buffDt = PlayerBuffSave(player, buffDt);
-            debuffDt = PlayerDebuffSave(player, debuffDt);
+            await using var conn = new SqlConnection(ConnectionString);
+            await conn.OpenAsync(token).ConfigureAwait(false);
+            await using var tx = (SqlTransaction)await conn.BeginTransactionAsync(IsolationLevel.ReadCommitted, token).ConfigureAwait(false);
 
-            await ExecTvpAsync(conn, tx, "PlayerSave", "@Players", "dbo.PlayerType", dt, ct).ConfigureAwait(false);
-            await ExecTvpAsync(conn, tx, "PlayerQuestSave", "@Quests", "dbo.QuestType", qDt, ct).ConfigureAwait(false);
-            await ExecTvpAsync(conn, tx, "PlayerComboSave", "@Combos", "dbo.ComboType", cDt, ct).ConfigureAwait(false);
-            await ExecTvpAsync(conn, tx, "ItemUpsert", "@Items", "dbo.ItemType", iDt, ct).ConfigureAwait(false);
-            await ExecTvpAsync(conn, tx, "PlayerSaveSkills", "@Skills", "dbo.SkillType", skillDt, ct).ConfigureAwait(false);
-            await ExecTvpAsync(conn, tx, "PlayerSaveSpells", "@Spells", "dbo.SpellType", spellDt, ct).ConfigureAwait(false);
-            await ExecTvpAsync(conn, tx, "PlayerBuffSync", "@Buffs", "dbo.BuffType", buffDt, ct, new SqlParameter("@Serial", SqlDbType.BigInt) { Value = (long)player.Serial }).ConfigureAwait(false);
-            await ExecTvpAsync(conn, tx, "PlayerDeBuffSync", "@Debuffs", "dbo.DebuffType", debuffDt, ct, new SqlParameter("@Serial", SqlDbType.BigInt) { Value = (long)player.Serial }).ConfigureAwait(false);
+            try
+            {
+                player.Client.LastSave = DateTime.UtcNow;
 
-            await tx.CommitAsync(ct).ConfigureAwait(false);
+                var dt = PlayerStatSave(player, PlayerDataTable());
+                var qDt = PlayerQuestSave(player, QuestDataTable());
+                var cDt = PlayerComboSave(player, ComboScrollDataTable());
+                var iDt = PlayerItemSave(player, ItemsDataTable());
+                var skillDt = PlayerSkillSave(player, SkillDataTable());
+                var spellDt = PlayerSpellSave(player, SpellDataTable());
+                var buffDt = PlayerBuffSave(player, BuffsDataTable());
+                var debuffDt = PlayerDebuffSave(player, DeBuffsDataTable());
 
-            // Player has a synced database state
-            player.PlayerSaveDirty = false;
-        }
-        catch (Exception e)
+                await ExecTvpAsync(conn, tx, "PlayerSave", "@Players", "dbo.PlayerType", dt, token).ConfigureAwait(false);
+                await ExecTvpAsync(conn, tx, "PlayerQuestSave", "@Quests", "dbo.QuestType", qDt, token).ConfigureAwait(false);
+                await ExecTvpAsync(conn, tx, "PlayerComboSave", "@Combos", "dbo.ComboType", cDt, token).ConfigureAwait(false);
+                await ExecTvpAsync(conn, tx, "ItemUpsert", "@Items", "dbo.ItemType", iDt, token).ConfigureAwait(false);
+                await ExecTvpAsync(conn, tx, "PlayerSaveSkills", "@Skills", "dbo.SkillType", skillDt, token).ConfigureAwait(false);
+                await ExecTvpAsync(conn, tx, "PlayerSaveSpells", "@Spells", "dbo.SpellType", spellDt, token).ConfigureAwait(false);
+                await ExecTvpAsync(
+                    conn, tx, "PlayerBuffSync", "@Buffs", "dbo.BuffType", buffDt, token,
+                    new SqlParameter("@Serial", SqlDbType.BigInt) { Value = (long)player.Serial }).ConfigureAwait(false);
+                await ExecTvpAsync(
+                    conn, tx, "PlayerDeBuffSync", "@Debuffs", "dbo.DebuffType", debuffDt, token,
+                    new SqlParameter("@Serial", SqlDbType.BigInt) { Value = (long)player.Serial }).ConfigureAwait(false);
+
+                await tx.CommitAsync(token).ConfigureAwait(false);
+                player.PlayerSaveDirty = false;
+            }
+            catch
+            {
+                try
+                {
+                    await tx.RollbackAsync(token).ConfigureAwait(false);
+                }
+                catch { }
+
+                // Throw and let ExecuteWithRetryAsync see the SqlException
+                throw;
+            }
+        }, ct).ConfigureAwait(false);
+
+        if (!ok)
         {
-            await tx.RollbackAsync(ct).ConfigureAwait(false);
-            ServerSetup.EventsLogger($"PlayerSave performed rollback!", LogLevel.Error);
-            SentrySdk.CaptureException(e);
+            ServerSetup.EventsLogger($"PlayerSave failed after retries for Serial={player.Serial}", LogLevel.Error);
         }
     }
 
@@ -419,10 +427,10 @@ public record AislingStorage : Sql, IEqualityOperators<AislingStorage, AislingSt
     {
         await using var cmd = new SqlCommand(procName, conn, tx)
         {
-            CommandType = CommandType.StoredProcedure
+            CommandType = CommandType.StoredProcedure,
+            CommandTimeout = 5
         };
 
-        // Add scalar/extra parameters first
         if (extraParams is { Length: > 0 })
         {
             foreach (var ep in extraParams)
@@ -432,10 +440,9 @@ public record AislingStorage : Sql, IEqualityOperators<AislingStorage, AislingSt
             }
         }
 
-        // Add TVP parameter
-        var p = cmd.Parameters.AddWithValue(tvpParamName, tvp);
-        p.SqlDbType = SqlDbType.Structured;
-        p.TypeName = typeName;
+        var tvpParam = cmd.Parameters.Add(tvpParamName, SqlDbType.Structured);
+        tvpParam.TypeName = typeName;
+        tvpParam.Value = tvp;
 
         await cmd.ExecuteNonQueryAsync(ct).ConfigureAwait(false);
     }
