@@ -1,24 +1,31 @@
 ﻿using System.Collections.Concurrent;
+using System.Collections.Frozen;
 using System.Reflection;
 
 namespace Darkages.ScriptingBase;
 
 public static class ScriptManager
 {
-    private static readonly Dictionary<string, Type> Scripts = [];
+    private static readonly FrozenDictionary<string, Type> Scripts;
 
     static ScriptManager()
     {
         var assembly = Assembly.GetExecutingAssembly();
+        var temp = new Dictionary<string, Type>(StringComparer.Ordinal);
 
         foreach (var type in assembly.GetTypes())
         {
-            var attribute = type.GetCustomAttributes(typeof(ScriptAttribute), false).Cast<ScriptAttribute>().FirstOrDefault();
+            var attribute = type.GetCustomAttributes(typeof(ScriptAttribute), inherit: false)
+                                .Cast<ScriptAttribute>()
+                                .FirstOrDefault();
 
-            if (attribute == null) continue;
+            if (attribute is null)
+                continue;
 
-            Scripts.Add(attribute.Name, type);
+            temp.Add(attribute.Name, type);
         }
+
+        Scripts = temp.ToFrozenDictionary(StringComparer.Ordinal);
     }
 
     /// <summary>

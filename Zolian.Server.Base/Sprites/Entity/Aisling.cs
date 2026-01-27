@@ -303,11 +303,10 @@ public sealed class Aisling : Player, IAisling
         {
             if (info != null)
             {
-                if (!string.IsNullOrEmpty(info.Data))
-                    foreach (var script in spell.Scripts.Values)
-                        script.Arguments = info.Data;
+                if (spell.ScriptRecord is not null && !string.IsNullOrEmpty(info.Data))
+                    spell.ScriptRecord.Script?.Arguments = info.Data;
 
-                if (spell.Scripts != null)
+                if (spell.ScriptRecord != null)
                 {
                     if (info.Target != 0)
                     {
@@ -334,9 +333,9 @@ public sealed class Aisling : Player, IAisling
                         spell.InUse = true;
 
                         var target = ObjectManager.GetObject(Map, i => i.Serial == info.Target, ObjectManager.Get.Damageable) ?? this;
-                        SendArmorBodyAnimationNearby(CastBodyAnimation, spell.Template.Sound);
-                        var script = spell.Scripts.Values.FirstOrDefault();
-                        script?.OnUse(this, target);
+                        SendArmorBodyAnimationNearby(CastBodyAnimation, null);
+                        SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(spell.Template.Sound, false));
+                        spell.ScriptRecord.Script?.OnUse(this, target);
                         spell.CurrentCooldown = spell.Template.Cooldown > 0 ? spell.Template.Cooldown : 0;
                         Client.SendCooldown(false, spell.Slot, spell.CurrentCooldown);
                         spell.LastUsedSpell = DateTime.UtcNow;
@@ -367,7 +366,7 @@ public sealed class Aisling : Player, IAisling
     /// <summary>
     /// Displays player's body animation based on Armor
     /// </summary>
-    private Aisling SendArmorBodyAnimationNearby(byte animation, byte sound, byte actionSpeed = 30)
+    private Aisling SendArmorBodyAnimationNearby(byte animation, byte? sound = null, byte actionSpeed = 30)
     {
         SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendBodyAnimation(Serial, (BodyAnimation)animation, actionSpeed, sound));
         return this;
@@ -683,7 +682,7 @@ public sealed class Aisling : Player, IAisling
                 var skills = SkillBook.Skills.Values
                     .Where(s => s != null && s.Level < s.Template.MaxLevel && s.Template.MaxLevel != 1)
                     .Where(skill => skill.CanUse())
-                    .Where(skill => skill.Scripts is not null && !skill.Scripts.IsEmpty)
+                    .Where(skill => skill.ScriptRecord is not null)
                     .ToList();
 
                 var tasks = new List<Task>(skills.Count);
@@ -711,7 +710,7 @@ public sealed class Aisling : Player, IAisling
         {
             skill.InUse = true;
 
-            var script = skill.Scripts.Values.FirstOrDefault();
+            var script = skill.ScriptRecord.Script;
             if (script == null) return Task.CompletedTask;
 
             script.OnUse(this);
@@ -758,7 +757,7 @@ public sealed class Aisling : Player, IAisling
 
                 // Only select usable
                 var validSpells = spells
-                    .Where(spell => spell != null && spell.CanUse() && spell.Scripts is not null && !spell.Scripts.IsEmpty)
+                    .Where(spell => spell != null && spell.CanUse() && spell.ScriptRecord is not null)
                     .ToList();
 
                 var tasks = new List<Task>(validSpells.Count);
@@ -800,7 +799,7 @@ public sealed class Aisling : Player, IAisling
         try
         {
             spell.InUse = true;
-            var script = spell.Scripts.Values.FirstOrDefault();
+            var script = spell.ScriptRecord.Script;
             if (script == null) return Task.CompletedTask;
 
             script.OnUse(this, spell.Template.TargetType == SpellTemplate.SpellUseType.NoTarget ? this : Target);

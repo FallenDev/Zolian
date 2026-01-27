@@ -10,11 +10,12 @@ using Darkages.Templates;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
 
-using System.Collections.Concurrent;
 using System.ComponentModel;
 using System.Data;
 
 namespace Darkages.Types;
+
+public sealed record SkillScriptRecord(string Name, SkillScript Script);
 
 public class Skill
 {
@@ -29,7 +30,7 @@ public class Skill
     public bool Ready => CurrentCooldown <= 0;
     public bool Refreshed { get; set; }
 
-    public ConcurrentDictionary<string, SkillScript> Scripts { get; set; }
+    public SkillScriptRecord ScriptRecord { get; set; }
 
     public byte Slot { get; set; }
     public SkillTemplate Template { get; set; }
@@ -50,7 +51,11 @@ public class Skill
 
     public bool CanUse() => Ready;
 
-    public static void AttachScript(Skill skill) => skill.Scripts = ScriptManager.Load<SkillScript>(skill.Template.ScriptName, skill);
+    public static void AttachScript(Skill skill)
+    {
+        if (ScriptManager.TryCreate<SkillScript>(skill.Template.ScriptName, out var scriptInstance, skill))
+            skill.ScriptRecord = new SkillScriptRecord(skill.Template.ScriptName, scriptInstance);
+    }
 
     public static Skill Create(int slot, SkillTemplate skillTemplate)
     {

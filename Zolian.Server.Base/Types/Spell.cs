@@ -16,6 +16,8 @@ using System.Data;
 
 namespace Darkages.Types;
 
+public sealed record SpellScriptRecord(string Name, SpellScript Script);
+
 public class Spell
 {
     public byte Icon { get; init; }
@@ -29,7 +31,7 @@ public class Spell
     private bool Ready => CurrentCooldown <= 0;
     public bool Refreshed { get; set; }
 
-    public ConcurrentDictionary<string, SpellScript> Scripts { get; set; }
+    public SpellScriptRecord ScriptRecord { get; set; }
 
     public byte Slot { get; set; }
     public SpellTemplate Template { get; set; }
@@ -38,7 +40,11 @@ public class Spell
 
     public bool CanUse() => Ready;
 
-    public static void AttachScript(Spell spell) => spell.Scripts = ScriptManager.Load<SpellScript>(spell.Template.ScriptName, spell);
+    public static void AttachScript(Spell spell)
+    {
+        if (ScriptManager.TryCreate<SpellScript>(spell.Template.ScriptName, out var scriptInstance, spell))
+            spell.ScriptRecord = new SpellScriptRecord(spell.Template.ScriptName, scriptInstance);
+    }
 
     public static Spell Create(int slot, SpellTemplate spellTemplate)
     {

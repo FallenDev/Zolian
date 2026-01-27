@@ -540,7 +540,7 @@ public class Consumable(Item item) : ItemScript(item)
 
                     foreach (var skill in skills)
                     {
-                        if (skill?.Scripts is null || skill.Scripts.IsEmpty) continue;
+                        if (skill?.ScriptRecord is null) continue;
                         if (skill.Template.Cooldown == 0)
                             if (!skill.CanUseZeroLineAbility) continue;
                         if (!skill.CanUse()) continue;
@@ -548,8 +548,7 @@ public class Consumable(Item item) : ItemScript(item)
 
                         skill.InUse = true;
 
-                        var script = skill.Scripts.Values.FirstOrDefault();
-                        script?.OnUse(aisling);
+                        skill.ScriptRecord.Script?.OnUse(aisling);
                         skill.CurrentCooldown = skill.Template.Cooldown;
                         aisling.Client.SendCooldown(true, skill.Slot, skill.CurrentCooldown);
                         skill.LastUsedSkill = DateTime.UtcNow;
@@ -612,7 +611,7 @@ public class Consumable(Item item) : ItemScript(item)
 
                     foreach (var skill in skills)
                     {
-                        if (skill?.Scripts is null || skill.Scripts.IsEmpty) continue;
+                        if (skill?.ScriptRecord is null) continue;
                         if (skill.Template.Cooldown == 0)
                             if (!skill.CanUseZeroLineAbility) continue;
                         if (!skill.CanUse()) continue;
@@ -620,8 +619,7 @@ public class Consumable(Item item) : ItemScript(item)
 
                         skill.InUse = true;
 
-                        var script = skill.Scripts.Values.FirstOrDefault();
-                        script?.OnUse(aisling);
+                        skill.ScriptRecord.Script?.OnUse(aisling);
                         skill.CurrentCooldown = skill.Template.Cooldown;
                         aisling.Client.SendCooldown(true, skill.Slot, skill.CurrentCooldown);
                         skill.LastUsedSkill = DateTime.UtcNow;
@@ -702,7 +700,7 @@ public class Consumable(Item item) : ItemScript(item)
 
                     foreach (var skill in skills)
                     {
-                        if (skill?.Scripts is null || skill.Scripts.IsEmpty) continue;
+                        if (skill?.ScriptRecord is null) continue;
                         if (skill.Template.Cooldown == 0)
                             if (!skill.CanUseZeroLineAbility) continue;
                         if (!skill.CanUse()) continue;
@@ -710,8 +708,7 @@ public class Consumable(Item item) : ItemScript(item)
 
                         skill.InUse = true;
 
-                        var script = skill.Scripts.Values.FirstOrDefault();
-                        script?.OnUse(aisling);
+                        skill.ScriptRecord.Script?.OnUse(aisling);
                         skill.CurrentCooldown = skill.Template.Cooldown;
                         aisling.Client.SendCooldown(true, skill.Slot, skill.CurrentCooldown);
                         skill.LastUsedSkill = DateTime.UtcNow;
@@ -819,7 +816,7 @@ public class Consumable(Item item) : ItemScript(item)
 
                     foreach (var skill in skills)
                     {
-                        if (skill?.Scripts is null || skill.Scripts.IsEmpty) continue;
+                        if (skill?.ScriptRecord is null) continue;
                         if (skill.Template.Cooldown == 0)
                             if (!skill.CanUseZeroLineAbility) continue;
                         if (!skill.CanUse()) continue;
@@ -827,8 +824,7 @@ public class Consumable(Item item) : ItemScript(item)
 
                         skill.InUse = true;
 
-                        var script = skill.Scripts.Values.FirstOrDefault();
-                        script?.OnUse(aisling);
+                        skill.ScriptRecord.Script?.OnUse(aisling);
                         skill.CurrentCooldown = skill.Template.Cooldown;
                         aisling.Client.SendCooldown(true, skill.Slot, skill.CurrentCooldown);
                         skill.LastUsedSkill = DateTime.UtcNow;

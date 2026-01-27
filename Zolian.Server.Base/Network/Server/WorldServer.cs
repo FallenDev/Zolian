@@ -1405,9 +1405,7 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
         {
             // Skill exists check
             if (skill?.Template == null) continue;
-            if (skill.Scripts == null) continue;
-            var script = skill.Scripts.Values.FirstOrDefault();
-            if (script == null) continue;
+            if (skill.ScriptRecord is null) continue;
 
             // Skill can be used check
             if (!skill.Ready && skill.InUse) continue;
@@ -1415,7 +1413,7 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
             skill.InUse = true;
 
             // Skill & Weapon script
-            script.OnUse(lpClient.Aisling);
+            skill.ScriptRecord.Script?.OnUse(lpClient.Aisling);
             ExecuteWeaponScriptsOnAssail(lpClient, skill);
 
             skill.LastUsedSkill = DateTime.UtcNow;
@@ -2507,14 +2505,12 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
                 return default;
             }
 
-            if (skill.Template == null || skill.Scripts == null) return default;
+            if (skill.Template is null || skill.ScriptRecord is null) return default;
 
             if (skill.Template.Cooldown == 0)
                 if (!skill.CanUseZeroLineAbility) return default;
             if (!skill.CanUse()) return default;
             if (skill.InUse) return default;
-
-            var script = skill.Scripts.Values.FirstOrDefault();
 
             // Execute Ability or Assail Logic
             skill.InUse = true;
@@ -2526,7 +2522,7 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
 
             if (skill.Template.SkillType != SkillScope.Assail)
             {
-                script?.OnUse(localClient.Aisling);
+                skill.ScriptRecord.Script?.OnUse(localClient.Aisling);
 
                 skill.LastUsedSkill = DateTime.UtcNow;
                 skill.CurrentCooldown = skill.Template.Cooldown;
@@ -2541,7 +2537,7 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
                     return default;
                 }
 
-                script?.OnUse(localClient.Aisling);
+                skill.ScriptRecord.Script?.OnUse(localClient.Aisling);
 
                 skill.LastUsedSkill = DateTime.UtcNow;
                 skill.CurrentCooldown = skill.Template.Cooldown;
@@ -3270,6 +3266,7 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
     private void DisplayRecentClientPacketLogs(IWorldClient client)
     {
         var logs = ClientPacketLogger.GetRecentLogs(client.RemoteIp).ToList();
+        if (logs.IsNullOrEmpty()) return;
 
         foreach (var log in logs)
             ServerSetup.PacketLogger(log);
@@ -3278,6 +3275,7 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
     private void DisplayRecentServerPacketLogs(IWorldClient client)
     {
         var logs = ServerPacketLogger.GetRecentLogs(client.RemoteIp).ToList();
+        if (logs.IsNullOrEmpty()) return;
 
         foreach (var log in logs)
             ServerSetup.PacketLogger(log);

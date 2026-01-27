@@ -514,7 +514,7 @@ public sealed class Monster : Damageable
         if (CantMove) return;
         if (ThrownBack) return;
 
-        if (Target != null)
+        while (Target != null)
         {
             if (Target is not Aisling aisling)
             {

@@ -9,8 +9,6 @@ using Darkages.ScriptingBase;
 using Darkages.Templates;
 using Darkages.Types;
 
-using Microsoft.Extensions.Logging;
-
 using ServiceStack;
 
 namespace Darkages.Sprites.Entity;
