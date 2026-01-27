@@ -14,6 +14,8 @@ using Chaos.Geometry.Abstractions.Definitions;
 using Chaos.Networking.Abstractions;
 using Chaos.Networking.Abstractions.Definitions;
 using Chaos.Networking.Entities.Server;
+using Chaos.NLog.Logging.Definitions;
+using Chaos.NLog.Logging.Extensions;
 using Chaos.Packets;
 using Chaos.Packets.Abstractions;
 
@@ -28,6 +30,7 @@ using Darkages.GameScripts.Formulas;
 using Darkages.Managers;
 using Darkages.Meta;
 using Darkages.Models;
+using Darkages.Network.Client.Abstractions;
 using Darkages.Network.Client.Coalescer;
 using Darkages.Network.Server;
 using Darkages.Object;
@@ -156,12 +159,10 @@ public class WorldClient : WorldClientBase, IWorldClient
     public WorldPortal PendingNode { get; set; }
     public uint EntryCheck { get; set; }
     private readonly Lock _warpCheckLock = new();
-    private readonly ConcurrentQueue<ExperienceEvent> _expQueue = [];
-    private readonly ConcurrentQueue<AbilityEvent> _apQueue = [];
-    private readonly ConcurrentQueue<DebuffEvent> _debuffApplyQueue = [];
-    private readonly ConcurrentQueue<BuffEvent> _buffApplyQueue = [];
-    private readonly ConcurrentQueue<DebuffEvent> _debuffUpdateQueue = [];
-    private readonly ConcurrentQueue<BuffEvent> _buffUpdateQueue = [];
+
+    // Client-owned work queue
+    private readonly ConcurrentQueue<IClientWork> _clientWorkQueue = new();
+    private readonly SemaphoreSlim _clientWorkSignal = new(0, int.MaxValue);
 
     public WorldClient([NotNull] IWorldServer<IWorldClient> server, [NotNull] Socket socket,
         [NotNull] ICrypto crypto, [NotNull] IPacketSerializer packetSerializer,
@@ -171,14 +172,7 @@ public class WorldClient : WorldClientBase, IWorldClient
         _soundCoalescer = new SoundCoalescer(SendSoundImmediate, 150, 24);
         _healthBarCoalescer = new HealthBarCoalescer(SendHealthBarCoalesced, 150, 24);
         _bodyAnimationCoalescer = new BodyAnimationCoalescer(SendBodyAnimationCoalesced, 150, 24);
-
-        // Event-Driven Tasks
-        _ = Task.Factory.StartNew(ProcessExperienceEvents, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default).Unwrap();
-        _ = Task.Factory.StartNew(ProcessAbilityEvents, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default).Unwrap();
-        _ = Task.Factory.StartNew(ProcessApplyingBuffsEvents, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default).Unwrap();
-        _ = Task.Factory.StartNew(ProcessApplyingDebuffsEvents, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default).Unwrap();
-        _ = Task.Factory.StartNew(ProcessUpdatingBuffsEvents, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default).Unwrap();
-        _ = Task.Factory.StartNew(ProcessUpdatingDebuffsEvents, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default).Unwrap();
+        _ = Task.Run(ProcessPlayerWorkQueue);
     }
 
     public Task Update()
@@ -198,113 +192,6 @@ public class WorldClient : WorldClientBase, IWorldClient
 
         return Task.CompletedTask;
     }
-
-
-    #region Events
-
-    private async Task ProcessExperienceEvents()
-    {
-        while (ServerSetup.Instance.Running)
-        {
-            if (_expQueue.IsEmpty)
-            {
-                await Task.Delay(50).ConfigureAwait(false);
-                continue;
-            }
-
-            while (_expQueue.TryDequeue(out var expEvent))
-            {
-                HandleExp(expEvent.Player, expEvent.Exp, expEvent.Hunting);
-            }
-        }
-    }
-
-    private async Task ProcessAbilityEvents()
-    {
-        while (ServerSetup.Instance.Running)
-        {
-            if (_apQueue.IsEmpty)
-            {
-                await Task.Delay(50).ConfigureAwait(false);
-                continue;
-            }
-
-            while (_apQueue.TryDequeue(out var apEvent))
-            {
-                HandleAp(apEvent.Player, apEvent.Exp, apEvent.Hunting);
-            }
-        }
-    }
-
-    private async Task ProcessApplyingDebuffsEvents()
-    {
-        while (ServerSetup.Instance.Running)
-        {
-            if (_debuffApplyQueue.IsEmpty)
-            {
-                await Task.Delay(50).ConfigureAwait(false);
-                continue;
-            }
-
-            while (_debuffApplyQueue.TryDequeue(out var debuffEvent))
-            {
-                debuffEvent.Debuff.OnApplied(debuffEvent.Affected, debuffEvent.Debuff);
-            }
-        }
-    }
-
-    private async Task ProcessApplyingBuffsEvents()
-    {
-        while (ServerSetup.Instance.Running)
-        {
-            if (_buffApplyQueue.IsEmpty)
-            {
-                await Task.Delay(50).ConfigureAwait(false);
-                continue;
-            }
-
-            while (_buffApplyQueue.TryDequeue(out var buffEvent))
-            {
-                buffEvent.Buff.OnApplied(buffEvent.Affected, buffEvent.Buff);
-            }
-        }
-    }
-
-    private async Task ProcessUpdatingDebuffsEvents()
-    {
-        while (ServerSetup.Instance.Running)
-        {
-            if (_debuffUpdateQueue.IsEmpty)
-            {
-                await Task.Delay(50).ConfigureAwait(false);
-                continue;
-            }
-
-            while (_debuffUpdateQueue.TryDequeue(out var debuffEvent))
-            {
-                debuffEvent.Debuff.Update(debuffEvent.Affected);
-            }
-        }
-    }
-
-    private async Task ProcessUpdatingBuffsEvents()
-    {
-        while (ServerSetup.Instance.Running)
-        {
-            if (_buffUpdateQueue.IsEmpty)
-            {
-                await Task.Delay(50).ConfigureAwait(false);
-                continue;
-            }
-
-            while (_buffUpdateQueue.TryDequeue(out var buffEvent))
-            {
-                buffEvent.Buff.Update(buffEvent.Affected);
-            }
-        }
-    }
-
-    #endregion
 
     private void CheckInvisible(Aisling player, Stopwatch sw)
     {
@@ -4069,14 +3956,71 @@ public class WorldClient : WorldClientBase, IWorldClient
 
     #endregion
 
-    #region Events & Experience
+    #region Client Work Queue
 
-    public void EnqueueExperienceEvent(Aisling player, long exp, bool hunting) => _expQueue.Enqueue(new ExperienceEvent(player, exp, hunting));
-    public void EnqueueAbilityEvent(Aisling player, int exp, bool hunting) => _apQueue.Enqueue(new AbilityEvent(player, exp, hunting));
-    public void EnqueueDebuffAppliedEvent(Sprite affected, Debuff debuff) => _debuffApplyQueue.Enqueue(new DebuffEvent(affected, debuff));
-    public void EnqueueBuffAppliedEvent(Sprite affected, Buff buff) => _buffApplyQueue.Enqueue(new BuffEvent(affected, buff));
-    public void EnqueueDebuffUpdatedEvent(Sprite affected, Debuff debuff) => _debuffUpdateQueue.Enqueue(new DebuffEvent(affected, debuff));
-    public void EnqueueBuffUpdatedEvent(Sprite affected, Buff buff) => _buffUpdateQueue.Enqueue(new BuffEvent(affected, buff));
+    private async Task ProcessPlayerWorkQueue()
+    {
+        while (ServerSetup.Instance.Running)
+        {
+            await _clientWorkSignal.WaitAsync(5000).ConfigureAwait(false);
+
+            while (_clientWorkQueue.TryDequeue(out var work))
+            {
+                try
+                {
+                    work.Execute(this);
+                }
+                catch { }
+            }
+        }
+    }
+
+    public void EnqueueExperienceEvent(Aisling player, long exp, bool hunting)
+    {
+        _clientWorkQueue.Enqueue(new ExperienceEvent(player, exp, hunting));
+        _clientWorkSignal.Release();
+    }
+
+    public void EnqueueAbilityEvent(Aisling player, int exp, bool hunting)
+    {
+        _clientWorkQueue.Enqueue(new AbilityEvent(player, exp, hunting));
+        _clientWorkSignal.Release();
+    }
+
+    public void EnqueueDebuffAppliedEvent(Sprite affected, Debuff debuff)
+    {
+        _clientWorkQueue.Enqueue(new DebuffOnAppliedEvent(affected, debuff));
+        _clientWorkSignal.Release();
+    }
+
+    public void EnqueueDebuffUpdatedEvent(Sprite affected, Debuff debuff)
+    {
+        _clientWorkQueue.Enqueue(new DebuffOnUpdatedEvent(affected, debuff));
+        _clientWorkSignal.Release();
+    }
+
+    public void EnqueueBuffAppliedEvent(Sprite affected, Buff buff)
+    {
+        _clientWorkQueue.Enqueue(new BuffOnAppliedEvent(affected, buff));
+        _clientWorkSignal.Release();
+    }
+
+    public void EnqueueBuffUpdatedEvent(Sprite affected, Buff buff)
+    {
+        _clientWorkQueue.Enqueue(new BuffOnUpdatedEvent(affected, buff));
+        _clientWorkSignal.Release();
+    }
+
+    internal void ClientWorkExpEvent(Aisling player, long exp, bool hunting) => HandleExp(player, exp, hunting);
+    internal void ClientWorkApEvent(Aisling player, int exp, bool hunting) => HandleAp(player, exp, hunting);
+    internal void ClientWorkDebuffAppliedEvent(Sprite affected, Debuff debuff) => debuff.OnApplied(affected, debuff);
+    internal void ClientWorkDebuffUpdatedEvent(Sprite affected, Debuff debuff) => debuff.Update(affected);
+    internal void ClientWorkBuffAppliedEvent(Sprite affected, Buff buff) => buff.OnApplied(affected, buff);
+    internal void ClientWorkBuffUpdatedEvent(Sprite affected, Buff buff) => buff.Update(affected);
+
+    #endregion
+
+    #region Events & Experience
 
     public void GiveExp(long exp)
     {
