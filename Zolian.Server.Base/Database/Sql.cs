@@ -1,11 +1,15 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using System.Data;
 
-using System.Data;
+using Microsoft.Data.SqlClient;
 
 namespace Darkages.Database;
 
 public abstract record Sql
 {
+    public const string ConnectionString = "Data Source=.;Initial Catalog=ZolianPlayers;Integrated Security=True;Encrypt=False;MultipleActiveResultSets=True;";
+    public const string PersonalMailString = "Data Source=.;Initial Catalog=ZolianBoardsMail;Integrated Security=True;Encrypt=False;MultipleActiveResultSets=True;";
+    public const string EncryptedConnectionString = "Data Source=.;Initial Catalog=ZolianPlayers;Integrated Security=True;Column Encryption Setting=enabled;TrustServerCertificate=True;MultipleActiveResultSets=True;";
+
     protected static SqlConnection ConnectToDatabase(string conn)
     {
         var sConn = new SqlConnection(conn);

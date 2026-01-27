@@ -740,41 +740,80 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE PROCEDURE [dbo].[ItemUpsert]
-@Items dbo.ItemType READONLY
+CREATE OR ALTER PROCEDURE dbo.ItemUpsert
+    @Items dbo.ItemType READONLY,
+    @PruneMissing bit = 0
 AS
 BEGIN
     SET NOCOUNT ON;
+    SET XACT_ABORT ON;
 
-    MERGE INTO [dbo].[PlayersItems] WITH (HOLDLOCK) AS target
-    USING @Items AS source 
-	ON target.ItemId = source.ItemId
+    -- UPDATE existing
+    UPDATE T
+    SET
+        T.[Name]            = S.[Name],
+        T.[Serial]          = S.[Serial],
+        T.[ItemPane]        = S.[ItemPane],
+        T.[Slot]            = S.[Slot],
+        T.[InventorySlot]   = S.[InventorySlot],
+        T.[Color]           = S.[Color],
+        T.[Cursed]          = S.[Cursed],
+        T.[Durability]      = S.[Durability],
+        T.[Identified]      = S.[Identified],
+        T.[ItemVariance]    = S.[ItemVariance],
+        T.[WeapVariance]    = S.[WeapVariance],
+        T.[ItemQuality]     = S.[ItemQuality],
+        T.[OriginalQuality] = S.[OriginalQuality],
+        T.[Stacks]          = S.[Stacks],
+        T.[Enchantable]     = S.[Enchantable],
+        T.[Tarnished]       = S.[Tarnished],
+        T.[GearEnhancement] = S.[GearEnhancement],
+        T.[ItemMaterial]    = S.[ItemMaterial],
+        T.[GiftWrapped]     = S.[GiftWrapped]
+    FROM dbo.PlayersItems AS T
+    INNER JOIN @Items AS S
+        ON S.ItemId = T.ItemId;
 
-    WHEN MATCHED THEN
-    UPDATE SET 
-        Name = source.Name,
-        Serial = source.Serial,
-        ItemPane = source.ItemPane,
-        Slot = source.Slot,
-        InventorySlot = source.InventorySlot,
-        Color = source.Color,
-        Cursed = source.Cursed,
-        Durability = source.Durability,
-        Identified = source.Identified,
-        ItemVariance = source.ItemVariance,
-        WeapVariance = source.WeapVariance,
-        ItemQuality = source.ItemQuality,
-        OriginalQuality = source.OriginalQuality,
-        Stacks = source.Stacks,
-        Enchantable = source.Enchantable,
-        Tarnished = source.Tarnished,
-        GearEnhancement = source.GearEnhancement,
-        ItemMaterial = source.ItemMaterial,
-        GiftWrapped = source.GiftWrapped
+    -- INSERT missing
+    INSERT INTO dbo.PlayersItems
+    (
+        ItemId, [Name], Serial, ItemPane, Slot, InventorySlot, Color, Cursed, Durability, Identified,
+        ItemVariance, WeapVariance, ItemQuality, OriginalQuality, Stacks, Enchantable, Tarnished,
+        GearEnhancement, ItemMaterial, GiftWrapped
+    )
+    SELECT
+        S.ItemId, S.[Name], S.Serial, S.ItemPane, S.Slot, S.InventorySlot, S.Color, S.Cursed, S.Durability, S.Identified,
+        S.ItemVariance, S.WeapVariance, S.ItemQuality, S.OriginalQuality, S.Stacks, S.Enchantable, S.Tarnished,
+        S.GearEnhancement, S.ItemMaterial, S.GiftWrapped
+    FROM @Items AS S
+    WHERE NOT EXISTS
+    (
+        SELECT 1
+        FROM dbo.PlayersItems AS T
+        WHERE T.ItemId = S.ItemId
+          AND T.Serial = S.Serial
+    );
 
-    WHEN NOT MATCHED THEN
-    INSERT (ItemId, Name, Serial, ItemPane, Slot, InventorySlot, Color, Cursed, Durability, Identified, ItemVariance, WeapVariance, ItemQuality, OriginalQuality, Stacks, Enchantable, Tarnished, GearEnhancement, ItemMaterial, GiftWrapped)
-    VALUES (source.ItemId, source.Name, source.Serial, source.ItemPane, source.Slot, source.InventorySlot, source.Color, source.Cursed, source.Durability, source.Identified, source.ItemVariance, source.WeapVariance, source.ItemQuality, source.OriginalQuality, source.Stacks, source.Enchantable, source.Tarnished, source.GearEnhancement, source.ItemMaterial, source.GiftWrapped);
+    -- DELETE rows no longer present (authoritative sync)
+    IF (@PruneMissing = 1)
+    BEGIN
+        ;WITH DistinctOwners AS
+        (
+            SELECT DISTINCT Serial
+            FROM @Items
+        )
+        DELETE T
+        FROM dbo.PlayersItems AS T
+        INNER JOIN DistinctOwners AS O
+            ON O.Serial = T.Serial
+        WHERE NOT EXISTS
+        (
+            SELECT 1
+            FROM @Items AS S
+            WHERE S.ItemId = T.ItemId
+              AND S.Serial = T.Serial
+        );
+    END
 END
 GO
 
@@ -1019,37 +1058,45 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE PROCEDURE [dbo].[PlayerComboSave]
+CREATE OR ALTER PROCEDURE dbo.PlayerComboSave
     @Combos dbo.ComboType READONLY
 AS
 BEGIN
     SET NOCOUNT ON;
-    
-    MERGE INTO [dbo].[PlayersCombos] AS target
-    USING @Combos AS source
-    ON target.Serial = source.Serial
+    SET XACT_ABORT ON;
 
-    WHEN MATCHED THEN
-    UPDATE SET
-        [Combo1] = source.Combo1,
-        [Combo2] = source.Combo2,
-        [Combo3] = source.Combo3,
-        [Combo4] = source.Combo4,
-        [Combo5] = source.Combo5,
-        [Combo6] = source.Combo6,
-        [Combo7] = source.Combo7,
-        [Combo8] = source.Combo8,
-        [Combo9] = source.Combo9,
-        [Combo10] = source.Combo10,
-        [Combo11] = source.Combo11,
-        [Combo12] = source.Combo12,
-        [Combo13] = source.Combo13,
-        [Combo14] = source.Combo14,
-        [Combo15] = source.Combo15
-        
-    WHEN NOT MATCHED THEN
-    INSERT (Serial, Combo1, Combo2, Combo3, Combo4, Combo5, Combo6, Combo7, Combo8, Combo9, Combo10, Combo11, Combo12, Combo13, Combo14, Combo15)
-    VALUES (source.Serial, source.Combo1, source.Combo2, source.Combo3, source.Combo4, source.Combo5, source.Combo6, source.Combo7, source.Combo8, source.Combo9, source.Combo10, source.Combo11, source.Combo12, source.Combo13, source.Combo14, source.Combo15);
+    UPDATE c
+    SET
+        [Combo1]  = s.Combo1,
+        [Combo2]  = s.Combo2,
+        [Combo3]  = s.Combo3,
+        [Combo4]  = s.Combo4,
+        [Combo5]  = s.Combo5,
+        [Combo6]  = s.Combo6,
+        [Combo7]  = s.Combo7,
+        [Combo8]  = s.Combo8,
+        [Combo9]  = s.Combo9,
+        [Combo10] = s.Combo10,
+        [Combo11] = s.Combo11,
+        [Combo12] = s.Combo12,
+        [Combo13] = s.Combo13,
+        [Combo14] = s.Combo14,
+        [Combo15] = s.Combo15
+    FROM dbo.PlayersCombos AS c
+    INNER JOIN @Combos AS s
+        ON s.Serial = c.Serial;
+
+    INSERT INTO dbo.PlayersCombos
+        (Serial, Combo1, Combo2, Combo3, Combo4, Combo5, Combo6, Combo7, Combo8, Combo9, Combo10, Combo11, Combo12, Combo13, Combo14, Combo15)
+    SELECT
+        s.Serial, s.Combo1, s.Combo2, s.Combo3, s.Combo4, s.Combo5, s.Combo6, s.Combo7, s.Combo8, s.Combo9, s.Combo10, s.Combo11, s.Combo12, s.Combo13, s.Combo14, s.Combo15
+    FROM @Combos AS s
+    WHERE NOT EXISTS
+    (
+        SELECT 1
+        FROM dbo.PlayersCombos AS c
+        WHERE c.Serial = s.Serial
+    );
 END
 GO
 
@@ -1058,105 +1105,169 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE PROCEDURE [dbo].[PlayerQuestSave]
+CREATE OR ALTER PROCEDURE dbo.PlayerQuestSave
     @Quests dbo.QuestType READONLY
 AS
 BEGIN
     SET NOCOUNT ON;
-    
-    MERGE INTO [dbo].[PlayersQuests] AS target
-    USING @Quests AS source
-    ON target.Serial = source.Serial
+    SET XACT_ABORT ON;
 
-    WHEN MATCHED THEN
-    UPDATE SET
-		[MailBoxNumber] = source.MailBoxNumber,
-        [TutorialCompleted] = source.TutorialCompleted,
-        [BetaReset] = source.BetaReset,
-        [ArtursGift] = source.ArtursGift,
-        [CamilleGreetingComplete] = source.CamilleGreetingComplete,
-        [ConnPotions] = source.ConnPotions,
-        [CryptTerror] = source.CryptTerror,
-        [CryptTerrorSlayed] = source.CryptTerrorSlayed,
-		[CryptTerrorContinued] = source.CryptTerrorContinued,
-		[CryptTerrorContSlayed] = source.CryptTerrorContSlayed,
-		[NightTerror] = source.NightTerror,
-		[NightTerrorSlayed] = source.NightTerrorSlayed,
-		[DreamWalking] = source.DreamWalking,
-		[DreamWalkingSlayed] = source.DreamWalkingSlayed,
-        [Dar] = source.Dar,
-        [DarItem] = source.DarItem,
-		[ReleasedTodesbaum] = source.ReleasedTodesbaum,
-        [DrunkenHabit] = source.DrunkenHabit,
-        [FionaDance] = source.FionaDance,
-        [Keela] = source.Keela,
-        [KeelaCount] = source.KeelaCount,
-        [KeelaKill] = source.KeelaKill,
-        [KeelaQuesting] = source.KeelaQuesting,
-        [KillerBee] = source.KillerBee,
-        [Neal] = source.Neal,
-        [NealCount] = source.NealCount,
-        [NealKill] = source.NealKill,
-        [AbelShopAccess] = source.AbelShopAccess,
-        [PeteKill] = source.PeteKill,
-        [PeteComplete] = source.PeteComplete,
-        [SwampAccess] = source.SwampAccess,
-        [SwampCount] = source.SwampCount,
-        [TagorDungeonAccess] = source.TagorDungeonAccess,
-        [Lau] = source.Lau,
-        [BeltDegree] = source.BeltDegree,
-        [MilethReputation] = source.MilethReputation,
-        [AbelReputation] = source.AbelReputation,
-        [RucesionReputation] = source.RucesionReputation,
-        [SuomiReputation] = source.SuomiReputation,
-        [RionnagReputation] = source.RionnagReputation,
-        [OrenReputation] = source.OrenReputation,
-        [PietReputation] = source.PietReputation,
-        [LouresReputation] = source.LouresReputation,
-        [UndineReputation] = source.UndineReputation,
-        [TagorReputation] = source.TagorReputation,
-        [BlackSmithing] = source.BlackSmithing,
-		[BlackSmithingTier] = source.BlackSmithingTier,
-        [ArmorSmithing] = source.ArmorSmithing,
-		[ArmorSmithingTier] = source.ArmorSmithingTier,
-        [JewelCrafting] = source.JewelCrafting,
-		[JewelCraftingTier] = source.JewelCraftingTier,
-        [StoneSmithing] = source.StoneSmithing,
-		[StoneSmithingTier] = source.StoneSmithingTier,
-        [ThievesGuildReputation] = source.ThievesGuildReputation,
-        [AssassinsGuildReputation] = source.AssassinsGuildReputation,
-        [AdventuresGuildReputation] = source.AdventuresGuildReputation,
-        [BeltQuest] = source.BeltQuest,
-        [SavedChristmas] = source.SavedChristmas,
-		[RescuedReindeer] = source.RescuedReindeer,
-		[YetiKilled] = source.YetiKilled,
-		[UnknownStart] = source.UnknownStart,
-		[PirateShipAccess] = source.PirateShipAccess,
-		[ScubaSchematics] = source.ScubaSchematics,
-		[ScubaMaterialsQuest] = source.ScubaMaterialsQuest,
-		[ScubaGearCrafted] = source.ScubaGearCrafted,
-        [EternalLove] = source.EternalLove,
-        [EternalLoveStarted] = source.EternalLoveStarted,
-        [UnhappyEnding] = source.UnhappyEnding,
-        [HonoringTheFallen] = source.HonoringTheFallen,
-        [ReadTheFallenNotes] = source.ReadTheFallenNotes,
-		[GivenTarnishedBreastplate] = source.GivenTarnishedBreastplate,
-		[EternalBond] = source.EternalBond,
-		[ArmorCraftingCodex] = source.ArmorCraftingCodex,
-		[ArmorApothecaryAccepted] = source.ArmorApothecaryAccepted,
-		[ArmorCodexDeciphered] = source.ArmorCodexDeciphered,
-		[ArmorCraftingCodexLearned] = source.ArmorCraftingCodexLearned,
-		[ArmorCraftingAdvancedCodexLearned] = source.ArmorCraftingAdvancedCodexLearned,
-        [CthonicKillTarget] = source.CthonicKillTarget,
-        [CthonicFindTarget] = source.CthonicFindTarget,
-        [CthonicKillCompletions] = source.CthonicKillCompletions,
-        [CthonicCleansingOne] = source.CthonicCleansingOne,
-        [CthonicCleansingTwo] = source.CthonicCleansingTwo,
-        [CthonicDepthsCleansing] = source.CthonicDepthsCleansing,
-        [CthonicRuinsAccess] = source.CthonicRuinsAccess,
-        [CthonicRemainsExplorationLevel] = source.CthonicRemainsExplorationLevel,
-        [EndedOmegasRein] = source.EndedOmegasRein,
-        [CraftedMoonArmor] = source.CraftedMoonArmor;
+    -- Update existing
+    UPDATE q
+    SET
+        [MailBoxNumber] = s.MailBoxNumber,
+        [TutorialCompleted] = s.TutorialCompleted,
+        [BetaReset] = s.BetaReset,
+        [ArtursGift] = s.ArtursGift,
+        [CamilleGreetingComplete] = s.CamilleGreetingComplete,
+        [ConnPotions] = s.ConnPotions,
+        [CryptTerror] = s.CryptTerror,
+        [CryptTerrorSlayed] = s.CryptTerrorSlayed,
+        [CryptTerrorContinued] = s.CryptTerrorContinued,
+        [CryptTerrorContSlayed] = s.CryptTerrorContSlayed,
+        [NightTerror] = s.NightTerror,
+        [NightTerrorSlayed] = s.NightTerrorSlayed,
+        [DreamWalking] = s.DreamWalking,
+        [DreamWalkingSlayed] = s.DreamWalkingSlayed,
+        [Dar] = s.Dar,
+        [DarItem] = s.DarItem,
+        [ReleasedTodesbaum] = s.ReleasedTodesbaum,
+        [DrunkenHabit] = s.DrunkenHabit,
+        [FionaDance] = s.FionaDance,
+        [Keela] = s.Keela,
+        [KeelaCount] = s.KeelaCount,
+        [KeelaKill] = s.KeelaKill,
+        [KeelaQuesting] = s.KeelaQuesting,
+        [KillerBee] = s.KillerBee,
+        [Neal] = s.Neal,
+        [NealCount] = s.NealCount,
+        [NealKill] = s.NealKill,
+        [AbelShopAccess] = s.AbelShopAccess,
+        [PeteKill] = s.PeteKill,
+        [PeteComplete] = s.PeteComplete,
+        [SwampAccess] = s.SwampAccess,
+        [SwampCount] = s.SwampCount,
+        [TagorDungeonAccess] = s.TagorDungeonAccess,
+        [Lau] = s.Lau,
+        [BeltDegree] = s.BeltDegree,
+        [MilethReputation] = s.MilethReputation,
+        [AbelReputation] = s.AbelReputation,
+        [RucesionReputation] = s.RucesionReputation,
+        [SuomiReputation] = s.SuomiReputation,
+        [RionnagReputation] = s.RionnagReputation,
+        [OrenReputation] = s.OrenReputation,
+        [PietReputation] = s.PietReputation,
+        [LouresReputation] = s.LouresReputation,
+        [UndineReputation] = s.UndineReputation,
+        [TagorReputation] = s.TagorReputation,
+        [BlackSmithing] = s.BlackSmithing,
+        [BlackSmithingTier] = s.BlackSmithingTier,
+        [ArmorSmithing] = s.ArmorSmithing,
+        [ArmorSmithingTier] = s.ArmorSmithingTier,
+        [JewelCrafting] = s.JewelCrafting,
+        [JewelCraftingTier] = s.JewelCraftingTier,
+        [StoneSmithing] = s.StoneSmithing,
+        [StoneSmithingTier] = s.StoneSmithingTier,
+        [ThievesGuildReputation] = s.ThievesGuildReputation,
+        [AssassinsGuildReputation] = s.AssassinsGuildReputation,
+        [AdventuresGuildReputation] = s.AdventuresGuildReputation,
+        [BeltQuest] = s.BeltQuest,
+        [SavedChristmas] = s.SavedChristmas,
+        [RescuedReindeer] = s.RescuedReindeer,
+        [YetiKilled] = s.YetiKilled,
+        [UnknownStart] = s.UnknownStart,
+        [PirateShipAccess] = s.PirateShipAccess,
+        [ScubaSchematics] = s.ScubaSchematics,
+        [ScubaMaterialsQuest] = s.ScubaMaterialsQuest,
+        [ScubaGearCrafted] = s.ScubaGearCrafted,
+        [EternalLove] = s.EternalLove,
+        [EternalLoveStarted] = s.EternalLoveStarted,
+        [UnhappyEnding] = s.UnhappyEnding,
+        [HonoringTheFallen] = s.HonoringTheFallen,
+        [ReadTheFallenNotes] = s.ReadTheFallenNotes,
+        [GivenTarnishedBreastplate] = s.GivenTarnishedBreastplate,
+        [EternalBond] = s.EternalBond,
+        [ArmorCraftingCodex] = s.ArmorCraftingCodex,
+        [ArmorApothecaryAccepted] = s.ArmorApothecaryAccepted,
+        [ArmorCodexDeciphered] = s.ArmorCodexDeciphered,
+        [ArmorCraftingCodexLearned] = s.ArmorCraftingCodexLearned,
+        [ArmorCraftingAdvancedCodexLearned] = s.ArmorCraftingAdvancedCodexLearned,
+        [CthonicKillTarget] = s.CthonicKillTarget,
+        [CthonicFindTarget] = s.CthonicFindTarget,
+        [CthonicKillCompletions] = s.CthonicKillCompletions,
+        [CthonicCleansingOne] = s.CthonicCleansingOne,
+        [CthonicCleansingTwo] = s.CthonicCleansingTwo,
+        [CthonicDepthsCleansing] = s.CthonicDepthsCleansing,
+        [CthonicRuinsAccess] = s.CthonicRuinsAccess,
+        [CthonicRemainsExplorationLevel] = s.CthonicRemainsExplorationLevel,
+        [EndedOmegasRein] = s.EndedOmegasRein,
+        [CraftedMoonArmor] = s.CraftedMoonArmor
+    FROM dbo.PlayersQuests AS q
+    INNER JOIN @Quests AS s
+        ON s.Serial = q.Serial;
+
+    -- Insert missing
+    INSERT INTO dbo.PlayersQuests
+    (
+        Serial,
+        MailBoxNumber, TutorialCompleted, BetaReset, ArtursGift, CamilleGreetingComplete, ConnPotions,
+        CryptTerror, CryptTerrorSlayed, CryptTerrorContinued, CryptTerrorContSlayed,
+        NightTerror, NightTerrorSlayed, DreamWalking, DreamWalkingSlayed,
+        Dar, DarItem, ReleasedTodesbaum, DrunkenHabit, FionaDance,
+        Keela, KeelaCount, KeelaKill, KeelaQuesting, KillerBee,
+        Neal, NealCount, NealKill,
+        AbelShopAccess, PeteKill, PeteComplete,
+        SwampAccess, SwampCount, TagorDungeonAccess,
+        Lau, BeltDegree,
+        MilethReputation, AbelReputation, RucesionReputation, SuomiReputation, RionnagReputation,
+        OrenReputation, PietReputation, LouresReputation, UndineReputation, TagorReputation,
+        BlackSmithing, BlackSmithingTier, ArmorSmithing, ArmorSmithingTier, JewelCrafting, JewelCraftingTier,
+        StoneSmithing, StoneSmithingTier,
+        ThievesGuildReputation, AssassinsGuildReputation, AdventuresGuildReputation,
+        BeltQuest, SavedChristmas, RescuedReindeer, YetiKilled,
+        UnknownStart, PirateShipAccess,
+        ScubaSchematics, ScubaMaterialsQuest, ScubaGearCrafted,
+        EternalLove, EternalLoveStarted, UnhappyEnding,
+        HonoringTheFallen, ReadTheFallenNotes, GivenTarnishedBreastplate, EternalBond,
+        ArmorCraftingCodex, ArmorApothecaryAccepted, ArmorCodexDeciphered, ArmorCraftingCodexLearned, ArmorCraftingAdvancedCodexLearned,
+        CthonicKillTarget, CthonicFindTarget, CthonicKillCompletions,
+        CthonicCleansingOne, CthonicCleansingTwo, CthonicDepthsCleansing,
+        CthonicRuinsAccess, CthonicRemainsExplorationLevel,
+        EndedOmegasRein, CraftedMoonArmor
+    )
+    SELECT
+        s.Serial,
+        s.MailBoxNumber, s.TutorialCompleted, s.BetaReset, s.ArtursGift, s.CamilleGreetingComplete, s.ConnPotions,
+        s.CryptTerror, s.CryptTerrorSlayed, s.CryptTerrorContinued, s.CryptTerrorContSlayed,
+        s.NightTerror, s.NightTerrorSlayed, s.DreamWalking, s.DreamWalkingSlayed,
+        s.Dar, s.DarItem, s.ReleasedTodesbaum, s.DrunkenHabit, s.FionaDance,
+        s.Keela, s.KeelaCount, s.KeelaKill, s.KeelaQuesting, s.KillerBee,
+        s.Neal, s.NealCount, s.NealKill,
+        s.AbelShopAccess, s.PeteKill, s.PeteComplete,
+        s.SwampAccess, s.SwampCount, s.TagorDungeonAccess,
+        s.Lau, s.BeltDegree,
+        s.MilethReputation, s.AbelReputation, s.RucesionReputation, s.SuomiReputation, s.RionnagReputation,
+        s.OrenReputation, s.PietReputation, s.LouresReputation, s.UndineReputation, s.TagorReputation,
+        s.BlackSmithing, s.BlackSmithingTier, s.ArmorSmithing, s.ArmorSmithingTier, s.JewelCrafting, s.JewelCraftingTier,
+        s.StoneSmithing, s.StoneSmithingTier,
+        s.ThievesGuildReputation, s.AssassinsGuildReputation, s.AdventuresGuildReputation,
+        s.BeltQuest, s.SavedChristmas, s.RescuedReindeer, s.YetiKilled,
+        s.UnknownStart, s.PirateShipAccess,
+        s.ScubaSchematics, s.ScubaMaterialsQuest, s.ScubaGearCrafted,
+        s.EternalLove, s.EternalLoveStarted, s.UnhappyEnding,
+        s.HonoringTheFallen, s.ReadTheFallenNotes, s.GivenTarnishedBreastplate, s.EternalBond,
+        s.ArmorCraftingCodex, s.ArmorApothecaryAccepted, s.ArmorCodexDeciphered, s.ArmorCraftingCodexLearned, s.ArmorCraftingAdvancedCodexLearned,
+        s.CthonicKillTarget, s.CthonicFindTarget, s.CthonicKillCompletions,
+        s.CthonicCleansingOne, s.CthonicCleansingTwo, s.CthonicDepthsCleansing,
+        s.CthonicRuinsAccess, s.CthonicRemainsExplorationLevel,
+        s.EndedOmegasRein, s.CraftedMoonArmor
+    FROM @Quests AS s
+    WHERE NOT EXISTS
+    (
+        SELECT 1
+        FROM dbo.PlayersQuests AS q
+        WHERE q.Serial = s.Serial
+    );
 END
 GO
 
@@ -1165,106 +1276,154 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE PROCEDURE [dbo].[PlayerSave]
+CREATE OR ALTER PROCEDURE dbo.PlayerSave
     @Players dbo.PlayerType READONLY
 AS
 BEGIN
     SET NOCOUNT ON;
+    SET XACT_ABORT ON;
 
-    MERGE INTO [dbo].[Players] AS target
-    USING @Players AS source 
-    ON target.Serial = source.Serial
+    -- Update existing
+    UPDATE p
+    SET
+        [Created] = s.Created,
+        [Username] = s.Username,
+        [LoggedIn] = s.LoggedIn,
+        [LastLogged] = s.LastLogged,
+        [X] = s.X,
+        [Y] = s.Y,
+        [CurrentMapId] = s.CurrentMapId,
+        [Direction] = s.Direction,
+        [CurrentHp] = s.CurrentHp,
+        [BaseHp] = s.BaseHp,
+        [CurrentMp] = s.CurrentMp,
+        [BaseMp] = s.BaseMp,
+        [_ac] = s._ac,
+        [_Regen] = s._Regen,
+        [_Dmg] = s._Dmg,
+        [_Hit] = s._Hit,
+        [_Mr] = s._Mr,
+        [_Str] = s._Str,
+        [_Int] = s._Int,
+        [_Wis] = s._Wis,
+        [_Con] = s._Con,
+        [_Dex] = s._Dex,
+        [_Luck] = s._Luck,
+        [AbpLevel] = s.AbpLevel,
+        [AbpNext] = s.AbpNext,
+        [AbpTotal] = s.AbpTotal,
+        [ExpLevel] = s.ExpLevel,
+        [ExpNext] = s.ExpNext,
+        [ExpTotal] = s.ExpTotal,
+        [Stage] = s.Stage,
+        [JobClass] = s.JobClass,
+        [Path] = s.Path,
+        [PastClass] = s.PastClass,
+        [Race] = s.Race,
+        [Afflictions] = s.Afflictions,
+        [Gender] = s.Gender,
+        [HairColor] = s.HairColor,
+        [HairStyle] = s.HairStyle,
+        [NameColor] = s.NameColor,
+        [Nation] = s.Nation,
+        [Clan] = s.Clan,
+        [ClanRank] = s.ClanRank,
+        [ClanTitle] = s.ClanTitle,
+        [MonsterForm] = s.MonsterForm,
+        [ActiveStatus] = s.ActiveStatus,
+        [Flags] = s.Flags,
+        [CurrentWeight] = s.CurrentWeight,
+        [World] = s.World,
+        [Lantern] = s.Lantern,
+        [Invisible] = s.Invisible,
+        [Resting] = s.Resting,
+        [FireImmunity] = s.FireImmunity,
+        [WaterImmunity] = s.WaterImmunity,
+        [WindImmunity] = s.WindImmunity,
+        [EarthImmunity] = s.EarthImmunity,
+        [LightImmunity] = s.LightImmunity,
+        [DarkImmunity] = s.DarkImmunity,
+        [PoisonImmunity] = s.PoisonImmunity,
+        [EnticeImmunity] = s.EnticeImmunity,
+        [PartyStatus] = s.PartyStatus,
+        [RaceSkill] = s.RaceSkill,
+        [RaceSpell] = s.RaceSpell,
+        [GameMaster] = s.GameMaster,
+        [ArenaHost] = s.ArenaHost,
+        [Knight] = s.Knight,
+        [GoldPoints] = s.GoldPoints,
+        [StatPoints] = s.StatPoints,
+        [GamePoints] = s.GamePoints,
+        [BankedGold] = s.BankedGold,
+        [ArmorImg] = s.ArmorImg,
+        [HelmetImg] = s.HelmetImg,
+        [ShieldImg] = s.ShieldImg,
+        [WeaponImg] = s.WeaponImg,
+        [BootsImg] = s.BootsImg,
+        [HeadAccessoryImg] = s.HeadAccessoryImg,
+        [Accessory1Img] = s.Accessory1Img,
+        [Accessory2Img] = s.Accessory2Img,
+        [Accessory3Img] = s.Accessory3Img,
+        [Accessory1Color] = s.Accessory1Color,
+        [Accessory2Color] = s.Accessory2Color,
+        [Accessory3Color] = s.Accessory3Color,
+        [BodyColor] = s.BodyColor,
+        [BodySprite] = s.BodySprite,
+        [FaceSprite] = s.FaceSprite,
+        [OverCoatImg] = s.OverCoatImg,
+        [BootColor] = s.BootColor,
+        [OverCoatColor] = s.OverCoatColor,
+        [Pants] = s.Pants
+    FROM dbo.Players AS p
+    INNER JOIN @Players AS s
+        ON s.Serial = p.Serial;
 
-    WHEN MATCHED THEN
-    UPDATE SET 
-        [Created] = source.Created,
-        [Username] = source.Username,
-        [LoggedIn] = source.LoggedIn,
-        [LastLogged] = source.LastLogged,
-        [X] = source.X,
-        [Y] = source.Y,
-        [CurrentMapId] = source.CurrentMapId,
-        [Direction] = source.Direction,
-        [CurrentHp] = source.CurrentHp,
-        [BaseHp] = source.BaseHp,
-        [CurrentMp] = source.CurrentMp,
-        [BaseMp] = source.BaseMp,
-        [_ac] = source._ac,
-        [_Regen] = source._Regen,
-        [_Dmg] = source._Dmg,
-        [_Hit] = source._Hit,
-        [_Mr] = source._Mr,
-        [_Str] = source._Str,
-        [_Int] = source._Int,
-        [_Wis] = source._Wis,
-        [_Con] = source._Con,
-        [_Dex] = source._Dex,
-        [_Luck] = source._Luck,
-        [AbpLevel] = source.AbpLevel,
-        [AbpNext] = source.AbpNext,
-        [AbpTotal] = source.AbpTotal,
-        [ExpLevel] = source.ExpLevel,
-        [ExpNext] = source.ExpNext,
-        [ExpTotal] = source.ExpTotal,
-        [Stage] = source.Stage,
-        [JobClass] = source.JobClass,
-        [Path] = source.Path,
-        [PastClass] = source.PastClass,
-        [Race] = source.Race,
-        [Afflictions] = source.Afflictions,
-        [Gender] = source.Gender,
-        [HairColor] = source.HairColor,
-        [HairStyle] = source.HairStyle,
-        [NameColor] = source.NameColor,
-        [Nation] = source.Nation,
-        [Clan] = source.Clan,
-        [ClanRank] = source.ClanRank,
-        [ClanTitle] = source.ClanTitle,
-        [MonsterForm] = source.MonsterForm,
-        [ActiveStatus] = source.ActiveStatus,
-        [Flags] = source.Flags,
-        [CurrentWeight] = source.CurrentWeight,
-        [World] = source.World,
-        [Lantern] = source.Lantern,
-        [Invisible] = source.Invisible,
-        [Resting] = source.Resting,
-        [FireImmunity] = source.FireImmunity,
-        [WaterImmunity] = source.WaterImmunity,
-        [WindImmunity] = source.WindImmunity,
-        [EarthImmunity] = source.EarthImmunity,
-        [LightImmunity] = source.LightImmunity,
-        [DarkImmunity] = source.DarkImmunity,
-        [PoisonImmunity] = source.PoisonImmunity,
-        [EnticeImmunity] = source.EnticeImmunity,
-        [PartyStatus] = source.PartyStatus,
-        [RaceSkill] = source.RaceSkill,
-        [RaceSpell] = source.RaceSpell,
-        [GameMaster] = source.GameMaster,
-        [ArenaHost] = source.ArenaHost,
-        [Knight] = source.Knight,
-        [GoldPoints] = source.GoldPoints,
-        [StatPoints] = source.StatPoints,
-        [GamePoints] = source.GamePoints,
-        [BankedGold] = source.BankedGold,
-        [ArmorImg] = source.ArmorImg,
-        [HelmetImg] = source.HelmetImg,
-        [ShieldImg] = source.ShieldImg,
-        [WeaponImg] = source.WeaponImg,
-        [BootsImg] = source.BootsImg,
-        [HeadAccessoryImg] = source.HeadAccessoryImg,
-        [Accessory1Img] = source.Accessory1Img,
-        [Accessory2Img] = source.Accessory2Img,
-        [Accessory3Img] = source.Accessory3Img,
-        [Accessory1Color] = source.Accessory1Color,
-        [Accessory2Color] = source.Accessory2Color,
-        [Accessory3Color] = source.Accessory3Color,
-        [BodyColor] = source.BodyColor,
-        [BodySprite] = source.BodySprite,
-        [FaceSprite] = source.FaceSprite,
-        [OverCoatImg] = source.OverCoatImg,
-        [BootColor] = source.BootColor,
-        [OverCoatColor] = source.OverCoatColor,
-        [Pants] = source.Pants;
+    -- Insert missing
+    INSERT INTO dbo.Players
+    (
+        Serial,
+        Created, Username, LoggedIn, LastLogged, X, Y, CurrentMapId, Direction,
+        CurrentHp, BaseHp, CurrentMp, BaseMp,
+        _ac, _Regen, _Dmg, _Hit, _Mr, _Str, _Int, _Wis, _Con, _Dex, _Luck,
+        AbpLevel, AbpNext, AbpTotal, ExpLevel, ExpNext, ExpTotal,
+        Stage, JobClass, Path, PastClass, Race, Afflictions, Gender,
+        HairColor, HairStyle, NameColor, Nation, Clan, ClanRank, ClanTitle,
+        MonsterForm, ActiveStatus, Flags, CurrentWeight, World, Lantern, Invisible, Resting,
+        FireImmunity, WaterImmunity, WindImmunity, EarthImmunity, LightImmunity, DarkImmunity,
+        PoisonImmunity, EnticeImmunity,
+        PartyStatus, RaceSkill, RaceSpell, GameMaster, ArenaHost, Knight,
+        GoldPoints, StatPoints, GamePoints, BankedGold,
+        ArmorImg, HelmetImg, ShieldImg, WeaponImg, BootsImg,
+        HeadAccessoryImg, Accessory1Img, Accessory2Img, Accessory3Img,
+        Accessory1Color, Accessory2Color, Accessory3Color,
+        BodyColor, BodySprite, FaceSprite,
+        OverCoatImg, BootColor, OverCoatColor, Pants
+    )
+    SELECT
+        s.Serial,
+        s.Created, s.Username, s.LoggedIn, s.LastLogged, s.X, s.Y, s.CurrentMapId, s.Direction,
+        s.CurrentHp, s.BaseHp, s.CurrentMp, s.BaseMp,
+        s._ac, s._Regen, s._Dmg, s._Hit, s._Mr, s._Str, s._Int, s._Wis, s._Con, s._Dex, s._Luck,
+        s.AbpLevel, s.AbpNext, s.AbpTotal, s.ExpLevel, s.ExpNext, s.ExpTotal,
+        s.Stage, s.JobClass, s.Path, s.PastClass, s.Race, s.Afflictions, s.Gender,
+        s.HairColor, s.HairStyle, s.NameColor, s.Nation, s.Clan, s.ClanRank, s.ClanTitle,
+        s.MonsterForm, s.ActiveStatus, s.Flags, s.CurrentWeight, s.World, s.Lantern, s.Invisible, s.Resting,
+        s.FireImmunity, s.WaterImmunity, s.WindImmunity, s.EarthImmunity, s.LightImmunity, s.DarkImmunity,
+        s.PoisonImmunity, s.EnticeImmunity,
+        s.PartyStatus, s.RaceSkill, s.RaceSpell, s.GameMaster, s.ArenaHost, s.Knight,
+        s.GoldPoints, s.StatPoints, s.GamePoints, s.BankedGold,
+        s.ArmorImg, s.HelmetImg, s.ShieldImg, s.WeaponImg, s.BootsImg,
+        s.HeadAccessoryImg, s.Accessory1Img, s.Accessory2Img, s.Accessory3Img,
+        s.Accessory1Color, s.Accessory2Color, s.Accessory3Color,
+        s.BodyColor, s.BodySprite, s.FaceSprite,
+        s.OverCoatImg, s.BootColor, s.OverCoatColor, s.Pants
+    FROM @Players AS s
+    WHERE NOT EXISTS
+    (
+        SELECT 1
+        FROM dbo.Players AS p
+        WHERE p.Serial = s.Serial
+    );
 END
 GO
 
@@ -1308,6 +1467,24 @@ BEGIN
         FROM dbo.PlayersSkillBook AS t
         WHERE t.Serial    = s.Serial
           AND t.SkillName = s.Skill
+    );
+
+    -- Delete rows no longer present (authoritative sync)
+    ;WITH DistinctOwners AS
+    (
+        SELECT DISTINCT Serial
+        FROM @Skills
+    )
+    DELETE t
+    FROM dbo.PlayersSkillBook AS t
+    INNER JOIN DistinctOwners AS o
+        ON o.Serial = t.Serial
+    WHERE NOT EXISTS
+    (
+        SELECT 1
+        FROM @Skills AS s
+        WHERE s.Serial = t.Serial
+          AND s.Skill  = t.SkillName
     );
 END
 GO
@@ -1353,6 +1530,24 @@ BEGIN
         WHERE t.Serial    = s.Serial
           AND t.SpellName = s.Spell
     );
+
+    -- Delete rows no longer present (authoritative sync)
+    ;WITH DistinctOwners AS
+    (
+        SELECT DISTINCT Serial
+        FROM @Spells
+    )
+    DELETE t
+    FROM dbo.PlayersSpellBook AS t
+    INNER JOIN DistinctOwners AS o
+        ON o.Serial = t.Serial
+    WHERE NOT EXISTS
+    (
+        SELECT 1
+        FROM @Spells AS s
+        WHERE s.Serial = t.Serial
+          AND s.Spell  = t.SpellName
+    );
 END
 GO
 
@@ -1386,28 +1581,39 @@ BEGIN
     SET NOCOUNT ON;
     SET XACT_ABORT ON;
 
-    ;WITH SourceRows AS
-    (
-        SELECT
-            @Serial AS Serial,
-            b.[Name],
-            b.TimeLeft
-        FROM @Buffs b
-        WHERE b.Serial = @Serial
-    )
-    MERGE dbo.PlayersBuffs WITH (HOLDLOCK) AS t
-    USING SourceRows AS s
-        ON  t.Serial = s.Serial
-        AND t.[Name] = s.[Name]
-    WHEN MATCHED THEN
-        UPDATE SET
-            t.TimeLeft = s.TimeLeft
-    WHEN NOT MATCHED BY TARGET THEN
-        INSERT (Serial, [Name], TimeLeft)
-        VALUES (s.Serial, s.[Name], s.TimeLeft)
-    WHEN NOT MATCHED BY SOURCE
-         AND t.Serial = @Serial
-    THEN DELETE;
+    -- Update existing
+    UPDATE t
+    SET t.TimeLeft = s.TimeLeft
+    FROM dbo.PlayersBuffs AS t
+    INNER JOIN @Buffs AS s
+        ON s.Serial = t.Serial
+       AND s.[Name] = t.[Name]
+    WHERE t.Serial = @Serial;
+
+    -- Insert missing
+    INSERT INTO dbo.PlayersBuffs (Serial, [Name], TimeLeft)
+    SELECT s.Serial, s.[Name], s.TimeLeft
+    FROM @Buffs AS s
+    WHERE s.Serial = @Serial
+      AND NOT EXISTS
+      (
+          SELECT 1
+          FROM dbo.PlayersBuffs AS t
+          WHERE t.Serial = s.Serial
+            AND t.[Name] = s.[Name]
+      );
+
+    -- Delete rows no longer present (authoritative sync)
+    DELETE t
+    FROM dbo.PlayersBuffs AS t
+    WHERE t.Serial = @Serial
+      AND NOT EXISTS
+      (
+          SELECT 1
+          FROM @Buffs AS s
+          WHERE s.Serial = t.Serial
+            AND s.[Name] = t.[Name]
+      );
 END;
 GO
 
@@ -1419,35 +1625,46 @@ GO
 CREATE OR ALTER PROCEDURE dbo.PlayerDeBuffSync
 (
     @Serial BIGINT,
-    @Debuffs  dbo.DebuffType READONLY
+    @Debuffs dbo.DebuffType READONLY
 )
 AS
 BEGIN
     SET NOCOUNT ON;
     SET XACT_ABORT ON;
 
-    ;WITH SourceRows AS
-    (
-        SELECT
-            @Serial AS Serial,
-            b.[Name],
-            b.TimeLeft
-        FROM @Debuffs b
-        WHERE b.Serial = @Serial
-    )
-    MERGE dbo.PlayersDebuffs WITH (HOLDLOCK) AS t
-    USING SourceRows AS s
-        ON  t.Serial = s.Serial
-        AND t.[Name] = s.[Name]
-    WHEN MATCHED THEN
-        UPDATE SET
-            t.TimeLeft = s.TimeLeft
-    WHEN NOT MATCHED BY TARGET THEN
-        INSERT (Serial, [Name], TimeLeft)
-        VALUES (s.Serial, s.[Name], s.TimeLeft)
-    WHEN NOT MATCHED BY SOURCE
-         AND t.Serial = @Serial
-    THEN DELETE;
+    -- Update existing
+    UPDATE t
+    SET t.TimeLeft = s.TimeLeft
+    FROM dbo.PlayersDebuffs AS t
+    INNER JOIN @Debuffs AS s
+        ON s.Serial = t.Serial
+       AND s.[Name] = t.[Name]
+    WHERE t.Serial = @Serial;
+
+    -- Insert missing
+    INSERT INTO dbo.PlayersDebuffs (Serial, [Name], TimeLeft)
+    SELECT s.Serial, s.[Name], s.TimeLeft
+    FROM @Debuffs AS s
+    WHERE s.Serial = @Serial
+      AND NOT EXISTS
+      (
+          SELECT 1
+          FROM dbo.PlayersDebuffs AS t
+          WHERE t.Serial = s.Serial
+            AND t.[Name] = s.[Name]
+      );
+
+    -- Delete rows no longer present (authoritative sync)
+    DELETE t
+    FROM dbo.PlayersDebuffs AS t
+    WHERE t.Serial = @Serial
+      AND NOT EXISTS
+      (
+          SELECT 1
+          FROM @Debuffs AS s
+          WHERE s.Serial = t.Serial
+            AND s.[Name] = t.[Name]
+      );
 END;
 GO
 

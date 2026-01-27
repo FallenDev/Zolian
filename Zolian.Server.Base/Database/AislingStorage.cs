@@ -18,9 +18,6 @@ namespace Darkages.Database;
 
 public record AislingStorage : Sql, IEqualityOperators<AislingStorage, AislingStorage, bool>
 {
-    public const string ConnectionString = "Data Source=.;Initial Catalog=ZolianPlayers;Integrated Security=True;Encrypt=False;MultipleActiveResultSets=True;";
-    public const string PersonalMailString = "Data Source=.;Initial Catalog=ZolianBoardsMail;Integrated Security=True;Encrypt=False;MultipleActiveResultSets=True;";
-    private const string EncryptedConnectionString = "Data Source=.;Initial Catalog=ZolianPlayers;Integrated Security=True;Column Encryption Setting=enabled;TrustServerCertificate=True;MultipleActiveResultSets=True;";
     private AsyncLock LoadLock { get; } = new();
     private AsyncLock CreateLock { get; } = new();
     private readonly ConcurrentDictionary<uint, AsyncLock> _playerLocks = new();
@@ -372,60 +369,43 @@ public record AislingStorage : Sql, IEqualityOperators<AislingStorage, AislingSt
         {
             await using var conn = new SqlConnection(ConnectionString);
             await conn.OpenAsync(token).ConfigureAwait(false);
-            await using var tx = (SqlTransaction)await conn.BeginTransactionAsync(IsolationLevel.ReadCommitted, token).ConfigureAwait(false);
 
-            try
-            {
-                player.Client.LastSave = DateTime.UtcNow;
+            player.Client.LastSave = DateTime.UtcNow;
 
-                var dt = PlayerStatSave(player, PlayerDataTable());
-                var qDt = PlayerQuestSave(player, QuestDataTable());
-                var cDt = PlayerComboSave(player, ComboScrollDataTable());
-                var iDt = PlayerItemSave(player, ItemsDataTable());
-                var skillDt = PlayerSkillSave(player, SkillDataTable());
-                var spellDt = PlayerSpellSave(player, SpellDataTable());
-                var buffDt = PlayerBuffSave(player, BuffsDataTable());
-                var debuffDt = PlayerDebuffSave(player, DeBuffsDataTable());
+            // Build TVPs once (in-memory snapshot) then persist each table independently.
+            var dt = PlayerStatSave(player, PlayerDataTable());
+            var qDt = PlayerQuestSave(player, QuestDataTable());
+            var cDt = PlayerComboSave(player, ComboScrollDataTable());
+            var iDt = PlayerItemSave(player, ItemsDataTable());
+            var skillDt = PlayerSkillSave(player, SkillDataTable());
+            var spellDt = PlayerSpellSave(player, SpellDataTable());
+            var buffDt = PlayerBuffSave(player, BuffsDataTable());
+            var debuffDt = PlayerDebuffSave(player, DeBuffsDataTable());
 
-                await ExecTvpAsync(conn, tx, "PlayerSave", "@Players", "dbo.PlayerType", dt, token).ConfigureAwait(false);
-                await ExecTvpAsync(conn, tx, "PlayerQuestSave", "@Quests", "dbo.QuestType", qDt, token).ConfigureAwait(false);
-                await ExecTvpAsync(conn, tx, "PlayerComboSave", "@Combos", "dbo.ComboType", cDt, token).ConfigureAwait(false);
-                await ExecTvpAsync(conn, tx, "ItemUpsert", "@Items", "dbo.ItemType", iDt, token).ConfigureAwait(false);
-                await ExecTvpAsync(conn, tx, "PlayerSaveSkills", "@Skills", "dbo.SkillType", skillDt, token).ConfigureAwait(false);
-                await ExecTvpAsync(conn, tx, "PlayerSaveSpells", "@Spells", "dbo.SpellType", spellDt, token).ConfigureAwait(false);
-                await ExecTvpAsync(
-                    conn, tx, "PlayerBuffSync", "@Buffs", "dbo.BuffType", buffDt, token,
-                    new SqlParameter("@Serial", SqlDbType.BigInt) { Value = (long)player.Serial }).ConfigureAwait(false);
-                await ExecTvpAsync(
-                    conn, tx, "PlayerDeBuffSync", "@Debuffs", "dbo.DebuffType", debuffDt, token,
-                    new SqlParameter("@Serial", SqlDbType.BigInt) { Value = (long)player.Serial }).ConfigureAwait(false);
+            // Autocommit per proc
+            await ExecTvpAsync(conn, "PlayerSave", "@Players", "dbo.PlayerType", dt, token).ConfigureAwait(false);
+            await ExecTvpAsync(conn, "PlayerQuestSave", "@Quests", "dbo.QuestType", qDt, token).ConfigureAwait(false);
+            await ExecTvpAsync(conn, "PlayerComboSave", "@Combos", "dbo.ComboType", cDt, token).ConfigureAwait(false);
+            await ExecTvpAsync(conn, "ItemUpsert", "@Items", "dbo.ItemType", iDt, token).ConfigureAwait(false);
+            await ExecTvpAsync(conn, "PlayerSaveSkills", "@Skills", "dbo.SkillType", skillDt, token).ConfigureAwait(false);
+            await ExecTvpAsync(conn, "PlayerSaveSpells", "@Spells", "dbo.SpellType", spellDt, token).ConfigureAwait(false);
 
-                await tx.CommitAsync(token).ConfigureAwait(false);
-                player.PlayerSaveDirty = false;
-            }
-            catch
-            {
-                try
-                {
-                    await tx.RollbackAsync(token).ConfigureAwait(false);
-                }
-                catch { }
+            await ExecTvpAsync(conn, "PlayerBuffSync", "@Buffs", "dbo.BuffType", buffDt, token,
+                new SqlParameter("@Serial", SqlDbType.BigInt) { Value = (long)player.Serial }).ConfigureAwait(false);
 
-                // Throw and let ExecuteWithRetryAsync see the SqlException
-                throw;
-            }
+            await ExecTvpAsync(conn, "PlayerDeBuffSync", "@Debuffs", "dbo.DebuffType", debuffDt, token,
+                new SqlParameter("@Serial", SqlDbType.BigInt) { Value = (long)player.Serial }).ConfigureAwait(false);
+
+            player.PlayerSaveDirty = false;
         }, ct).ConfigureAwait(false);
 
         if (!ok)
-        {
             ServerSetup.EventsLogger($"PlayerSave failed after retries for Serial={player.Serial}", LogLevel.Error);
-        }
     }
 
-    private static async Task ExecTvpAsync(SqlConnection conn, SqlTransaction tx, string procName, string tvpParamName,
-        string typeName, DataTable tvp, CancellationToken ct, params SqlParameter[] extraParams)
+    private static async Task ExecTvpAsync(SqlConnection conn, string procName, string tvpParamName, string typeName, DataTable tvp, CancellationToken ct, params SqlParameter[] extraParams)
     {
-        await using var cmd = new SqlCommand(procName, conn, tx)
+        await using var cmd = new SqlCommand(procName, conn)
         {
             CommandType = CommandType.StoredProcedure,
             CommandTimeout = 5
