@@ -1057,6 +1057,13 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
             {
                 if (!localClient.Aisling.GameMaster) return false;
                 if (!localArgs.Message.StartsWith("/")) return false;
+
+                var ipLocal = IPAddress.Parse(ServerSetup.Instance.InternalAddress);
+
+                if (!GameMastersIPs.Any(ip => client.RemoteIp.Equals(IPAddress.Parse(ip)))
+                    && !IPAddress.IsLoopback(client.RemoteIp) && !client.RemoteIp.Equals(ipLocal))
+                    return false;
+
                 Commander.ParseChatMessage(localClient.Aisling.Client, localArgs.Message);
                 return true;
             }
@@ -1275,6 +1282,7 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
             {
                 var ipLocal = IPAddress.Parse(ServerSetup.Instance.InternalAddress);
 
+                // If not from GM IPs, loopback, or local IP, disconnect
                 if (!GameMastersIPs.Any(ip => client.RemoteIp.Equals(IPAddress.Parse(ip)))
                     && !IPAddress.IsLoopback(client.RemoteIp) && !client.RemoteIp.Equals(ipLocal))
                 {
