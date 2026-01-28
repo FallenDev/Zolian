@@ -259,18 +259,14 @@ public class GlobalSpellMethods
     {
         if (sprite is not Aisling aisling) return;
         if (target is not Damageable damageable) return;
-        var levelSeed = (long)((aisling.ExpLevel + aisling.AbpLevel) * 0.10 * spell.Level);
         var dmg = AislingSpellDamageCalc(sprite, spell, exp);
 
         if (target.CurrentHp > 0)
         {
-            aisling.SendAnimationNearby(spell.Template.TargetAnimation, null, target.Serial);
             damageable.ApplyElementalSpellDamage(aisling, dmg, aisling.OffenseElement, spell);
         }
-        else
-        {
-            aisling.SendAnimationNearby(spell.Template.TargetAnimation, target.Position);
-        }
+
+        aisling.SendAnimationNearby(spell.Template.TargetAnimation, target.Position);
     }
 
     public void ElementalNecklaceOnUse(Sprite sprite, Sprite target, Spell spell, double exp = 1)
@@ -332,17 +328,7 @@ public class GlobalSpellMethods
                 return;
             }
 
-            var success = Execute(client, spell);
-
-            if (success)
-            {
-                ElementalNecklaceOnSuccess(aisling, target, spell, exp);
-            }
-            else
-            {
-                SpellOnFailed(aisling, target, spell);
-            }
-
+            ElementalNecklaceOnSuccess(aisling, target, spell, exp);
             client.SendAttributes(StatUpdateType.Vitality);
         }
         else

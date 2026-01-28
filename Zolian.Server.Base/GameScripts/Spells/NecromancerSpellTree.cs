@@ -359,23 +359,15 @@ public class Corpse_Burst(Spell spell) : SpellScript(spell)
         playerAction.ActionUsed = "Corpse Burst";
         var client = playerAction.Client;
         GlobalSpellMethods.Train(client, Spell);
-        var success = GlobalSpellMethods.Execute(client, Spell);
         var mR = Generator.RandNumGen100();
 
         if (mR <= target.Will)
         {
-            if (success)
-            {
-                OnSuccess(sprite, target);
-            }
-            else
-            {
-                GlobalSpellMethods.SpellOnFailed(playerAction, target, Spell);
-            }
+            OnSuccess(sprite, target);
         }
         else
         {
-            playerAction.Client.Aisling.SendAnimationNearby(115, null, target.Serial);
+            playerAction.Client.Aisling.SendAnimationNearby(115, target.Position);
         }
     }
 
@@ -458,23 +450,15 @@ public class Command_Undead(Spell spell) : SpellScript(spell)
         playerAction.ActionUsed = "Command Undead";
         var client = playerAction.Client;
         GlobalSpellMethods.Train(client, Spell);
-        var success = GlobalSpellMethods.Execute(client, Spell);
         var mR = Generator.RandNumGen100();
 
         if (mR > target.Will)
         {
-            if (success)
-            {
-                OnSuccess(sprite, target);
-            }
-            else
-            {
-                GlobalSpellMethods.SpellOnFailed(playerAction, target, Spell);
-            }
+            OnSuccess(sprite, target);
         }
         else
         {
-            playerAction.Client.Aisling.SendAnimationNearby(115, null, target.Serial);
+            playerAction.Client.Aisling.SendAnimationNearby(115, target.Position);
         }
     }
 }

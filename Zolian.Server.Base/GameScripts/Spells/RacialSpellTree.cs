@@ -6,6 +6,7 @@ using Chaos.Geometry.Abstractions.Definitions;
 using Darkages.Common;
 using Darkages.Enums;
 using Darkages.GameScripts.Affects;
+using Darkages.GameScripts.Monsters;
 using Darkages.Network.Server;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;
@@ -121,26 +122,16 @@ public class Calming_Voice(Spell spell) : SpellScript(spell)
         if (aisling.CurrentMp < 0)
             aisling.CurrentMp = 0;
 
-        var success = GlobalSpellMethods.Execute(client, Spell);
-
-        if (success)
+        foreach (var monster in targetAisling.MonstersNearby())
         {
-            foreach (var monster in targetAisling.MonstersNearby())
-            {
-                if (monster.Target is null) continue;
-                if (monster.Target == targetAisling)
-                    monster.Target = null;
-            }
-
-            targetAisling.ThreatMeter = 0;
-
-            GlobalSpellMethods.SpellOnSuccess(sprite, target, Spell);
-        }
-        else
-        {
-            GlobalSpellMethods.SpellOnFailed(aisling, target, Spell);
+            if (monster.Target is null) continue;
+            if (monster.Target == targetAisling)
+                monster.Target = null;
         }
 
+        targetAisling.ThreatMeter = 0;
+
+        GlobalSpellMethods.SpellOnSuccess(sprite, target, Spell);
         client.SendAttributes(StatUpdateType.Vitality);
     }
 }
@@ -247,15 +238,11 @@ public class DestructiveForce(Spell spell) : SpellScript(spell)
             if (targetSprite.Position.DistanceFrom((ushort)damageDealingSprite.Pos.X, (ushort)damageDealingSprite.Pos.Y) >= 5) continue;
             if (targetSprite.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Dummy)) continue;
 
-            var success = GlobalSpellMethods.Execute(damageDealingSprite.Client, Spell);
+            var mR = Generator.RandNumGen100();
 
-            if (success)
+            if (mR > targetSprite.Will)
             {
                 OnSuccess(damageDealingSprite, targetSprite);
-            }
-            else
-            {
-                GlobalSpellMethods.SpellOnFailed(damageDealingSprite, targetSprite, Spell);
             }
         }
     }
@@ -345,16 +332,7 @@ public class Elemental_Bolt(Spell spell) : SpellScript(spell)
 
         if (mR > target.Will)
         {
-            var success = GlobalSpellMethods.Execute(client, Spell);
-
-            if (success)
-            {
-                OnSuccess(aisling, target);
-            }
-            else
-            {
-                GlobalSpellMethods.SpellOnFailed(aisling, target, Spell);
-            }
+            OnSuccess(aisling, target);
         }
 
         client.SendAttributes(StatUpdateType.Vitality);
@@ -402,6 +380,8 @@ public class Magic_Missile(Spell spell) : SpellScript(spell)
             var randTarget = targetList[rand];
             _spellMethod.ElementalNecklaceOnUse(sprite, randTarget, Spell, GlobalSpellMethods.Normal + playerAction.ExpLevel);
         }
+
+        playerAction.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(Spell.Template.Sound, false));
     }
 }
 

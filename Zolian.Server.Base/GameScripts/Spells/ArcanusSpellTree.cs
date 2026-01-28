@@ -91,17 +91,7 @@ public class Mor_Strioch_Pian_Gar(Spell spell) : SpellScript(spell)
         if (aisling.CurrentHp < 0)
             aisling.CurrentHp = 1;
 
-        var success = GlobalSpellMethods.Execute(client, Spell);
-
-        if (success)
-        {
-            OnSuccess(aisling, target);
-        }
-        else
-        {
-            GlobalSpellMethods.SpellOnFailed(aisling, target, Spell);
-        }
-
+        OnSuccess(aisling, target);
         client.SendAttributes(StatUpdateType.Vitality);
     }
 }

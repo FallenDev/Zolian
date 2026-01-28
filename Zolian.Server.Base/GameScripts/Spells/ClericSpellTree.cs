@@ -206,7 +206,8 @@ public class Pramh(Spell spell) : SpellScript(spell)
 
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Another spell of similar nature is already applied.");
             return;
-        };
+        }
+        ;
 
         _spellMethod.AfflictionOnUse(sprite, target, Spell, _debuff);
     }
@@ -326,17 +327,7 @@ public class Detect(Spell spell) : SpellScript(spell)
             if (aisling.CurrentMp < 0)
                 aisling.CurrentMp = 0;
 
-            var success = GlobalSpellMethods.Execute(client, Spell);
-
-            if (success)
-            {
-                OnSuccess(sprite, target);
-            }
-            else
-            {
-                GlobalSpellMethods.SpellOnFailed(aisling, target, Spell);
-            }
-
+            OnSuccess(sprite, target);
             client.SendAttributes(StatUpdateType.Vitality);
         }
         else
@@ -447,17 +438,7 @@ public class Heal_Minor(Spell spell) : SpellScript(spell)
             if (aisling.CurrentMp < 0)
                 aisling.CurrentMp = 0;
 
-            var success = GlobalSpellMethods.Execute(client, Spell);
-
-            if (success)
-            {
-                OnSuccess(sprite, target);
-            }
-            else
-            {
-                GlobalSpellMethods.SpellOnFailed(aisling, target, Spell);
-            }
-
+            OnSuccess(sprite, target);
             client.SendAttributes(StatUpdateType.Vitality);
         }
         else
@@ -555,17 +536,7 @@ public class Heal_Major(Spell spell) : SpellScript(spell)
             if (aisling.CurrentMp < 0)
                 aisling.CurrentMp = 0;
 
-            var success = GlobalSpellMethods.Execute(client, Spell);
-
-            if (success)
-            {
-                OnSuccess(sprite, target);
-            }
-            else
-            {
-                GlobalSpellMethods.SpellOnFailed(aisling, target, Spell);
-            }
-
+            OnSuccess(sprite, target);
             client.SendAttributes(StatUpdateType.Vitality);
         }
         else
@@ -663,17 +634,7 @@ public class Heal_Critical(Spell spell) : SpellScript(spell)
             if (aisling.CurrentMp < 0)
                 aisling.CurrentMp = 0;
 
-            var success = GlobalSpellMethods.Execute(client, Spell);
-
-            if (success)
-            {
-                OnSuccess(sprite, target);
-            }
-            else
-            {
-                GlobalSpellMethods.SpellOnFailed(aisling, target, Spell);
-            }
-
+            OnSuccess(sprite, target);
             client.SendAttributes(StatUpdateType.Vitality);
         }
         else
@@ -782,17 +743,7 @@ public class Dire_Aid(Spell spell) : SpellScript(spell)
             if (aisling.CurrentMp < 0)
                 aisling.CurrentMp = 0;
 
-            var success = GlobalSpellMethods.Execute(client, Spell);
-
-            if (success)
-            {
-                OnSuccess(sprite, target);
-            }
-            else
-            {
-                GlobalSpellMethods.SpellOnFailed(aisling, target, Spell);
-            }
-
+            OnSuccess(sprite, target);
             client.SendAttributes(StatUpdateType.Vitality);
         }
         else
@@ -891,17 +842,7 @@ public class Healing_Winds(Spell spell) : SpellScript(spell)
             if (aisling.CurrentMp < 0)
                 aisling.CurrentMp = 0;
 
-            var success = GlobalSpellMethods.Execute(client, Spell);
-
-            if (success)
-            {
-                OnSuccess(sprite, target);
-            }
-            else
-            {
-                GlobalSpellMethods.SpellOnFailed(aisling, target, Spell);
-            }
-
+            OnSuccess(sprite, target);
             client.SendAttributes(StatUpdateType.Vitality);
         }
         else
@@ -1125,23 +1066,15 @@ public class Turn_Undead(Spell spell) : SpellScript(spell)
         playerAction.ActionUsed = "Turn Undead";
         var client = playerAction.Client;
         GlobalSpellMethods.Train(client, Spell);
-        var success = GlobalSpellMethods.Execute(client, Spell);
         var mR = Generator.RandNumGen100();
 
         if (mR > target.Will)
         {
-            if (success)
-            {
-                OnSuccess(sprite, target);
-            }
-            else
-            {
-                GlobalSpellMethods.SpellOnFailed(playerAction, target, Spell);
-            }
+            OnSuccess(sprite, target);
         }
         else
         {
-            playerAction.Client.Aisling.SendAnimationNearby(115, null, target.Serial);
+            playerAction.Client.Aisling.SendAnimationNearby(115, target.Position);
         }
     }
 }
@@ -1197,23 +1130,15 @@ public class Turn_Critter(Spell spell) : SpellScript(spell)
         playerAction.ActionUsed = "Turn Critter";
         var client = playerAction.Client;
         GlobalSpellMethods.Train(client, Spell);
-        var success = GlobalSpellMethods.Execute(client, Spell);
         var mR = Generator.RandNumGen100();
 
         if (mR > target.Will)
         {
-            if (success)
-            {
-                OnSuccess(sprite, target);
-            }
-            else
-            {
-                GlobalSpellMethods.SpellOnFailed(playerAction, target, Spell);
-            }
+            OnSuccess(sprite, target);
         }
         else
         {
-            playerAction.Client.Aisling.SendAnimationNearby(115, null, target.Serial);
+            playerAction.Client.Aisling.SendAnimationNearby(115, target.Position);
         }
     }
 }
@@ -1269,23 +1194,15 @@ public class Turn_Greater_Undead(Spell spell) : SpellScript(spell)
         playerAction.ActionUsed = "Turn Undead";
         var client = playerAction.Client;
         GlobalSpellMethods.Train(client, Spell);
-        var success = GlobalSpellMethods.Execute(client, Spell);
         var mR = Generator.RandNumGen100();
 
         if (mR > target.Will)
         {
-            if (success)
-            {
-                OnSuccess(sprite, target);
-            }
-            else
-            {
-                GlobalSpellMethods.SpellOnFailed(playerAction, target, Spell);
-            }
+            OnSuccess(sprite, target);
         }
         else
         {
-            playerAction.Client.Aisling.SendAnimationNearby(115, null, target.Serial);
+            playerAction.Client.Aisling.SendAnimationNearby(115, target.Position);
         }
     }
 }
@@ -1341,23 +1258,15 @@ public class Turn_Greater_Critter(Spell spell) : SpellScript(spell)
         playerAction.ActionUsed = "Turn Critter";
         var client = playerAction.Client;
         GlobalSpellMethods.Train(client, Spell);
-        var success = GlobalSpellMethods.Execute(client, Spell);
         var mR = Generator.RandNumGen100();
 
         if (mR > target.Will)
         {
-            if (success)
-            {
-                OnSuccess(sprite, target);
-            }
-            else
-            {
-                GlobalSpellMethods.SpellOnFailed(playerAction, target, Spell);
-            }
+            OnSuccess(sprite, target);
         }
         else
         {
-            playerAction.Client.Aisling.SendAnimationNearby(115, null, target.Serial);
+            playerAction.Client.Aisling.SendAnimationNearby(115, target.Position);
         }
     }
 }
@@ -1437,17 +1346,7 @@ public class AoPuinsein(Spell spell) : SpellScript(spell)
             if (aisling.CurrentMp < 0)
                 aisling.CurrentMp = 0;
 
-            var success = GlobalSpellMethods.Execute(client, Spell);
-
-            if (success)
-            {
-                OnSuccess(sprite, target);
-            }
-            else
-            {
-                GlobalSpellMethods.SpellOnFailed(aisling, target, Spell);
-            }
-
+            OnSuccess(sprite, target);
             client.SendAttributes(StatUpdateType.Vitality);
         }
         else
@@ -1533,17 +1432,7 @@ public class AoDall(Spell spell) : SpellScript(spell)
             if (aisling.CurrentMp < 0)
                 aisling.CurrentMp = 0;
 
-            var success = GlobalSpellMethods.Execute(client, Spell);
-
-            if (success)
-            {
-                OnSuccess(sprite, target);
-            }
-            else
-            {
-                GlobalSpellMethods.SpellOnFailed(aisling, target, Spell);
-            }
-
+            OnSuccess(sprite, target);
             client.SendAttributes(StatUpdateType.Vitality);
         }
         else
@@ -1629,17 +1518,7 @@ public class AoBeagCradh(Spell spell) : SpellScript(spell)
             if (aisling.CurrentMp < 0)
                 aisling.CurrentMp = 0;
 
-            var success = GlobalSpellMethods.Execute(client, Spell);
-
-            if (success)
-            {
-                OnSuccess(sprite, target);
-            }
-            else
-            {
-                GlobalSpellMethods.SpellOnFailed(aisling, target, Spell);
-            }
-
+            OnSuccess(sprite, target);
             client.SendAttributes(StatUpdateType.Vitality);
         }
         else
@@ -1726,17 +1605,7 @@ public class AoCradh(Spell spell) : SpellScript(spell)
             if (aisling.CurrentMp < 0)
                 aisling.CurrentMp = 0;
 
-            var success = GlobalSpellMethods.Execute(client, Spell);
-
-            if (success)
-            {
-                OnSuccess(sprite, target);
-            }
-            else
-            {
-                GlobalSpellMethods.SpellOnFailed(aisling, target, Spell);
-            }
-
+            OnSuccess(sprite, target);
             client.SendAttributes(StatUpdateType.Vitality);
         }
         else
@@ -1823,17 +1692,7 @@ public class AoMorCradh(Spell spell) : SpellScript(spell)
             if (aisling.CurrentMp < 0)
                 aisling.CurrentMp = 0;
 
-            var success = GlobalSpellMethods.Execute(client, Spell);
-
-            if (success)
-            {
-                OnSuccess(sprite, target);
-            }
-            else
-            {
-                GlobalSpellMethods.SpellOnFailed(aisling, target, Spell);
-            }
-
+            OnSuccess(sprite, target);
             client.SendAttributes(StatUpdateType.Vitality);
         }
         else
@@ -1920,17 +1779,7 @@ public class AoArdCradh(Spell spell) : SpellScript(spell)
             if (aisling.CurrentMp < 0)
                 aisling.CurrentMp = 0;
 
-            var success = GlobalSpellMethods.Execute(client, Spell);
-
-            if (success)
-            {
-                OnSuccess(sprite, target);
-            }
-            else
-            {
-                GlobalSpellMethods.SpellOnFailed(aisling, target, Spell);
-            }
-
+            OnSuccess(sprite, target);
             client.SendAttributes(StatUpdateType.Vitality);
         }
         else
@@ -2011,17 +1860,7 @@ public class AoSuain(Spell spell) : SpellScript(spell)
         if (aisling.CurrentMp < 0)
             aisling.CurrentMp = 0;
 
-        var success = GlobalSpellMethods.Execute(client, Spell);
-
-        if (success)
-        {
-            OnSuccess(sprite, target);
-        }
-        else
-        {
-            GlobalSpellMethods.SpellOnFailed(aisling, target, Spell);
-        }
-
+        OnSuccess(sprite, target);
         client.SendAttributes(StatUpdateType.Vitality);
     }
 }
