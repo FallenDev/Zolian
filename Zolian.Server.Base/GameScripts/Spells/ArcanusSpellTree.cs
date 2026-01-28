@@ -135,9 +135,10 @@ public class AoSithGar(Spell spell) : SpellScript(spell)
 
         foreach (var targetObj in aisling.AislingsNearby())
         {
-            if (targetObj.GroupParty != aisling.GroupParty) continue;
             if (targetObj.Serial == aisling.Serial) continue;
-            client.Aisling.SendAnimationNearby(Spell.Template.TargetAnimation, null, targetObj.Serial);
+
+            client.Aisling.SendAnimationNearby(Spell.Template.TargetAnimation, targetObj.Position);
+
             foreach (var debuff in targetObj.Debuffs.Values)
             {
                 if (debuff.Affliction) continue;
@@ -152,6 +153,8 @@ public class AoSithGar(Spell spell) : SpellScript(spell)
                 buff.OnEnded(targetObj, buff);
             }
         }
+
+        client.Aisling.SendAnimationNearby(Spell.Template.TargetAnimation, aisling.Position);
 
         foreach (var debuff in aisling.Debuffs.Values)
         {
@@ -183,7 +186,9 @@ public class AoSithGar(Spell spell) : SpellScript(spell)
         foreach (var targetObj in sprite.AislingsNearby())
         {
             if (targetObj == null) continue;
+
             targetObj.SendAnimationNearby(Spell.Template.TargetAnimation, targetObj.Position);
+
             foreach (var debuff in targetObj.Debuffs.Values)
             {
                 if (debuff.Affliction) continue;
@@ -194,6 +199,7 @@ public class AoSithGar(Spell spell) : SpellScript(spell)
             foreach (var buff in targetObj.Buffs.Values)
             {
                 if (buff.Affliction) continue;
+                if (buff.Name is "Double XP" or "Triple XP" or "Dia Haste") continue;
                 buff.OnEnded(targetObj, buff);
             }
         }

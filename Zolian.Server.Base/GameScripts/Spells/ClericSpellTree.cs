@@ -146,7 +146,7 @@ public class Dark_Chain(Spell spell) : SpellScript(spell)
             playerAction.ActionUsed = "Dark Chain";
         if (target == null) return;
 
-        _spellMethod.ElementalOnUse(sprite, target, Spell, 60);
+        _spellMethod.ElementalOnUse(sprite, target, Spell, GlobalSpellMethods.Normal);
         _spellMethod.AfflictionOnUse(sprite, target, Spell, _debuff);
     }
 }
@@ -1104,7 +1104,7 @@ public class Turn_Undead(Spell spell) : SpellScript(spell)
             if (!monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Undead)) continue;
             if (monster.Level >= 101) continue;
             _debuff = new DebuffRending();
-            _spellMethod.ElementalOnUse(sprite, target, Spell, 30);
+            _spellMethod.ElementalOnUse(sprite, target, Spell, GlobalSpellMethods.Beag);
             _spellMethod.AfflictionOnUse(sprite, target, Spell, _debuff);
             monster.Target = null;
             monster.Aggressive = false;
@@ -1176,7 +1176,7 @@ public class Turn_Critter(Spell spell) : SpellScript(spell)
             if (!monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.LowerBeing)) continue;
             if (monster.Level >= 101) continue;
             _debuff = new DebuffRending();
-            _spellMethod.ElementalOnUse(sprite, target, Spell, 30);
+            _spellMethod.ElementalOnUse(sprite, target, Spell, GlobalSpellMethods.Beag);
             _spellMethod.AfflictionOnUse(sprite, target, Spell, _debuff);
             monster.Target = null;
             monster.Aggressive = false;
@@ -1248,7 +1248,7 @@ public class Turn_Greater_Undead(Spell spell) : SpellScript(spell)
             if (!monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.Undead)) continue;
             if (monster.Level >= 251) continue;
             _debuff = new DebuffRending();
-            _spellMethod.ElementalOnUse(sprite, target, Spell, 50);
+            _spellMethod.ElementalOnUse(sprite, target, Spell, GlobalSpellMethods.Normal);
             _spellMethod.AfflictionOnUse(sprite, target, Spell, _debuff);
             monster.Target = null;
             monster.Aggressive = false;
@@ -1320,7 +1320,7 @@ public class Turn_Greater_Critter(Spell spell) : SpellScript(spell)
             if (!monster.Template.MonsterRace.MonsterRaceIsSet(MonsterRace.LowerBeing)) continue;
             if (monster.Level >= 251) continue;
             _debuff = new DebuffRending();
-            _spellMethod.ElementalOnUse(sprite, target, Spell, 50);
+            _spellMethod.ElementalOnUse(sprite, target, Spell, GlobalSpellMethods.Normal);
             _spellMethod.AfflictionOnUse(sprite, target, Spell, _debuff);
             monster.Target = null;
             monster.Aggressive = false;

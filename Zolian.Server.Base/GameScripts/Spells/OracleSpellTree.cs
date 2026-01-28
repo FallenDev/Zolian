@@ -27,7 +27,7 @@ public class UasTornado(Spell spell) : SpellScript(spell)
         enemies.Add(target);
 
         foreach (var enemy in enemies.Where(e => e != null))
-            _spellMethod.ElementalOnUse(sprite, enemy, Spell, 3500);
+            _spellMethod.ElementalOnUse(sprite, enemy, Spell, GlobalSpellMethods.Uas);
     }
 }
 
@@ -52,7 +52,7 @@ public class UasLandslide(Spell spell) : SpellScript(spell)
         enemies.Add(target);
 
         foreach (var enemy in enemies.Where(e => e != null))
-            _spellMethod.ElementalOnUse(sprite, enemy, Spell, 3500);
+            _spellMethod.ElementalOnUse(sprite, enemy, Spell, GlobalSpellMethods.Uas);
     }
 }
 
@@ -77,7 +77,7 @@ public class UasMonsoon(Spell spell) : SpellScript(spell)
         enemies.Add(target);
 
         foreach (var enemy in enemies.Where(e => e != null))
-            _spellMethod.ElementalOnUse(sprite, enemy, Spell, 3500);
+            _spellMethod.ElementalOnUse(sprite, enemy, Spell, GlobalSpellMethods.Uas);
     }
 }
 
@@ -102,7 +102,7 @@ public class UasEruption(Spell spell) : SpellScript(spell)
         enemies.Add(target);
 
         foreach (var enemy in enemies.Where(e => e != null))
-            _spellMethod.ElementalOnUse(sprite, enemy, Spell, 3500);
+            _spellMethod.ElementalOnUse(sprite, enemy, Spell, GlobalSpellMethods.Uas);
     }
 }
 
@@ -127,7 +127,7 @@ public class UasTwilight(Spell spell) : SpellScript(spell)
         enemies.Add(target);
 
         foreach (var enemy in enemies.Where(e => e != null))
-            _spellMethod.ElementalOnUse(sprite, enemy, Spell, 3500);
+            _spellMethod.ElementalOnUse(sprite, enemy, Spell, GlobalSpellMethods.Uas);
     }
 }
 
@@ -152,7 +152,7 @@ public class UasSanctified(Spell spell) : SpellScript(spell)
         enemies.Add(target);
 
         foreach (var enemy in enemies.Where(e => e != null))
-            _spellMethod.ElementalOnUse(sprite, enemy, Spell, 3500);
+            _spellMethod.ElementalOnUse(sprite, enemy, Spell, GlobalSpellMethods.Uas);
     }
 }
 

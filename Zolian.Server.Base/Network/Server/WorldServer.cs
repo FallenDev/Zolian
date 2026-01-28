@@ -2637,7 +2637,6 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
             }
 
             var monsterCheck = ObjectManager.GetObject<Monster>(localClient.Aisling.Map, i => i.Serial == localArgs.TargetId);
-            ServerSetup.Instance.MundaneByMapCache.TryGetValue(localClient.Aisling.CurrentMapId, out var npcArray);
 
             if (monsterCheck != null)
             {
@@ -2647,13 +2646,18 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
                 return default;
             }
 
-            if (npcArray != null)
-                foreach (var npc in npcArray)
-                {
-                    if (npc.Serial != localArgs.TargetId) continue;
-                    npc.AIScript?.OnClick(localClient.Aisling.Client, (uint)localArgs.TargetId);
-                    return default;
-                }
+            if (ServerSetup.Instance.MundaneByMapCache != null)
+            {
+                ServerSetup.Instance.MundaneByMapCache.TryGetValue(localClient.Aisling.CurrentMapId, out var npcArray);
+
+                if (npcArray != null)
+                    foreach (var npc in npcArray)
+                    {
+                        if (npc.Serial != localArgs.TargetId) continue;
+                        npc.AIScript?.OnClick(localClient.Aisling.Client, (uint)localArgs.TargetId);
+                        return default;
+                    }
+            }
 
             var obj = ObjectManager.GetObject(localClient.Aisling.Map, i => i.Serial == localArgs.TargetId, ObjectManager.Get.Aislings);
             switch (obj)

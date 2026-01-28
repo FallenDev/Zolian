@@ -10,6 +10,12 @@ namespace Darkages.GameScripts.Spells;
 
 public class GlobalSpellMethods
 {
+    public const double Beag = 50;
+    public const double Normal = 100;
+    public const double Mor = 250;
+    public const double Ard = 500;
+    public const double Uas = 1750;
+    public const double Tir = 2300;
     private const int CritDmg = 2;
 
     public static bool Execute(WorldClient client, Spell spell)
@@ -84,39 +90,44 @@ public class GlobalSpellMethods
 
     public static long AislingSpellDamageCalc(Sprite sprite, Spell spell, double exp)
     {
-        const int dmg = 0;
-        if (sprite is not Aisling damageDealingAisling) return dmg;
+        if (sprite is not Aisling a) return 0;
+
         var spellLevelOffset = spell.Level + 1;
-        var client = damageDealingAisling.Client;
-        var bonus = ServerSetup.Instance.Config.BaseDamageMod + 2.0 * spellLevelOffset;
-        var amp = client.Aisling.Int / 2.0 * exp;
-        var final = (int)(amp + bonus);
-        var crit = CritStrike();
+        var bonus = (ServerSetup.Instance.Config.BaseDamageMod + 2.0) * spellLevelOffset;
 
-        if (!crit) return final;
+        // Curve STAT growth
+        const double intGain = 25.0;
+        var intPower = Math.Sqrt(a.Client.Aisling.Int) * intGain;
 
-        damageDealingAisling.SendAnimationNearby(387, null, damageDealingAisling.Serial);
-        final *= CritDmg;
+        var amp = intPower * exp;
+        var final = (long)Math.Round(amp + bonus, MidpointRounding.AwayFromZero);
 
-        return final;
+        if (!CritStrike())
+            return final;
+
+        a.SendAnimationNearby(387, null, a.Serial);
+        return final * CritDmg;
     }
+
 
     public static long MonsterElementalDamageProc(Sprite sprite, Spell spell, double exp)
     {
-        if (sprite is not Monster damageMonster) return 0;
-        var imp = ServerSetup.Instance.Config.BaseDamageMod + 2.0;
-        var level = damageMonster.Level;
+        if (sprite is not Monster m) return 0;
 
-        var amp = damageMonster.Int / 2.0 * exp;
-        var final = (int)(amp + imp) + level;
-        var crit = CritStrike();
+        var spellLevelOffset = spell.Level + 1;
+        var bonus = (ServerSetup.Instance.Config.BaseDamageMod + 2.0) * spellLevelOffset;
 
-        if (!crit) return final;
+        // Curve STAT growth
+        const double intGain = 16.0;
+        var intPower = Math.Sqrt(m.Int) * intGain;
 
-        damageMonster.SendAnimationNearby(387, null, damageMonster.Serial);
-        final *= CritDmg;
+        var amp = intPower * exp;
+        var final = (long)Math.Round(amp + bonus, MidpointRounding.AwayFromZero);
 
-        return final;
+        if (!CritStrike()) return final;
+
+        m.SendAnimationNearby(387, null, m.Serial);
+        return final * CritDmg;
     }
 
     public static void ElementalOnSuccess(Sprite sprite, Sprite target, Spell spell, double exp)
@@ -203,6 +214,7 @@ public class GlobalSpellMethods
                 {
                     aisling.CurrentMp -= spell.Template.ManaCost;
                     Train(client, spell);
+                    client.SendAttributes(StatUpdateType.Vitality);
                 }
                 else
                 {
@@ -210,18 +222,7 @@ public class GlobalSpellMethods
                     return;
                 }
 
-                var success = Execute(client, spell);
-
-                if (success)
-                {
-                    ElementalOnSuccess(aisling, target, spell, exp);
-                }
-                else
-                {
-                    SpellOnFailed(aisling, target, spell);
-                }
-
-                client.SendAttributes(StatUpdateType.Vitality);
+                ElementalOnSuccess(aisling, target, spell, exp);
             }
             else
             {

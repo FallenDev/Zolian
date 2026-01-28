@@ -5,9 +5,7 @@ using Darkages.Sprites.Entity;
 using Darkages.Types;
 
 namespace Darkages.GameScripts.Spells;
-// Berserker Spells
 
-// Defender Spells
 [Script("Asgall")]
 public class Asgall(Spell spell) : SpellScript(spell)
 {
@@ -69,8 +67,6 @@ public class Defensive_Stance(Spell spell) : SpellScript(spell)
         GlobalSpellMethods.EnhancementOnUse(sprite, sprite, Spell, _buff);
     }
 }
-
-// Master Spells
 
 [Script("Perfect Defense")]
 public class Perfect_Defense(Spell spell) : SpellScript(spell)

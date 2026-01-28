@@ -32,7 +32,7 @@ public class Tail_Flip(Spell spell) : SpellScript(spell)
         if (sprite is Aisling playerAction)
             playerAction.ActionUsed = "Tail Flip";
 
-        _spellMethod.ElementalOnUse(sprite, target, Spell, 290);
+        _spellMethod.ElementalOnUse(sprite, target, Spell, GlobalSpellMethods.Mor);
     }
 }
 
@@ -296,7 +296,7 @@ public class Elemental_Bolt(Spell spell) : SpellScript(spell)
     {
         if (sprite is not Aisling aisling) return;
         if (target is not Damageable damageable) return;
-        var dmg = GlobalSpellMethods.AislingSpellDamageCalc(sprite, Spell, 95);
+        var dmg = GlobalSpellMethods.AislingSpellDamageCalc(sprite, Spell, GlobalSpellMethods.Mor);
         var randomEle = Generator.RandomEnumValue<ElementManager.Element>();
 
         if (target.CurrentHp > 0)
@@ -379,9 +379,19 @@ public class Magic_Missile(Spell spell) : SpellScript(spell)
         GlobalSpellMethods.Train(playerAction.Client, Spell);
 
         var targetList = playerAction.MonstersNearby().ToList();
-        var count = targetList.Count();
+        var count = targetList.Count;
+        var actions = 3;
 
-        for (var i = 0; i < 3; i++)
+        if (playerAction.Level == 500)
+            actions = 4;
+
+        if (playerAction.Level == 500 && playerAction.AbpLevel >= 250)
+            actions = 5;
+
+        if (playerAction.Level == 500 && playerAction.AbpLevel == 500)
+            actions = 6;
+
+        for (var i = 0; i < actions; i++)
         {
             if (count == 0)
             {
@@ -390,7 +400,7 @@ public class Magic_Missile(Spell spell) : SpellScript(spell)
             }
             var rand = Random.Shared.Next(0, count);
             var randTarget = targetList[rand];
-            _spellMethod.ElementalNecklaceOnUse(sprite, randTarget, Spell, 90 + playerAction.ExpLevel);
+            _spellMethod.ElementalNecklaceOnUse(sprite, randTarget, Spell, GlobalSpellMethods.Normal + playerAction.ExpLevel);
         }
     }
 }
