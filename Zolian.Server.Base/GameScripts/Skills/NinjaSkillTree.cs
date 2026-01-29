@@ -67,6 +67,18 @@ public class Amenotejikara(Skill skill) : SkillScript(skill)
             return;
         }
 
+        if (map.ID is >= 3629 and <= 3632)
+        {
+            client.SendServerMessage(ServerMessageType.ActiveMessage, "The heat is too intense to use that now.");
+            return;
+        }
+
+        if (map.ID is 4335)
+        {
+            client.SendServerMessage(ServerMessageType.ActiveMessage, "A dark energy prevents you from using that here.");
+            return;
+        }
+
         try
         {
             _oldPosition = sprite.Position;
