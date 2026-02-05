@@ -1,504 +1,578 @@
-﻿using Darkages.CommandSystem.CLI;
-using Darkages.Database;
+﻿using Darkages.Database;
 using Darkages.GameScripts.Formulas;
 using Darkages.Network.Client;
+using Darkages.Network.Server;
+using Darkages.Object;
+using Darkages.Sprites.Entity;
 using Darkages.Templates;
 using Darkages.Types;
+
 using Microsoft.Extensions.Logging;
-using Darkages.Object;
+
 using Gender = Darkages.Enums.Gender;
-using Darkages.Network.Server;
-using Darkages.Sprites.Entity;
 
 namespace Darkages.CommandSystem;
 
+/// <summary>
+/// Command wiring over the immutable parser.
+/// </summary>
 public static class Commander
 {
-    static Commander()
-    {
-        ServerSetup.Instance.Parser = CommandParser.CreateNew().UsePrefix().OnError(OnParseError);
-    }
-
     public static void CompileCommands()
     {
+        ServerSetup.Commands = CommandSystemCore
+            .CreateBuilder(prefix: "/", onError: (ctx, msg) =>
+            {
+                if (ctx is WorldClient c)
+                    c.SendServerMessage(ServerMessageType.ActiveMessage, msg);
+
+                ServerSetup.EventsLogger($"[Chat Parser] {msg}");
+            })
+
         #region Server Maintenance
 
-        ServerSetup.Instance.Parser.AddCommand(Command
-            .Create("Restart", "restart", "- Force restart and reload:")
-            .SetAction(Restart));
+            .Add(new CommandDefinition(
+                Name: "Restart",
+                Aliases: new[] { "restart" },
+                AccessLevel: 0,
+                ArgSpecs: Array.Empty<ArgSpec>(),
+                Handler: Restart,
+                Description: "- Force restart and reload:"
+            ))
 
-        ServerSetup.Instance.Parser.AddCommand(Command
-            .Create("Chaos", "chaos", "- Force shutdown:")
-            .SetAction(Chaos));
+            .Add(new CommandDefinition(
+                Name: "Chaos",
+                Aliases: new[] { "chaos" },
+                AccessLevel: 0,
+                ArgSpecs: Array.Empty<ArgSpec>(),
+                Handler: Chaos,
+                Description: "- Force shutdown:"
+            ))
 
-        ServerSetup.Instance.Parser.AddCommand(Command
-            .Create("Cancel Chaos", "cc", "- Halt shutdown:")
-            .SetAction(CancelChaos));
+            .Add(new CommandDefinition(
+                Name: "Cancel Chaos",
+                Aliases: new[] { "cc" },
+                AccessLevel: 0,
+                ArgSpecs: Array.Empty<ArgSpec>(),
+                Handler: CancelChaos,
+                Description: "- Halt shutdown:"
+            ))
 
-        ServerSetup.Instance.Parser.AddCommand(Command
-            .Create("Reload Maps", "rm", "- Reload all maps:")
-            .SetAction(OnMapReload));
+            .Add(new CommandDefinition(
+                Name: "Reload Maps",
+                Aliases: new[] { "rm" },
+                AccessLevel: 0,
+                ArgSpecs: Array.Empty<ArgSpec>(),
+                Handler: OnMapReload,
+                Description: "- Reload all maps:"
+            ))
 
-        ServerSetup.Instance.Parser.AddCommand(Command
-            .Create("Reset IP", "ip", "- Resets restricted IPs")
-            .SetAction(OnIpReset));
+            .Add(new CommandDefinition(
+                Name: "Reset IP",
+                Aliases: new[] { "ip" },
+                AccessLevel: 0,
+                ArgSpecs: Array.Empty<ArgSpec>(),
+                Handler: OnIpReset,
+                Description: "- Resets restricted IPs"
+            ))
 
         #endregion
 
         #region GM Control
 
-        ServerSetup.Instance.Parser.AddCommand(Command
-            .Create("Learn Spell", "spell")
-            .SetAction(OnLearnSpell)
-            .AddArgument(Argument.Create("name"))
-            .AddArgument(Argument.Create("level").MakeOptional().SetDefault(100)));
+            .Add(new CommandDefinition(
+                Name: "Learn Spell",
+                Aliases: new[] { "spell" },
+                AccessLevel: 0,
+                ArgSpecs: new[]
+                {
+                    new ArgSpec("name", ArgKind.String),
+                    new ArgSpec("level", ArgKind.Int32, Optional: true, Default: "100"),
+                },
+                Handler: OnLearnSpell
+            ))
 
-        ServerSetup.Instance.Parser.AddCommand(Command
-            .Create("Learn Skill", "skill")
-            .SetAction(OnLearnSkill)
-            .AddArgument(Argument.Create("name"))
-            .AddArgument(Argument.Create("level").MakeOptional().SetDefault(100)));
+            .Add(new CommandDefinition(
+                Name: "Learn Skill",
+                Aliases: new[] { "skill" },
+                AccessLevel: 0,
+                ArgSpecs: new[]
+                {
+                    new ArgSpec("name", ArgKind.String),
+                    new ArgSpec("level", ArgKind.Int32, Optional: true, Default: "100"),
+                },
+                Handler: OnLearnSkill
+            ))
 
-        ServerSetup.Instance.Parser.AddCommand(Command
-            .Create("Teleport", "map")
-            .AddAlias("t")
-            .SetAction(OnTeleport)
-            .AddArgument(Argument.Create("t"))
-            .AddArgument(Argument.Create("x"))
-            .AddArgument(Argument.Create("y")));
+            .Add(new CommandDefinition(
+                Name: "Teleport",
+                Aliases: new[] { "map", "t" },
+                AccessLevel: 0,
+                ArgSpecs: new[]
+                {
+                    new ArgSpec("t", ArgKind.String),
+                    new ArgSpec("x", ArgKind.Int32),
+                    new ArgSpec("y", ArgKind.Int32),
+                },
+                Handler: OnTeleport
+            ))
 
-        ServerSetup.Instance.Parser.AddCommand(Command
-            .Create("Create Item", "give")
-            .SetAction(OnItemCreate)
-            .AddArgument(Argument.Create("item"))
-            .AddArgument(Argument.Create("amount").MakeOptional().SetDefault(1)));
+            .Add(new CommandDefinition(
+                Name: "Create Item",
+                Aliases: new[] { "give" },
+                AccessLevel: 0,
+                ArgSpecs: new[]
+                {
+                    new ArgSpec("item", ArgKind.String),
+                    new ArgSpec("amount", ArgKind.Int32, Optional: true, Default: "1"),
+                },
+                Handler: OnItemCreate
+            ))
 
         #endregion
 
         #region Interaction with Players
 
-        ServerSetup.Instance.Parser.AddCommand(Command
-            .Create("Group", "group")
-            .AddAlias("party")
-            .SetAction(OnRemoteGroup)
-            .AddArgument(Argument.Create("name")));
+            .Add(new CommandDefinition(
+                Name: "Group",
+                Aliases: new[] { "group", "party" },
+                AccessLevel: 0,
+                ArgSpecs: new[]
+                {
+                    new ArgSpec("who", ArgKind.String),
+                },
+                Handler: OnRemoteGroup
+            ))
 
-        ServerSetup.Instance.Parser.AddCommand(Command
-            .Create("Summon Player", "s")
-            .SetAction(OnSummonPlayer)
-            .AddArgument(Argument.Create("who")));
+            .Add(new CommandDefinition(
+                Name: "Summon Player",
+                Aliases: new[] { "s" },
+                AccessLevel: 0,
+                ArgSpecs: new[]
+                {
+                    new ArgSpec("who", ArgKind.String),
+                },
+                Handler: OnSummonPlayer
+            ))
 
-        ServerSetup.Instance.Parser.AddCommand(Command
-            .Create("Teleport to Player", "p")
-            .SetAction(OnPortToPlayer)
-            .AddArgument(Argument.Create("who")));
+            .Add(new CommandDefinition(
+                Name: "Teleport to Player",
+                Aliases: new[] { "p" },
+                AccessLevel: 0,
+                ArgSpecs: new[]
+                {
+                    new ArgSpec("who", ArgKind.String),
+                },
+                Handler: OnPortToPlayer
+            ))
 
-        ServerSetup.Instance.Parser.AddCommand(Command
-            .Create("Sex Change", "sex")
-            .SetAction(OnSexChange)
-            .AddArgument(Argument.Create("who"))
-            .AddArgument(Argument.Create("s")));
+            .Add(new CommandDefinition(
+                Name: "Sex Change",
+                Aliases: new[] { "sex" },
+                AccessLevel: 0,
+                ArgSpecs: new[]
+                {
+                    new ArgSpec("who", ArgKind.String),
+                    new ArgSpec("s", ArgKind.Int32),
+                },
+                Handler: OnSexChange
+            ))
 
-        ServerSetup.Instance.Parser.AddCommand(Command
-            .Create("Kill Player", "kill")
-            .SetAction(OnKillCommand)
-            .AddArgument(Argument.Create("who")));
+            .Add(new CommandDefinition(
+                Name: "Kill Player",
+                Aliases: new[] { "kill" },
+                AccessLevel: 0,
+                ArgSpecs: new[]
+                {
+                    new ArgSpec("who", ArgKind.String),
+                },
+                Handler: OnKillCommand
+            ))
 
-        ServerSetup.Instance.Parser.AddCommand(Command
-            .Create("Create Monster", "sm")
-            .SetAction(OnMonsterSummon)
-            .AddArgument(Argument.Create("who"))
-            .AddArgument(Argument.Create("amount")));
+            .Add(new CommandDefinition(
+                Name: "Create Monster",
+                Aliases: new[] { "sm" },
+                AccessLevel: 0,
+                ArgSpecs: new[]
+                {
+                    new ArgSpec("who", ArgKind.String),
+                    new ArgSpec("amount", ArgKind.Int32, Optional: true, Default: "1"),
+                },
+                Handler: OnMonsterSummon
+            ))
 
         #endregion
+
+            .Build();
     }
 
-    /// <summary>
-    /// Freezes server routine for updates and maintenance
-    /// </summary>
-    private static void Chaos(Argument[] args, object arg)
+    public static void ParseChatMessage(WorldClient client, string message, int accessLevel = 0)
+        => ServerSetup.Commands?.TryParseAndExecute(message, client, accessLevel);
+
+    private static bool RequireClient(object? ctx, out WorldClient client)
     {
-        var client = (WorldClient)arg;
-        if (client == null) return;
-        var death = client.Aisling.Username.Equals("death", StringComparison.InvariantCultureIgnoreCase);
-        if (!death)
+        if (ctx is WorldClient c)
         {
-            client.SendServerMessage(ServerMessageType.ActiveMessage, "{=bRestricted GM Command - Shuts down server");
-            return;
+            client = c;
+            return true;
         }
 
+        client = null!;
+        return false;
+    }
+
+    private static bool IsDeath(WorldClient client)
+        => client.Aisling.Username.Equals("death", StringComparison.InvariantCultureIgnoreCase);
+
+    private static bool RequireDeath(WorldClient client, string denialMessage)
+    {
+        if (IsDeath(client))
+            return true;
+
+        client.SendServerMessage(ServerMessageType.ActiveMessage, denialMessage);
+        return false;
+    }
+
+    private static Aisling? FindPlayerByName(string who)
+    {
+        if (string.IsNullOrWhiteSpace(who))
+            return null;
+
         var players = ServerSetup.Instance.Game.Aislings;
-        var playersList = players.ToList();
+        return players.FirstOrDefault(i => i != null &&
+                                           string.Equals(i.Username, who, StringComparison.CurrentCultureIgnoreCase));
+    }
+
+    // --- Commands ---
+
+    private static void Chaos(object? ctx, ParsedArgs args)
+    {
+        if (!RequireClient(ctx, out var client))
+            return;
+
+        if (!RequireDeath(client, "{=bRestricted GM Command - Shuts down server"))
+            return;
+
+        var players = ServerSetup.Instance.Game.Aislings.ToList();
+
         ServerSetup.EventsLogger("--------------------------------------------", LogLevel.Warning);
         ServerSetup.EventsLogger("", LogLevel.Warning);
         ServerSetup.EventsLogger("--------------- Server Chaos ---------------", LogLevel.Warning);
 
-        foreach (var connected in playersList)
+        foreach (var connected in players)
         {
-            connected.Client.SendServerMessage(ServerMessageType.GroupChat, "{=qDeath{=g: {=bServer maintenance in 1 minute.");
+            connected.Client.SendServerMessage(ServerMessageType.GroupChat,
+                "{=qDeath{=g: {=bServer maintenance in 1 minute.");
 
-            Task.Delay(15000).ContinueWith(ct =>
-            {
-                connected.Client.SendServerMessage(ServerMessageType.GroupChat, "{=qDeath{=g: {=bServer maintenance in 45 seconds.");
-            });
-            Task.Delay(30000).ContinueWith(ct =>
-            {
-                connected.Client.SendServerMessage(ServerMessageType.GroupChat, "{=qDeath{=g: {=bServer maintenance in 30 seconds.");
-            });
-
-            Task.Delay(45000).ContinueWith(ct =>
-            {
-                connected.Client.SendServerMessage(ServerMessageType.GroupChat, "{=qDeath{=g: {=bServer maintenance in 15 seconds.");
-            });
-
-            Task.Delay(55000).ContinueWith(ct =>
-            {
-                connected.Client.SendServerMessage(ServerMessageType.GroupChat, "{=qDeath{=g: {=bServer maintenance in 5 seconds.");
-            });
-
-            Task.Delay(58000).ContinueWith(ct =>
-            {
-                if (client.Aisling.GameMasterChaosCancel)
-                {
-                    client.Aisling.GameMasterChaosCancel = false;
-                    return;
-                }
-                ServerSetup.Instance.Running = false;
-                connected.Client.SendServerMessage(ServerMessageType.GroupChat, "{=qDeath{=g: {=bInvokes Chaos to rise{=g. -Server Shutdown-");
-                connected.Client.SendServerMessage(ServerMessageType.ScrollWindow, "{=bChaos has risen.\n\n {=a During chaos, various updates will be performed. This can last anywhere between 1 to 5 minutes depending on the complexity of the update.");
-            });
-
-            Task.Delay(60000).ContinueWith(ct =>
-            {
-                if (!client.Aisling.GameMasterChaosCancel)
-                    connected.Client.CloseTransport();
-
-                connected.Client.SendServerMessage(ServerMessageType.GroupChat, "{=qDeath{=g: {=bChaos has been cancelled.");
-            });
+            _ = ChaosPerPlayerTimersAsync(client, connected);
         }
     }
 
-    /// <summary>
-    /// Cancels chaos before it completes
-    /// </summary>
-    private static void CancelChaos(Argument[] args, object arg)
+    private static async Task ChaosPerPlayerTimersAsync(WorldClient gmClient, Aisling connected)
     {
-        var client = (WorldClient)arg;
-        if (client == null) return;
-        var death = client.Aisling.Username.Equals("death", StringComparison.InvariantCultureIgnoreCase);
-        if (!death)
+        try
         {
-            client.SendServerMessage(ServerMessageType.ActiveMessage, "{=bRestricted GM Command - Cancel Chaos");
-            return;
+            await Task.Delay(15000).ConfigureAwait(false);
+            connected.Client.SendServerMessage(ServerMessageType.GroupChat,
+                "{=qDeath{=g: {=bServer maintenance in 45 seconds.");
+
+            await Task.Delay(15000).ConfigureAwait(false);
+            connected.Client.SendServerMessage(ServerMessageType.GroupChat,
+                "{=qDeath{=g: {=bServer maintenance in 30 seconds.");
+
+            await Task.Delay(15000).ConfigureAwait(false);
+            connected.Client.SendServerMessage(ServerMessageType.GroupChat,
+                "{=qDeath{=g: {=bServer maintenance in 15 seconds.");
+
+            await Task.Delay(10000).ConfigureAwait(false);
+            connected.Client.SendServerMessage(ServerMessageType.GroupChat,
+                "{=qDeath{=g: {=bServer maintenance in 5 seconds.");
+
+            await Task.Delay(3000).ConfigureAwait(false);
+
+            if (gmClient.Aisling.GameMasterChaosCancel)
+            {
+                gmClient.Aisling.GameMasterChaosCancel = false;
+                return;
+            }
+
+            ServerSetup.Instance.Running = false;
+
+            connected.Client.SendServerMessage(ServerMessageType.GroupChat,
+                "{=qDeath{=g: {=bInvokes Chaos to rise{=g. -Server Shutdown-");
+
+            connected.Client.SendServerMessage(ServerMessageType.ScrollWindow,
+                "{=bChaos has risen.\n\n {=a During chaos, various updates will be performed. This can last anywhere between 1 to 5 minutes depending on the complexity of the update.");
+
+            await Task.Delay(2000).ConfigureAwait(false);
+
+            if (!gmClient.Aisling.GameMasterChaosCancel)
+            {
+                connected.Client.CloseTransport();
+            }
+            else
+            {
+                connected.Client.SendServerMessage(ServerMessageType.GroupChat,
+                    "{=qDeath{=g: {=bChaos has been cancelled.");
+            }
         }
+        catch (Exception ex)
+        {
+            ServerSetup.EventsLogger($"Chaos timer error: {ex.GetType().Name}: {ex.Message}", LogLevel.Error);
+        }
+    }
+
+    private static void CancelChaos(object? ctx, ParsedArgs args)
+    {
+        if (!RequireClient(ctx, out var client))
+            return;
+
+        if (!RequireDeath(client, "{=bRestricted GM Command - Cancel Chaos"))
+            return;
 
         ServerSetup.EventsLogger("Chaos Cancelled", LogLevel.Warning);
         client.Aisling.GameMasterChaosCancel = true;
     }
 
-
-    /// <summary>
-    /// Restarts server by forcing an Exit Program command
-    /// </summary>
-    public static void Restart(Argument[] args, object arg)
+    private static void Restart(object? ctx, ParsedArgs args)
     {
         var players = ServerSetup.Instance.Game.Aislings.ToList();
+
         ServerSetup.EventsLogger("---------------------------------------------", LogLevel.Warning);
         ServerSetup.EventsLogger("", LogLevel.Warning);
         ServerSetup.EventsLogger("------------- Server Restart Initiated -------------", LogLevel.Warning);
 
-        // Announce to all players
         foreach (var connected in players)
-        {
             connected.Client.SendServerMessage(ServerMessageType.GroupChat, "{=g-Server Restart-");
-        }
 
-        // Halts all components and routines
         ServerSetup.Instance.Running = false;
-
-        // Exit program so Daemon can reboot it
         Environment.Exit(0);
     }
 
-    /// <summary>
-    /// In Game Usage : /spell "Spell Name" 100
-    /// Learns a spell
-    /// </summary>
-    private static void OnLearnSpell(Argument[] args, object arg)
+    private static void OnLearnSpell(object? ctx, ParsedArgs args)
     {
-        var client = (WorldClient)arg;
-        if (client == null) return;
+        if (!RequireClient(ctx, out var client))
+            return;
+
         ServerSetup.EventsLogger($"{client.RemoteIp} used GM Command -Spell- on character: {client.Aisling.Username}");
-        var name = args.FromName("name").Replace("\"", "");
-        var level = args.FromName("level");
 
-        if (int.TryParse(level, out _))
-        {
-            var spell = Spell.GiveTo(client.Aisling, name);
-            client.SystemMessage(spell ? $"Learned: {name}" : "Failed");
-        }
-        else
-        {
-            client.SystemMessage("Failed");
-        }
+        var name = args.GetString(0);
+        var level = args.GetInt32Or(1, 100);
+        _ = level;
 
+        var spell = Spell.GiveTo(client.Aisling, name);
+        client.SystemMessage(spell ? $"Learned: {name}" : "Failed");
         client.LoadSpellBook();
     }
 
-    /// <summary>
-    /// In Game Usage : /skill "Skill Name" 100
-    /// Learns a skill
-    /// </summary>
-    private static void OnLearnSkill(Argument[] args, object arg)
+    private static void OnLearnSkill(object? ctx, ParsedArgs args)
     {
-        var client = (WorldClient)arg;
-        if (client == null) return;
+        if (!RequireClient(ctx, out var client))
+            return;
+
         ServerSetup.EventsLogger($"{client.RemoteIp} used GM Command -Skill- on character: {client.Aisling.Username}");
-        var name = args.FromName("name").Replace("\"", "");
-        var level = args.FromName("level");
 
-        if (int.TryParse(level, out _))
-        {
-            var skill = Skill.GiveTo(client.Aisling, name);
-            client.SystemMessage(skill ? $"Learned: {name}" : "Failed");
-        }
-        else
-        {
-            client.SystemMessage("Failed");
-        }
+        var name = args.GetString(0);
+        var level = args.GetInt32Or(1, 100);
+        _ = level;
 
+        var skill = Skill.GiveTo(client.Aisling, name);
+        client.SystemMessage(skill ? $"Learned: {name}" : "Failed");
         client.LoadSkillBook();
     }
 
-    /// <summary>
-    /// InGame Usage : /s "playerName" - Summons a player
-    /// </summary>
-    private static void OnSummonPlayer(Argument[] args, object arg)
+    private static void OnSummonPlayer(object? ctx, ParsedArgs args)
     {
-        var client = (WorldClient)arg;
-        if (client == null) return;
-        var who = args.FromName("who").Replace("\"", "");
-        if (string.IsNullOrEmpty(who)) return;
-        var players = ServerSetup.Instance.Game.Aislings;
-        var player = players.FirstOrDefault(i => i != null && string.Equals(i.Username, who, StringComparison.CurrentCultureIgnoreCase));
+        if (!RequireClient(ctx, out var client))
+            return;
+
+        var who = args.GetString(0);
+        var player = FindPlayerByName(who);
         if (player == null) return;
+
         if (!player.GameSettings.GMPort)
         {
             client.SendServerMessage(ServerMessageType.ActiveMessage, $"{player.Username}, has requested not to be summoned.");
-            player.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"GM {client.Aisling.Username} wished to summon you, but was told you were busy");
+            player.Client.SendServerMessage(ServerMessageType.ActiveMessage,
+                $"GM {client.Aisling.Username} wished to summon you, but was told you were busy");
             return;
         }
+
         player.Client.TransitionToMap(client.Aisling.Map, client.Aisling.Position);
-        ServerSetup.EventsLogger($"{client.RemoteIp} used GM Command -Summon- on character: {client.Aisling.Username}, Summoned: {player?.Username}");
+        ServerSetup.EventsLogger($"{client.RemoteIp} used GM Command -Summon- on character: {client.Aisling.Username}, Summoned: {player.Username}");
     }
 
-    /// <summary>
-    /// InGame Usage : /p "playerName" - Ports to a player
-    /// </summary>
-    private static void OnPortToPlayer(Argument[] args, object arg)
+    private static void OnPortToPlayer(object? ctx, ParsedArgs args)
     {
-        var client = (WorldClient)arg;
-        if (client == null) return;
-        var who = args.FromName("who").Replace("\"", "");
-        if (string.IsNullOrEmpty(who)) return;
-        var players = ServerSetup.Instance.Game.Aislings;
-        var player = players.FirstOrDefault(i => i != null && string.Equals(i.Username, who, StringComparison.CurrentCultureIgnoreCase));
-        if (player != null) client.TransitionToMap(player.Map, player.Position);
-        ServerSetup.EventsLogger($"{client.RemoteIp} used GM Command -Port- on character: {client.Aisling.Username}, Ported: {player?.Username}");
+        if (!RequireClient(ctx, out var client))
+            return;
+
+        var who = args.GetString(0);
+        var player = FindPlayerByName(who);
+        if (player == null) return;
+
+        client.TransitionToMap(player.Map, player.Position);
+        ServerSetup.EventsLogger($"{client.RemoteIp} used GM Command -Port- on character: {client.Aisling.Username}, Ported: {player.Username}");
     }
 
-    /// <summary>
-    /// InGame Usage : /sex "playerName" 1 
-    /// </summary>
-    private static void OnSexChange(Argument[] args, object arg)
+    private static void OnSexChange(object? ctx, ParsedArgs args)
     {
-        var client = (WorldClient)arg;
-        if (client == null) return;
-        var who = args.FromName("who").Replace("\"", "");
-        if (!int.TryParse(args.FromName("s"), out var sResult)) return;
-        if (string.IsNullOrEmpty(who)) return;
-        var players = ServerSetup.Instance.Game.Aislings;
-        var player = players.FirstOrDefault(i => i != null && string.Equals(i.Username, who, StringComparison.CurrentCultureIgnoreCase));
-        if (player != null) player.Gender = (Gender)sResult;
+        if (!RequireClient(ctx, out var client))
+            return;
+
+        var who = args.GetString(0);
+        var sResult = args.GetInt32(1);
+
+        var player = FindPlayerByName(who);
+        if (player != null)
+            player.Gender = (Gender)sResult;
+
         client.ClientRefreshed();
         ServerSetup.EventsLogger($"{client.RemoteIp} used GM Command -Sex Change- on character: {client.Aisling.Username}");
     }
 
-    /// <summary>
-    /// InGame Usage : /kill "playerName"
-    /// </summary>
-    private static void OnKillCommand(Argument[] args, object arg)
+    private static void OnKillCommand(object? ctx, ParsedArgs args)
     {
-        var client = (WorldClient)arg;
-        if (client == null) return;
-        var death = client.Aisling.Username.Equals("death", StringComparison.InvariantCultureIgnoreCase);
-        if (!death)
-        {
-            client.SendServerMessage(ServerMessageType.ActiveMessage, "{=bRestricted GM Command - Kill Player");
+        if (!RequireClient(ctx, out var client))
             return;
-        }
 
-        var who = args.FromName("who").Replace("\"", "");
-        if (string.IsNullOrEmpty(who)) return;
-        var players = ServerSetup.Instance.Game.Aislings;
-        var player = players.FirstOrDefault(i => i != null && string.Equals(i.Username, who, StringComparison.CurrentCultureIgnoreCase));
+        if (!RequireDeath(client, "{=bRestricted GM Command - Kill Player"))
+            return;
+
+        var who = args.GetString(0);
+        var player = FindPlayerByName(who);
+
         WorldClient.KillPlayer(client.Aisling.Map, player?.Username);
         ServerSetup.EventsLogger($"{client.RemoteIp} used GM Command -Kill- on character: {client.Aisling.Username}");
     }
 
-    /// <summary>
-    /// InGame Usage : /sm "base name" 1
-    /// </summary>
-    private static void OnMonsterSummon(Argument[] args, object arg)
+    private static void OnMonsterSummon(object? ctx, ParsedArgs args)
     {
-        var client = (WorldClient)arg;
-        if (client == null) return;
-        var death = client.Aisling.Username.Equals("death", StringComparison.InvariantCultureIgnoreCase);
-        if (!death)
-        {
-            client.SendServerMessage(ServerMessageType.ActiveMessage, "{=bRestricted GM Command - Summon Monster");
+        if (!RequireClient(ctx, out var client))
             return;
-        }
 
-        var who = args.FromName("who").Replace("\"", "");
-        if (!int.TryParse(args.FromName("amount"), out var sResult)) return;
-        if (string.IsNullOrEmpty(who)) return;
-        if (sResult == 0)
-            sResult = 1;
+        if (!RequireDeath(client, "{=bRestricted GM Command - Summon Monster"))
+            return;
 
-        for (var i = 0; i < sResult; i++)
+        var who = args.GetString(0);
+        var amount = args.GetInt32Or(1, 1);
+        if (amount <= 0) amount = 1;
+
+        for (var i = 0; i < amount; i++)
         {
-            ServerSetup.Instance.GlobalMonsterTemplateCache.TryGetValue(who, out var summon);
+            if (!ServerSetup.Instance.GlobalMonsterTemplateCache.TryGetValue(who, out var summon) || summon is null)
+                return;
+
             Monster.CreateFromTemplate(summon, client.Aisling.Map);
         }
 
         ServerSetup.EventsLogger($"{client.RemoteIp} used GM Command -Summon Monster- on character: {client.Aisling.Username}");
     }
 
-    /// <summary>
-    /// InGame Usage : /group "playerName"  
-    /// </summary>
-    private static void OnRemoteGroup(Argument[] args, object arg)
+    private static void OnRemoteGroup(object? ctx, ParsedArgs args)
     {
-        var client = (WorldClient)arg;
-        if (client == null) return;
-        var death = client.Aisling.Username.Equals("death", StringComparison.InvariantCultureIgnoreCase);
-        if (!death)
+        if (!RequireClient(ctx, out var client))
+            return;
+
+        if (!RequireDeath(client, "{=bRestricted GM Command - Group Player"))
+            return;
+
+        var who = args.GetString(0);
+        var player = FindPlayerByName(who);
+        if (player == null) return;
+
+        if (player.GroupParty != null)
         {
-            client.SendServerMessage(ServerMessageType.ActiveMessage, "{=bRestricted GM Command - Group Player");
+            client.SendServerMessage(ServerMessageType.ActiveMessage, "This player already belongs to a group");
             return;
         }
 
-        var who = args.FromName("who").Replace("\"", "");
-        if (string.IsNullOrEmpty(who)) return;
-        var players = ServerSetup.Instance.Game.Aislings;
-        var player = players.FirstOrDefault(i => i != null && string.Equals(i.Username, who, StringComparison.CurrentCultureIgnoreCase));
-        if (player != null)
+        if (player.Map.ID is 23352 or 7000 or 7001 or 7002 or 3029 or 720 or 393)
         {
-            if (player.GroupParty != null)
-            {
-                client.SendServerMessage(ServerMessageType.ActiveMessage, "This player already belongs to a group");
-                return;
-            }
-
-            if (player.Map.ID is 23352 or 7000 or 7001 or 7002 or 3029 or 720 or 393)
-            {
-                client.SendServerMessage(ServerMessageType.ActiveMessage, "You can't seem to connect with them");
-                return;
-            }
-
-            Party.AddPartyMember(client.Aisling, player);
+            client.SendServerMessage(ServerMessageType.ActiveMessage, "You can't seem to connect with them");
+            return;
         }
 
+        Party.AddPartyMember(client.Aisling, player);
         ServerSetup.EventsLogger($"{client.RemoteIp} remotely grouped character: {client.Aisling.Username}");
     }
 
-    /// <summary>
-    /// InGame Usage : /t or /map "Abel Dungeon 2-1" 35 36
-    /// </summary>
-    private static void OnTeleport(Argument[] args, object arg)
+    private static void OnTeleport(object? ctx, ParsedArgs args)
     {
-        var client = (WorldClient)arg;
-        if (client == null) return;
-        var mapName = args.FromName("t").Replace("\"", "");
-        if (!int.TryParse(args.FromName("x"), out var x) || !int.TryParse(args.FromName("y"), out var y)) return;
+        if (!RequireClient(ctx, out var client))
+            return;
+
+        var mapName = args.GetString(0);
+        var x = args.GetInt32(1);
+        var y = args.GetInt32(2);
+
         var (_, area) = ServerSetup.Instance.GlobalMapCache.FirstOrDefault(i => i.Value.Name == mapName);
         if (area == null) return;
+
         client.TransitionToMap(area, new Position(x, y));
         ServerSetup.EventsLogger($"{client.RemoteIp} used GM Command -Port- on character: {client.Aisling.Username}");
     }
 
-    private static void OnIpReset(Argument[] args, object arg)
+    private static void OnIpReset(object? ctx, ParsedArgs args)
     {
-        var client = (WorldClient)arg;
-        if (client == null) return;
-        var death = client.Aisling.Username.Equals("death", StringComparison.InvariantCultureIgnoreCase);
-        if (!death)
-        {
-            client.SendServerMessage(ServerMessageType.ActiveMessage, "{=bRestricted GM Command - Reset Restrictions");
+        if (!RequireClient(ctx, out var client))
             return;
-        }
+
+        if (!RequireDeath(client, "{=bRestricted GM Command - Reset Restrictions"))
+            return;
 
         ServerSetup.Instance.GlobalPasswordAttempt.Clear();
         ServerSetup.EventsLogger($"{client.RemoteIp} used GM Command -Ip Reset- on character: {client.Aisling.Username}");
     }
 
-    /// <summary>
-    /// In Game Usage : /rm
-    /// Reloads all maps
-    /// </summary>
-    private static void OnMapReload(Argument[] args, object arg)
+    private static void OnMapReload(object? ctx, ParsedArgs args)
     {
-        var client = (WorldClient)arg;
-        if (client == null) return;
+        if (!RequireClient(ctx, out var client))
+            return;
+
         ServerSetup.EventsLogger($"{client.RemoteIp} used GM Command -Reload Maps- on character: {client.Aisling.Username}");
+
         var players = ServerSetup.Instance.Game.Aislings;
+
         ServerSetup.EventsLogger("---------------------------------------------", LogLevel.Warning);
         ServerSetup.EventsLogger("------------- Maps Reloaded -------------", LogLevel.Warning);
 
-        // Wipe
         ServerSetup.Instance.TempGlobalMapCache = [];
         ServerSetup.Instance.TempGlobalWarpTemplateCache = [];
-        
+
         foreach (var npc in ServerSetup.Instance.GlobalMundaneCache.Values)
-        {
             ObjectManager.DelObject(npc);
-        }
+
         ServerSetup.Instance.GlobalMundaneCache = [];
 
-        // Reload
         AreaStorage.Instance.CacheFromDatabase();
         DatabaseLoad.CacheFromDatabase(new WarpTemplate());
 
         foreach (var connected in players)
         {
-            connected.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=q{client.Aisling.Username} Invokes Reload Maps");
+            connected.Client.SendServerMessage(ServerMessageType.ActiveMessage,
+                $"{{=q{client.Aisling.Username} Invokes Reload Maps");
             connected.Client.ClientRefreshed();
         }
     }
 
-    /// <summary>
-    /// InGame Usage : /give "Dark Belt" 3
-    /// InGame Usage : /give "Raw Beryl" 33
-    /// InGame Usage : /give "Hy-Brasyl Battle Axe" 
-    /// </summary>
-    private static void OnItemCreate(Argument[] args, object arg)
+    private static void OnItemCreate(object? ctx, ParsedArgs args)
     {
-        var client = (WorldClient)arg;
-        if (client == null) return;
-        var death = client.Aisling.Username.Equals("death", StringComparison.InvariantCultureIgnoreCase);
-        if (!death)
-        {
-            client.SendServerMessage(ServerMessageType.ActiveMessage, "{=bRestricted GM Command - Item Creation");
+        if (!RequireClient(ctx, out var client))
             return;
-        }
+
+        if (!RequireDeath(client, "{=bRestricted GM Command - Item Creation"))
+            return;
 
         ServerSetup.EventsLogger($"{client.RemoteIp} used GM Command -Item Create- on character: {client.Aisling.Username}");
 
-        var name = args.FromName("item").Replace("\"", "");
-        if (!int.TryParse(args.FromName("amount"), out var quantity)) return;
-        if (!ServerSetup.Instance.GlobalItemTemplateCache.ContainsKey(name)) return;
-        var template = ServerSetup.Instance.GlobalItemTemplateCache[name];
+        var name = args.GetString(0);
+        var quantity = args.GetInt32Or(1, 1);
+        if (quantity <= 0) return;
+
+        if (!ServerSetup.Instance.GlobalItemTemplateCache.TryGetValue(name, out var template))
+            return;
+
         if (template.CanStack)
         {
             var stacks = quantity / template.MaxStack;
@@ -513,48 +587,46 @@ public static class Commander
             }
 
             if (remaining <= 0) return;
+
+            if (client.Aisling.Inventory.IsFull)
+            {
+                client.SendServerMessage(ServerMessageType.ActiveMessage, "{=cYour inventory is full");
+                return;
+            }
+
             {
                 var item = new Item();
-                if (client.Aisling.Inventory.IsFull)
-                {
-                    client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cYour inventory is full");
-                    return;
-                }
                 item = item.Create(client.Aisling, template);
                 item.Stacks = (ushort)remaining;
                 item.GiveTo(client.Aisling);
             }
+
+            return;
         }
-        else
+
+        var quality = Item.Quality.Common;
+        var variance = Item.Variance.None;
+        var wVariance = Item.WeaponVariance.None;
+
+        for (var i = 0; i < quantity; i++)
         {
-            var item = new Item();
-            var quality = Item.Quality.Common;
-            var variance = Item.Variance.None;
-            var wVariance = Item.WeaponVariance.None;
-            
-            for (var i = 0; i < quantity; i++)
+            if (client.Aisling.Inventory.IsFull)
             {
-                if (client.Aisling.Inventory.IsFull)
-                {
-                    client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cYour inventory is full");
-                    return;
-                }
-
-                if (template.Enchantable)
-                {
-                    quality = ItemQualityVariance.DetermineHighQuality();
-                    variance = ItemQualityVariance.DetermineVariance();
-                    wVariance = ItemQualityVariance.DetermineWeaponVariance();
-                }
-
-                item = item.Create(client.Aisling, template, quality, variance, wVariance);
-                ItemQualityVariance.ItemDurability(item, quality);
-                item.GiveTo(client.Aisling);
+                client.SendServerMessage(ServerMessageType.ActiveMessage, "{=cYour inventory is full");
+                return;
             }
+
+            if (template.Enchantable)
+            {
+                quality = ItemQualityVariance.DetermineHighQuality();
+                variance = ItemQualityVariance.DetermineVariance();
+                wVariance = ItemQualityVariance.DetermineWeaponVariance();
+            }
+
+            var item = new Item();
+            item = item.Create(client.Aisling, template, quality, variance, wVariance);
+            ItemQualityVariance.ItemDurability(item, quality);
+            item.GiveTo(client.Aisling);
         }
     }
-    
-    public static void ParseChatMessage(WorldClient client, string message) => ServerSetup.Instance.Parser?.Parse(message, client);
-
-    private static void OnParseError(object obj, string command) => ServerSetup.EventsLogger($"[Chat Parser] Error: {command}");
 }

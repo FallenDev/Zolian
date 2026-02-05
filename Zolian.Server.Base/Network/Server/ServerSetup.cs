@@ -1,9 +1,7 @@
 ﻿using Darkages.Common;
 using Darkages.CommandSystem;
-using Darkages.CommandSystem.CLI;
 using Darkages.Database;
 using Darkages.Models;
-using Darkages.Sprites;
 using Darkages.Templates;
 using Darkages.Types;
 
@@ -40,7 +38,7 @@ public class ServerSetup : IServerContext
     public WorldServer Game { get; set; }
     public LoginServer LoginServer { get; set; }
     public LobbyServer LobbyServer { get; set; }
-    public CommandParser Parser { get; set; }
+    public static CommandSystemCore Commands;
     public string StoragePath { get; set; }
     public string MoonPhase { get; set; }
     public byte LightPhase { get; set; }
@@ -255,10 +253,23 @@ public class ServerSetup : IServerContext
         Console.WriteLine("GM Commands");
         Console.ForegroundColor = ConsoleColor.Magenta;
 
-        foreach (var command in Parser.Commands)
+        if (ServerSetup.Commands == null)
         {
-            Console.WriteLine(command.ShowHelp(), LogLevel.Debug);
+            Console.WriteLine("No command system initialized.");
+            Console.ResetColor();
+            return;
         }
+
+        foreach (var command in ServerSetup.Commands.Definitions)
+        {
+            var aliases = string.Join(", ", command.Aliases);
+            Console.WriteLine($"  /{aliases}");
+
+            if (!string.IsNullOrWhiteSpace(command.Description))
+                Console.WriteLine($"      {command.Description}");
+        }
+
+        Console.ResetColor();
     }
 
     public void DatabaseSaveConnection()

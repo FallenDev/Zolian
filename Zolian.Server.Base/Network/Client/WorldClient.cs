@@ -14,8 +14,6 @@ using Chaos.Geometry.Abstractions.Definitions;
 using Chaos.Networking.Abstractions;
 using Chaos.Networking.Abstractions.Definitions;
 using Chaos.Networking.Entities.Server;
-using Chaos.NLog.Logging.Definitions;
-using Chaos.NLog.Logging.Extensions;
 using Chaos.Packets;
 using Chaos.Packets.Abstractions;
 
