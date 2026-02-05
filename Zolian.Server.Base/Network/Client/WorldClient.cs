@@ -4133,9 +4133,15 @@ public class WorldClient : WorldClientBase, IWorldClient
                 player.Client.SendServerMessage(ServerMessageType.ActiveMessage,
                     $"You leveled up {levelsGained} time(s)! New Insight: {player.ExpLevel}");
                 player.SendAnimationNearby(79, null, player.Serial, 64);
-            }
 
-            player.Client.SendAttributes(StatUpdateType.Full);
+                player.CurrentHp = player.MaximumHp;
+                player.CurrentMp = player.MaximumMp;
+                player.Client.SendAttributes(StatUpdateType.Full);
+            }
+            else
+            {
+                player.Client.SendAttributes(StatUpdateType.ExpGold);
+            }
         }
         catch (Exception ex)
         {
@@ -4289,11 +4295,15 @@ public class WorldClient : WorldClientBase, IWorldClient
 
                     player.LegendBook.AddLegend(legend, player.Client);
                 }
-            }
 
-            player.CurrentHp = player.MaximumHp;
-            player.CurrentMp = player.MaximumMp;
-            player.Client.SendAttributes(StatUpdateType.Full);
+                player.CurrentHp = player.MaximumHp;
+                player.CurrentMp = player.MaximumMp;
+                player.Client.SendAttributes(StatUpdateType.Full);
+            }
+            else
+            {
+                player.Client.SendAttributes(StatUpdateType.ExpGold);
+            }
         }
         catch (Exception e)
         {
