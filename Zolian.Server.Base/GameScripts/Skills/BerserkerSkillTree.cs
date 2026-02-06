@@ -319,10 +319,10 @@ public class Aid(Skill skill) : SkillScript(skill)
                 }
 
                 if (damageable.HasDebuff("Beag Suain"))
-                    damageable.Debuffs.TryRemove("Beag Suain", out _);
+                    damageable.RemoveDebuff("Beag Suain");
 
                 if (damageable.HasDebuff("Silence"))
-                    damageable.Debuffs.TryRemove("Silence", out _);
+                    damageable.RemoveDebuff("Silence");
 
                 damageable.ApplyDamage(damageDealer, 0, Skill);
                 damageable.SendAnimationNearby(Skill.Template.TargetAnimation, null, damageable.Serial);

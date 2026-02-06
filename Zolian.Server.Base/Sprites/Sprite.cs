@@ -509,25 +509,22 @@ public abstract class Sprite : INotifyPropertyChanged
             RemoveDebuff(debuff.Key);
     }
 
-    private bool RemoveBuff(string buff)
+    public bool RemoveBuff(string buff)
     {
         if (!HasBuff(buff)) return false;
 
-        lock (Buffs)
+        try
         {
-            try
+            var buffObj = Buffs.TryGetValue(buff, out var foundBuff);
+            if (buffObj)
             {
-                var buffObj = Buffs.TryGetValue(buff, out var foundBuff);
-                if (buffObj)
-                {
-                    if (foundBuff.Name.Contains("XP")) return false;
-                    foundBuff.OnEnded(this, foundBuff);
-                }
+                if (foundBuff.Name.Contains("XP")) return false;
+                foundBuff.OnEnded(this, foundBuff);
             }
-            catch
-            {
-                // ignored
-            }
+        }
+        catch
+        {
+            // ignored
         }
 
         return true;
@@ -544,21 +541,18 @@ public abstract class Sprite : INotifyPropertyChanged
         if (!cancelled && debuff == "Skulled") return true;
         if (!HasDebuff(debuff)) return false;
 
-        lock (Debuffs)
+        try
         {
-            try
+            var debuffObj = Debuffs.TryGetValue(debuff, out var foundDebuff);
+            if (debuffObj)
             {
-                var debuffObj = Debuffs.TryGetValue(debuff, out var foundDebuff);
-                if (debuffObj)
-                {
-                    foundDebuff.Cancelled = cancelled;
-                    foundDebuff.OnEnded(this, foundDebuff);
-                }
+                foundDebuff.Cancelled = cancelled;
+                foundDebuff.OnEnded(this, foundDebuff);
             }
-            catch
-            {
-                // ignored
-            }
+        }
+        catch
+        {
+            // ignored
         }
 
         return true;

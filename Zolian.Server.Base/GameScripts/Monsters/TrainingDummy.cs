@@ -72,13 +72,13 @@ public class TrainingDummy : MonsterScript
         foreach (var debuff in Monster.Debuffs.Values)
         {
             if (debuff != null)
-                Monster.Debuffs.TryRemove(debuff.Name, out _);
+                Monster.RemoveDebuff(debuff.Name);
         }
 
         foreach (var debuff in Monster.Buffs.Values)
         {
             if (debuff != null)
-                Monster.Buffs.TryRemove(debuff.Name, out _);
+                Monster.RemoveBuff(debuff.Name);
         }
 
         Monster.Skulled = false;
@@ -139,13 +139,13 @@ public class TrainingDummy2 : MonsterScript
         foreach (var debuff in Monster.Debuffs.Values)
         {
             if (debuff != null)
-                Monster.Debuffs.TryRemove(debuff.Name, out _);
+                Monster.RemoveDebuff(debuff.Name);
         }
 
         foreach (var debuff in Monster.Buffs.Values)
         {
             if (debuff != null)
-                Monster.Buffs.TryRemove(debuff.Name, out _);
+                Monster.RemoveBuff(debuff.Name);
         }
 
         Monster.Skulled = false;

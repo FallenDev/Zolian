@@ -149,21 +149,9 @@ public static class GlobalSkillMethods
                 (skill.Template.PostQualifiers.QualifierFlagIsSet(PostQualifier.BreakInvisible) ||
                  skill.Template.PostQualifiers.QualifierFlagIsSet(PostQualifier.Both)))
             {
-                if (client.Aisling.Buffs.TryRemove("Hide", out var hide))
-                {
-                    hide.OnEnded(client.Aisling, hide);
-                }
-
-                if (client.Aisling.Buffs.TryRemove("Shadowfade", out var shadowFade))
-                {
-                    shadowFade.OnEnded(client.Aisling, shadowFade);
-                }
-
-                if (client.Aisling.Buffs.TryRemove("Blend", out var blend))
-                {
-                    blend.OnEnded(client.Aisling, blend);
-                }
-
+                aisling.RemoveBuff("Hide");
+                aisling.RemoveBuff("Shadowfade");
+                aisling.RemoveBuff("Blend");
                 client.UpdateDisplay();
                 return Attempt(client, skill);
             }

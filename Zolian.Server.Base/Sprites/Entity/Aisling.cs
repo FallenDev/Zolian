@@ -312,21 +312,9 @@ public sealed class Aisling : Player, IAisling
                     {
                         if (IsInvisible && (spell.Template.PostQualifiers.QualifierFlagIsSet(PostQualifier.BreakInvisible) || spell.Template.PostQualifiers.QualifierFlagIsSet(PostQualifier.Both)))
                         {
-                            if (Buffs.TryRemove("Hide", out var hide))
-                            {
-                                hide.OnEnded(Client.Aisling, hide);
-                            }
-
-                            if (Buffs.TryRemove("Shadowfade", out var shadowFade))
-                            {
-                                shadowFade.OnEnded(Client.Aisling, shadowFade);
-                            }
-
-                            if (Buffs.TryRemove("Blend", out var blend))
-                            {
-                                blend.OnEnded(Client.Aisling, blend);
-                            }
-
+                            RemoveBuff("Hide");
+                            RemoveBuff("Shadowfade");
+                            RemoveBuff("Blend");
                             Client.UpdateDisplay();
                         }
 
