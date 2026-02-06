@@ -332,14 +332,6 @@ public sealed class Monster : Damageable
         mundane.AIScript?.OnResponse(aisling.Client, responseId, $"{mundane.Serial}");
     }
 
-    public static void CreateFromTemplate(MonsterTemplate template, Area map)
-    {
-        var newObj = Create(template, map);
-
-        if (newObj == null) return;
-        ObjectManager.AddObject(newObj);
-    }
-
     private void Patrol()
     {
         if (CurrentWaypoint != null) WalkTo(CurrentWaypoint.X, CurrentWaypoint.Y);

@@ -4,6 +4,7 @@ using Darkages.Common;
 using Darkages.Enums;
 using Darkages.Network.Client;
 using Darkages.Network.Server;
+using Darkages.Object;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Sprites.Entity;
@@ -49,7 +50,9 @@ public class DraconicOmega : MonsterScript
             if (Monster.IsVulnerable || Monster.IsPoisoned)
             {
                 var pos = Monster.Pos;
-                Monster.SendAnimationNearby(75, new Position(pos));
+                var diceRoll = Generator.RandNumGen100();
+                if (diceRoll >= 80)
+                    Monster.SendAnimationNearby(75, new Position(pos));
 
                 foreach (var debuff in Monster.Debuffs.Values)
                     debuff?.OnEnded(Monster, debuff);
@@ -344,7 +347,9 @@ public class JackFrost : MonsterScript
             if (Monster.IsVulnerable || Monster.IsPoisoned)
             {
                 var pos = Monster.Pos;
-                Monster.SendAnimationNearby(75, new Position(pos));
+                var diceRoll = Generator.RandNumGen100();
+                if (diceRoll >= 80)
+                    Monster.SendAnimationNearby(75, new Position(pos));
 
                 foreach (var debuff in Monster.Debuffs.Values)
                     debuff?.OnEnded(Monster, debuff);
@@ -643,7 +648,9 @@ public class Yeti : MonsterScript
             if (Monster.IsVulnerable || Monster.IsPoisoned)
             {
                 var pos = Monster.Pos;
-                Monster.SendAnimationNearby(75, new Position(pos));
+                var diceRoll = Generator.RandNumGen100();
+                if (diceRoll >= 80)
+                    Monster.SendAnimationNearby(75, new Position(pos));
 
                 foreach (var debuff in Monster.Debuffs.Values)
                     debuff?.OnEnded(Monster, debuff);
@@ -669,9 +676,24 @@ public class Yeti : MonsterScript
             var foundB = templates.TryGetValue(t => t.Name == "SnowmanB", out var templateB);
             var foundC = templates.TryGetValue(t => t.Name == "SnowmanC", out var templateC);
 
-            if (foundA) Monster.CreateFromTemplate(templateA, Monster.Map);
-            if (foundB) Monster.CreateFromTemplate(templateB, Monster.Map);
-            if (foundC) Monster.CreateFromTemplate(templateC, Monster.Map);
+            if (foundA)
+            {
+                var mob1 = Monster.Create(templateA, Monster.Map);
+                if (mob1 is not null)
+                    ObjectManager.AddObject(mob1);
+            }
+            if (foundB)
+            {
+                var mob2 = Monster.Create(templateB, Monster.Map);
+                if (mob2 is not null)
+                    ObjectManager.AddObject(mob2);
+            }
+            if (foundC)
+            {
+                var mob3 = Monster.Create(templateC, Monster.Map);
+                if (mob3 is not null)
+                    ObjectManager.AddObject(mob3);
+            }
 
             _phaseOne = true;
         }
@@ -687,11 +709,36 @@ public class Yeti : MonsterScript
             var foundD = templates.TryGetValue(t => t.Name == "SnowmanD", out var templateD);
             var foundE = templates.TryGetValue(t => t.Name == "SnowmanE", out var templateE);
 
-            if (foundA) Monster.CreateFromTemplate(templateA, Monster.Map);
-            if (foundB) Monster.CreateFromTemplate(templateB, Monster.Map);
-            if (foundC) Monster.CreateFromTemplate(templateC, Monster.Map);
-            if (foundD) Monster.CreateFromTemplate(templateD, Monster.Map);
-            if (foundE) Monster.CreateFromTemplate(templateE, Monster.Map);
+            if (foundA)
+            {
+                var mob1 = Monster.Create(templateA, Monster.Map);
+                if (mob1 is not null)
+                    ObjectManager.AddObject(mob1);
+            }
+            if (foundB)
+            {
+                var mob2 = Monster.Create(templateB, Monster.Map);
+                if (mob2 is not null)
+                    ObjectManager.AddObject(mob2);
+            }
+            if (foundC)
+            {
+                var mob3 = Monster.Create(templateC, Monster.Map);
+                if (mob3 is not null)
+                    ObjectManager.AddObject(mob3);
+            }
+            if (foundD)
+            {
+                var mob4 = Monster.Create(templateD, Monster.Map);
+                if (mob4 is not null)
+                    ObjectManager.AddObject(mob4);
+            }
+            if (foundE)
+            {
+                var mob5 = Monster.Create(templateE, Monster.Map);
+                if (mob5 is not null)
+                    ObjectManager.AddObject(mob5);
+            }
 
             _phaseTwo = true;
         }
@@ -709,13 +756,48 @@ public class Yeti : MonsterScript
             var foundF = templates.TryGetValue(t => t.Name == "SnowmanF", out var templateF);
             var foundG = templates.TryGetValue(t => t.Name == "SnowmanG", out var templateG);
 
-            if (foundA) Monster.CreateFromTemplate(templateA, Monster.Map);
-            if (foundB) Monster.CreateFromTemplate(templateB, Monster.Map);
-            if (foundC) Monster.CreateFromTemplate(templateC, Monster.Map);
-            if (foundD) Monster.CreateFromTemplate(templateD, Monster.Map);
-            if (foundE) Monster.CreateFromTemplate(templateE, Monster.Map);
-            if (foundF) Monster.CreateFromTemplate(templateF, Monster.Map);
-            if (foundG) Monster.CreateFromTemplate(templateG, Monster.Map);
+            if (foundA)
+            {
+                var mob1 = Monster.Create(templateA, Monster.Map);
+                if (mob1 is not null)
+                    ObjectManager.AddObject(mob1);
+            }
+            if (foundB)
+            {
+                var mob2 = Monster.Create(templateB, Monster.Map);
+                if (mob2 is not null)
+                    ObjectManager.AddObject(mob2);
+            }
+            if (foundC)
+            {
+                var mob3 = Monster.Create(templateC, Monster.Map);
+                if (mob3 is not null)
+                    ObjectManager.AddObject(mob3);
+            }
+            if (foundD)
+            {
+                var mob4 = Monster.Create(templateD, Monster.Map);
+                if (mob4 is not null)
+                    ObjectManager.AddObject(mob4);
+            }
+            if (foundE)
+            {
+                var mob5 = Monster.Create(templateE, Monster.Map);
+                if (mob5 is not null)
+                    ObjectManager.AddObject(mob5);
+            }
+            if (foundF)
+            {
+                var mob6 = Monster.Create(templateF, Monster.Map);
+                if (mob6 is not null)
+                    ObjectManager.AddObject(mob6);
+            }
+            if (foundG)
+            {
+                var mob7 = Monster.Create(templateG, Monster.Map);
+                if (mob7 is not null)
+                    ObjectManager.AddObject(mob7);
+            }
 
             _phaseThree = true;
         }
@@ -1001,7 +1083,9 @@ public class WorldBossBahamut : MonsterScript
             if (Monster.IsVulnerable || Monster.IsPoisoned)
             {
                 var pos = Monster.Pos;
-                Monster.SendAnimationNearby(75, new Position(pos));
+                var diceRoll = Generator.RandNumGen100();
+                if (diceRoll >= 80)
+                    Monster.SendAnimationNearby(75, new Position(pos));
 
                 foreach (var debuff in Monster.Debuffs.Values)
                     debuff?.OnEnded(Monster, debuff);

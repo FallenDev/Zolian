@@ -1749,7 +1749,9 @@ public class AosdaRemnant : MonsterScript
             if (Monster.IsVulnerable || Monster.IsPoisoned)
             {
                 var pos = Monster.Pos;
-                Monster.SendAnimationNearby(75, new Position(pos));
+                var diceRoll = Generator.RandNumGen100();
+                if (diceRoll >= 80)
+                    Monster.SendAnimationNearby(75, new Position(pos));
 
                 foreach (var debuff in Monster.Debuffs.Values)
                     debuff?.OnEnded(Monster, debuff);
@@ -2053,7 +2055,9 @@ public class AosdaHero : MonsterScript
                 if (_vulnerabilityWatch.Elapsed.TotalMilliseconds > 1000)
                 {
                     var pos = Monster.Pos;
-                    Monster.SendAnimationNearby(75, new Position(pos));
+                    var diceRoll = Generator.RandNumGen100();
+                    if (diceRoll >= 80)
+                        Monster.SendAnimationNearby(75, new Position(pos));
 
                     foreach (var debuff in Monster.Debuffs.Values)
                         debuff?.OnEnded(Monster, debuff);
@@ -2351,7 +2355,9 @@ public class AncientDragon : MonsterScript
             if (Monster.IsVulnerable || Monster.IsPoisoned)
             {
                 var pos = Monster.Pos;
-                Monster.SendAnimationNearby(75, new Position(pos));
+                var diceRoll = Generator.RandNumGen100();
+                if (diceRoll >= 80)
+                    Monster.SendAnimationNearby(75, new Position(pos));
 
                 foreach (var debuff in Monster.Debuffs.Values)
                     debuff?.OnEnded(Monster, debuff);

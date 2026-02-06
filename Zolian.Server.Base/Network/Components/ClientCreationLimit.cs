@@ -24,7 +24,7 @@ public class ClientCreationLimit(WorldServer server) : WorldServerComponent(serv
                 continue;
             }
 
-            CleanupCreationLimits();
+            CleanupCreationLimitsAndIPBlocksOnPasswordAttempt();
 
             var postElapsed = sw.Elapsed.TotalMilliseconds;
             var overshoot = postElapsed - ComponentSpeed;
@@ -37,9 +37,10 @@ public class ClientCreationLimit(WorldServer server) : WorldServerComponent(serv
         }
     }
 
-    private static void CleanupCreationLimits()
+    private static void CleanupCreationLimitsAndIPBlocksOnPasswordAttempt()
     {
         if (!ServerSetup.Instance.Running) return;
+        ServerSetup.Instance.GlobalPasswordAttempt.Clear();
 
         var dict = ServerSetup.Instance.GlobalCreationCount;
 

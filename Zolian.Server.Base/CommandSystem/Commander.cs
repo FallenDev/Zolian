@@ -1,4 +1,5 @@
 ﻿using Darkages.Database;
+using Darkages.Enums;
 using Darkages.GameScripts.Formulas;
 using Darkages.Network.Client;
 using Darkages.Network.Server;
@@ -427,7 +428,7 @@ public static class Commander
         if (player != null)
             player.Gender = (Gender)sResult;
 
-        client.ClientRefreshed();
+        player.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.ClientRefreshed());
         ServerSetup.EventsLogger($"{client.RemoteIp} used GM Command -Sex Change- on character: {client.Aisling.Username}");
     }
 
@@ -457,16 +458,29 @@ public static class Commander
         var who = args.GetString(0);
         var amount = args.GetInt32Or(1, 1);
         if (amount <= 0) amount = 1;
+        var summoned = 0;
 
         for (var i = 0; i < amount; i++)
         {
             if (!ServerSetup.Instance.GlobalMonsterTemplateCache.TryGetValue(who, out var summon) || summon is null)
                 return;
 
-            Monster.CreateFromTemplate(summon, client.Aisling.Map);
+            var mob = Monster.Create(summon, client.Aisling.Map);
+            if (mob != null)
+            {
+                ObjectManager.AddObject(mob);
+                summoned++;
+            }
         }
 
-        ServerSetup.EventsLogger($"{client.RemoteIp} used GM Command -Summon Monster- on character: {client.Aisling.Username}");
+        if (summoned == 0)
+        {
+            client.SendServerMessage(ServerMessageType.ActiveMessage, $"Failed to summon monster: {who}");
+            return;
+        }
+
+        client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendServerMessage(ServerMessageType.ActiveMessage, $"Death Summoned: {who} x{summoned}"));
+        ServerSetup.EventsLogger($"{client.RemoteIp} used GM Command -Summon Monster- {who} x{summoned}");
     }
 
     private static void OnRemoteGroup(object? ctx, ParsedArgs args)
