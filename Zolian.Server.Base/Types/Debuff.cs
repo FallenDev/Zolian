@@ -52,6 +52,7 @@ public class Debuff
             "Adv Frozen" => new DebuffAdvFrozen(),
             "Halt" => new DebuffHalt(),
             "Sleep" => new DebuffSleep(),
+            "Deep Sleep" => new DebuffDeepSleep(),
             "Bleeding" => new DebuffBleeding(),
             "Uas Puinsein" => new DebuffUasPoison(),
             "Ard Puinsein" => new DebuffArdPoison(),

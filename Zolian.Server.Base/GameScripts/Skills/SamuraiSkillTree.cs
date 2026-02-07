@@ -92,8 +92,7 @@ public class Iaido(Skill skill) : SkillScript(skill)
                     {
                         case Aisling:
                         case Monster monster when monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.Boss)
-                                                  || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.MiniBoss)
-                                                  || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.Forsaken):
+                                                  || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.MiniBoss):
                             if (damageDealer is Aisling player)
                                 player.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Death doesn't seem to work on them");
                             continue;
@@ -157,7 +156,7 @@ public class Iaido(Skill skill) : SkillScript(skill)
         else
         {
             if (sprite is not Monster damageMonster) return 0;
-            dmg = damageMonster.Str * 2 + damageMonster.Dex * 3;
+            dmg = damageMonster.Str * 50 + damageMonster.Dex * 35;
         }
 
         var critCheck = GlobalSkillMethods.OnCrit(dmg);

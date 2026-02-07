@@ -12,49 +12,17 @@ public enum MonsterType
     None,
     Physical,
     Magical,
-    GodlyStr,
-    GodlyInt,
-    GodlyWis,
-    GodlyCon,
-    GodlyDex,
-    Above99P,
-    Above99M,
-    Above150P,
-    Above150M,
-    Above200P,
-    Above200M,
-    Above250P,
-    Above250M,
-    MasterStr,
-    MasterInt,
-    MasterWis,
-    MasterCon,
-    MasterDex,
-    Forsaken,
-    Above300P,
-    Above300M,
-    Above350P,
-    Above350M,
-    Above400P,
-    Above400M,
-    Above450P,
-    Above450M,
-    Above500P,
-    Above500M,
-    DivineStr,
-    DivineInt,
-    DivineWis,
-    DivineCon,
-    DivineDex,
     MiniBoss,
     Rift,
     Boss
 }
 
 /// <summary>
-/// Common - 75% AC & Will Save
-/// Tank - 98% AC & 50% Will Save
-/// Caster - 50% AC & 98% Will Save
+/// Common - 55% AC & 75% Will Save
+/// Tank - 70% AC & 50% Will Save
+/// Caster - 40% AC & 90% Will Save
+/// <see cref="GameScripts.Formulas.WillSavingThrow" />
+/// <see cref="GameScripts.Formulas.Ac" />
 /// </summary>
 public enum MonsterArmorType
 {

@@ -1,14 +1,17 @@
 ﻿using System.Collections.Concurrent;
-using Chaos.Geometry;
-using Chaos.Geometry.Abstractions.Definitions;
-using Darkages.Types;
 using System.Numerics;
 using System.Security.Cryptography;
-using Darkages.Network.Server;
-using Darkages.Sprites.Entity;
+
+using Chaos.Geometry;
+using Chaos.Geometry.Abstractions.Definitions;
+
 using Darkages.Enums;
+using Darkages.GameScripts.Skills;
 using Darkages.Network.Client;
+using Darkages.Network.Server;
 using Darkages.Object;
+using Darkages.Sprites.Entity;
+using Darkages.Types;
 
 namespace Darkages.Sprites;
 
@@ -21,20 +24,6 @@ public class Movable : Identifiable
     /// </summary>
     private bool Walk()
     {
-        void Step0C(int x, int y)
-        {
-            var readyTime = DateTime.UtcNow;
-            Pos = new Vector2(PendingX, PendingY);
-
-            foreach (var player in AislingsNearby())
-            {
-                player?.Client.SendCreatureWalk(Serial, new Point(x, y), (Direction)Direction);
-            }
-
-            LastMovementChanged = readyTime;
-            LastPosition = new Position(x, y);
-        }
-
         lock (_walkLock)
         {
             var currentPosX = X;
@@ -86,11 +75,14 @@ public class Movable : Identifiable
             else if (!Map.IsSpriteWithinBounds(PendingX, PendingY)) return false;
 
             // Commit Walk to other Player Clients
-            Step0C(currentPosX, currentPosY);
+            Step0COnWalk(currentPosX, currentPosY);
 
-            // Check Trap Activation
+            // Check Trap Activation & Run Map OnWalk Script
             if (this is Monster trapCheck)
+            {
                 CheckTraps(trapCheck);
+                trapCheck.Map?.Script?.Item2.OnNpcWalk(trapCheck);
+            }
 
             // Reset our PendingX & PendingY
             PendingX = currentPosX;
@@ -117,9 +109,14 @@ public class Movable : Identifiable
                 if ((int)pos.X == x && (int)pos.Y == y) return false;
             }
 
+            var ghostWalk = false;
+
+            if (this is Monster monster)
+                ghostWalk = monster.Template.IgnoreCollision;
+
             try
             {
-                if (Map.IsWall((int)pos.X, (int)pos.Y)) continue;
+                if (!ghostWalk && Map.IsWall((int)pos.X, (int)pos.Y)) continue;
                 if (Area.IsSpriteInLocationOnWalk(this, (int)pos.X, (int)pos.Y)) continue;
             }
             catch (Exception ex)
@@ -207,11 +204,19 @@ public class Movable : Identifiable
     {
         try
         {
-            if (sprite is not Aisling movingPlayer) return await Task.FromResult(false);
-            var warpPos = new Position(savedXStep, savedYStep);
-            movingPlayer.Client.WarpTo(warpPos);
-            movingPlayer.Client.CheckWarpTransitions(movingPlayer.Client, savedXStep, savedYStep);
-            return await movingPlayer.Client.SendRemoveObject(movingPlayer.Serial);
+            if (sprite is Aisling movingPlayer)
+            {
+                var warpPos = new Position(savedXStep, savedYStep);
+                movingPlayer.Client.WarpTo(warpPos);
+                movingPlayer.Client.CheckWarpTransitions(movingPlayer.Client, savedXStep, savedYStep);
+                return await movingPlayer.Client.SendRemoveObject(movingPlayer.Serial);
+            }
+
+            if (sprite is not Monster movingMonster) return await Task.FromResult(false);
+
+            // Commit Walk to other Player Clients
+            Step0COnAbilities(savedXStep, savedYStep);
+            return await Task.FromResult(true);
         }
         catch
         {
@@ -219,6 +224,36 @@ public class Movable : Identifiable
             SentrySdk.CaptureMessage($"Issue with Step called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
             return await Task.FromResult(false);
         }
+    }
+
+    private void Step0COnWalk(int x, int y)
+    {
+        var readyTime = DateTime.UtcNow;
+        Pos = new Vector2(PendingX, PendingY);
+
+        foreach (var player in AislingsNearby())
+        {
+            player?.Client.SendCreatureWalk(Serial, new Point(x, y), (Direction)Direction);
+        }
+
+        LastMovementChanged = readyTime;
+        LastPosition = new Position(x, y);
+    }
+
+    private void Step0COnAbilities(int x, int y)
+    {
+        var readyTime = DateTime.UtcNow;
+        Pos = new Vector2(x, y);
+
+        foreach (var player in AislingsNearby())
+        {
+            player?.Client.SendCreatureWalk(Serial, new Point(x, y), (Direction)Direction);
+        }
+
+        LastMovementChanged = readyTime;
+        LastPosition = new Position(x, y);
+        PendingX = x;
+        PendingY = y;
     }
 
     public void StepAddAndUpdateDisplay(Sprite sprite)

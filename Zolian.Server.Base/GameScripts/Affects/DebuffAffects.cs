@@ -1411,6 +1411,55 @@ public class DebuffAdvFrozen : Debuff
     }
 }
 
+public class DebuffDeepSleep : Debuff
+{
+    public override byte Icon => 6;
+    public override int Length => 120;
+    public override string Name => "Deep Sleep";
+
+    public override void OnApplied(Sprite affected, Debuff debuff)
+    {
+        if (affected.Debuffs.TryAdd(debuff.Name, debuff))
+        {
+            DebuffSpell = debuff;
+            DebuffSpell.TimeLeft = DebuffSpell.Length;
+        }
+
+        if (affected is Damageable damageable)
+        {
+            damageable.SendAnimationNearby(32, null, affected.Serial);
+            damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(29, false));
+        }
+
+        if (affected is not Aisling aisling) return;
+        aisling.PlayerSaveDirty = true;
+    }
+
+    public override void OnDurationUpdate(Sprite affected, Debuff debuff)
+    {
+        base.OnDurationUpdate(affected, debuff);
+
+        if (affected is Damageable damageable)
+        {
+            damageable.SendAnimationNearby(32, null, affected.Serial);
+            damageable.SendTargetedClientMethod(PlayerScope.NearbyAislings, client => client.SendSound(65, false));
+        }
+
+        if (affected is not Aisling aisling) return;
+        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "You've been placed in a dream like state");
+    }
+
+    public override void OnEnded(Sprite affected, Debuff debuff)
+    {
+        affected.Debuffs.TryRemove(debuff.Name, out _);
+
+        if (affected is not Aisling aisling) return;
+        aisling.Client.SendEffect(byte.MinValue, Icon);
+        aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Was that a dream?");
+        aisling.PlayerSaveDirty = true;
+        aisling.Client.SendAttributes(StatUpdateType.Full);
+    }
+}
 
 public class DebuffSleep : Debuff
 {

@@ -1,5 +1,6 @@
 ﻿using Darkages.Common;
 using Darkages.Network.Client;
+using Darkages.Sprites;
 using Darkages.Sprites.Entity;
 using Darkages.Types;
 
@@ -29,6 +30,7 @@ public abstract class AreaScript(Area area)
         //client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendDoorsOnMap(client.Aisling.Map.Doors));
     }
     public virtual void OnPlayerWalk(WorldClient client, Position oldLocation, Position newLocation) { }
+    public virtual void OnNpcWalk(Movable sprite) { }
     public virtual void OnItemDropped(WorldClient client, Item item, Position location) { }
     public virtual void OnGossip(WorldClient client, string message) { }
 }

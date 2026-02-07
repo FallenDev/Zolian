@@ -189,7 +189,7 @@ public class DraconicOmega : MonsterScript
                 Monster.ClearTarget();
 
                 if (Monster.CantMove || !Monster.WalkEnabled) return;
-                if (walk) Monster.Walk();
+                if (walk) Monster.PreWalkChecks();
 
                 return;
             }
@@ -216,7 +216,7 @@ public class DraconicOmega : MonsterScript
         if (Monster.WalkEnabled)
         {
             if (Monster.CantMove) return;
-            if (walk) Monster.Walk();
+            if (walk) Monster.PreWalkChecks();
             var rand = Generator.RandomPercentPrecise();
             if (rand >= 0.93)
             {
@@ -486,7 +486,7 @@ public class JackFrost : MonsterScript
                 Monster.ClearTarget();
 
                 if (Monster.CantMove || !Monster.WalkEnabled) return;
-                if (walk) Monster.Walk();
+                if (walk) Monster.PreWalkChecks();
 
                 return;
             }
@@ -513,7 +513,7 @@ public class JackFrost : MonsterScript
         if (Monster.WalkEnabled)
         {
             if (Monster.CantMove) return;
-            if (walk) Monster.Walk();
+            if (walk) Monster.PreWalkChecks();
             var rand = Generator.RandomPercentPrecise();
             if (rand >= 0.93)
             {
@@ -925,7 +925,7 @@ public class Yeti : MonsterScript
                 Monster.ClearTarget();
 
                 if (Monster.CantMove || !Monster.WalkEnabled) return;
-                if (walk) Monster.Walk();
+                if (walk) Monster.PreWalkChecks();
 
                 return;
             }
@@ -952,7 +952,7 @@ public class Yeti : MonsterScript
         if (Monster.WalkEnabled)
         {
             if (Monster.CantMove) return;
-            if (walk) Monster.Walk();
+            if (walk) Monster.PreWalkChecks();
             var rand = Generator.RandomPercentPrecise();
             if (rand >= 0.93)
             {
@@ -1611,7 +1611,7 @@ public class BBShade : MonsterScript
                 Monster.ClearTarget();
 
                 if (Monster.CantMove || !Monster.WalkEnabled) return;
-                if (walk) Monster.Walk();
+                if (walk) Monster.PreWalkChecks();
 
                 return;
             }
@@ -1638,7 +1638,7 @@ public class BBShade : MonsterScript
         if (Monster.WalkEnabled)
         {
             if (Monster.CantMove) return;
-            if (walk) Monster.Walk();
+            if (walk) Monster.PreWalkChecks();
         }
 
         Monster.UpdateTarget(false, true);

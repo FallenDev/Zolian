@@ -171,7 +171,7 @@ public class BaseMonsterIntelligence : MonsterScript
                     Monster.Aggressive = false;
 
                 if (Monster.CantMove || !Monster.WalkEnabled) return;
-                if (walk) Monster.Walk();
+                if (walk) Monster.PreWalkChecks();
 
                 return;
             }
@@ -198,7 +198,7 @@ public class BaseMonsterIntelligence : MonsterScript
         if (Monster.WalkEnabled)
         {
             if (Monster.CantMove) return;
-            if (walk) Monster.Walk();
+            if (walk) Monster.PreWalkChecks();
         }
 
         Monster.UpdateTarget();
@@ -444,7 +444,7 @@ public class WeakCommon : MonsterScript
                     Monster.Aggressive = false;
 
                 if (Monster.CantMove || !Monster.WalkEnabled) return;
-                if (walk) Monster.Walk();
+                if (walk) Monster.PreWalkChecks();
 
                 return;
             }
@@ -471,7 +471,7 @@ public class WeakCommon : MonsterScript
         if (Monster.WalkEnabled)
         {
             if (Monster.CantMove) return;
-            if (walk) Monster.Walk();
+            if (walk) Monster.PreWalkChecks();
         }
 
         Monster.UpdateTarget(true);
@@ -892,7 +892,7 @@ public class ShadowSight : MonsterScript
                     Monster.Aggressive = false;
 
                 if (Monster.CantMove || !Monster.WalkEnabled) return;
-                if (walk) Monster.Walk();
+                if (walk) Monster.PreWalkChecks();
 
                 return;
             }
@@ -919,7 +919,7 @@ public class ShadowSight : MonsterScript
         if (Monster.WalkEnabled)
         {
             if (Monster.CantMove) return;
-            if (walk) Monster.Walk();
+            if (walk) Monster.PreWalkChecks();
         }
 
         Monster.UpdateTarget(false, true);
@@ -1165,7 +1165,7 @@ public class WeakShadowSight : MonsterScript
                     Monster.Aggressive = false;
 
                 if (Monster.CantMove || !Monster.WalkEnabled) return;
-                if (walk) Monster.Walk();
+                if (walk) Monster.PreWalkChecks();
 
                 return;
             }
@@ -1192,7 +1192,7 @@ public class WeakShadowSight : MonsterScript
         if (Monster.WalkEnabled)
         {
             if (Monster.CantMove) return;
-            if (walk) Monster.Walk();
+            if (walk) Monster.PreWalkChecks();
         }
 
         Monster.UpdateTarget(true, true);
@@ -1438,7 +1438,7 @@ public class RiftMob : MonsterScript
                     Monster.Aggressive = false;
 
                 if (Monster.CantMove || !Monster.WalkEnabled) return;
-                if (walk) Monster.Walk();
+                if (walk) Monster.PreWalkChecks();
 
                 return;
             }
@@ -1465,7 +1465,7 @@ public class RiftMob : MonsterScript
         if (Monster.WalkEnabled)
         {
             if (Monster.CantMove) return;
-            if (walk) Monster.Walk();
+            if (walk) Monster.PreWalkChecks();
         }
 
         Monster.UpdateTarget();

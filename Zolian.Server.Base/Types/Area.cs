@@ -296,6 +296,11 @@ public class Area : Map
 
     private void CalculateNodePriorities(Sprite sprite, Vector2 start, Vector2 end, float[,] priorities)
     {
+        var ghostWalk = false;
+
+        if (sprite is Monster monster)
+            ghostWalk = monster.Template.IgnoreCollision;
+
         for (var x = 0; x < Width; x++)
         {
             for (var y = 0; y < Height; y++)
@@ -309,7 +314,7 @@ public class Area : Map
                     impassable = true;
                 }
 
-                if (impassable)
+                if (impassable && !ghostWalk)
                 {
                     cost = 999;
                 }

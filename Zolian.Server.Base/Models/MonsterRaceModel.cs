@@ -181,8 +181,8 @@ public class MonsterRaceModel
     internal static readonly string[] BahamutAbilities = ["Megaflare", "Lava Armor", "Ember Strike", "Silent Siren"];
     internal static readonly string[] BahamutSpells = ["Heavens Fall", "Liquid Hell", "Ao Sith Gar"];
 
-    internal static readonly string[] ElementalSkills = ["Flame Thrower", "Water Cannon", "Tornado Vector", "Earth Shatter"];
-    internal static readonly string[] ElementalAbilities = ["Elemental Bane"];
+    internal static readonly string[] ElementalSkills = [];
+    internal static readonly string[] ElementalAbilities = ["Flame Thrower", "Water Cannon", "Tornado Vector", "Earth Shatter", "Elemental Bane"];
     internal static readonly string[] ElementalSpells = [];
 
     internal static readonly string[] FairySkills = ["Ambidextrous", "Divine Thrust", "Clobber x2"];

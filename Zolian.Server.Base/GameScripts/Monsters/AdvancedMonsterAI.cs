@@ -531,7 +531,7 @@ public class SelfDestruct : MonsterScript
                     Monster.Aggressive = false;
 
                 if (Monster.CantMove || !Monster.WalkEnabled) return;
-                if (walk) Monster.Walk();
+                if (walk) Monster.PreWalkChecks();
 
                 return;
             }
@@ -546,7 +546,7 @@ public class SelfDestruct : MonsterScript
         if (Monster.WalkEnabled)
         {
             if (Monster.CantMove) return;
-            if (walk) Monster.Walk();
+            if (walk) Monster.PreWalkChecks();
         }
 
         Monster.UpdateTarget();
@@ -770,7 +770,7 @@ public class AlertSummon : MonsterScript
                     Monster.Aggressive = false;
 
                 if (Monster.CantMove || !Monster.WalkEnabled) return;
-                if (walk) Monster.Walk();
+                if (walk) Monster.PreWalkChecks();
 
                 return;
             }
@@ -800,7 +800,7 @@ public class AlertSummon : MonsterScript
         if (Monster.WalkEnabled)
         {
             if (Monster.CantMove) return;
-            if (walk) Monster.Walk();
+            if (walk) Monster.PreWalkChecks();
         }
 
         Monster.UpdateTarget();
@@ -1294,7 +1294,7 @@ public class GeneralPirate : MonsterScript
                 Monster.ClearTarget();
 
                 if (Monster.CantMove || !Monster.WalkEnabled) return;
-                if (walk) Monster.Walk();
+                if (walk) Monster.PreWalkChecks();
 
                 return;
             }
@@ -1321,7 +1321,7 @@ public class GeneralPirate : MonsterScript
         if (Monster.WalkEnabled)
         {
             if (Monster.CantMove) return;
-            if (walk) Monster.Walk();
+            if (walk) Monster.PreWalkChecks();
             var rand = Generator.RandomPercentPrecise();
             if (rand >= 0.93)
             {
@@ -1582,7 +1582,7 @@ public class PirateOfficer : MonsterScript
                 Monster.ClearTarget();
 
                 if (Monster.CantMove || !Monster.WalkEnabled) return;
-                if (walk) Monster.Walk();
+                if (walk) Monster.PreWalkChecks();
 
                 return;
             }
@@ -1609,7 +1609,7 @@ public class PirateOfficer : MonsterScript
         if (Monster.WalkEnabled)
         {
             if (Monster.CantMove) return;
-            if (walk) Monster.Walk();
+            if (walk) Monster.PreWalkChecks();
             var rand = Generator.RandomPercentPrecise();
             if (rand >= 0.93)
             {
@@ -1891,7 +1891,7 @@ public class AosdaRemnant : MonsterScript
                     Monster.Aggressive = false;
 
                 if (Monster.CantMove || !Monster.WalkEnabled) return;
-                if (walk) Monster.Walk();
+                if (walk) Monster.PreWalkChecks();
 
                 return;
             }
@@ -1918,7 +1918,7 @@ public class AosdaRemnant : MonsterScript
         if (Monster.WalkEnabled)
         {
             if (Monster.CantMove) return;
-            if (walk) Monster.Walk();
+            if (walk) Monster.PreWalkChecks();
             var rand = Generator.RandomPercentPrecise();
             if (rand >= 0.93)
             {
@@ -2197,7 +2197,7 @@ public class AosdaHero : MonsterScript
                 Monster.ClearTarget();
 
                 if (Monster.CantMove || !Monster.WalkEnabled) return;
-                if (walk) Monster.Walk();
+                if (walk) Monster.PreWalkChecks();
 
                 return;
             }
@@ -2224,7 +2224,7 @@ public class AosdaHero : MonsterScript
         if (Monster.WalkEnabled)
         {
             if (Monster.CantMove) return;
-            if (walk) Monster.Walk();
+            if (walk) Monster.PreWalkChecks();
             var rand = Generator.RandomPercentPrecise();
             if (rand >= 0.93)
             {
@@ -2494,7 +2494,7 @@ public class AncientDragon : MonsterScript
                 Monster.ClearTarget();
 
                 if (Monster.CantMove || !Monster.WalkEnabled) return;
-                if (walk) Monster.Walk();
+                if (walk) Monster.PreWalkChecks();
 
                 return;
             }
@@ -2521,7 +2521,7 @@ public class AncientDragon : MonsterScript
         if (Monster.WalkEnabled)
         {
             if (Monster.CantMove) return;
-            if (walk) Monster.Walk();
+            if (walk) Monster.PreWalkChecks();
             var rand = Generator.RandomPercentPrecise();
             if (rand >= 0.93)
             {
@@ -2774,7 +2774,7 @@ public class Swarm : MonsterScript
                     Monster.Aggressive = false;
 
                 if (Monster.CantMove || !Monster.WalkEnabled) return;
-                if (walk) Monster.Walk();
+                if (walk) Monster.PreWalkChecks();
 
                 return;
             }
@@ -2801,7 +2801,7 @@ public class Swarm : MonsterScript
         if (Monster.WalkEnabled)
         {
             if (Monster.CantMove) return;
-            if (walk) Monster.Walk();
+            if (walk) Monster.PreWalkChecks();
         }
 
         Monster.UpdateTarget(true);
@@ -3068,7 +3068,7 @@ public class DbSwarm : MonsterScript
                     Monster.Aggressive = false;
 
                 if (Monster.CantMove || !Monster.WalkEnabled) return;
-                if (walk) Monster.Walk();
+                if (walk) Monster.PreWalkChecks();
 
                 return;
             }
@@ -3095,7 +3095,7 @@ public class DbSwarm : MonsterScript
         if (Monster.WalkEnabled)
         {
             if (Monster.CantMove) return;
-            if (walk) Monster.Walk();
+            if (walk) Monster.PreWalkChecks();
         }
 
         Monster.UpdateTarget(true);

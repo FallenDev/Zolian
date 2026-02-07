@@ -501,20 +501,42 @@ public class Damageable : Movable
         if (IsSleeping) RemoveDebuff("Sleep");
 
         // Weak Frozen status gets removed after five successful hits
-        if (!IsFrozen) return dmg;
+        if (IsFrozen)
+        {
+            FrozenProc();
+        }
 
+        // Deep Sleep gets removed after 30 successful hits
+        if (IsComa)
+        {
+            ComaProc();
+        }
+
+        return dmg;
+    }
+
+    private void FrozenProc()
+    {
+        if (!IsFrozen) return;
         _frozenStack += 1;
-        if (_frozenStack <= 4) return dmg;
-
+        if (_frozenStack <= 4) return;
         if (HasDebuff("Frozen"))
             RemoveDebuff("Frozen");
         if (HasDebuff("Dark Chain"))
             RemoveDebuff("Dark Chain");
-
         // Reset Frozen Stack
         _frozenStack = 0;
+    }
 
-        return dmg;
+    private void ComaProc()
+    {
+        if (!IsComa) return;
+        _comaAwakeStack += 1;
+        if (_comaAwakeStack <= 29) return;
+        if (HasDebuff("Deep Sleep"))
+            RemoveDebuff("Deep Sleep");
+        // Reset Coma Stack
+        _comaAwakeStack = 0;
     }
 
     private long MagicVulnerable(long dmg)
@@ -760,13 +782,7 @@ public class Damageable : Movable
         switch (target)
         {
             case Monster monster when monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.Boss)
-                                      || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.MiniBoss)
-                                      || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineDex)
-                                      || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineCon)
-                                      || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineWis)
-                                      || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineInt)
-                                      || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineStr)
-                                      || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.Forsaken):
+                                      || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.MiniBoss):
                 aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Bleeding is ineffective");
                 return;
         }
@@ -838,13 +854,7 @@ public class Damageable : Movable
         {
             case Aisling:
             case Monster monster when monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.Boss)
-                                      || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.MiniBoss)
-                                      || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineDex)
-                                      || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineCon)
-                                      || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineWis)
-                                      || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineInt)
-                                      || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineStr)
-                                      || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.Forsaken):
+                                      || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.MiniBoss):
                 aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Unable to feast on their health");
                 return;
         }
@@ -900,13 +910,7 @@ public class Damageable : Movable
         {
             case Aisling:
             case Monster monster when monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.Boss)
-                                      || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.MiniBoss)
-                                      || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineDex)
-                                      || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineCon)
-                                      || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineWis)
-                                      || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineInt)
-                                      || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineStr)
-                                      || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.Forsaken):
+                                      || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.MiniBoss):
                 aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Siphon doesn't seem to work on them");
                 return;
         }
@@ -961,13 +965,7 @@ public class Damageable : Movable
         {
             case Aisling:
             case Monster monster when monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.Boss)
-                                      || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.MiniBoss)
-                                      || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineDex)
-                                      || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineCon)
-                                      || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineWis)
-                                      || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineInt)
-                                      || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.DivineStr)
-                                      || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.Forsaken):
+                                      || monster.Template.MonsterType.MonsterTypeIsSet(MonsterType.MiniBoss):
                 aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "Death doesn't seem to work on them");
                 return;
         }

@@ -206,8 +206,7 @@ public class Pramh(Spell spell) : SpellScript(spell)
 
             aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Another spell of similar nature is already applied.");
             return;
-        }
-        ;
+        }        
 
         _spellMethod.AfflictionOnUse(sprite, target, Spell, _debuff);
     }

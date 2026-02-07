@@ -366,14 +366,6 @@ public sealed class Monster : Damageable
 
         var nodeX = pathList[0].X;
         var nodeY = pathList[0].Y;
-
-        // Check if path became blocked, if so recalculate path
-        if (Map.IsWall(this, (int)nodeX, (int)nodeY) || Area.IsSpriteInLocationOnWalk(this, (int)nodeX, (int)nodeY))
-        {
-            Wander();
-            return;
-        }
-
         WalkTo((int)nodeX, (int)nodeY);
     }
 
@@ -501,7 +493,7 @@ public sealed class Monster : Damageable
         }
     }
 
-    public void Walk()
+    public void PreWalkChecks()
     {
         if (CantMove) return;
         if (ThrownBack) return;

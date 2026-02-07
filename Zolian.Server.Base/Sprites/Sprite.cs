@@ -27,6 +27,8 @@ public abstract class Sprite : INotifyPropertyChanged
     #region Buffs Debuffs
 
     protected int _frozenStack;
+    protected int _comaAwakeStack;
+
     public bool IsWeakened => CurrentHp <= MaximumHp * .05;
     public bool IsAited => HasBuff("Aite") || HasBuff("Dia Aite");
     public bool Immunity => HasBuff("Dion") || HasBuff("Mor Dion") || HasBuff("Ard Dion") || HasBuff("Stone Skin") ||
@@ -42,7 +44,8 @@ public abstract class Sprite : INotifyPropertyChanged
     public bool IsStopped => HasDebuff("Halt");
     public bool IsBeagParalyzed => HasDebuff("Beag Suain");
     public bool IsPoisoned => HasDebuff(i => i.Name.Contains("Puinsein") || HasDebuff("Deadly Poison"));
-    public bool IsSleeping => HasDebuff("Sleep");
+    public bool IsSleeping => HasDebuff("Sleep") || IsComa;
+    public bool IsComa => HasDebuff("Deep Sleep");
     public bool IsInvisible => HasBuff("Hide") || HasBuff("Shadowfade") || HasBuff("Blend");
     public bool DrunkenFist => HasBuff("Drunken Fist");
     public bool NinthGateReleased => HasBuff("Ninth Gate Release");
