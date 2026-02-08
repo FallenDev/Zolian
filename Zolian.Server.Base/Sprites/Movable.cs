@@ -6,7 +6,6 @@ using Chaos.Geometry;
 using Chaos.Geometry.Abstractions.Definitions;
 
 using Darkages.Enums;
-using Darkages.GameScripts.Skills;
 using Darkages.Network.Client;
 using Darkages.Network.Server;
 using Darkages.Object;
@@ -214,9 +213,7 @@ public class Movable : Identifiable
 
             if (sprite is not Monster movingMonster) return await Task.FromResult(false);
 
-            // Commit Walk to other Player Clients
-            Step0COnAbilities(savedXStep, savedYStep);
-            return await Task.FromResult(true);
+            return await StepAddAndRemoveObjectOnMovementAbilities(savedXStep, savedYStep);
         }
         catch
         {
@@ -228,39 +225,38 @@ public class Movable : Identifiable
 
     private void Step0COnWalk(int x, int y)
     {
-        var readyTime = DateTime.UtcNow;
-        Pos = new Vector2(PendingX, PendingY);
-
-        foreach (var player in AislingsNearby())
+        lock (_walkLock)
         {
-            player?.Client.SendCreatureWalk(Serial, new Point(x, y), (Direction)Direction);
-        }
+            var readyTime = DateTime.UtcNow;
+            Pos = new Vector2(PendingX, PendingY);
 
-        LastMovementChanged = readyTime;
-        LastPosition = new Position(x, y);
+            foreach (var player in AislingsNearby())
+            {
+                player?.Client.SendCreatureWalk(Serial, new Point(x, y), (Direction)Direction);
+            }
+
+            LastMovementChanged = readyTime;
+            LastPosition = new Position(x, y);
+        }
     }
 
-    private void Step0COnAbilities(int x, int y)
+    private Task<bool> StepAddAndRemoveObjectOnMovementAbilities(int x, int y)
     {
         var readyTime = DateTime.UtcNow;
         Pos = new Vector2(x, y);
-
-        foreach (var player in AislingsNearby())
-        {
-            player?.Client.SendCreatureWalk(Serial, new Point(x, y), (Direction)Direction);
-        }
-
         LastMovementChanged = readyTime;
         LastPosition = new Position(x, y);
         PendingX = x;
         PendingY = y;
+        UpdateAddAndRemove();
+        return Task.FromResult(true);
     }
 
     public void StepAddAndUpdateDisplay(Sprite sprite)
     {
+        sprite.LastTurnUpdated = DateTime.UtcNow;
         if (sprite is not Aisling movingPlayer) return;
         movingPlayer.Client.UpdateDisplay();
-        movingPlayer.LastTurnUpdated = DateTime.UtcNow;
         movingPlayer.Client.LastMovement = DateTime.UtcNow;
     }
 

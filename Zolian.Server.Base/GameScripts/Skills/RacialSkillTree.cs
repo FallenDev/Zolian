@@ -1634,6 +1634,7 @@ public class Vicious_Roar(Skill skill) : SkillScript(skill)
     }
 }
 
+// Skill used also by Monsters to charge forward
 [Script("Dash")]
 public class Dash(Skill skill) : SkillScript(skill)
 {

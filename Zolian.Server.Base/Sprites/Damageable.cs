@@ -340,7 +340,8 @@ public class Damageable : Movable
         }
 
         dmg = LuckModifier(dmg);
-        dmg = ComputeDmgFromAc(dmg);
+        var penetration = LevelArmorAndMagicPenetration(damageDealingSprite);
+        dmg = ComputeDmgFromAc(dmg, penetration);
 
         if (DrunkenFist)
             dmg -= (int)(dmg * 0.25);
@@ -363,10 +364,10 @@ public class Damageable : Movable
         return true;
     }
 
-    private long ComputeDmgFromAc(long dmg)
+    private long ComputeDmgFromAc(long dmg, double armorPenetration)
     {
-        if (ScriptManager.TryCreate<FormulaScript>(ServerSetup.Instance.Config.ACFormulaScript, out var formula, this) && formula != null)
-            return formula.Calculate(this, dmg);
+        if (ScriptManager.TryCreate<FormulaScript>(ServerSetup.Instance.Config.ACFormulaScript, out var formula) && formula != null)
+            return formula.Calculate(this, dmg, armorPenetration);
 
         return dmg;
     }
@@ -426,7 +427,8 @@ public class Damageable : Movable
         }
 
         dmg = LuckModifier(dmg);
-        dmg = ComputeDmgFromWillSavingThrow(dmg);
+        var penetration = LevelArmorAndMagicPenetration(damageDealingSprite);
+        dmg = ComputeDmgFromWillSavingThrow(dmg, penetration);
 
         if (DrunkenFist)
             dmg -= (int)(dmg * 0.25);
@@ -443,10 +445,10 @@ public class Damageable : Movable
         return true;
     }
 
-    private long ComputeDmgFromWillSavingThrow(long dmg)
+    private long ComputeDmgFromWillSavingThrow(long dmg, double magicPenetration)
     {
-        if (ScriptManager.TryCreate<FormulaScript>("Will Saving Throw", out var formula, this) && formula != null)
-            return formula.Calculate(this, dmg);
+        if (ScriptManager.TryCreate<FormulaScript>("Will Saving Throw", out var formula) && formula != null)
+            return formula.Calculate(this, dmg, magicPenetration);
 
         return dmg;
     }
@@ -454,6 +456,30 @@ public class Damageable : Movable
     #endregion
 
     #region Damage Application Helper Methods
+
+    private double LevelArmorAndMagicPenetration(Sprite damageDealingSprite)
+    {
+        if (damageDealingSprite is null)
+            return 0.0;
+
+        var attackerLevel = GetEffectiveLevel(damageDealingSprite);
+        var defenderLevel = GetEffectiveLevel(this);
+
+        // Attacker is same or lower level results in no penetration
+        if (attackerLevel <= defenderLevel)
+            return 0.0;
+
+        var delta = attackerLevel - defenderLevel;
+
+        // Step-based penetration by level advantage
+        if (delta >= 100) return 0.50;
+        if (delta >= 80) return 0.40;
+        if (delta >= 60) return 0.30;
+        if (delta >= 40) return 0.20;
+        if (delta >= 20) return 0.10;
+
+        return 0.0;
+    }
 
     private long DamageAmplificationIfElement(Sprite damageDealingSprite, long dmg)
     {
@@ -1218,22 +1244,39 @@ public class Damageable : Movable
 
         // Positive = attacker higher level, negative = defender higher level
         var delta = attackerLevel - defenderLevel;
-
         double multiplier;
 
         if (delta >= 0)
         {
-            // Attacker is same or higher level:
-            //  +1.5% damage per level advantage
-            //  delta =  0 => 1.00
-            //  delta = 10 => 1.15
-            //  delta = 50 => 1.75
-            var upDelta = Math.Min(delta, 50);
-            multiplier = 1.0 + (upDelta * 0.015);
+            if (delta <= 50)
+            {
+                // +1.5% damage per level advantage
+                //  delta =  0 => 1.00
+                //  delta = 10 => 1.15
+                //  delta = 50 => 1.75
+                multiplier = 1.0 + (delta * 0.015);
+            }
+            else
+            {
+                // Controls how quickly the bonus ramps.
+                // Set so that by delta = 500 (over = 450) we reach ~99% of the bonus range.
+                const double startDelta = 50.0;
+                const double endDelta = 500.0;
+                const double targetAtEnd = 0.99; // 99% of max by endDelta
 
-            // Above 50 levels, capped at +75%
-            if (delta > 50)
-                multiplier = 1.75;
+                var over = delta - (int)startDelta;
+                var overEnd = endDelta - startDelta;
+
+                // curve = -overEnd / ln(1 - target)
+                var curve = -overEnd / Math.Log(1.0 - targetAtEnd);
+
+                // Normalized curve: 0.0 -> ~targetAtEnd (by endDelta)
+                var bonus = 1.0 - Math.Exp(-over / curve);
+
+                //  1.75x at delta = 50
+                //  ~15.0x at delta = 500
+                multiplier = 1.75 + (bonus * (15.0 - 1.75));
+            }
         }
         else
         {
@@ -1259,7 +1302,7 @@ public class Damageable : Movable
             else
             {
                 // Beyond 50 levels difference:
-                //   defender is a god vs this attacker: flat 5% damage
+                //   defender has flat 5% damage
                 multiplier = 0.05;
             }
 
@@ -1269,8 +1312,8 @@ public class Damageable : Movable
         }
 
         // Additional safety clamp on upper end
-        if (multiplier > 1.75)
-            multiplier = 1.75;
+        if (multiplier > 15.00)
+            multiplier = 15.00;
 
         var scaled = (long)(dmg * multiplier);
         return scaled < 1 ? 1 : scaled;

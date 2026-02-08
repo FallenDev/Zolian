@@ -6,11 +6,20 @@ using Darkages.Sprites.Entity;
 namespace Darkages.GameScripts.Formulas;
 
 [Script("Will Saving Throw")]
-public class WillSavingThrow : FormulaScript
+public class WillSavingThrow() : FormulaScript
 {
-    public WillSavingThrow(Sprite obj) { }
-
-    public override long Calculate(Sprite obj, long value)
+    /// <summary>
+    /// Calculates the mitigated value after applying the target's Will and a specified magic penetration factor.
+    /// </summary>
+    /// <remarks>Mitigation is calculated using a diminishing returns formula based on the target's Will
+    /// attribute. For monsters, the mitigation curve and maximum cap depend on their armor type; for players, a
+    /// standard curve and cap are used. Magic penetration reduces the effective Will before mitigation is applied, but
+    /// only affects positive Will values. The result is always at least 1.</remarks>
+    /// <param name="obj">The target <see cref="Sprite"/> whose Will attribute is used to determine mitigation. Must not be null.</param>
+    /// <param name="value">The initial value to be mitigated. Must be greater than zero to apply mitigation; otherwise, the method returns 1.</param>
+    /// <param name="penetration">The percentage of magic penetration to apply, as a value between 0.0 and 0.50. Values outside this range are clamped.</param>
+    /// <returns>The resulting damage value after accounting for armor mitigation or amplification. Returns at least 1.</returns>
+    public override long Calculate(Sprite obj, long value, double penetration)
     {
         if (value <= 0)
             return 1;
@@ -55,10 +64,26 @@ public class WillSavingThrow : FormulaScript
         }
 
         var mitigation = will / (will + mitigationCurve);
+
         if (mitigation < 0.0)
             mitigation = 0.0;
         if (mitigation > maxCap)
             mitigation = maxCap;
+
+        // -----------------------------------------------------
+        // Apply magic penetration
+        // -----------------------------------------------------
+        if (penetration > 0.0)
+        {
+            // Clamp penetration to [0..0.50]
+            if (penetration > 0.50)
+                penetration = 0.50;
+
+            mitigation *= (1.0 - penetration);
+
+            if (mitigation < 0.0)
+                mitigation = 0.0;
+        }
 
         var reduced = (long)(value * mitigation);
         var result = value - reduced;

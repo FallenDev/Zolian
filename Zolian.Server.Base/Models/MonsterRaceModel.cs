@@ -146,7 +146,7 @@ public class MonsterRaceModel
 
     // Race kits
     internal static readonly string[] AberrationSkills = ["Thrust"];
-    internal static readonly string[] AberrationAbilities = ["Lullaby Strike", "Vampiric Slash"];
+    internal static readonly string[] AberrationAbilities = ["Lullaby Strike", "Vampiric Slash", "Blitz"];
     internal static readonly string[] AberrationSpells = ["Spectral Shield", "Silence"];
 
     internal static readonly string[] AnimalSkills = ["Bite", "Claw"];
@@ -158,11 +158,11 @@ public class MonsterRaceModel
     internal static readonly string[] AquaticSpells = [];
 
     internal static readonly string[] BeastSkills = ["Bite", "Claw"];
-    internal static readonly string[] BeastAbilities = ["Bite'n Shake", "Pounce", "Poison Talon"];
+    internal static readonly string[] BeastAbilities = ["Bite'n Shake", "Pounce", "Poison Talon", "Dash"];
     internal static readonly string[] BeastSpells = ["Asgall"];
 
     internal static readonly string[] CelestialSkills = ["Thrash", "Divine Thrust", "Slash", "Wallop"];
-    internal static readonly string[] CelestialAbilities = ["Titan's Cleave", "Shadow Step", "Entice", "Smite"];
+    internal static readonly string[] CelestialAbilities = ["Titan's Cleave", "Blitz", "Entice", "Smite"];
     internal static readonly string[] CelestialSpells = ["Deireas Faileas", "Asgall", "Perfect Defense", "Dion", "Silence"];
 
     internal static readonly string[] ConstructSkills = ["Stomp"];
@@ -174,7 +174,7 @@ public class MonsterRaceModel
     internal static readonly string[] DemonSpells = ["Asgall", "Perfect Defense", "Dion"];
 
     internal static readonly string[] DragonSkills = ["Thrash", "Ambidextrous", "Slash", "Claw", "Tail Slap"];
-    internal static readonly string[] DragonAbilities = ["Titan's Cleave", "Sever", "Earthly Delights", "Hurricane Kick"];
+    internal static readonly string[] DragonAbilities = ["Titan's Cleave", "Sever", "Earthly Delights", "Hurricane Kick", "Blitz"];
     internal static readonly string[] DragonSpells = ["Asgall", "Perfect Defense", "Dion", "Deireas Faileas"];
 
     internal static readonly string[] BahamutSkills = ["Fire Wheel", "Thrash", "Ambidextrous", "Slash", "Claw"];
@@ -186,11 +186,11 @@ public class MonsterRaceModel
     internal static readonly string[] ElementalSpells = [];
 
     internal static readonly string[] FairySkills = ["Ambidextrous", "Divine Thrust", "Clobber x2"];
-    internal static readonly string[] FairyAbilities = ["Earthly Delights", "Claw Fist", "Lullaby Strike"];
+    internal static readonly string[] FairyAbilities = ["Earthly Delights", "Claw Fist", "Lullaby Strike", "Blitz"];
     internal static readonly string[] FairySpells = ["Asgall", "Spectral Shield", "Deireas Faileas"];
 
     internal static readonly string[] FiendSkills = ["Punch", "Double Punch"];
-    internal static readonly string[] FiendAbilities = ["Stab", "Stab Twice"];
+    internal static readonly string[] FiendAbilities = ["Stab", "Stab Twice", "Dash"];
     internal static readonly string[] FiendSpells = ["Blind"];
 
     internal static readonly string[] FungiSkills = ["Wallop", "Clobber"];
@@ -198,11 +198,11 @@ public class MonsterRaceModel
     internal static readonly string[] FungiSpells = [];
 
     internal static readonly string[] GargoyleSkills = ["Slash"];
-    internal static readonly string[] GargoyleAbilities = ["Palm Heel Strike"];
+    internal static readonly string[] GargoyleAbilities = ["Palm Heel Strike", "Blitz"];
     internal static readonly string[] GargoyleSpells = ["Mor Dion"];
 
     internal static readonly string[] GiantSkills = ["Stomp", "Head Butt"];
-    internal static readonly string[] GiantAbilities = ["Golden Lair", "Double-Edged Dance"];
+    internal static readonly string[] GiantAbilities = ["Golden Lair", "Double-Edged Dance", "Charge"];
     internal static readonly string[] GiantSpells = ["Silence", "Pramh"];
 
     internal static readonly string[] GoblinSkills = ["Assault", "Clobber", "Wallop"];
@@ -258,7 +258,7 @@ public class MonsterRaceModel
     internal static readonly string[] RoboticSpells = ["Mor Dion", "Perfect Defense"];
 
     internal static readonly string[] ShadowSkills = ["Thrust"];
-    internal static readonly string[] ShadowAbilities = ["Lullaby Strike", "Vampiric Slash"];
+    internal static readonly string[] ShadowAbilities = ["Lullaby Strike", "Vampiric Slash", "Blitz", "Dash"];
     internal static readonly string[] ShadowSpells = [];
 
     internal static readonly string[] RodentSkills = ["Bite", "Assault"];

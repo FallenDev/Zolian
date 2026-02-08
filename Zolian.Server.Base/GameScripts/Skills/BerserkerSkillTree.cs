@@ -1,14 +1,16 @@
-﻿using Chaos.Networking.Entities.Server;
+﻿using Chaos.Geometry.Abstractions.Definitions;
+using Chaos.Networking.Entities.Server;
 
 using Darkages.Common;
 using Darkages.Enums;
 using Darkages.GameScripts.Affects;
-using Darkages.GameScripts.Monsters;
 using Darkages.Network.Server;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Sprites.Entity;
 using Darkages.Types;
+
+using ServiceStack;
 
 namespace Darkages.GameScripts.Skills;
 
@@ -152,6 +154,7 @@ public class Dual_Slice(Skill skill) : SkillScript(skill)
     }
 }
 
+// Skill used also by Monsters to ambush target player
 [Script("Blitz")]
 public class Blitz(Skill skill) : SkillScript(skill)
 {
@@ -196,6 +199,13 @@ public class Blitz(Skill skill) : SkillScript(skill)
 
             damageDealer.Facing(target.X, target.Y, out var direction);
             damageDealer.Direction = (byte)direction;
+
+            if (damageDealer is Monster monster)
+                foreach (var player in monster.AislingsNearby())
+                {
+                    player?.Client.SendCreatureTurn(monster.Serial, (Direction)direction);
+                }
+
             damageDealer.StepAddAndUpdateDisplay(damageDealer);
             GlobalSkillMethods.OnSuccess(target, damageDealer, Skill, dmgCalc, _crit, action);
         }
@@ -209,8 +219,15 @@ public class Blitz(Skill skill) : SkillScript(skill)
     public override void OnUse(Sprite sprite)
     {
         if (!Skill.CanUse()) return;
-        if (sprite is not Aisling aisling) return;
-        Target(aisling);
+        if (sprite is not Damageable damageDealer) return;
+
+        if (damageDealer.CantAttack)
+        {
+            OnFailed(damageDealer, null);
+            return;
+        }
+
+        Target(damageDealer);
     }
 
     private long DamageCalc(Sprite sprite)
@@ -235,31 +252,39 @@ public class Blitz(Skill skill) : SkillScript(skill)
         return critCheck.Item2;
     }
 
-    private void Target(Aisling aisling)
+    private void Target(Sprite sprite)
     {
-        var client = aisling.Client;
+        if (sprite is not Damageable damageable) return;
 
         try
         {
-            var _enemyList = client.Aisling.DamageableGetInFront(3).ToArray();
+            var _enemyList = damageable.DamageableGetInFront(3).ToArray();
             var _target = _enemyList.FirstOrDefault();
 
             if (_target == null)
             {
-                OnFailed(aisling, null);
+                OnFailed(damageable, null);
+                return;
             }
             else
             {
-                var success = GlobalSkillMethods.OnUse(aisling, Skill);
+                if (damageable is Aisling player)
+                {
+                    var success = GlobalSkillMethods.OnUse(player, Skill);
 
-                if (success)
-                {
-                    OnSuccess(aisling, _target);
+                    if (success)
+                    {
+                        OnSuccess(player, _target);
+                    }
+                    else
+                    {
+                        OnFailed(player, _target);
+                    }
+
+                    return;
                 }
-                else
-                {
-                    OnFailed(aisling, _target);
-                }
+
+                OnSuccess(damageable, _target);
             }
         }
         catch
