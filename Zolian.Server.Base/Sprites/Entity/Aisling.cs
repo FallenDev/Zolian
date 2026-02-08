@@ -155,13 +155,16 @@ public sealed class Aisling : Player, IAisling
     {
         get
         {
+            if (JobClass is Job.DarkKnight or Job.ShaolinMonk or Job.Templar 
+                or Job.Samurai or Job.Dragoon) return true;
+
             var twoHandedUser = false;
 
             foreach (var (_, skill) in SkillBook.Skills)
             {
                 twoHandedUser = skill?.SkillName switch
                 {
-                    "Two-Handed Attack" or "Kobudo" => true,
+                    "Two-Handed Attack" or "Kobudo" or "Daisho" => true,
                     _ => twoHandedUser
                 };
             }
@@ -174,12 +177,20 @@ public sealed class Aisling : Player, IAisling
     {
         get
         {
+            if (JobClass is Job.Oracle or Job.Necromancer or Job.Summoner) return true;
+
+            var twoHandedUser = false;
+
             foreach (var (_, skill) in SkillBook.Skills)
             {
-                if (skill?.SkillName is "Advanced Staff Training") return true;
+                twoHandedUser = skill?.SkillName switch
+                {
+                    "Advanced Staff Training" or "Daisho" => true,
+                    _ => twoHandedUser
+                };
             }
 
-            return false;
+            return twoHandedUser;
         }
     }
 
@@ -187,6 +198,8 @@ public sealed class Aisling : Player, IAisling
     {
         get
         {
+            if (JobClass is Job.Samurai or Job.Ninja or Job.Thief) return true;
+
             var dualWielder = false;
 
             foreach (var (_, skill) in SkillBook.Skills)
@@ -206,6 +219,8 @@ public sealed class Aisling : Player, IAisling
     {
         get
         {
+            if (JobClass is Job.SharpShooter or Job.Ninja or Job.Thief) return true;
+
             var bowWielder = false;
 
             foreach (var (_, skill) in SkillBook.Skills)

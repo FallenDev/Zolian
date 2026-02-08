@@ -202,7 +202,7 @@ public class MonsterRaceModel
     internal static readonly string[] GargoyleSpells = ["Mor Dion"];
 
     internal static readonly string[] GiantSkills = ["Stomp", "Head Butt"];
-    internal static readonly string[] GiantAbilities = ["Golden Lair", "Double-Edged Dance", "Charge"];
+    internal static readonly string[] GiantAbilities = ["Golden Lair", "Double-Edged Dance", "Dash"];
     internal static readonly string[] GiantSpells = ["Silence", "Pramh"];
 
     internal static readonly string[] GoblinSkills = ["Assault", "Clobber", "Wallop"];

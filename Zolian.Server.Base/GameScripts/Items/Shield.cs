@@ -22,15 +22,15 @@ public class Shield(Item item) : ItemScript(item)
             var e = aisling.EquipmentManager.Equipment[1]?.Item;
             if (e == null) return;
 
-            if (e.Template.Flags.FlagIsSet(ItemFlags.TwoHanded))
+            if (e.Template.Flags.FlagIsSet(ItemFlags.TwoHanded) && !client.Aisling.TitanGrip)
             {
-                aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "I cannot wield an offhand with this weapon.");
+                aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "{=cI'm not capable of wielding this with my weapon.");
                 return;
             }
 
-            if (e.Template.Flags.FlagIsSet(ItemFlags.TwoHandedStaff))
+            if (e.Template.Flags.FlagIsSet(ItemFlags.TwoHandedStaff) && Item.Template.Group != "Sources")
             {
-                aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "I cannot wield an offhand with a staff.");
+                aisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "{=cI cannot wield this with a staff.");
                 return;
             }
         }
@@ -46,7 +46,7 @@ public class Shield(Item item) : ItemScript(item)
             var l = aisling.EquipmentManager.Equipment[3]?.Slot;
             if (l != null && !aisling.EquipmentManager.RemoveFromExistingSlot((int)l))
             {
-                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=cYou require both hands to equip such an item.");
+                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=cI require both hands to use this.");
                 return;
             }
         }
@@ -62,7 +62,7 @@ public class Shield(Item item) : ItemScript(item)
             var k = aisling.EquipmentManager.Equipment[3]?.Slot;
             if (k != null && !aisling.EquipmentManager.RemoveFromExistingSlot((int)k))
             {
-                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=cYou require both hands to equip such an item.");
+                aisling.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=cI require both hands to use this.");
                 return;
             }
         }
