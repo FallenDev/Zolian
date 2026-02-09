@@ -38,7 +38,7 @@ public class OmegaRising(Spell spell) : SpellScript(spell)
             _debuff = new DebuffCriochCradh();
             if (player == null) continue;
             _spellMethod.AfflictionOnUse(sprite, player, Spell, _debuff);
-            _spellMethod.ElementalOnUse(sprite, player, Spell, 1500);
+            _spellMethod.ElementalOnUse(sprite, player, Spell, GlobalSpellMethods.Tir);
         }
     }
 }
