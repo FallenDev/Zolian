@@ -1340,6 +1340,53 @@ public class Consumable(Item item) : ItemScript(item)
                     client.SendServerMessage(ServerMessageType.ActiveMessage, "{=bIt's Locked!");
                     return;
                 }
+            case "Bahamut's Treasure Chest":
+                {
+                    if (aisling.HasItem("Copper Lockpick"))
+                    {
+                        var chance = Generator.RandomPercentPrecise();
+
+                        if (chance <= .80)
+                        {
+                            client.SendServerMessage(ServerMessageType.ActiveMessage, "{=qClick! Nice, it opened!");
+                            client.Aisling.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendSound(132, false));
+                            client.Aisling.GiveGold((uint)Random.Shared.Next(5000000, 10000000));
+
+                            var rand = Generator.RandomPercentPrecise();
+                            var stockingItem = new Item();
+                            var quality = ItemQualityVariance.DetermineQuality();
+                            var variance = ItemQualityVariance.DetermineVariance();
+                            var wVariance = ItemQualityVariance.DetermineWeaponVariance();
+
+                            stockingItem = rand switch
+                            {
+                                > 0 and <= 0.20 => stockingItem.Create(aisling, "Excalibur", quality, variance,
+                                    wVariance),
+                                > 0.20 and <= 0.40 => stockingItem.Create(aisling, "Slick Shades", quality, variance,
+                                    wVariance),
+                                > 0.40 and <= 0.60 => stockingItem.Create(aisling, "Bahamut's Blood Ruby Eye", quality, variance,
+                                    wVariance),
+                                > 0.60 and <= 0.80 => stockingItem.Create(aisling, "Bahamut's Blood Ruby Eye", quality, variance,
+                                    wVariance),
+                                > 0.80 => stockingItem.Create(aisling, "Obsidian", quality, variance,
+                                    wVariance),
+                                _ => stockingItem
+                            };
+
+                            stockingItem.GiveTo(client.Aisling);
+                            client.Aisling.Inventory.RemoveFromInventory(client, Item);
+                            return;
+                        }
+
+                        var lockpick = aisling.HasItemReturnItem("Copper Lockpick");
+                        aisling.Inventory.RemoveRange(client, lockpick, 1);
+                        client.SendServerMessage(ServerMessageType.ActiveMessage, "{=bLockpick snapped!");
+                        return;
+                    }
+
+                    client.SendServerMessage(ServerMessageType.ActiveMessage, "{=bIt's Locked!");
+                    return;
+                }
             case "Gold Pouch":
                 {
                     var chance = Generator.RandomPercentPrecise();

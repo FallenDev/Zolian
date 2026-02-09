@@ -358,13 +358,22 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
     {
         try
         {
-            var monsters = ServerSetup.Instance.GlobalMapCache
-                .SelectMany(kvp => ObjectManager.GetObjects<Monster>(kvp.Value, i => !i.Skulled).Select(innerKvp => innerKvp.Value))
-                .ToArray();
+            var now = DateTime.UtcNow;
 
-            Parallel.ForEach(monsters,
-                new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount },
-                monster => ProcessMonster(monster, elapsedTime));
+            foreach (var mapKvp in ServerSetup.Instance.GlobalMapCache)
+            {
+                var area = mapKvp.Value;
+                var monstersById = ObjectManager.GetObjects<Monster>(area, m => !m.Skulled);
+
+                if (monstersById.IsEmpty())
+                    continue;
+
+                foreach (var kv in monstersById)
+                {
+                    var monster = kv.Value;
+                    ProcessMonster(monster, elapsedTime, now);
+                }
+            }
         }
         catch (Exception ex)
         {
@@ -372,7 +381,7 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
         }
     }
 
-    private static void ProcessMonster(Monster monster, TimeSpan elapsedTime)
+    private static void ProcessMonster(Monster monster, TimeSpan elapsedTime, DateTime now)
     {
         if (monster == null) return;
 
@@ -387,13 +396,13 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
         }
 
         monster.AIScript?.Update(elapsedTime);
-        monster.LastUpdated = DateTime.UtcNow;
+        monster.LastUpdated = now;
 
         // Handle buffs and debuffs
         if (!monster.MonsterBuffAndDebuffStopWatch.IsRunning)
             monster.MonsterBuffAndDebuffStopWatch.Start();
 
-        if (!(monster.MonsterBuffAndDebuffStopWatch.Elapsed.TotalMilliseconds >= 1000)) return;
+        if (monster.MonsterBuffAndDebuffStopWatch.Elapsed.TotalMilliseconds < 1000) return;
         monster.UpdateBuffs(monster);
         monster.UpdateDebuffs(monster);
         monster.MonsterBuffAndDebuffStopWatch.Restart();
@@ -403,16 +412,22 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
     {
         try
         {
-            var mundanes = ServerSetup.Instance.GlobalMapCache
-                .SelectMany(kvp => ObjectManager.GetObjects<Mundane>(kvp.Value, m => m != null).Select(innerKvp => innerKvp.Value))
-                .ToArray();
+            var now = DateTime.UtcNow;
 
-            if (mundanes.Length == 0)
-                return;
+            foreach (var mapKvp in ServerSetup.Instance.GlobalMapCache)
+            {
+                var area = mapKvp.Value;
+                var mundanesById = ObjectManager.GetObjects<Mundane>(area, m => m != null);
 
-            Parallel.ForEach(mundanes,
-                new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount },
-                mundane => ProcessMundane(mundane, elapsedTime));
+                if (mundanesById.IsEmpty())
+                    continue;
+
+                foreach (var kv in mundanesById)
+                {
+                    var mundane = kv.Value;
+                    ProcessMundane(mundane, elapsedTime, now);
+                }
+            }
         }
         catch (Exception ex)
         {
@@ -420,11 +435,11 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
         }
     }
 
-    private static void ProcessMundane(Mundane mundane, TimeSpan elapsedTime)
+    private static void ProcessMundane(Mundane mundane, TimeSpan elapsedTime, DateTime now)
     {
         if (mundane == null) return;
         mundane.Update(elapsedTime);
-        mundane.LastUpdated = DateTime.UtcNow;
+        mundane.LastUpdated = now;
     }
 
     private void CheckTraps(TimeSpan elapsedTime)
@@ -453,14 +468,20 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
     {
         try
         {
-            Parallel.ForEach(
-                ServerSetup.Instance.GlobalMapCache,
-                new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount },
-                kvp => kvp.Value?.Update(elapsedTime));
+            foreach (var kvp in ServerSetup.Instance.GlobalMapCache)
+            {
+                try
+                {
+                    kvp.Value?.Update(elapsedTime);
+                }
+                catch (Exception ex)
+                {
+                    SentrySdk.CaptureException(ex);
+                }
+            }
         }
-        catch (Exception ex)
+        catch
         {
-            SentrySdk.CaptureException(ex);
             SentrySdk.CaptureMessage($"Map failed to update; Reload Maps initiated: {DateTime.UtcNow}");
 
             // Ensure only one reload routine runs at a time and avoid races with readers

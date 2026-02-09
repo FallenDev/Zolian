@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Numerics;
+using System.Security.Cryptography;
 
 using Darkages.Common;
 using Darkages.Enums;
@@ -13,8 +14,6 @@ using Darkages.Templates;
 using Darkages.Types;
 
 using ServiceStack;
-
-using static ServiceStack.Diagnostics.Events;
 
 namespace Darkages.Sprites.Entity;
 
@@ -63,13 +62,13 @@ public sealed class Monster : Damageable
     public string Size { get; set; }
     public ushort Image { get; set; }
     public bool WalkEnabled { get; set; }
-    public bool NextToTargetFirstAttack { get; set; }
     public WorldServerTimer BashTimer { get; init; }
     public WorldServerTimer AbilityTimer { get; init; }
     public WorldServerTimer CastTimer { get; init; }
     public MonsterTemplate Template { get; init; }
     public WorldServerTimer WalkTimer { get; init; }
     public WorldServerTimer ObjectUpdateTimer { get; init; } = new(TimeSpan.FromMilliseconds(200));
+    public readonly Stopwatch VulnerabilityWatch = new();
 
     public bool IsAlive => CurrentHp > 0;
     private bool Rewarded { get; set; }
@@ -369,7 +368,7 @@ public sealed class Monster : Damageable
         WalkTo((int)nodeX, (int)nodeY);
     }
 
-    public void UpdateTarget(bool ascending = false, bool shadowSight = false)
+    public void UpdateTarget(bool targetingOrder = false, bool shadowSight = false)
     {
         if (!ObjectUpdateEnabled) return;
         var nearbyPlayers = AislingsEarShotNearby();
@@ -391,7 +390,7 @@ public sealed class Monster : Damageable
 
             if (!tagged.IsEmpty())
             {
-                var groupAttacking = ascending ? tagged.OrderBy(c => c.ThreatMeter) : tagged.OrderByDescending(c => c.ThreatMeter);
+                var groupAttacking = targetingOrder ? tagged.OrderBy(c => c.ThreatMeter) : tagged.OrderByDescending(c => c.ThreatMeter);
 
                 foreach (var player in groupAttacking)
                 {
@@ -405,7 +404,7 @@ public sealed class Monster : Damageable
             else
             {
                 if (Target != null) return;
-                var topDps = ascending ? nearbyPlayers.OrderBy(c => c.ThreatMeter) : nearbyPlayers.OrderByDescending(c => c.ThreatMeter);
+                var topDps = targetingOrder ? nearbyPlayers.OrderBy(c => c.ThreatMeter) : nearbyPlayers.OrderByDescending(c => c.ThreatMeter);
 
                 foreach (var target in topDps)
                 {
@@ -534,7 +533,6 @@ public sealed class Monster : Damageable
     public void NextToTarget()
     {
         if (Target == null) return;
-        NextToTargetFirstAttack = true;
 
         if (Facing((int)Target.Pos.X, (int)Target.Pos.Y, out var direction))
         {
@@ -616,5 +614,94 @@ public sealed class Monster : Damageable
         {
             Wander();
         }
+    }
+
+    public void Bash()
+    {
+        if (this is null || CantAttack)
+            return;
+
+        var scripts = SkillScripts;
+
+        // Training Dummy or other enemies who can't attack
+        if (scripts.Count == 0)
+            return;
+
+        var now = DateTime.UtcNow;
+        var attackSpeedMs = Template.AttackSpeed;
+
+        for (var i = 0; i < scripts.Count; i++)
+        {
+            var s = scripts[i];
+            if (s is null)
+                continue;
+
+            var skill = s.Skill;
+            if (skill is null)
+                continue;
+
+            if (!skill.CanUse())
+                continue;
+
+            skill.InUse = true;
+
+            try
+            {
+                s.OnUse(this);
+
+                skill.NextAvailableUse = now
+                    .AddSeconds(skill.Template.Cooldown)
+                    .AddMilliseconds(attackSpeedMs);
+            }
+            finally
+            {
+                skill.InUse = false;
+            }
+        }
+    }
+
+    public void Abilities()
+    {
+        if (this is null || CantAttack)
+            return;
+
+        var scripts = AbilityScripts;
+
+        // Training Dummy or other enemies who can't attack
+        if (scripts.Count == 0)
+            return;
+
+        if (Generator.RandNumGen100() <= 60)
+            return;
+
+        var idx = RandomNumberGenerator.GetInt32(scripts.Count);
+        var script = scripts[idx];
+        script?.OnUse(this);
+    }
+
+    public void CastSpell()
+    {
+        if (this is null || CantCast)
+            return;
+
+        var target = Target;
+        if (target is null)
+            return;
+
+        if (!target.WithinMonsterSpellRangeOf(this))
+            return;
+
+        var scripts = SpellScripts;
+
+        // Training Dummy or other enemies who can't attack
+        if (scripts.Count == 0)
+            return;
+
+        if (Generator.RandomPercentPrecise() < 0.70)
+            return;
+
+        var idx = RandomNumberGenerator.GetInt32(scripts.Count);
+        var script = scripts[idx];
+        script?.OnUse(this, target);
     }
 }

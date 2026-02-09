@@ -15,12 +15,9 @@ namespace Darkages.GameScripts.Monsters;
 [Script("Draconic Omega")]
 public class DraconicOmega : MonsterScript
 {
-    private readonly string _aosdaSayings = "Muahahah fool|I've met hatchlings fiercer than you|Trying to challenge me? Might as well be a mouse roaring at a mountain";
-    private readonly string _aosdaChase = "Don't run coward|Fly, little one! The shadows suit you|Off so soon? I've barely warmed up!|Such haste! Did you leave your courage behind?|Flee now, and live to cower another day";
-    private string[] GhostChat => _aosdaSayings.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
-    private string[] GhostChase => _aosdaChase.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
+    private readonly string _aosdaSayings = "Muahahah fool|I've met hatchlings fiercer than you|Trying to challenge me? Might as well be a mouse roaring at a mountain|Such haste! Did you leave your courage behind?|Flee now, and live to cower another day";
+    private string[] GhostChat => _aosdaSayings.Split(['|'], StringSplitOptions.RemoveEmptyEntries);
     private int Count => GhostChat.Length;
-    private int RunCount => GhostChase.Length;
     private bool _deathCry;
 
     public DraconicOmega(Monster monster, Area map) : base(monster, map)
@@ -30,32 +27,44 @@ public class DraconicOmega : MonsterScript
         Monster.MonsterBank = [];
     }
 
+    /// <summary>
+    /// Overwritten to "Ao Sith" remove debuffs if poisoned or vulnerable
+    /// </summary>
     public override void Update(TimeSpan elapsedTime)
     {
-        if (Monster is null) return;
-        if (!Monster.IsAlive) return;
+        var monster = Monster;
+        if (monster is null || !monster.IsAlive)
+            return;
 
-        var update = Monster.ObjectUpdateTimer.Update(elapsedTime);
+        var update = monster.ObjectUpdateTimer.Update(elapsedTime);
 
         try
         {
             if (update)
             {
-                Monster.ObjectUpdateEnabled = true;
-                Monster.UpdateTarget(false, true);
+                monster.ObjectUpdateEnabled = true;
+                monster.UpdateTarget();
             }
 
-            Monster.ObjectUpdateEnabled = false;
+            monster.ObjectUpdateEnabled = false;
 
-            if (Monster.IsVulnerable || Monster.IsPoisoned)
+            if (monster.IsVulnerable || monster.IsPoisoned)
             {
-                var pos = Monster.Pos;
-                var diceRoll = Generator.RandNumGen100();
-                if (diceRoll >= 80)
-                    Monster.SendAnimationNearby(75, new Position(pos));
+                if (!monster.VulnerabilityWatch.IsRunning)
+                    monster.VulnerabilityWatch.Start();
 
-                foreach (var debuff in Monster.Debuffs.Values)
-                    debuff?.OnEnded(Monster, debuff);
+                if (monster.VulnerabilityWatch.Elapsed.TotalMilliseconds > 3000)
+                {
+                    var pos = monster.Pos;
+                    var diceRoll = Generator.RandNumGen100();
+                    if (diceRoll >= 80)
+                        monster.SendAnimationNearby(75, new Position(pos));
+
+                    foreach (var debuff in monster.Debuffs.Values)
+                        debuff?.OnEnded(monster, debuff);
+
+                    monster.VulnerabilityWatch.Restart();
+                }
             }
 
             MonsterState(elapsedTime);
@@ -67,257 +76,163 @@ public class DraconicOmega : MonsterScript
         }
     }
 
-    public override void OnClick(WorldClient client)
-    {
-        var colorA = "";
-        var colorB = "";
-        var colorLvl = LevelColor(client);
-        var halfHp = $"{{=s{Monster.CurrentHp}";
-        var halfGone = Monster.MaximumHp * .5;
-
-        colorA = Monster.OffenseElement switch
-        {
-            ElementManager.Element.Void => "{=n",
-            ElementManager.Element.Holy => "{=g",
-            ElementManager.Element.None => "{=s",
-            ElementManager.Element.Fire => "{=b",
-            ElementManager.Element.Water => "{=e",
-            ElementManager.Element.Wind => "{=c",
-            ElementManager.Element.Earth => "{=d",
-            ElementManager.Element.Terror => "{=j",
-            ElementManager.Element.Rage => "{=j",
-            ElementManager.Element.Sorrow => "{=j",
-            _ => colorA
-        };
-
-        colorB = Monster.DefenseElement switch
-        {
-            ElementManager.Element.Void => "{=n",
-            ElementManager.Element.Holy => "{=g",
-            ElementManager.Element.None => "{=s",
-            ElementManager.Element.Fire => "{=b",
-            ElementManager.Element.Water => "{=e",
-            ElementManager.Element.Wind => "{=c",
-            ElementManager.Element.Earth => "{=d",
-            ElementManager.Element.Terror => "{=j",
-            ElementManager.Element.Rage => "{=j",
-            ElementManager.Element.Sorrow => "{=j",
-            _ => colorB
-        };
-
-        if (Monster.CurrentHp < halfGone)
-        {
-            halfHp = $"{{=b{Monster.CurrentHp}{{=s";
-        }
-
-        if (Monster.Template.Level >= client.Aisling.Level + client.Aisling.AbpLevel + 30)
-        {
-            client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=c{Monster.Template.BaseName}: {{=aLv: {colorLvl} {{=aHP: {halfHp}/{Monster.MaximumHp}");
-            client.SendServerMessage(ServerMessageType.PersistentMessage, $"{{=c{Monster.Template.BaseName}: {{=aLv: {colorLvl}");
-            return;
-        }
-
-        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=c{Monster.Template.BaseName}: {{=aLv: {colorLvl} {{=aHP: {halfHp}/{Monster.MaximumHp}");
-        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=aSize: {{=s{Monster.Size} {{=aAC: {{=s{Monster.SealedAc} {{=aWill: {{=s{Monster.Will}");
-        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=aO: {colorA}{Monster.OffenseElement} {{=aD: {colorB}{Monster.DefenseElement}");
-        client.SendServerMessage(ServerMessageType.PersistentMessage, $"{{=aLv: {colorLvl} {{=aO: {colorA}{Monster.OffenseElement} {{=aD: {colorB}{Monster.DefenseElement}");
-    }
-
+    /// <summary>
+    /// Overwritten to display a death message
+    /// </summary>
     public override void OnDeath(WorldClient client = null)
     {
-        Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Nooooooo"));
+        var monster = Monster;
+        if (monster is null) return;
+
+        monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(monster.Serial, PublicMessageType.Normal, $"{monster.Name}: I am Omega, I am immorta..."));
+
         Task.Delay(300).Wait();
 
-        foreach (var item in Monster.MonsterBank.Where(item => item != null))
+        var bank = monster.MonsterBank;
+        for (var i = 0; i < bank.Count; i++)
         {
-            item.Release(Monster, Monster.Position);
+            var item = bank[i];
+            if (item is null)
+                continue;
+
+            item.Release(monster, monster.Position);
             AddObject(item);
 
             foreach (var player in item.AislingsNearby())
-            {
                 item.ShowTo(player);
+        }
+
+        if (monster.Target is null)
+        {
+            Aisling found = null;
+
+            foreach (var kvp in monster.TargetRecord.TaggedAislings)
+            {
+                var p = kvp.Value;
+                if (p?.Map == monster.Map)
+                {
+                    found = p;
+                    break;
+                }
             }
+
+            monster.Target = found;
         }
 
-        if (Monster.Target is null)
+        if (monster.Target is Aisling aisling)
         {
-            var recordTuple = Monster.TargetRecord.TaggedAislings.Values.FirstOrDefault(p => p.Map == Monster.Map);
-            Monster.Target = recordTuple;
-        }
-
-        if (Monster.Target is Aisling aisling)
-        {
-            Monster.GenerateRewards(aisling);
-            Monster.UpdateKillCounters(Monster);
+            monster.GenerateRewards(aisling);
+            Monster.UpdateKillCounters(monster);
         }
         else
         {
-            var sum = (uint)Random.Shared.Next(Monster.Template.Level * 13, Monster.Template.Level * 200);
+            var level = monster.Template.Level;
+            var sum = (uint)Random.Shared.Next(level * 30, level * 500);
 
             if (sum > 0)
-            {
-                Money.Create(Monster, sum, new Position(Monster.Pos.X, Monster.Pos.Y));
-            }
+                Money.Create(monster, sum, new Position(monster.Pos.X, monster.Pos.Y));
         }
 
-        Monster.Remove();
+        monster.Remove();
     }
 
+    /// <summary>
+    /// Overwritten to allow commentary while walking, casting spells, and allow to see invisible players
+    /// </summary>
     public override void MonsterState(TimeSpan elapsedTime)
     {
-        if (Monster.Target is not null && Monster.TargetRecord.TaggedAislings.IsEmpty &&
-            Monster.Template.EngagedWalkingSpeed > 0)
-            Monster.WalkTimer.Delay = TimeSpan.FromMilliseconds(Monster.Template.EngagedWalkingSpeed);
+        var monster = Monster;
+        if (monster is null || !monster.IsAlive)
+            return;
+
+        if (monster.Target is not null && monster.TargetRecord.TaggedAislings.IsEmpty &&
+            monster.Template.EngagedWalkingSpeed > 0)
+            monster.WalkTimer.Delay = TimeSpan.FromMilliseconds(monster.Template.EngagedWalkingSpeed);
         else
-            Monster.WalkTimer.Delay = TimeSpan.FromMilliseconds(Monster.Template.MovementSpeed);
+            monster.WalkTimer.Delay = TimeSpan.FromMilliseconds(monster.Template.MovementSpeed);
 
-        var assail = Monster.BashTimer.Update(elapsedTime);
-        var ability = Monster.AbilityTimer.Update(elapsedTime);
-        var cast = Monster.CastTimer.Update(elapsedTime);
-        var walk = Monster.WalkTimer.Update(elapsedTime);
+        var assail = monster.BashTimer.Update(elapsedTime);
+        var ability = monster.AbilityTimer.Update(elapsedTime);
+        var cast = monster.CastTimer.Update(elapsedTime);
+        var walk = monster.WalkTimer.Update(elapsedTime);
 
-        if (Monster.Target is Aisling aisling)
+        if (monster.Target is Aisling aisling)
         {
-            if (Monster.Target.IsWeakened && !_deathCry)
+            if (monster.Target.IsWeakened && !_deathCry)
             {
                 _deathCry = true;
-                Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Sweet release..        ^_^"));
+                monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(monster.Serial, PublicMessageType.Normal, $"{monster.Name}: Hahhahaa fools"));
             }
 
             if (aisling.Skulled || aisling.Dead || !aisling.LoggedIn)
             {
-                Monster.ClearTarget();
+                monster.ClearTarget();
 
-                if (Monster.CantMove || !Monster.WalkEnabled) return;
-                if (walk) Monster.PreWalkChecks();
+                if (monster.Template.MoodType.MoodFlagIsSet(MoodQualifer.Neutral))
+                    monster.Aggressive = false;
+
+                if (monster.CantMove || !monster.WalkEnabled) return;
+                if (walk) monster.PreWalkChecks();
 
                 return;
             }
 
-            if (Monster.BashEnabled || Monster.NextToTargetFirstAttack)
-            {
-                if (!Monster.CantAttack)
-                    if (assail || Monster.NextToTargetFirstAttack) Bash();
-            }
+            if (monster.BashEnabled && assail && !monster.CantAttack)
+                monster.Bash();
 
-            if (Monster.AbilityEnabled)
-            {
-                if (!Monster.CantAttack)
-                    if (ability) Ability();
-            }
+            if (monster.AbilityEnabled && ability && !monster.CantAttack)
+                monster.Abilities();
 
-            if (Monster.CastEnabled)
-            {
-                if (!Monster.CantCast)
-                    if (cast) CastSpell();
-            }
+            if (monster.CastEnabled && cast && !monster.CantCast)
+                CastSpell();
         }
 
-        if (Monster.WalkEnabled)
+        if (monster.WalkEnabled && walk && !monster.CantMove)
         {
-            if (Monster.CantMove) return;
-            if (walk) Monster.PreWalkChecks();
+            monster.PreWalkChecks();
             var rand = Generator.RandomPercentPrecise();
             if (rand >= 0.93)
             {
-                Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: {GhostChat[RandomNumberGenerator.GetInt32(Count + 1) % GhostChat.Length]}"));
+                monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(monster.Serial, PublicMessageType.Normal, $"{monster.Name}: {GhostChat[RandomNumberGenerator.GetInt32(Count + 1) % GhostChat.Length]}"));
             }
         }
 
-        Monster.UpdateTarget(false, true);
-    }
-
-    public override void OnItemDropped(WorldClient client, Item item)
-    {
-        if (item == null) return;
-        if (client == null) return;
-        client.Aisling.Inventory.RemoveFromInventory(client.Aisling.Client, item);
-        Monster.MonsterBank.Add(item);
-    }
-
-    private string LevelColor(WorldClient client)
-    {
-        if (Monster.Template.Level >= client.Aisling.Level + client.Aisling.AbpLevel + 30)
-            return "{=n???{=s";
-        if (Monster.Template.Level >= client.Aisling.Level + client.Aisling.AbpLevel + 15)
-            return $"{{=b{Monster.Template.Level}{{=s";
-        if (Monster.Template.Level >= client.Aisling.Level + client.Aisling.AbpLevel + 10)
-            return $"{{=c{Monster.Template.Level}{{=s";
-        if (Monster.Template.Level <= client.Aisling.Level + client.Aisling.AbpLevel - 30)
-            return $"{{=k{Monster.Template.Level}{{=s";
-        if (Monster.Template.Level <= client.Aisling.Level + client.Aisling.AbpLevel - 15)
-            return $"{{=j{Monster.Template.Level}{{=s";
-        return Monster.Template.Level <= client.Aisling.Level + client.Aisling.AbpLevel - 10 ? $"{{=i{Monster.Template.Level}{{=s" : $"{{=q{Monster.Template.Level}{{=s";
-    }
-
-    #region Actions
-
-    private void Bash()
-    {
-        Monster.NextToTargetFirstAttack = false;
-        if (Monster.CantAttack) return;
-        // Training Dummy or other enemies who can't attack
-        if (Monster.SkillScripts.Count == 0) return;
-
-        var assails = Monster.SkillScripts.Where(i => i.Skill.CanUse());
-
-        Parallel.ForEach(assails, (s) =>
-        {
-            s.Skill.InUse = true;
-            s.OnUse(Monster);
-            {
-                var readyTime = DateTime.UtcNow;
-                readyTime = readyTime.AddSeconds(s.Skill.Template.Cooldown);
-                readyTime = readyTime.AddMilliseconds(Monster.Template.AttackSpeed);
-                s.Skill.NextAvailableUse = readyTime;
-            }
-            s.Skill.InUse = false;
-        });
-    }
-
-    private void Ability()
-    {
-        if (Monster.CantAttack) return;
-        // Training Dummy or other enemies who can't attack
-        if (Monster.AbilityScripts.Count == 0) return;
-
-        if (Generator.RandomPercentPrecise() <= 0.70) return;
-        var abilityIdx = RandomNumberGenerator.GetInt32(Monster.AbilityScripts.Count);
-
-        if (Monster.AbilityScripts[abilityIdx] is null) return;
-        Monster.AbilityScripts[abilityIdx].OnUse(Monster);
+        monster.UpdateTarget(false, true);
     }
 
     private void CastSpell()
     {
-        if (Monster.CantCast) return;
-        if (Monster.Target is null) return;
-        if (!Monster.Target.WithinMonsterSpellRangeOf(Monster)) return;
+        var monster = Monster;
+        if (monster is null || monster.CantCast)
+            return;
 
-        Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Ascradith Nem Tsu!"));
+        var target = monster.Target;
+        if (target is null) return;
+
+        if (!target.WithinMonsterSpellRangeOf(monster)) return;
+
+        monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(monster.Serial, PublicMessageType.Normal, $"{monster.Name}: Ascradith Nem!!!!"));
+
+        var scripts = monster.SpellScripts;
 
         // Training Dummy or other enemies who can't attack
-        if (Monster.SpellScripts.Count == 0) return;
+        if (scripts.Count == 0) return;
 
-        if (Generator.RandomPercentPrecise() <= 0.70) return;
-        var spellIdx = RandomNumberGenerator.GetInt32(Monster.SpellScripts.Count);
+        if (Generator.RandomPercentPrecise() < 0.50)
+            return;
 
-        if (Monster.SpellScripts[spellIdx] is null) return;
-        Monster.SpellScripts[spellIdx].OnUse(Monster, Monster.Target);
+        var idx = RandomNumberGenerator.GetInt32(scripts.Count);
+        var script = scripts[idx];
+        script?.OnUse(monster, target);
     }
-
-    #endregion
 }
 
 [Script("Jack Frost")]
 public class JackFrost : MonsterScript
 {
-    private readonly string _aosdaSayings = "How about this!|I do not know what I am doing... help me|I feel the light";
-    private readonly string _aosdaChase = "Hey, hey. Slow down, slow down|Don't run, I will turn you to Ice!|But you've came all this way!";
-    private string[] GhostChat => _aosdaSayings.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
-    private string[] GhostChase => _aosdaChase.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
+    private readonly string _aosdaSayings = "How about this!|I do not know what I am doing... help me|I feel the light|Hey, hey. Slow down, slow down";
+    private string[] GhostChat => _aosdaSayings.Split(['|'], StringSplitOptions.RemoveEmptyEntries);
     private int Count => GhostChat.Length;
-    private int RunCount => GhostChase.Length;
     private bool _deathCry;
 
     public JackFrost(Monster monster, Area map) : base(monster, map)
@@ -327,32 +242,44 @@ public class JackFrost : MonsterScript
         Monster.MonsterBank = [];
     }
 
+    /// <summary>
+    /// Overwritten to "Ao Sith" remove debuffs if poisoned or vulnerable
+    /// </summary>
     public override void Update(TimeSpan elapsedTime)
     {
-        if (Monster is null) return;
-        if (!Monster.IsAlive) return;
+        var monster = Monster;
+        if (monster is null || !monster.IsAlive)
+            return;
 
-        var update = Monster.ObjectUpdateTimer.Update(elapsedTime);
+        var update = monster.ObjectUpdateTimer.Update(elapsedTime);
 
         try
         {
             if (update)
             {
-                Monster.ObjectUpdateEnabled = true;
-                Monster.UpdateTarget(false, true);
+                monster.ObjectUpdateEnabled = true;
+                monster.UpdateTarget();
             }
 
-            Monster.ObjectUpdateEnabled = false;
+            monster.ObjectUpdateEnabled = false;
 
-            if (Monster.IsVulnerable || Monster.IsPoisoned)
+            if (monster.IsVulnerable || monster.IsPoisoned)
             {
-                var pos = Monster.Pos;
-                var diceRoll = Generator.RandNumGen100();
-                if (diceRoll >= 80)
-                    Monster.SendAnimationNearby(75, new Position(pos));
+                if (!monster.VulnerabilityWatch.IsRunning)
+                    monster.VulnerabilityWatch.Start();
 
-                foreach (var debuff in Monster.Debuffs.Values)
-                    debuff?.OnEnded(Monster, debuff);
+                if (monster.VulnerabilityWatch.Elapsed.TotalMilliseconds > 3000)
+                {
+                    var pos = monster.Pos;
+                    var diceRoll = Generator.RandNumGen100();
+                    if (diceRoll >= 80)
+                        monster.SendAnimationNearby(75, new Position(pos));
+
+                    foreach (var debuff in monster.Debuffs.Values)
+                        debuff?.OnEnded(monster, debuff);
+
+                    monster.VulnerabilityWatch.Restart();
+                }
             }
 
             MonsterState(elapsedTime);
@@ -364,257 +291,163 @@ public class JackFrost : MonsterScript
         }
     }
 
-    public override void OnClick(WorldClient client)
-    {
-        var colorA = "";
-        var colorB = "";
-        var colorLvl = LevelColor(client);
-        var halfHp = $"{{=s{Monster.CurrentHp}";
-        var halfGone = Monster.MaximumHp * .5;
-
-        colorA = Monster.OffenseElement switch
-        {
-            ElementManager.Element.Void => "{=n",
-            ElementManager.Element.Holy => "{=g",
-            ElementManager.Element.None => "{=s",
-            ElementManager.Element.Fire => "{=b",
-            ElementManager.Element.Water => "{=e",
-            ElementManager.Element.Wind => "{=c",
-            ElementManager.Element.Earth => "{=d",
-            ElementManager.Element.Terror => "{=j",
-            ElementManager.Element.Rage => "{=j",
-            ElementManager.Element.Sorrow => "{=j",
-            _ => colorA
-        };
-
-        colorB = Monster.DefenseElement switch
-        {
-            ElementManager.Element.Void => "{=n",
-            ElementManager.Element.Holy => "{=g",
-            ElementManager.Element.None => "{=s",
-            ElementManager.Element.Fire => "{=b",
-            ElementManager.Element.Water => "{=e",
-            ElementManager.Element.Wind => "{=c",
-            ElementManager.Element.Earth => "{=d",
-            ElementManager.Element.Terror => "{=j",
-            ElementManager.Element.Rage => "{=j",
-            ElementManager.Element.Sorrow => "{=j",
-            _ => colorB
-        };
-
-        if (Monster.CurrentHp < halfGone)
-        {
-            halfHp = $"{{=b{Monster.CurrentHp}{{=s";
-        }
-
-        if (Monster.Template.Level >= client.Aisling.Level + client.Aisling.AbpLevel + 30)
-        {
-            client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=c{Monster.Template.BaseName}: {{=aLv: {colorLvl} {{=aHP: {halfHp}/{Monster.MaximumHp}");
-            client.SendServerMessage(ServerMessageType.PersistentMessage, $"{{=c{Monster.Template.BaseName}: {{=aLv: {colorLvl}");
-            return;
-        }
-
-        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=c{Monster.Template.BaseName}: {{=aLv: {colorLvl} {{=aHP: {halfHp}/{Monster.MaximumHp}");
-        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=aSize: {{=s{Monster.Size} {{=aAC: {{=s{Monster.SealedAc} {{=aWill: {{=s{Monster.Will}");
-        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=aO: {colorA}{Monster.OffenseElement} {{=aD: {colorB}{Monster.DefenseElement}");
-        client.SendServerMessage(ServerMessageType.PersistentMessage, $"{{=aLv: {colorLvl} {{=aO: {colorA}{Monster.OffenseElement} {{=aD: {colorB}{Monster.DefenseElement}");
-    }
-
+    /// <summary>
+    /// Overwritten to display a death message
+    /// </summary>
     public override void OnDeath(WorldClient client = null)
     {
-        Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Thank you, Merry Christmas!"));
+        var monster = Monster;
+        if (monster is null) return;
+
+        monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(monster.Serial, PublicMessageType.Normal, $"{monster.Name}: Thank you! Merry Christmas!!"));
+
         Task.Delay(300).Wait();
 
-        foreach (var item in Monster.MonsterBank.Where(item => item != null))
+        var bank = monster.MonsterBank;
+        for (var i = 0; i < bank.Count; i++)
         {
-            item.Release(Monster, Monster.Position);
+            var item = bank[i];
+            if (item is null)
+                continue;
+
+            item.Release(monster, monster.Position);
             AddObject(item);
 
             foreach (var player in item.AislingsNearby())
-            {
                 item.ShowTo(player);
+        }
+
+        if (monster.Target is null)
+        {
+            Aisling found = null;
+
+            foreach (var kvp in monster.TargetRecord.TaggedAislings)
+            {
+                var p = kvp.Value;
+                if (p?.Map == monster.Map)
+                {
+                    found = p;
+                    break;
+                }
             }
+
+            monster.Target = found;
         }
 
-        if (Monster.Target is null)
+        if (monster.Target is Aisling aisling)
         {
-            var recordTuple = Monster.TargetRecord.TaggedAislings.Values.FirstOrDefault(p => p.Map == Monster.Map);
-            Monster.Target = recordTuple;
-        }
-
-        if (Monster.Target is Aisling aisling)
-        {
-            Monster.GenerateRewards(aisling);
-            Monster.UpdateKillCounters(Monster);
+            monster.GenerateRewards(aisling);
+            Monster.UpdateKillCounters(monster);
         }
         else
         {
-            var sum = (uint)Random.Shared.Next(Monster.Template.Level * 13, Monster.Template.Level * 200);
+            var level = monster.Template.Level;
+            var sum = (uint)Random.Shared.Next(level * 30, level * 500);
 
             if (sum > 0)
-            {
-                Money.Create(Monster, sum, new Position(Monster.Pos.X, Monster.Pos.Y));
-            }
+                Money.Create(monster, sum, new Position(monster.Pos.X, monster.Pos.Y));
         }
 
-        Monster.Remove();
+        monster.Remove();
     }
 
+    /// <summary>
+    /// Overwritten to allow commentary while walking, casting spells, and allow to see invisible players
+    /// </summary>
     public override void MonsterState(TimeSpan elapsedTime)
     {
-        if (Monster.Target is not null && Monster.TargetRecord.TaggedAislings.IsEmpty &&
-            Monster.Template.EngagedWalkingSpeed > 0)
-            Monster.WalkTimer.Delay = TimeSpan.FromMilliseconds(Monster.Template.EngagedWalkingSpeed);
+        var monster = Monster;
+        if (monster is null || !monster.IsAlive)
+            return;
+
+        if (monster.Target is not null && monster.TargetRecord.TaggedAislings.IsEmpty &&
+            monster.Template.EngagedWalkingSpeed > 0)
+            monster.WalkTimer.Delay = TimeSpan.FromMilliseconds(monster.Template.EngagedWalkingSpeed);
         else
-            Monster.WalkTimer.Delay = TimeSpan.FromMilliseconds(Monster.Template.MovementSpeed);
+            monster.WalkTimer.Delay = TimeSpan.FromMilliseconds(monster.Template.MovementSpeed);
 
-        var assail = Monster.BashTimer.Update(elapsedTime);
-        var ability = Monster.AbilityTimer.Update(elapsedTime);
-        var cast = Monster.CastTimer.Update(elapsedTime);
-        var walk = Monster.WalkTimer.Update(elapsedTime);
+        var assail = monster.BashTimer.Update(elapsedTime);
+        var ability = monster.AbilityTimer.Update(elapsedTime);
+        var cast = monster.CastTimer.Update(elapsedTime);
+        var walk = monster.WalkTimer.Update(elapsedTime);
 
-        if (Monster.Target is Aisling aisling)
+        if (monster.Target is Aisling aisling)
         {
-            if (Monster.Target.IsWeakened && !_deathCry)
+            if (monster.Target.IsWeakened && !_deathCry)
             {
                 _deathCry = true;
-                Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Nooooo..."));
+                monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(monster.Serial, PublicMessageType.Normal, $"{monster.Name}: I'm melting..."));
             }
 
             if (aisling.Skulled || aisling.Dead || !aisling.LoggedIn)
             {
-                Monster.ClearTarget();
+                monster.ClearTarget();
 
-                if (Monster.CantMove || !Monster.WalkEnabled) return;
-                if (walk) Monster.PreWalkChecks();
+                if (monster.Template.MoodType.MoodFlagIsSet(MoodQualifer.Neutral))
+                    monster.Aggressive = false;
+
+                if (monster.CantMove || !monster.WalkEnabled) return;
+                if (walk) monster.PreWalkChecks();
 
                 return;
             }
 
-            if (Monster.BashEnabled || Monster.NextToTargetFirstAttack)
-            {
-                if (!Monster.CantAttack)
-                    if (assail || Monster.NextToTargetFirstAttack) Bash();
-            }
+            if (monster.BashEnabled && assail && !monster.CantAttack)
+                monster.Bash();
 
-            if (Monster.AbilityEnabled)
-            {
-                if (!Monster.CantAttack)
-                    if (ability) Ability();
-            }
+            if (monster.AbilityEnabled && ability && !monster.CantAttack)
+                monster.Abilities();
 
-            if (Monster.CastEnabled)
-            {
-                if (!Monster.CantCast)
-                    if (cast) CastSpell();
-            }
+            if (monster.CastEnabled && cast && !monster.CantCast)
+                CastSpell();
         }
 
-        if (Monster.WalkEnabled)
+        if (monster.WalkEnabled && walk && !monster.CantMove)
         {
-            if (Monster.CantMove) return;
-            if (walk) Monster.PreWalkChecks();
+            monster.PreWalkChecks();
             var rand = Generator.RandomPercentPrecise();
             if (rand >= 0.93)
             {
-                Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: {GhostChat[RandomNumberGenerator.GetInt32(Count + 1) % GhostChat.Length]}"));
+                monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(monster.Serial, PublicMessageType.Normal, $"{monster.Name}: {GhostChat[RandomNumberGenerator.GetInt32(Count + 1) % GhostChat.Length]}"));
             }
         }
 
-        Monster.UpdateTarget(false, true);
-    }
-
-    public override void OnItemDropped(WorldClient client, Item item)
-    {
-        if (item == null) return;
-        if (client == null) return;
-        client.Aisling.Inventory.RemoveFromInventory(client.Aisling.Client, item);
-        Monster.MonsterBank.Add(item);
-    }
-
-    private string LevelColor(WorldClient client)
-    {
-        if (Monster.Template.Level >= client.Aisling.Level + client.Aisling.AbpLevel + 30)
-            return "{=n???{=s";
-        if (Monster.Template.Level >= client.Aisling.Level + client.Aisling.AbpLevel + 15)
-            return $"{{=b{Monster.Template.Level}{{=s";
-        if (Monster.Template.Level >= client.Aisling.Level + client.Aisling.AbpLevel + 10)
-            return $"{{=c{Monster.Template.Level}{{=s";
-        if (Monster.Template.Level <= client.Aisling.Level + client.Aisling.AbpLevel - 30)
-            return $"{{=k{Monster.Template.Level}{{=s";
-        if (Monster.Template.Level <= client.Aisling.Level + client.Aisling.AbpLevel - 15)
-            return $"{{=j{Monster.Template.Level}{{=s";
-        return Monster.Template.Level <= client.Aisling.Level + client.Aisling.AbpLevel - 10 ? $"{{=i{Monster.Template.Level}{{=s" : $"{{=q{Monster.Template.Level}{{=s";
-    }
-
-    #region Actions
-
-    private void Bash()
-    {
-        Monster.NextToTargetFirstAttack = false;
-        if (Monster.CantAttack) return;
-        // Training Dummy or other enemies who can't attack
-        if (Monster.SkillScripts.Count == 0) return;
-
-        var assails = Monster.SkillScripts.Where(i => i.Skill.CanUse());
-
-        Parallel.ForEach(assails, (s) =>
-        {
-            s.Skill.InUse = true;
-            s.OnUse(Monster);
-            {
-                var readyTime = DateTime.UtcNow;
-                readyTime = readyTime.AddSeconds(s.Skill.Template.Cooldown);
-                readyTime = readyTime.AddMilliseconds(Monster.Template.AttackSpeed);
-                s.Skill.NextAvailableUse = readyTime;
-            }
-            s.Skill.InUse = false;
-        });
-    }
-
-    private void Ability()
-    {
-        if (Monster.CantAttack) return;
-        // Training Dummy or other enemies who can't attack
-        if (Monster.AbilityScripts.Count == 0) return;
-
-        if (Generator.RandomPercentPrecise() <= 0.70) return;
-        var abilityIdx = RandomNumberGenerator.GetInt32(Monster.AbilityScripts.Count);
-
-        if (Monster.AbilityScripts[abilityIdx] is null) return;
-        Monster.AbilityScripts[abilityIdx].OnUse(Monster);
+        monster.UpdateTarget(false, true);
     }
 
     private void CastSpell()
     {
-        if (Monster.CantCast) return;
-        if (Monster.Target is null) return;
-        if (!Monster.Target.WithinMonsterSpellRangeOf(Monster)) return;
+        var monster = Monster;
+        if (monster is null || monster.CantCast)
+            return;
 
-        Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: I do not control my actions!"));
+        var target = monster.Target;
+        if (target is null) return;
+
+        if (!target.WithinMonsterSpellRangeOf(monster)) return;
+
+        monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(monster.Serial, PublicMessageType.Normal, $"{monster.Name}: I do not control my actions!"));
+
+        var scripts = monster.SpellScripts;
 
         // Training Dummy or other enemies who can't attack
-        if (Monster.SpellScripts.Count == 0) return;
+        if (scripts.Count == 0) return;
 
-        if (Generator.RandomPercentPrecise() <= 0.70) return;
-        var spellIdx = RandomNumberGenerator.GetInt32(Monster.SpellScripts.Count);
+        if (Generator.RandomPercentPrecise() < 0.50)
+            return;
 
-        if (Monster.SpellScripts[spellIdx] is null) return;
-        Monster.SpellScripts[spellIdx].OnUse(Monster, Monster.Target);
+        var idx = RandomNumberGenerator.GetInt32(scripts.Count);
+        var script = scripts[idx];
+        script?.OnUse(monster, target);
     }
-
-    #endregion
 }
 
 [Script("Yeti")]
 public class Yeti : MonsterScript
 {
-    private readonly string _aosdaSayings = "Muahahah|I promised to give Christmas back!|I'm just borrowing it, leave me alone";
-    private readonly string _aosdaChase = "Let's sing some carols|Come back, I just want a hug|I'm no Grinch, I'm a Yeti. There's a difference!";
-    private string[] GhostChat => _aosdaSayings.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
-    private string[] GhostChase => _aosdaChase.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
+    private readonly string _aosdaSayings = "Muahahah|I promised to give Christmas back!|I'm just borrowing it, leave me alone|Let's sing some carols|Come back, I just want a hug|I'm no Grinch, I'm a Yeti. There's a difference!";
+    private string[] GhostChat => _aosdaSayings.Split(['|'], StringSplitOptions.RemoveEmptyEntries);
     private int Count => GhostChat.Length;
-    private int RunCount => GhostChase.Length;
     private bool _deathCry;
     private bool _phaseOne;
     private bool _phaseTwo;
@@ -627,33 +460,46 @@ public class Yeti : MonsterScript
         Monster.MonsterBank = [];
     }
 
+    /// <summary>
+    /// Overwritten to "Ao Sith" remove debuffs if poisoned or vulnerable; Adds UpdatePhases() 
+    /// to spawn adds at 75%, 50%, and 25% health thresholds
+    /// </summary>
     public override void Update(TimeSpan elapsedTime)
     {
-        if (Monster is null) return;
-        if (!Monster.IsAlive) return;
+        var monster = Monster;
+        if (monster is null || !monster.IsAlive)
+            return;
 
-        var update = Monster.ObjectUpdateTimer.Update(elapsedTime);
+        var update = monster.ObjectUpdateTimer.Update(elapsedTime);
 
         try
         {
             if (update)
             {
-                Monster.ObjectUpdateEnabled = true;
-                Monster.UpdateTarget(false, true);
+                monster.ObjectUpdateEnabled = true;
+                monster.UpdateTarget();
                 UpdatePhases();
             }
 
-            Monster.ObjectUpdateEnabled = false;
+            monster.ObjectUpdateEnabled = false;
 
-            if (Monster.IsVulnerable || Monster.IsPoisoned)
+            if (monster.IsVulnerable || monster.IsPoisoned)
             {
-                var pos = Monster.Pos;
-                var diceRoll = Generator.RandNumGen100();
-                if (diceRoll >= 80)
-                    Monster.SendAnimationNearby(75, new Position(pos));
+                if (!monster.VulnerabilityWatch.IsRunning)
+                    monster.VulnerabilityWatch.Start();
 
-                foreach (var debuff in Monster.Debuffs.Values)
-                    debuff?.OnEnded(Monster, debuff);
+                if (monster.VulnerabilityWatch.Elapsed.TotalMilliseconds > 3000)
+                {
+                    var pos = monster.Pos;
+                    var diceRoll = Generator.RandNumGen100();
+                    if (diceRoll >= 80)
+                        monster.SendAnimationNearby(75, new Position(pos));
+
+                    foreach (var debuff in monster.Debuffs.Values)
+                        debuff?.OnEnded(monster, debuff);
+
+                    monster.VulnerabilityWatch.Restart();
+                }
             }
 
             MonsterState(elapsedTime);
@@ -667,30 +513,34 @@ public class Yeti : MonsterScript
 
     private void UpdatePhases()
     {
-        if (Monster.CurrentHp <= Monster.MaximumHp * 0.75 && !_phaseOne)
+        var monster = Monster;
+        if (monster is null || !monster.IsAlive)
+            return;
+
+        if (monster.CurrentHp <= monster.MaximumHp * 0.75 && !_phaseOne)
         {
-            Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Shout, $"{Monster.Name}: AHHHHH That Hurts! You made Yeti Mad!"));
+            monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(monster.Serial, PublicMessageType.Shout, $"{monster.Name}: AHHHHH That Hurts! You made Yeti Mad!"));
             // Per-map monster template cache
-            if (!ServerSetup.Instance.MonsterTemplateByMapCache.TryGetValue(Monster.Map.ID, out var templates) || templates.Length == 0) return;
+            if (!ServerSetup.Instance.MonsterTemplateByMapCache.TryGetValue(monster.Map.ID, out var templates) || templates.Length == 0) return;
             var foundA = templates.TryGetValue(t => t.Name == "SnowmanA", out var templateA);
             var foundB = templates.TryGetValue(t => t.Name == "SnowmanB", out var templateB);
             var foundC = templates.TryGetValue(t => t.Name == "SnowmanC", out var templateC);
 
             if (foundA)
             {
-                var mob1 = Monster.Create(templateA, Monster.Map);
+                var mob1 = Monster.Create(templateA, monster.Map);
                 if (mob1 is not null)
                     ObjectManager.AddObject(mob1);
             }
             if (foundB)
             {
-                var mob2 = Monster.Create(templateB, Monster.Map);
+                var mob2 = Monster.Create(templateB, monster.Map);
                 if (mob2 is not null)
                     ObjectManager.AddObject(mob2);
             }
             if (foundC)
             {
-                var mob3 = Monster.Create(templateC, Monster.Map);
+                var mob3 = Monster.Create(templateC, monster.Map);
                 if (mob3 is not null)
                     ObjectManager.AddObject(mob3);
             }
@@ -698,11 +548,11 @@ public class Yeti : MonsterScript
             _phaseOne = true;
         }
 
-        if (Monster.CurrentHp <= Monster.MaximumHp * 0.50 && !_phaseTwo)
+        if (monster.CurrentHp <= monster.MaximumHp * 0.50 && !_phaseTwo)
         {
-            Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Shout, $"{Monster.Name}: AHHHHH That Hurts! You made Yeti Really Mad!"));
+            monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(monster.Serial, PublicMessageType.Shout, $"{monster.Name}: AHHHHH That Hurts! You made Yeti Really Mad!"));
             // Per-map monster template cache
-            if (!ServerSetup.Instance.MonsterTemplateByMapCache.TryGetValue(Monster.Map.ID, out var templates) || templates.Length == 0) return;
+            if (!ServerSetup.Instance.MonsterTemplateByMapCache.TryGetValue(monster.Map.ID, out var templates) || templates.Length == 0) return;
             var foundA = templates.TryGetValue(t => t.Name == "SnowmanA", out var templateA);
             var foundB = templates.TryGetValue(t => t.Name == "SnowmanB", out var templateB);
             var foundC = templates.TryGetValue(t => t.Name == "SnowmanC", out var templateC);
@@ -711,31 +561,31 @@ public class Yeti : MonsterScript
 
             if (foundA)
             {
-                var mob1 = Monster.Create(templateA, Monster.Map);
+                var mob1 = Monster.Create(templateA, monster.Map);
                 if (mob1 is not null)
                     ObjectManager.AddObject(mob1);
             }
             if (foundB)
             {
-                var mob2 = Monster.Create(templateB, Monster.Map);
+                var mob2 = Monster.Create(templateB, monster.Map);
                 if (mob2 is not null)
                     ObjectManager.AddObject(mob2);
             }
             if (foundC)
             {
-                var mob3 = Monster.Create(templateC, Monster.Map);
+                var mob3 = Monster.Create(templateC, monster.Map);
                 if (mob3 is not null)
                     ObjectManager.AddObject(mob3);
             }
             if (foundD)
             {
-                var mob4 = Monster.Create(templateD, Monster.Map);
+                var mob4 = Monster.Create(templateD, monster.Map);
                 if (mob4 is not null)
                     ObjectManager.AddObject(mob4);
             }
             if (foundE)
             {
-                var mob5 = Monster.Create(templateE, Monster.Map);
+                var mob5 = Monster.Create(templateE, monster.Map);
                 if (mob5 is not null)
                     ObjectManager.AddObject(mob5);
             }
@@ -743,11 +593,11 @@ public class Yeti : MonsterScript
             _phaseTwo = true;
         }
 
-        if (Monster.CurrentHp <= Monster.MaximumHp * 0.25 && !_phaseThree)
+        if (monster.CurrentHp <= monster.MaximumHp * 0.25 && !_phaseThree)
         {
-            Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Shout, $"{Monster.Name}: AHHHHH That Hurts! Time to die!!"));
+            monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(monster.Serial, PublicMessageType.Shout, $"{monster.Name}: AHHHHH That Hurts! Time to die!!"));
             // Per-map monster template cache
-            if (!ServerSetup.Instance.MonsterTemplateByMapCache.TryGetValue(Monster.Map.ID, out var templates) || templates.Length == 0) return;
+            if (!ServerSetup.Instance.MonsterTemplateByMapCache.TryGetValue(monster.Map.ID, out var templates) || templates.Length == 0) return;
             var foundA = templates.TryGetValue(t => t.Name == "SnowmanA", out var templateA);
             var foundB = templates.TryGetValue(t => t.Name == "SnowmanB", out var templateB);
             var foundC = templates.TryGetValue(t => t.Name == "SnowmanC", out var templateC);
@@ -758,43 +608,43 @@ public class Yeti : MonsterScript
 
             if (foundA)
             {
-                var mob1 = Monster.Create(templateA, Monster.Map);
+                var mob1 = Monster.Create(templateA, monster.Map);
                 if (mob1 is not null)
                     ObjectManager.AddObject(mob1);
             }
             if (foundB)
             {
-                var mob2 = Monster.Create(templateB, Monster.Map);
+                var mob2 = Monster.Create(templateB, monster.Map);
                 if (mob2 is not null)
                     ObjectManager.AddObject(mob2);
             }
             if (foundC)
             {
-                var mob3 = Monster.Create(templateC, Monster.Map);
+                var mob3 = Monster.Create(templateC, monster.Map);
                 if (mob3 is not null)
                     ObjectManager.AddObject(mob3);
             }
             if (foundD)
             {
-                var mob4 = Monster.Create(templateD, Monster.Map);
+                var mob4 = Monster.Create(templateD, monster.Map);
                 if (mob4 is not null)
                     ObjectManager.AddObject(mob4);
             }
             if (foundE)
             {
-                var mob5 = Monster.Create(templateE, Monster.Map);
+                var mob5 = Monster.Create(templateE, monster.Map);
                 if (mob5 is not null)
                     ObjectManager.AddObject(mob5);
             }
             if (foundF)
             {
-                var mob6 = Monster.Create(templateF, Monster.Map);
+                var mob6 = Monster.Create(templateF, monster.Map);
                 if (mob6 is not null)
                     ObjectManager.AddObject(mob6);
             }
             if (foundG)
             {
-                var mob7 = Monster.Create(templateG, Monster.Map);
+                var mob7 = Monster.Create(templateG, monster.Map);
                 if (mob7 is not null)
                     ObjectManager.AddObject(mob7);
             }
@@ -803,246 +653,155 @@ public class Yeti : MonsterScript
         }
     }
 
-    public override void OnClick(WorldClient client)
-    {
-        var colorA = "";
-        var colorB = "";
-        var colorLvl = LevelColor(client);
-        var halfHp = $"{{=s{Monster.CurrentHp}";
-        var halfGone = Monster.MaximumHp * .5;
-
-        colorA = Monster.OffenseElement switch
-        {
-            ElementManager.Element.Void => "{=n",
-            ElementManager.Element.Holy => "{=g",
-            ElementManager.Element.None => "{=s",
-            ElementManager.Element.Fire => "{=b",
-            ElementManager.Element.Water => "{=e",
-            ElementManager.Element.Wind => "{=c",
-            ElementManager.Element.Earth => "{=d",
-            ElementManager.Element.Terror => "{=j",
-            ElementManager.Element.Rage => "{=j",
-            ElementManager.Element.Sorrow => "{=j",
-            _ => colorA
-        };
-
-        colorB = Monster.DefenseElement switch
-        {
-            ElementManager.Element.Void => "{=n",
-            ElementManager.Element.Holy => "{=g",
-            ElementManager.Element.None => "{=s",
-            ElementManager.Element.Fire => "{=b",
-            ElementManager.Element.Water => "{=e",
-            ElementManager.Element.Wind => "{=c",
-            ElementManager.Element.Earth => "{=d",
-            ElementManager.Element.Terror => "{=j",
-            ElementManager.Element.Rage => "{=j",
-            ElementManager.Element.Sorrow => "{=j",
-            _ => colorB
-        };
-
-        if (Monster.CurrentHp < halfGone)
-        {
-            halfHp = $"{{=b{Monster.CurrentHp}{{=s";
-        }
-
-        if (Monster.Template.Level >= client.Aisling.Level + client.Aisling.AbpLevel + 30)
-        {
-            client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=c{Monster.Template.BaseName}: {{=aLv: {colorLvl} {{=aHP: {halfHp}/{Monster.MaximumHp}");
-            client.SendServerMessage(ServerMessageType.PersistentMessage, $"{{=c{Monster.Template.BaseName}: {{=aLv: {colorLvl}");
-            return;
-        }
-
-        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=c{Monster.Template.BaseName}: {{=aLv: {colorLvl} {{=aHP: {halfHp}/{Monster.MaximumHp}");
-        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=aSize: {{=s{Monster.Size} {{=aAC: {{=s{Monster.SealedAc} {{=aWill: {{=s{Monster.Will}");
-        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=aO: {colorA}{Monster.OffenseElement} {{=aD: {colorB}{Monster.DefenseElement}");
-        client.SendServerMessage(ServerMessageType.PersistentMessage, $"{{=aLv: {colorLvl} {{=aO: {colorA}{Monster.OffenseElement} {{=aD: {colorB}{Monster.DefenseElement}");
-    }
-
+    /// <summary>
+    /// Overwritten to display a death message
+    /// </summary>
     public override void OnDeath(WorldClient client = null)
     {
-        Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Nooooooo"));
+        var monster = Monster;
+        if (monster is null) return;
+
+        monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(monster.Serial, PublicMessageType.Normal, $"{monster.Name}: There was Donner, and Blitzen..."));
+
         Task.Delay(300).Wait();
 
-        foreach (var item in Monster.MonsterBank.Where(item => item != null))
+        var bank = monster.MonsterBank;
+        for (var i = 0; i < bank.Count; i++)
         {
-            item.Release(Monster, Monster.Position);
+            var item = bank[i];
+            if (item is null)
+                continue;
+
+            item.Release(monster, monster.Position);
             AddObject(item);
 
             foreach (var player in item.AislingsNearby())
-            {
                 item.ShowTo(player);
+        }
+
+        if (monster.Target is null)
+        {
+            Aisling found = null;
+
+            foreach (var kvp in monster.TargetRecord.TaggedAislings)
+            {
+                var p = kvp.Value;
+                if (p?.Map == monster.Map)
+                {
+                    found = p;
+                    break;
+                }
             }
+
+            monster.Target = found;
         }
 
-        if (Monster.Target is null)
+        if (monster.Target is Aisling aisling)
         {
-            var recordTuple = Monster.TargetRecord.TaggedAislings.Values.FirstOrDefault(p => p.Map == Monster.Map);
-            Monster.Target = recordTuple;
-        }
-
-        if (Monster.Target is Aisling aisling)
-        {
-            Monster.GenerateRewards(aisling);
-            Monster.UpdateKillCounters(Monster);
+            monster.GenerateRewards(aisling);
+            Monster.UpdateKillCounters(monster);
         }
         else
         {
-            var sum = (uint)Random.Shared.Next(Monster.Template.Level * 13, Monster.Template.Level * 200);
+            var level = monster.Template.Level;
+            var sum = (uint)Random.Shared.Next(level * 13, level * 200);
 
             if (sum > 0)
-            {
-                Money.Create(Monster, sum, new Position(Monster.Pos.X, Monster.Pos.Y));
-            }
+                Money.Create(monster, sum, new Position(monster.Pos.X, monster.Pos.Y));
         }
 
-        Monster.Remove();
+        monster.Remove();
     }
 
+    /// <summary>
+    /// Overwritten to allow commentary while walking, casting spells, and allow to see invisible players
+    /// </summary>
     public override void MonsterState(TimeSpan elapsedTime)
     {
-        if (Monster.Target is not null && Monster.TargetRecord.TaggedAislings.IsEmpty &&
-            Monster.Template.EngagedWalkingSpeed > 0)
-            Monster.WalkTimer.Delay = TimeSpan.FromMilliseconds(Monster.Template.EngagedWalkingSpeed);
+        var monster = Monster;
+        if (monster is null || !monster.IsAlive)
+            return;
+
+        if (monster.Target is not null && monster.TargetRecord.TaggedAislings.IsEmpty &&
+            monster.Template.EngagedWalkingSpeed > 0)
+            monster.WalkTimer.Delay = TimeSpan.FromMilliseconds(monster.Template.EngagedWalkingSpeed);
         else
-            Monster.WalkTimer.Delay = TimeSpan.FromMilliseconds(Monster.Template.MovementSpeed);
+            monster.WalkTimer.Delay = TimeSpan.FromMilliseconds(monster.Template.MovementSpeed);
 
-        var assail = Monster.BashTimer.Update(elapsedTime);
-        var ability = Monster.AbilityTimer.Update(elapsedTime);
-        var cast = Monster.CastTimer.Update(elapsedTime);
-        var walk = Monster.WalkTimer.Update(elapsedTime);
+        var assail = monster.BashTimer.Update(elapsedTime);
+        var ability = monster.AbilityTimer.Update(elapsedTime);
+        var cast = monster.CastTimer.Update(elapsedTime);
+        var walk = monster.WalkTimer.Update(elapsedTime);
 
-        if (Monster.Target is Aisling aisling)
+        if (monster.Target is Aisling aisling)
         {
-            if (Monster.Target.IsWeakened && !_deathCry)
+            if (monster.Target.IsWeakened && !_deathCry)
             {
                 _deathCry = true;
-                Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Let it snow.. Let it snow.. let ittt..."));
+                monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(monster.Serial, PublicMessageType.Normal, $"{monster.Name}: Let it snow.. Let it snow.. let it snow"));
             }
 
             if (aisling.Skulled || aisling.Dead || !aisling.LoggedIn)
             {
-                Monster.ClearTarget();
+                monster.ClearTarget();
 
-                if (Monster.CantMove || !Monster.WalkEnabled) return;
-                if (walk) Monster.PreWalkChecks();
+                if (monster.Template.MoodType.MoodFlagIsSet(MoodQualifer.Neutral))
+                    monster.Aggressive = false;
+
+                if (monster.CantMove || !monster.WalkEnabled) return;
+                if (walk) monster.PreWalkChecks();
 
                 return;
             }
 
-            if (Monster.BashEnabled || Monster.NextToTargetFirstAttack)
-            {
-                if (!Monster.CantAttack)
-                    if (assail || Monster.NextToTargetFirstAttack) Bash();
-            }
+            if (monster.BashEnabled && assail && !monster.CantAttack)
+                monster.Bash();
 
-            if (Monster.AbilityEnabled)
-            {
-                if (!Monster.CantAttack)
-                    if (ability) Ability();
-            }
+            if (monster.AbilityEnabled && ability && !monster.CantAttack)
+                monster.Abilities();
 
-            if (Monster.CastEnabled)
-            {
-                if (!Monster.CantCast)
-                    if (cast) CastSpell();
-            }
+            if (monster.CastEnabled && cast && !monster.CantCast)
+                CastSpell();
         }
 
-        if (Monster.WalkEnabled)
+        if (monster.WalkEnabled && walk && !monster.CantMove)
         {
-            if (Monster.CantMove) return;
-            if (walk) Monster.PreWalkChecks();
+            monster.PreWalkChecks();
             var rand = Generator.RandomPercentPrecise();
             if (rand >= 0.93)
             {
-                Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: {GhostChat[RandomNumberGenerator.GetInt32(Count + 1) % GhostChat.Length]}"));
+                monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(monster.Serial, PublicMessageType.Normal, $"{monster.Name}: {GhostChat[RandomNumberGenerator.GetInt32(Count + 1) % GhostChat.Length]}"));
             }
         }
 
-        Monster.UpdateTarget(false, true);
-    }
-
-    public override void OnItemDropped(WorldClient client, Item item)
-    {
-        if (item == null) return;
-        if (client == null) return;
-        client.Aisling.Inventory.RemoveFromInventory(client.Aisling.Client, item);
-        Monster.MonsterBank.Add(item);
-    }
-
-    private string LevelColor(WorldClient client)
-    {
-        if (Monster.Template.Level >= client.Aisling.Level + client.Aisling.AbpLevel + 30)
-            return "{=n???{=s";
-        if (Monster.Template.Level >= client.Aisling.Level + client.Aisling.AbpLevel + 15)
-            return $"{{=b{Monster.Template.Level}{{=s";
-        if (Monster.Template.Level >= client.Aisling.Level + client.Aisling.AbpLevel + 10)
-            return $"{{=c{Monster.Template.Level}{{=s";
-        if (Monster.Template.Level <= client.Aisling.Level + client.Aisling.AbpLevel - 30)
-            return $"{{=k{Monster.Template.Level}{{=s";
-        if (Monster.Template.Level <= client.Aisling.Level + client.Aisling.AbpLevel - 15)
-            return $"{{=j{Monster.Template.Level}{{=s";
-        return Monster.Template.Level <= client.Aisling.Level + client.Aisling.AbpLevel - 10 ? $"{{=i{Monster.Template.Level}{{=s" : $"{{=q{Monster.Template.Level}{{=s";
-    }
-
-    #region Actions
-
-    private void Bash()
-    {
-        Monster.NextToTargetFirstAttack = false;
-        if (Monster.CantAttack) return;
-        // Training Dummy or other enemies who can't attack
-        if (Monster.SkillScripts.Count == 0) return;
-
-        var assails = Monster.SkillScripts.Where(i => i.Skill.CanUse());
-
-        Parallel.ForEach(assails, (s) =>
-        {
-            s.Skill.InUse = true;
-            s.OnUse(Monster);
-            {
-                var readyTime = DateTime.UtcNow;
-                readyTime = readyTime.AddSeconds(s.Skill.Template.Cooldown);
-                readyTime = readyTime.AddMilliseconds(Monster.Template.AttackSpeed);
-                s.Skill.NextAvailableUse = readyTime;
-            }
-            s.Skill.InUse = false;
-        });
-    }
-
-    private void Ability()
-    {
-        if (Monster.CantAttack) return;
-        // Training Dummy or other enemies who can't attack
-        if (Monster.AbilityScripts.Count == 0) return;
-
-        if (Generator.RandomPercentPrecise() <= 0.70) return;
-        var abilityIdx = RandomNumberGenerator.GetInt32(Monster.AbilityScripts.Count);
-
-        if (Monster.AbilityScripts[abilityIdx] is null) return;
-        Monster.AbilityScripts[abilityIdx].OnUse(Monster);
+        monster.UpdateTarget(false, true);
     }
 
     private void CastSpell()
     {
-        if (Monster.CantCast) return;
-        if (Monster.Target is null) return;
-        if (!Monster.Target.WithinMonsterSpellRangeOf(Monster)) return;
+        var monster = Monster;
+        if (monster is null || monster.CantCast)
+            return;
 
-        Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Silent Night, Holy Night..."));
+        var target = monster.Target;
+        if (target is null) return;
+
+        if (!target.WithinMonsterSpellRangeOf(monster)) return;
+
+        monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(monster.Serial, PublicMessageType.Normal, $"{monster.Name}: Silent Night, Holy Night..."));
+
+        var scripts = monster.SpellScripts;
 
         // Training Dummy or other enemies who can't attack
-        if (Monster.SpellScripts.Count == 0) return;
+        if (scripts.Count == 0) return;
 
-        if (Generator.RandomPercentPrecise() <= 0.70) return;
-        var spellIdx = RandomNumberGenerator.GetInt32(Monster.SpellScripts.Count);
+        if (Generator.RandomPercentPrecise() < 0.50)
+            return;
 
-        if (Monster.SpellScripts[spellIdx] is null) return;
-        Monster.SpellScripts[spellIdx].OnUse(Monster, Monster.Target);
+        var idx = RandomNumberGenerator.GetInt32(scripts.Count);
+        var script = scripts[idx];
+        script?.OnUse(monster, target);
     }
-
-    #endregion
 }
 
 [Script("World Boss Astrid")]
@@ -1050,8 +809,8 @@ public class WorldBossBahamut : MonsterScript
 {
     private readonly string _aosdaSayings = "I've met hatchlings fiercer than you|I'm going to enjoy this|Asra Leckto Moltuv, esta drakto|Don't die on me now|Endure!";
     private readonly string _aosdaChase = "Hahahaha, scared? You should be.|Come back, I just have a question|Such haste! Did you leave your courage behind?|Flee now.. live to cower another day hahaha, mortal";
-    private string[] GhostChat => _aosdaSayings.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
-    private string[] GhostChase => _aosdaChase.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
+    private string[] GhostChat => _aosdaSayings.Split(['|'], StringSplitOptions.RemoveEmptyEntries);
+    private string[] GhostChase => _aosdaChase.Split(['|'], StringSplitOptions.RemoveEmptyEntries);
     private int Count => GhostChat.Length;
     private int RunCount => GhostChase.Length;
     private bool _deathCry;
@@ -1063,32 +822,44 @@ public class WorldBossBahamut : MonsterScript
         Monster.MonsterBank = [];
     }
 
+    /// <summary>
+    /// Overwritten to "Ao Sith" remove debuffs if poisoned, vulnerable, and silenced
+    /// </summary>
     public override void Update(TimeSpan elapsedTime)
     {
-        if (Monster is null) return;
-        if (!Monster.IsAlive) return;
+        var monster = Monster;
+        if (monster is null || !monster.IsAlive)
+            return;
 
-        var update = Monster.ObjectUpdateTimer.Update(elapsedTime);
+        var update = monster.ObjectUpdateTimer.Update(elapsedTime);
 
         try
         {
             if (update)
             {
-                Monster.ObjectUpdateEnabled = true;
-                Monster.UpdateTarget(true, true);
+                monster.ObjectUpdateEnabled = true;
+                monster.UpdateTarget();
             }
 
-            Monster.ObjectUpdateEnabled = false;
+            monster.ObjectUpdateEnabled = false;
 
-            if (Monster.IsVulnerable || Monster.IsPoisoned)
+            if (monster.IsVulnerable || monster.IsPoisoned || monster.IsSilenced)
             {
-                var pos = Monster.Pos;
-                var diceRoll = Generator.RandNumGen100();
-                if (diceRoll >= 80)
-                    Monster.SendAnimationNearby(75, new Position(pos));
+                if (!monster.VulnerabilityWatch.IsRunning)
+                    monster.VulnerabilityWatch.Start();
 
-                foreach (var debuff in Monster.Debuffs.Values)
-                    debuff?.OnEnded(Monster, debuff);
+                if (monster.VulnerabilityWatch.Elapsed.TotalMilliseconds > 3000)
+                {
+                    var pos = monster.Pos;
+                    var diceRoll = Generator.RandNumGen100();
+                    if (diceRoll >= 80)
+                        monster.SendAnimationNearby(75, new Position(pos));
+
+                    foreach (var debuff in monster.Debuffs.Values)
+                        debuff?.OnEnded(monster, debuff);
+
+                    monster.VulnerabilityWatch.Restart();
+                }
             }
 
             MonsterState(elapsedTime);
@@ -1100,186 +871,164 @@ public class WorldBossBahamut : MonsterScript
         }
     }
 
-    public override void OnClick(WorldClient client)
-    {
-        var colorA = "";
-        var colorB = "";
-        var colorLvl = LevelColor(client);
-        var halfHp = $"{{=s{Monster.CurrentHp}";
-        var halfGone = Monster.MaximumHp * .5;
-
-        colorA = Monster.OffenseElement switch
-        {
-            ElementManager.Element.Void => "{=n",
-            ElementManager.Element.Holy => "{=g",
-            ElementManager.Element.None => "{=s",
-            ElementManager.Element.Fire => "{=b",
-            ElementManager.Element.Water => "{=e",
-            ElementManager.Element.Wind => "{=c",
-            ElementManager.Element.Earth => "{=d",
-            ElementManager.Element.Terror => "{=j",
-            ElementManager.Element.Rage => "{=j",
-            ElementManager.Element.Sorrow => "{=j",
-            _ => colorA
-        };
-
-        colorB = Monster.DefenseElement switch
-        {
-            ElementManager.Element.Void => "{=n",
-            ElementManager.Element.Holy => "{=g",
-            ElementManager.Element.None => "{=s",
-            ElementManager.Element.Fire => "{=b",
-            ElementManager.Element.Water => "{=e",
-            ElementManager.Element.Wind => "{=c",
-            ElementManager.Element.Earth => "{=d",
-            ElementManager.Element.Terror => "{=j",
-            ElementManager.Element.Rage => "{=j",
-            ElementManager.Element.Sorrow => "{=j",
-            _ => colorB
-        };
-
-        if (Monster.CurrentHp < halfGone)
-        {
-            halfHp = $"{{=b{Monster.CurrentHp}{{=s";
-        }
-
-        if (Monster.Template.Level >= client.Aisling.Level + client.Aisling.AbpLevel + 30)
-        {
-            client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=c{Monster.Template.BaseName}: {{=aLv: {colorLvl} {{=aHP: {halfHp}/{Monster.MaximumHp}");
-            client.SendServerMessage(ServerMessageType.PersistentMessage, $"{{=c{Monster.Template.BaseName}: {{=aLv: {colorLvl}");
-            return;
-        }
-
-        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=c{Monster.Template.BaseName}: {{=aLv: {colorLvl} {{=aHP: {halfHp}/{Monster.MaximumHp}");
-        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=aSize: {{=s{Monster.Size} {{=aAC: {{=s{Monster.SealedAc} {{=aWill: {{=s{Monster.Will}");
-        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=aO: {colorA}{Monster.OffenseElement} {{=aD: {colorB}{Monster.DefenseElement}");
-        client.SendServerMessage(ServerMessageType.PersistentMessage, $"{{=aLv: {colorLvl} {{=aO: {colorA}{Monster.OffenseElement} {{=aD: {colorB}{Monster.DefenseElement}");
-    }
-
+    /// <summary>
+    /// Overwritten to display a death message and cast double xp on death
+    /// </summary>
     public override void OnDeath(WorldClient client = null)
     {
-        Monster.SendTargetedClientMethod(PlayerScope.All, c => c.SendServerMessage(ServerMessageType.ActiveMessage, $"{Monster.Name}: {{=bLike a phoenix, I will return."));
-        Monster.LoadAndCastSpellScriptOnDeath("Double XP");
+        var monster = Monster;
+        if (monster is null) return;
+
+        monster.SendTargetedClientMethod(PlayerScope.All, c => c.SendServerMessage(ServerMessageType.ActiveMessage, $"{monster.Name}: {{=bLike a phoenix, I will return."));
+        monster.LoadAndCastSpellScriptOnDeath("Double XP");
+
         Task.Delay(600).Wait();
 
-        foreach (var item in Monster.MonsterBank.Where(item => item != null))
+        var bank = monster.MonsterBank;
+        for (var i = 0; i < bank.Count; i++)
         {
-            item.Release(Monster, Monster.Position);
+            var item = bank[i];
+            if (item is null)
+                continue;
+
+            item.Release(monster, monster.Position);
             AddObject(item);
 
             foreach (var player in item.AislingsNearby())
-            {
                 item.ShowTo(player);
+        }
+
+        if (monster.Target is null)
+        {
+            Aisling found = null;
+
+            foreach (var kvp in monster.TargetRecord.TaggedAislings)
+            {
+                var p = kvp.Value;
+                if (p?.Map == monster.Map)
+                {
+                    found = p;
+                    break;
+                }
             }
-        }
 
-        if (Monster.Target is null)
-        {
-            var recordTuple = Monster.TargetRecord.TaggedAislings.Values.FirstOrDefault(p => p.Map == Monster.Map);
-            Monster.Target = recordTuple;
-        }
-
-        if (Monster.Target is Aisling aisling)
-        {
-            Monster.GenerateRewards(aisling);
-            Monster.UpdateKillCounters(Monster);
+            monster.Target = found;
         }
         else
         {
-            var sum = (uint)Random.Shared.Next(Monster.Template.Level * 100000, Monster.Template.Level * 200000);
+            var item = new Item();
+            item = item.Create(monster, "Bahamut's Treasure Chest");
+            item?.Release(monster, monster.Position);
+        }
+
+        if (monster.Target is Aisling aisling)
+        {
+            monster.GenerateRewards(aisling);
+            Monster.UpdateKillCounters(monster);
+        }
+        else
+        {
+            var level = monster.Template.Level;
+            var sum = (uint)Random.Shared.Next(level * 1000, level * 2000);
 
             if (sum > 0)
-            {
-                Money.Create(Monster, sum, new Position(Monster.Pos.X, Monster.Pos.Y));
-            }
+                Money.Create(monster, sum, new Position(monster.Pos.X, monster.Pos.Y));
         }
 
-        Monster.Remove();
+        monster.Remove();
     }
 
+    /// <summary>
+    /// Overwritten to detect invisible, enable berserk, target weakest, and display deathcry commentary
+    /// </summary>
     public override void MonsterState(TimeSpan elapsedTime)
     {
-        if (Monster.Target is not null && Monster.TargetRecord.TaggedAislings.IsEmpty &&
-            Monster.Template.EngagedWalkingSpeed > 0)
-            Monster.WalkTimer.Delay = TimeSpan.FromMilliseconds(Monster.Template.EngagedWalkingSpeed);
+        var monster = Monster;
+        if (monster is null || !monster.IsAlive)
+            return;
+
+        if (monster.Target is not null && monster.TargetRecord.TaggedAislings.IsEmpty &&
+            monster.Template.EngagedWalkingSpeed > 0)
+            monster.WalkTimer.Delay = TimeSpan.FromMilliseconds(monster.Template.EngagedWalkingSpeed);
         else
-            Monster.WalkTimer.Delay = TimeSpan.FromMilliseconds(Monster.Template.MovementSpeed);
+            monster.WalkTimer.Delay = TimeSpan.FromMilliseconds(monster.Template.MovementSpeed);
 
-        var assail = Monster.BashTimer.Update(elapsedTime);
-        var ability = Monster.AbilityTimer.Update(elapsedTime);
-        var cast = Monster.CastTimer.Update(elapsedTime);
-        var walk = Monster.WalkTimer.Update(elapsedTime);
+        var assail = monster.BashTimer.Update(elapsedTime);
+        var ability = monster.AbilityTimer.Update(elapsedTime);
+        var cast = monster.CastTimer.Update(elapsedTime);
+        var walk = monster.WalkTimer.Update(elapsedTime);
 
-        if (Monster.Target is Aisling aisling)
+        if (monster.Target is Aisling aisling)
         {
-            if (Monster.Target.IsWeakened && !_deathCry)
+            if (monster.Target.IsWeakened && !_deathCry)
             {
                 _deathCry = true;
-                Monster.SendTargetedClientMethod(PlayerScope.AislingsOnSameMap, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Shhh now, let it consume you.."));
+                monster.SendTargetedClientMethod(PlayerScope.AislingsOnSameMap, c => c.SendPublicMessage(monster.Serial, PublicMessageType.Normal, $"{monster.Name}: Shhh now, let it consume you.."));
             }
 
             if (aisling.Skulled || aisling.Dead || !aisling.LoggedIn)
             {
-                Monster.ClearTarget();
+                monster.ClearTarget();
 
-                if (Monster.CantMove || !Monster.WalkEnabled) return;
+                if (monster.CantMove || !monster.WalkEnabled) return;
                 if (walk) Walk();
 
                 return;
             }
 
-            if (Monster.Image == Monster.Template.ImageVarience)
-            {
+            // Berserk
+            if (monster.Image == monster.Template.ImageVarience)
                 Bash();
-            }
 
-            if (Monster.BashEnabled || Monster.NextToTargetFirstAttack)
-            {
-                if (!Monster.CantAttack)
-                    if (assail || Monster.NextToTargetFirstAttack) Bash();
-            }
+            if (monster.BashEnabled && assail && !monster.CantAttack)
+                Bash();
 
-            if (Monster.AbilityEnabled)
-            {
-                if (!Monster.CantAttack)
-                    if (ability) Ability();
-            }
+            if (monster.AbilityEnabled && ability && !monster.CantAttack)
+                monster.Abilities();
 
-            if (Monster.CastEnabled)
-            {
-                if (!Monster.CantCast)
-                    if (cast) CastSpell();
-            }
+            if (monster.CastEnabled && cast && !monster.CantCast)
+                monster.CastSpell();
         }
 
-        if (Monster.WalkEnabled)
-        {
-            if (Monster.CantMove) return;
-            if (walk) Walk();
-        }
+        if (monster.WalkEnabled && walk && !monster.CantMove)
+            Walk();
 
-        Monster.UpdateTarget(true, true);
+        monster.UpdateTarget(true, true);
     }
 
+    /// <summary>
+    /// Overwritten to display approach message
+    /// </summary>
     public override void OnApproach(WorldClient client)
     {
-        Monster.SendTargetedClientMethod(PlayerScope.AislingsOnSameMap, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: Ahh, a warmup!"));
+        var monster = Monster;
+        if (monster is null || !monster.IsAlive)
+            return;
+
+        monster.SendTargetedClientMethod(PlayerScope.AislingsOnSameMap, c => c.SendPublicMessage(monster.Serial, PublicMessageType.Normal, $"{monster.Name}: Ahh, a warmup!"));
     }
 
+    /// <summary>
+    /// Overwritten to change apperance at 3% health and enable berserk mode
+    /// </summary>
     public override void OnDamaged(WorldClient client, long dmg, Sprite source)
     {
+        var monster = Monster;
+        if (monster is null || !monster.IsAlive)
+            return;
+
         try
         {
-            var critical = (long)(Monster.MaximumHp * 0.03);
-            if (Monster.CurrentHp <= critical)
+            var critical = (long)(monster.MaximumHp * 0.03);
+            if (monster.CurrentHp <= critical)
             {
-                Monster.SendTargetedClientMethod(PlayerScope.AislingsOnSameMap, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: {{=bYou fight well, now lets get serious!"));
-                Monster.Image = (ushort)Monster.Template.ImageVarience;
+                monster.SendTargetedClientMethod(PlayerScope.AislingsOnSameMap, c => c.SendPublicMessage(monster.Serial, PublicMessageType.Normal, $"{monster.Name}: {{=bYou fight well, now lets get serious!"));
+                monster.Image = (ushort)monster.Template.ImageVarience;
 
                 var objects = GetObjects(client.Aisling.Map, s => s.WithinRangeOf(client.Aisling), Get.AllButAislings).ToList();
                 objects.Reverse();
 
-                foreach (var aisling in Monster.AislingsNearby())
+                foreach (var aisling in monster.AislingsNearby())
                 {
                     if (objects.Count == 0) continue;
                     aisling.Client.SendVisibleEntities(objects);
@@ -1295,163 +1044,134 @@ public class WorldBossBahamut : MonsterScript
         base.OnDamaged(client, dmg, source);
     }
 
-    public override void OnItemDropped(WorldClient client, Item item)
-    {
-        if (item == null) return;
-        if (client == null) return;
-        client.Aisling.Inventory.RemoveFromInventory(client.Aisling.Client, item);
-        Monster.MonsterBank.Add(item);
-    }
-
-    private string LevelColor(WorldClient client)
-    {
-        if (Monster.Template.Level >= client.Aisling.Level + client.Aisling.AbpLevel + 30)
-            return "{=n???{=s";
-        if (Monster.Template.Level >= client.Aisling.Level + client.Aisling.AbpLevel + 15)
-            return $"{{=b{Monster.Template.Level}{{=s";
-        if (Monster.Template.Level >= client.Aisling.Level + client.Aisling.AbpLevel + 10)
-            return $"{{=c{Monster.Template.Level}{{=s";
-        if (Monster.Template.Level <= client.Aisling.Level + client.Aisling.AbpLevel - 30)
-            return $"{{=k{Monster.Template.Level}{{=s";
-        if (Monster.Template.Level <= client.Aisling.Level + client.Aisling.AbpLevel - 15)
-            return $"{{=j{Monster.Template.Level}{{=s";
-        return Monster.Template.Level <= client.Aisling.Level + client.Aisling.AbpLevel - 10 ? $"{{=i{Monster.Template.Level}{{=s" : $"{{=q{Monster.Template.Level}{{=s";
-    }
-
-    #region Actions
-
+    /// <summary>
+    /// Overwritten to allow distant facing checks
+    /// </summary>
     private void Bash()
     {
-        Monster.NextToTargetFirstAttack = false;
-        if (Monster.CantAttack) return;
-        if (Monster.NextTo((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y))
-        {
-            if (!Monster.Facing((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y, out var direction))
+        var monster = Monster;
+        if (monster is null || monster.CantAttack) return;
+
+        if (monster.Target != null)
+            if (Monster.NextTo((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y))
             {
-                Monster.Direction = (byte)direction;
-                Monster.Turn();
+                if (!monster.Facing((int)monster.Target.Pos.X, (int)monster.Target.Pos.Y, out var direction))
+                {
+                    monster.Direction = (byte)direction;
+                    monster.Turn();
+                }
+            }
+
+        var scripts = monster.SkillScripts;
+
+        // Training Dummy or other enemies who can't attack
+        if (scripts.Count == 0)
+            return;
+
+        var now = DateTime.UtcNow;
+        var attackSpeedMs = monster.Template.AttackSpeed;
+
+        for (var i = 0; i < scripts.Count; i++)
+        {
+            var s = scripts[i];
+            if (s is null)
+                continue;
+
+            var skill = s.Skill;
+            if (skill is null)
+                continue;
+
+            if (!skill.CanUse())
+                continue;
+
+            skill.InUse = true;
+
+            try
+            {
+                s.OnUse(monster);
+
+                skill.NextAvailableUse = now
+                    .AddSeconds(skill.Template.Cooldown)
+                    .AddMilliseconds(attackSpeedMs);
+            }
+            finally
+            {
+                skill.InUse = false;
             }
         }
-
-        // Training Dummy or other enemies who can't attack
-        if (Monster.SkillScripts.Count == 0) return;
-
-        var assails = Monster.SkillScripts.Where(i => i.Skill.CanUse());
-
-        Parallel.ForEach(assails, (s) =>
-        {
-            s.Skill.InUse = true;
-            s.OnUse(Monster);
-            {
-                var readyTime = DateTime.UtcNow;
-                readyTime = readyTime.AddSeconds(s.Skill.Template.Cooldown);
-                readyTime = readyTime.AddMilliseconds(Monster.Template.AttackSpeed);
-                s.Skill.NextAvailableUse = readyTime;
-            }
-            s.Skill.InUse = false;
-        });
     }
 
-    private void Ability()
-    {
-        if (Monster.CantAttack) return;
-        // Training Dummy or other enemies who can't attack
-        if (Monster.AbilityScripts.Count == 0) return;
-
-        if (Generator.RandomPercentPrecise() <= 0.70) return;
-        var abilityIdx = RandomNumberGenerator.GetInt32(Monster.AbilityScripts.Count);
-
-        if (Monster.AbilityScripts[abilityIdx] is null) return;
-        Monster.AbilityScripts[abilityIdx].OnUse(Monster);
-    }
-
-    private void CastSpell()
-    {
-        if (Monster.CantCast) return;
-        if (Monster.Target is null) return;
-        if (!Monster.Target.WithinMonsterSpellRangeOf(Monster)) return;
-
-        // Training Dummy or other enemies who can't attack
-        if (Monster.SpellScripts.Count == 0) return;
-
-        if (Generator.RandomPercentPrecise() <= 0.70) return;
-        var spellIdx = RandomNumberGenerator.GetInt32(Monster.SpellScripts.Count);
-
-        if (Monster.SpellScripts[spellIdx] is null) return;
-        Monster.SpellScripts[spellIdx].OnUse(Monster, Monster.Target);
-    }
-
+    /// <summary>
+    /// Overwritten to allow commentary while walking, and adjust targets based off of a wide-spread frontal cone attack
+    /// </summary>
     private void Walk()
     {
-        if (Monster.CantMove) return;
-        if (Monster.ThrownBack)
-            Monster.ThrownBack = false;
+        var monster = Monster;
+        if (monster is null || !monster.IsAlive)
+            return;
 
-        if (Monster.Target != null)
+        if (monster.ThrownBack)
+            monster.ThrownBack = false;
+
+        if (monster.Target != null)
         {
-            if (Monster.Target is not Aisling aisling)
+            if (monster.Target is not Aisling aisling)
             {
-                Monster.Wander();
+                monster.Wander();
                 return;
             }
 
             if (aisling.Dead || aisling.Skulled || !aisling.LoggedIn || Map.ID != aisling.Map.ID)
             {
-                Monster.ClearTarget();
-                Monster.Wander();
+                monster.ClearTarget();
+                monster.Wander();
                 return;
             }
 
-            if (Monster.GetFiveByFourRectInFront().Contains(Monster.Target))
+            if (monster.GetFiveByFourRectInFront().Contains(monster.Target))
             {
-                Monster.BashEnabled = true;
-                Monster.AbilityEnabled = true;
-                Monster.CastEnabled = true;
+                monster.BashEnabled = true;
+                monster.AbilityEnabled = true;
+                monster.CastEnabled = true;
 
                 var rand = Generator.RandomPercentPrecise();
                 if (rand >= 0.90)
                 {
-                    Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: {GhostChat[RandomNumberGenerator.GetInt32(Count + 1) % GhostChat.Length]}"));
+                    monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(monster.Serial, PublicMessageType.Normal, $"{monster.Name}: {GhostChat[RandomNumberGenerator.GetInt32(Count + 1) % GhostChat.Length]}"));
                 }
             }
-            else if (Monster.Target != null && Monster.NextTo((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y))
+            else if (monster.Target != null && monster.NextTo((int)monster.Target.Pos.X, (int)monster.Target.Pos.Y))
             {
-                Monster.NextToTarget();
+                monster.NextToTarget();
             }
             else
             {
-                Monster.AbilityEnabled = true;
+                monster.AbilityEnabled = true;
                 var rand = Generator.RandomPercentPrecise();
                 if (rand >= 0.80)
                 {
-                    Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Name}: {GhostChase[RandomNumberGenerator.GetInt32(RunCount + 1) % GhostChase.Length]}"));
+                    monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(monster.Serial, PublicMessageType.Normal, $"{monster.Name}: {GhostChase[RandomNumberGenerator.GetInt32(RunCount + 1) % GhostChase.Length]}"));
                 }
 
-                Monster.BeginPathFind();
+                monster.BeginPathFind();
             }
         }
         else
         {
-            Monster.BashEnabled = false;
-            Monster.AbilityEnabled = false;
-            Monster.CastEnabled = false;
-
-            Monster.PatrolIfSet();
+            monster.BashEnabled = false;
+            monster.AbilityEnabled = false;
+            monster.CastEnabled = false;
+            monster.PatrolIfSet();
         }
     }
-
-    #endregion
 }
 
 [Script("BB Shade")]
 public class BBShade : MonsterScript
 {
-    private readonly string _pirateSayings = "Yo Ho|All Hands!|Hoist the colors high!|Ye, ho! All together!|Never shall we die!";
-    private readonly string _pirateChase = "Dead men tell no tales...|If ye be brave or fool enough to face me|Haha!!";
-    private string[] Arggh => _pirateSayings.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
-    private string[] Arrrgh => _pirateChase.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
+    private readonly string _pirateSayings = "Yo Ho|All Hands!|Hoist the colors high!|Ye, ho! All together!|Never shall we die!|Dead men tell no tales..";
+    private string[] Arggh => _pirateSayings.Split(['|'], StringSplitOptions.RemoveEmptyEntries);
     private int Count => Arggh.Length;
-    private int RunCount => Arrrgh.Length;
     private bool _deathCry;
 
     public BBShade(Monster monster, Area map) : base(monster, map)
@@ -1461,24 +1181,45 @@ public class BBShade : MonsterScript
         Monster.MonsterBank = [];
     }
 
+    /// <summary>
+    /// Overwritten to "Ao Sith" remove debuffs if poisoned or vulnerable
+    /// </summary>
     public override void Update(TimeSpan elapsedTime)
     {
-        if (Monster is null) return;
-        if (!Monster.IsAlive) return;
+        var monster = Monster;
+        if (monster is null || !monster.IsAlive)
+            return;
 
-        var update = Monster.ObjectUpdateTimer.Update(elapsedTime);
+        var update = monster.ObjectUpdateTimer.Update(elapsedTime);
 
         try
         {
             if (update)
             {
-                Monster.ObjectUpdateEnabled = true;
-                Monster.UpdateTarget(false, true);
+                monster.ObjectUpdateEnabled = true;
+                monster.UpdateTarget();
             }
 
-            Monster.ObjectUpdateEnabled = false;
+            monster.ObjectUpdateEnabled = false;
 
-            if (Monster.IsConfused || Monster.IsFrozen || Monster.IsStopped || Monster.IsSleeping) return;
+            if (monster.IsVulnerable || monster.IsPoisoned)
+            {
+                if (!monster.VulnerabilityWatch.IsRunning)
+                    monster.VulnerabilityWatch.Start();
+
+                if (monster.VulnerabilityWatch.Elapsed.TotalMilliseconds > 3000)
+                {
+                    var pos = monster.Pos;
+                    var diceRoll = Generator.RandNumGen100();
+                    if (diceRoll >= 80)
+                        monster.SendAnimationNearby(75, new Position(pos));
+
+                    foreach (var debuff in monster.Debuffs.Values)
+                        debuff?.OnEnded(monster, debuff);
+
+                    monster.VulnerabilityWatch.Restart();
+                }
+            }
 
             MonsterState(elapsedTime);
         }
@@ -1489,239 +1230,156 @@ public class BBShade : MonsterScript
         }
     }
 
-    public override void OnClick(WorldClient client)
-    {
-        var colorA = "";
-        var colorB = "";
-        var colorLvl = LevelColor(client);
-        var halfHp = $"{{=s{Monster.CurrentHp}";
-        var halfGone = Monster.MaximumHp * .5;
-
-        colorA = Monster.OffenseElement switch
-        {
-            ElementManager.Element.Void => "{=n",
-            ElementManager.Element.Holy => "{=g",
-            ElementManager.Element.None => "{=s",
-            ElementManager.Element.Fire => "{=b",
-            ElementManager.Element.Water => "{=e",
-            ElementManager.Element.Wind => "{=c",
-            ElementManager.Element.Earth => "{=d",
-            ElementManager.Element.Terror => "{=j",
-            ElementManager.Element.Rage => "{=j",
-            ElementManager.Element.Sorrow => "{=j",
-            _ => colorA
-        };
-
-        colorB = Monster.DefenseElement switch
-        {
-            ElementManager.Element.Void => "{=n",
-            ElementManager.Element.Holy => "{=g",
-            ElementManager.Element.None => "{=s",
-            ElementManager.Element.Fire => "{=b",
-            ElementManager.Element.Water => "{=e",
-            ElementManager.Element.Wind => "{=c",
-            ElementManager.Element.Earth => "{=d",
-            ElementManager.Element.Terror => "{=j",
-            ElementManager.Element.Rage => "{=j",
-            ElementManager.Element.Sorrow => "{=j",
-            _ => colorB
-        };
-
-        if (Monster.CurrentHp < halfGone)
-        {
-            halfHp = $"{{=b{Monster.CurrentHp}{{=s";
-        }
-
-        if (Monster.Template.Level >= client.Aisling.Level + client.Aisling.AbpLevel + 30)
-        {
-            client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=c{Monster.Template.BaseName}: {{=aLv: {colorLvl} {{=aHP: {halfHp}/{Monster.MaximumHp}");
-            client.SendServerMessage(ServerMessageType.PersistentMessage, $"{{=c{Monster.Template.BaseName}: {{=aLv: {colorLvl}");
-            return;
-        }
-
-        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=c{Monster.Template.BaseName}: {{=aLv: {colorLvl} {{=aHP: {halfHp}/{Monster.MaximumHp}");
-        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=aSize: {{=s{Monster.Size} {{=aAC: {{=s{Monster.SealedAc} {{=aWill: {{=s{Monster.Will}");
-        client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=aO: {colorA}{Monster.OffenseElement} {{=aD: {colorB}{Monster.DefenseElement}");
-        client.SendServerMessage(ServerMessageType.PersistentMessage, $"{{=aLv: {colorLvl} {{=aO: {colorA}{Monster.OffenseElement} {{=aD: {colorB}{Monster.DefenseElement}");
-    }
-
+    /// <summary>
+    /// Overwritten to display death message, and issue "chest" reward
+    /// </summary>
     public override void OnDeath(WorldClient client = null)
     {
-        Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Template.BaseName}: See ya next time!!!!!"));
+        var monster = Monster;
+        if (monster is null) return;
+
+        monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(monster.Serial, PublicMessageType.Normal, $"{monster.Name}: See ya next time!!!!!"));
+
         Task.Delay(300).Wait();
 
-        foreach (var item in Monster.MonsterBank.Where(item => item != null))
+        var bank = monster.MonsterBank;
+        for (var i = 0; i < bank.Count; i++)
         {
-            item.Release(Monster, Monster.Position);
+            var item = bank[i];
+            if (item is null)
+                continue;
+
+            item.Release(monster, monster.Position);
             AddObject(item);
 
             foreach (var player in item.AislingsNearby())
-            {
                 item.ShowTo(player);
+        }
+
+        if (monster.Target is null)
+        {
+            Aisling found = null;
+
+            foreach (var kvp in monster.TargetRecord.TaggedAislings)
+            {
+                var p = kvp.Value;
+                if (p?.Map == monster.Map)
+                {
+                    found = p;
+                    break;
+                }
             }
-        }
 
-        if (Monster.Target is null)
-        {
-            var recordTuple = Monster.TargetRecord.TaggedAislings.Values.FirstOrDefault(p => p.Map == Monster.Map);
-            Monster.Target = recordTuple;
-        }
-
-        if (Monster.Target is Aisling aisling)
-        {
-            Monster.GenerateRewards(aisling);
-            Monster.UpdateKillCounters(Monster);
+            monster.Target = found;
         }
         else
         {
-            var sum = (uint)Random.Shared.Next(Monster.Template.Level * 13, Monster.Template.Level * 200);
+            var item = new Item();
+            item = item.Create(monster, "Strong Treasure Chest");
+            item?.Release(monster, monster.Position);
+        }
+
+        if (monster.Target is Aisling aisling)
+        {
+            monster.GenerateRewards(aisling);
+            Monster.UpdateKillCounters(monster);
+        }
+        else
+        {
+            var level = monster.Template.Level;
+            var sum = (uint)Random.Shared.Next(level * 25, level * 350);
 
             if (sum > 0)
-            {
-                Money.Create(Monster, sum, new Position(Monster.Pos.X, Monster.Pos.Y));
-            }
+                Money.Create(monster, sum, new Position(monster.Pos.X, monster.Pos.Y));
         }
 
-        Monster.Remove();
+        monster.Remove();
     }
 
+    /// <summary>
+    /// Overwritten to allow commentary while walking and casting spells, and see Invisible players
+    /// </summary>
     public override void MonsterState(TimeSpan elapsedTime)
     {
-        if (Monster.Target is not null && Monster.TargetRecord.TaggedAislings.IsEmpty &&
-            Monster.Template.EngagedWalkingSpeed > 0)
-            Monster.WalkTimer.Delay = TimeSpan.FromMilliseconds(Monster.Template.EngagedWalkingSpeed);
+        var monster = Monster;
+        if (monster is null || !monster.IsAlive)
+            return;
+
+        if (monster.Target is not null && monster.TargetRecord.TaggedAislings.IsEmpty &&
+            monster.Template.EngagedWalkingSpeed > 0)
+            monster.WalkTimer.Delay = TimeSpan.FromMilliseconds(monster.Template.EngagedWalkingSpeed);
         else
-            Monster.WalkTimer.Delay = TimeSpan.FromMilliseconds(Monster.Template.MovementSpeed);
+            monster.WalkTimer.Delay = TimeSpan.FromMilliseconds(monster.Template.MovementSpeed);
 
-        var assail = Monster.BashTimer.Update(elapsedTime);
-        var ability = Monster.AbilityTimer.Update(elapsedTime);
-        var cast = Monster.CastTimer.Update(elapsedTime);
-        var walk = Monster.WalkTimer.Update(elapsedTime);
+        var assail = monster.BashTimer.Update(elapsedTime);
+        var ability = monster.AbilityTimer.Update(elapsedTime);
+        var cast = monster.CastTimer.Update(elapsedTime);
+        var walk = monster.WalkTimer.Update(elapsedTime);
 
-        if (Monster.Target is Aisling aisling)
+        if (monster.Target is Aisling aisling)
         {
-            if (Monster.Target.IsWeakened && !_deathCry)
+            if (monster.Target.IsWeakened && !_deathCry)
             {
                 _deathCry = true;
-                Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Template.BaseName}: Hahahahaha!!"));
+                monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(monster.Serial, PublicMessageType.Normal, "Pirate Officer: Hahahahaha!!"));
             }
 
             if (aisling.Skulled || aisling.Dead || !aisling.LoggedIn)
             {
-                Monster.ClearTarget();
+                monster.ClearTarget();
 
-                if (Monster.CantMove || !Monster.WalkEnabled) return;
-                if (walk) Monster.PreWalkChecks();
+                if (monster.CantMove || !monster.WalkEnabled) return;
+                if (walk) monster.PreWalkChecks();
 
                 return;
             }
 
-            if (Monster.BashEnabled || Monster.NextToTargetFirstAttack)
-            {
-                if (!Monster.CantAttack)
-                    if (assail || Monster.NextToTargetFirstAttack) Bash();
-            }
+            if (monster.BashEnabled && assail && !monster.CantAttack)
+                monster.Bash();
 
-            if (Monster.AbilityEnabled)
-            {
-                if (!Monster.CantAttack)
-                    if (ability) Ability();
-            }
+            if (monster.AbilityEnabled && ability && !monster.CantAttack)
+                monster.Abilities();
 
-            if (Monster.CastEnabled)
-            {
-                if (!Monster.CantCast)
-                    if (cast) CastSpell();
-            }
+            if (monster.CastEnabled && cast && !monster.CantCast)
+                CastSpell();
         }
 
-        if (Monster.WalkEnabled)
+        if (monster.WalkEnabled && walk && !monster.CantMove)
         {
-            if (Monster.CantMove) return;
-            if (walk) Monster.PreWalkChecks();
+            monster.PreWalkChecks();
+            var rand = Generator.RandomPercentPrecise();
+            if (rand >= 0.80)
+            {
+                monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(monster.Serial, PublicMessageType.Normal, $"{monster.Name}: {Arggh[RandomNumberGenerator.GetInt32(Count + 1) % Arggh.Length]}"));
+            }
         }
 
         Monster.UpdateTarget(false, true);
     }
 
-    public override void OnItemDropped(WorldClient client, Item item)
-    {
-        if (item == null) return;
-        if (client == null) return;
-        client.Aisling.Inventory.RemoveFromInventory(client.Aisling.Client, item);
-        Monster.MonsterBank.Add(item);
-    }
-
-    private string LevelColor(WorldClient client)
-    {
-        if (Monster.Template.Level >= client.Aisling.Level + client.Aisling.AbpLevel + 30)
-            return "{=n???{=s";
-        if (Monster.Template.Level >= client.Aisling.Level + client.Aisling.AbpLevel + 15)
-            return $"{{=b{Monster.Template.Level}{{=s";
-        if (Monster.Template.Level >= client.Aisling.Level + client.Aisling.AbpLevel + 10)
-            return $"{{=c{Monster.Template.Level}{{=s";
-        if (Monster.Template.Level <= client.Aisling.Level + client.Aisling.AbpLevel - 30)
-            return $"{{=k{Monster.Template.Level}{{=s";
-        if (Monster.Template.Level <= client.Aisling.Level + client.Aisling.AbpLevel - 15)
-            return $"{{=j{Monster.Template.Level}{{=s";
-        return Monster.Template.Level <= client.Aisling.Level + client.Aisling.AbpLevel - 10 ? $"{{=i{Monster.Template.Level}{{=s" : $"{{=q{Monster.Template.Level}{{=s";
-    }
-
-    #region Actions
-
-    private void Bash()
-    {
-        Monster.NextToTargetFirstAttack = false;
-        if (Monster.CantAttack) return;
-        // Training Dummy or other enemies who can't attack
-        if (Monster.SkillScripts.Count == 0) return;
-
-        var assails = Monster.SkillScripts.Where(i => i.Skill.CanUse());
-
-        Parallel.ForEach(assails, (s) =>
-        {
-            s.Skill.InUse = true;
-            s.OnUse(Monster);
-            {
-                var readyTime = DateTime.UtcNow;
-                readyTime = readyTime.AddSeconds(s.Skill.Template.Cooldown);
-                readyTime = readyTime.AddMilliseconds(Monster.Template.AttackSpeed);
-                s.Skill.NextAvailableUse = readyTime;
-            }
-            s.Skill.InUse = false;
-        });
-    }
-
-    private void Ability()
-    {
-        if (Monster.CantAttack) return;
-        // Training Dummy or other enemies who can't attack
-        if (Monster.AbilityScripts.Count == 0) return;
-
-        if (Generator.RandomPercentPrecise() <= 0.70) return;
-        var abilityIdx = RandomNumberGenerator.GetInt32(Monster.AbilityScripts.Count);
-
-        if (Monster.AbilityScripts[abilityIdx] is null) return;
-        Monster.AbilityScripts[abilityIdx].OnUse(Monster);
-    }
-
     private void CastSpell()
     {
-        if (Monster.CantCast) return;
-        if (Monster.Target is null) return;
-        if (!Monster.Target.WithinMonsterSpellRangeOf(Monster)) return;
+        var monster = Monster;
+        if (monster is null || monster.CantCast)
+            return;
 
-        Monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(Monster.Serial, PublicMessageType.Normal, $"{Monster.Template.BaseName}: Dead men tell no tales!!"));
+        var target = monster.Target;
+        if (target is null) return;
+
+        if (!target.WithinMonsterSpellRangeOf(monster)) return;
+
+        monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(monster.Serial, PublicMessageType.Normal, $"{monster.Name}: Dead men tell no tales!!"));
+
+        var scripts = monster.SpellScripts;
 
         // Training Dummy or other enemies who can't attack
-        if (Monster.SpellScripts.Count == 0) return;
+        if (scripts.Count == 0) return;
 
-        if (Generator.RandomPercentPrecise() <= 0.70) return;
-        var spellIdx = RandomNumberGenerator.GetInt32(Monster.SpellScripts.Count);
+        if (Generator.RandomPercentPrecise() < 0.70)
+            return;
 
-        if (Monster.SpellScripts[spellIdx] is null) return;
-        Monster.SpellScripts[spellIdx].OnUse(Monster, Monster.Target);
+        var idx = RandomNumberGenerator.GetInt32(scripts.Count);
+        var script = scripts[idx];
+        script?.OnUse(monster, target);
     }
-
-    #endregion
 }
