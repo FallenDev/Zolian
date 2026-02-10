@@ -5,6 +5,7 @@ using Darkages.Common;
 using Darkages.Enums;
 using Darkages.Network.Client;
 using Darkages.Network.Server;
+using Darkages.Object;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Sprites.Entity;
@@ -1618,5 +1619,258 @@ public class DbSwarm : MonsterScript
             summoned.Direction = monster.Direction;
             AddObject(summoned);
         }
+    }
+}
+
+[Script("ChaosHydraLava")]
+public class ChaosHydraLava : MonsterScript
+{
+    private readonly string _aosdaSayings = "Teine remembers all who burn… and all who scream.|You step into my fire. Is mise an tine.|My heads speak with one voice, bás i ngach lasair.|Stone fears me. Water flees me. Flesh feeds me.";
+    private string[] GhostChat => _aosdaSayings.Split(['|'], StringSplitOptions.RemoveEmptyEntries);
+    private int Count => GhostChat.Length;
+    private bool _deathCry;
+    private bool _phaseOne;
+    private bool _phaseTwo;
+    private bool _phaseThree;
+
+    public ChaosHydraLava(Monster monster, Area map) : base(monster, map)
+    {
+        Monster.CastTimer.RandomizedVariance = 60;
+        Monster.AbilityTimer.RandomizedVariance = 50;
+        Monster.MonsterBank = [];
+    }
+
+    /// <summary>
+    /// Overwritten to "Ao Sith" remove debuffs if poisoned or vulnerable; Adds UpdatePhases() 
+    /// to spawn adds at 75%, 50%, and 25% health thresholds
+    /// </summary>
+    public override void Update(TimeSpan elapsedTime)
+    {
+        var monster = Monster;
+        if (monster is null || !monster.IsAlive)
+            return;
+
+        var update = monster.ObjectUpdateTimer.Update(elapsedTime);
+
+        try
+        {
+            if (update)
+            {
+                monster.ObjectUpdateEnabled = true;
+                monster.UpdateTarget();
+                UpdatePhases();
+            }
+
+            monster.ObjectUpdateEnabled = false;
+
+            if (monster.IsVulnerable || monster.IsPoisoned)
+            {
+                if (!monster.VulnerabilityWatch.IsRunning)
+                    monster.VulnerabilityWatch.Start();
+
+                if (monster.VulnerabilityWatch.Elapsed.TotalMilliseconds > 3000)
+                {
+                    var pos = monster.Pos;
+                    var diceRoll = Generator.RandNumGen100();
+                    if (diceRoll >= 80)
+                        monster.SendAnimationNearby(75, new Position(pos));
+
+                    foreach (var debuff in monster.Debuffs.Values)
+                        debuff?.OnEnded(monster, debuff);
+
+                    monster.VulnerabilityWatch.Restart();
+                }
+            }
+
+            MonsterState(elapsedTime);
+        }
+        catch (Exception e)
+        {
+            ServerSetup.EventsLogger($"{e}\nUnhandled exception in {GetType().Name}.{nameof(Update)}");
+            SentrySdk.CaptureException(e);
+        }
+    }
+
+    private void UpdatePhases()
+    {
+        var monster = Monster;
+        if (monster is null || !monster.IsAlive)
+            return;
+
+        if (monster.CurrentHp <= monster.MaximumHp * 0.75 && !_phaseOne)
+        {
+            monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(monster.Serial, PublicMessageType.Shout, $"{monster.Name}: Every age ends in fire. I am merely patient."));
+            monster.Image = 206; // Two-headed hydra
+            monster.DefenseElement = ElementManager.Element.Sorrow;
+            monster.UpdateAddAndRemove();
+            _phaseOne = true;
+        }
+
+        if (monster.CurrentHp <= monster.MaximumHp * 0.50 && !_phaseTwo)
+        {
+            monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(monster.Serial, PublicMessageType.Shout, $"{monster.Name}: The world was forged once. I am what remains."));
+            monster.Image = 315; // One-headed hydra
+            monster.OffenseElement = ElementManager.Element.Sorrow;
+            monster.UpdateAddAndRemove();
+            _phaseTwo = true;
+        }
+
+        if (monster.CurrentHp <= monster.MaximumHp * 0.25 && !_phaseThree)
+        {
+            monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(monster.Serial, PublicMessageType.Shout, $"{monster.Name}: Fire is not chaos. Fire is memory."));
+            monster.OffenseElement = ElementManager.Element.Rage;
+            monster.DefenseElement = ElementManager.Element.Rage;
+            _phaseThree = true;
+        }
+    }
+
+    /// <summary>
+    /// Overwritten to display a death message
+    /// </summary>
+    public override void OnDeath(WorldClient client = null)
+    {
+        var monster = Monster;
+        if (monster is null) return;
+
+        monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(monster.Serial, PublicMessageType.Normal, $"{monster.Name}: Remember my name when the fire takes you."));
+
+        Task.Delay(300).Wait();
+
+        var bank = monster.MonsterBank;
+        for (var i = 0; i < bank.Count; i++)
+        {
+            var item = bank[i];
+            if (item is null)
+                continue;
+
+            item.Release(monster, monster.Position);
+            AddObject(item);
+
+            foreach (var player in item.AislingsNearby())
+                item.ShowTo(player);
+        }
+
+        if (monster.Target is null)
+        {
+            Aisling found = null;
+
+            foreach (var kvp in monster.TargetRecord.TaggedAislings)
+            {
+                var p = kvp.Value;
+                if (p?.Map == monster.Map)
+                {
+                    found = p;
+                    break;
+                }
+            }
+
+            monster.Target = found;
+        }
+
+        if (monster.Target is Aisling aisling)
+        {
+            monster.GenerateRewards(aisling);
+            Monster.UpdateKillCounters(monster);
+        }
+        else
+        {
+            var level = monster.Template.Level;
+            var sum = (uint)Random.Shared.Next(level * 13, level * 200);
+
+            if (sum > 0)
+                Money.Create(monster, sum, new Position(monster.Pos.X, monster.Pos.Y));
+        }
+
+        monster.Remove();
+    }
+
+    /// <summary>
+    /// Overwritten to allow commentary while walking, casting spells, and allow to see invisible players
+    /// </summary>
+    public override void MonsterState(TimeSpan elapsedTime)
+    {
+        var monster = Monster;
+        if (monster is null || !monster.IsAlive)
+            return;
+
+        if (monster.Target is not null && monster.TargetRecord.TaggedAislings.IsEmpty &&
+            monster.Template.EngagedWalkingSpeed > 0)
+            monster.WalkTimer.Delay = TimeSpan.FromMilliseconds(monster.Template.EngagedWalkingSpeed);
+        else
+            monster.WalkTimer.Delay = TimeSpan.FromMilliseconds(monster.Template.MovementSpeed);
+
+        var assail = monster.BashTimer.Update(elapsedTime);
+        var ability = monster.AbilityTimer.Update(elapsedTime);
+        var cast = monster.CastTimer.Update(elapsedTime);
+        var walk = monster.WalkTimer.Update(elapsedTime);
+
+        if (monster.Target is Aisling aisling)
+        {
+            if (monster.Target.IsWeakened && !_deathCry)
+            {
+                _deathCry = true;
+                monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(monster.Serial, PublicMessageType.Normal, $"{monster.Name}: Enough. Éiríonn an tine fiáin!"));
+            }
+
+            if (aisling.Skulled || aisling.Dead || !aisling.LoggedIn)
+            {
+                monster.ClearTarget();
+
+                if (monster.Template.MoodType.MoodFlagIsSet(MoodQualifer.Neutral))
+                    monster.Aggressive = false;
+
+                if (monster.CantMove || !monster.WalkEnabled) return;
+                if (walk) monster.PreWalkChecks();
+
+                return;
+            }
+
+            if (monster.BashEnabled && assail && !monster.CantAttack)
+                monster.Bash();
+
+            if (monster.AbilityEnabled && ability && !monster.CantAttack)
+                monster.Abilities();
+
+            if (monster.CastEnabled && cast && !monster.CantCast)
+                CastSpell();
+        }
+
+        if (monster.WalkEnabled && walk && !monster.CantMove)
+        {
+            monster.PreWalkChecks();
+            var rand = Generator.RandomPercentPrecise();
+            if (rand >= 0.93)
+            {
+                monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(monster.Serial, PublicMessageType.Normal, $"{monster.Name}: {GhostChat[RandomNumberGenerator.GetInt32(Count + 1) % GhostChat.Length]}"));
+            }
+        }
+
+        monster.UpdateTarget(false, true);
+    }
+
+    private void CastSpell()
+    {
+        var monster = Monster;
+        if (monster is null || monster.CantCast)
+            return;
+
+        var target = monster.Target;
+        if (target is null) return;
+
+        if (!target.WithinMonsterSpellRangeOf(monster)) return;
+
+        monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(monster.Serial, PublicMessageType.Normal, $"{monster.Name}: One head watches. One judges. One burns."));
+
+        var scripts = monster.SpellScripts;
+
+        // Training Dummy or other enemies who can't attack
+        if (scripts.Count == 0) return;
+
+        if (Generator.RandomPercentPrecise() < 0.50)
+            return;
+
+        var idx = RandomNumberGenerator.GetInt32(scripts.Count);
+        var script = scripts[idx];
+        script?.OnUse(monster, target);
     }
 }

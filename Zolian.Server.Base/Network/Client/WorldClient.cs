@@ -64,6 +64,7 @@ public class WorldClient : WorldClientBase, IWorldClient
     private readonly SoundCoalescer _soundCoalescer;
     private readonly HealthBarCoalescer _healthBarCoalescer;
     private readonly BodyAnimationCoalescer _bodyAnimationCoalescer;
+    private int _updateInFlight;
 
     public readonly WorldServerTimer SkillSpellTimer = new(TimeSpan.FromMilliseconds(1000));
     public readonly Stopwatch CooldownControl = new();
@@ -91,6 +92,8 @@ public class WorldClient : WorldClientBase, IWorldClient
     private readonly Stopwatch _deathRattleSw = Stopwatch.StartNew();
 
     public Aisling Aisling { get; set; }
+    public bool TryBeginUpdate() => Interlocked.CompareExchange(ref _updateInFlight, 1, 0) == 0;
+    public void EndUpdate() => Volatile.Write(ref _updateInFlight, 0);
     public bool MapUpdating { get; set; }
     public bool MapOpen { get; set; }
     public DateTime BoardOpened { get; set; }
@@ -173,12 +176,12 @@ public class WorldClient : WorldClientBase, IWorldClient
         _ = Task.Run(ProcessPlayerWorkQueue);
     }
 
-    public Task Update()
+    public void Update()
     {
         if (Aisling is not { LoggedIn: true })
-            return Task.CompletedTask;
+            return;
 
-        CheckInvisible(Aisling, _invisibleSw);
+        CheckInvisible(_invisibleSw);
         EquipLantern(_lanternSw);
         CheckDayDreaming(_dayDreamSw);
         CheckForMail(_mailSw);
@@ -187,32 +190,37 @@ public class WorldClient : WorldClientBase, IWorldClient
         HandleDeathRattleRefresh(_deathRattleSw);
         HandleBadTrades();
         HandleSecOffenseEle();
-
-        return Task.CompletedTask;
     }
 
-    private void CheckInvisible(Aisling player, Stopwatch sw)
+    private void CheckInvisible(Stopwatch sw)
     {
-        if (player.IsInvisible) return;
+        if (Aisling.IsInvisible) return;
         if (sw.ElapsedMilliseconds < 50) return;
         sw.Restart();
 
         Buff hide = null;
         Buff shadowfade = null;
+        Buff blend = null;
 
-        foreach (var buff in player.Buffs.Values)
+        foreach (var buff in Aisling.Buffs.Values)
         {
             if (buff is null) continue;
 
-            if (hide is null && buff.Name is "Hide") hide = buff;
-            else if (shadowfade is null && buff.Name is "Shadowfade") shadowfade = buff;
+            var name = buff.Name;
+            if (hide is null && string.Equals(name, "Hide", StringComparison.Ordinal))
+                hide = buff;
+            else if (shadowfade is null && string.Equals(name, "Shadowfade", StringComparison.Ordinal))
+                shadowfade = buff;
+            else if (blend is null && string.Equals(name, "Blend", StringComparison.Ordinal))
+                blend = buff;
 
-            if (hide is not null && shadowfade is not null)
+            if (hide is not null && shadowfade is not null && blend is not null)
                 break;
         }
 
-        hide?.OnEnded(player, hide);
-        shadowfade?.OnEnded(player, shadowfade);
+        hide?.OnEnded(Aisling, hide);
+        shadowfade?.OnEnded(Aisling, shadowfade);
+        blend?.OnEnded(Aisling, blend);
     }
 
     private void EquipLantern(Stopwatch sw)
@@ -220,17 +228,25 @@ public class WorldClient : WorldClientBase, IWorldClient
         if (sw.ElapsedMilliseconds < 1500) return;
         sw.Restart();
 
-        if (Aisling.Map == null) return;
+        var map = Aisling.Map;
+        if (map is null)
+            return;
 
-        if (Aisling.Map.Flags.MapFlagIsSet(MapFlags.Darkness))
+        var isDark = map.Flags.MapFlagIsSet(MapFlags.Darkness);
+
+        if (isDark)
         {
-            if (Aisling.Lantern == 2) return;
+            if (Aisling.Lantern == 2)
+                return;
+
             Aisling.Lantern = 2;
             SendDisplayAisling(Aisling);
             return;
         }
 
-        if (Aisling.Lantern != 2) return;
+        if (Aisling.Lantern != 2)
+            return;
+
         Aisling.Lantern = 0;
         SendDisplayAisling(Aisling);
     }
@@ -288,12 +304,12 @@ public class WorldClient : WorldClientBase, IWorldClient
 
     private void DisplayQualityPillar(Stopwatch sw)
     {
-        if (sw.ElapsedMilliseconds < 100) return;
+        if (sw.ElapsedMilliseconds < 125) return;
         sw.Restart();
 
         if (!Aisling.GameSettings.GroundQualities) return;
 
-        var objects = ObjectManager.GetObjects<Item>(Aisling.Map, item => item.Template.Enchantable);
+        var objects = ObjectManager.GetObjects<Item>(Aisling.Map, item => item.Template.Enchantable && item.WithinRangeOf(Aisling, 13));
         if (objects.IsEmpty) return;
 
         try
@@ -301,24 +317,20 @@ public class WorldClient : WorldClientBase, IWorldClient
             foreach (var entry in objects.Values)
             {
                 if (entry is null) continue;
+                var pos = entry.Position;
 
-                switch (entry.ItemQuality)
+                ushort anim = entry.ItemQuality switch
                 {
-                    case Item.Quality.Epic:
-                        Aisling.Client.SendAnimation(397, new Position(entry.Position.X, entry.Position.Y));
-                        break;
-                    case Item.Quality.Legendary:
-                        Aisling.Client.SendAnimation(398, new Position(entry.Position.X, entry.Position.Y));
-                        break;
-                    case Item.Quality.Forsaken:
-                        Aisling.Client.SendAnimation(399, new Position(entry.Position.X, entry.Position.Y));
-                        break;
-                    case Item.Quality.Mythic:
-                    case Item.Quality.Primordial:
-                    case Item.Quality.Transcendent:
-                        Aisling.Client.SendAnimation(400, new Position(entry.Position.X, entry.Position.Y));
-                        break;
-                }
+                    Item.Quality.Epic => 397,
+                    Item.Quality.Legendary => 398,
+                    Item.Quality.Forsaken => 399,
+                    Item.Quality.Mythic or Item.Quality.Primordial or Item.Quality.Transcendent => 400,
+                    _ => 0
+                };
+
+                if (anim == 0) continue;
+
+                Aisling.Client.SendAnimation(anim, new Position(pos.X, pos.Y));
             }
         }
         catch { }
@@ -354,12 +366,24 @@ public class WorldClient : WorldClientBase, IWorldClient
     private void HandleDeathRattleRefresh(Stopwatch sw)
     {
         if (!Aisling.DeathRattle)
-            sw.Restart();
+        {
+            if (sw.IsRunning)
+                sw.Reset();
+
+            return;
+        }
+
+        if (!sw.IsRunning)
+            sw.Start();
 
         if (sw.ElapsedMilliseconds < 300000) return;
         Aisling.DeathRattle = false;
+        sw.Reset();
     }
 
+    /// <summary>
+    /// Method to handle trades when a player leaves the range or map of another player, or disconnects
+    /// </summary>
     private void HandleBadTrades()
     {
         if (Aisling.Exchange?.Trader == null) return;
@@ -367,6 +391,10 @@ public class WorldClient : WorldClientBase, IWorldClient
         Aisling.CancelExchange();
     }
 
+    /// <summary>
+    /// Method to handle edge case where buff "Atlantean Weapon" is on a player
+    /// Prevents an item in the shield slot from overwriting the secondary offensive element
+    /// </summary>
     private void HandleSecOffenseEle()
     {
         if (Aisling.IsEnhancingSecondaryOffense) return;

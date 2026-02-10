@@ -5,6 +5,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Numerics;
 using System.Text;
+using System.Threading.Channels;
 
 using Chaos.Cryptography;
 using Chaos.Networking.Abstractions;
@@ -65,7 +66,22 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
     private const int GroundItemsIntervalMs = 60000;  // 60 seconds
     private const int GroundMoneyIntervalMs = 60000;  // 60 seconds
 
+    // Expose logged-in players for server components and scripts
     public IEnumerable<Aisling> Aislings => ClientRegistry.Where(c => c is { Aisling.LoggedIn: true }).Select(c => c.Aisling);
+
+    // The number of concurrent client update workers
+    private readonly int _clientWorkerCount = 12;
+
+    // Client update queue and workers for processing player updates in parallel without blocking the main server loop
+    private readonly Channel<Aisling> _clientUpdateQueue =
+        Channel.CreateBounded<Aisling>(new BoundedChannelOptions(4096)
+        {
+            FullMode = BoundedChannelFullMode.DropOldest,
+            SingleWriter = true, // tick loop only
+            SingleReader = false // _clientWorkerCount
+        });
+
+    private Task[] _clientWorkers;
 
     public WorldServer(
         IClientRegistry<IWorldClient> clientRegistry,
@@ -102,6 +118,14 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
 
         using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken);
         var ct = linkedCts.Token;
+
+        // Start client worker tasks
+        _clientWorkers = new Task[_clientWorkerCount];
+
+        for (var i = 0; i < _clientWorkers.Length; i++)
+        {
+            _clientWorkers[i] = Task.Run(() => ClientUpdateWorkerAsync(ct), ct);
+        }
 
         try
         {
@@ -142,7 +166,19 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
                 try
                 {
                     // Phase 1: low-latency player work
-                    await UpdateClientsAsync(ct).ConfigureAwait(false);
+                    //
+                    // IMPORTANT:
+                    // This does NOT execute client updates directly.
+                    // Each tick declares which clients are *eligible* to update at this time.
+                    //
+                    // Execution is handled asynchronously by the client update workers.
+                    // The per-client in-flight gate ensures we never overlap updates for the same client,
+                    // calling this every tick is intentional and safe.
+                    //
+                    // Separating "when updates are allowed" (time-based) from
+                    // "when updates actually run" (throughput-based) keeps the world tick stable
+                    // even when individual clients are slow.
+                    EnqueueClientUpdates();
 
                     // Phase 2: maps & traps (still at GameSpeed cadence)
                     UpdateMaps(dt);
@@ -231,60 +267,109 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
         }
     }
 
-    private async Task UpdateClientsAsync(CancellationToken ct)
+    /// <summary>
+    /// Declares client update *eligibility* for the current server tick.
+    ///
+    /// This method is intentionally called every tick.
+    /// It does not execute client updates directly
+    /// Clients are only enqueued if they are not already updating
+    /// (guarded by a per-client in-flight gate)
+    ///
+    /// This allows:
+    /// - time-based update cadence (GameSpeed)
+    /// - independent client lag (slow clients don't stall the tick)
+    /// - bounded execution via the worker pool
+    /// </summary>
+    private void EnqueueClientUpdates()
     {
-        // Snapshot once to avoid concurrent modifications during update
         var players = Aislings.ToArray();
         if (players.Length == 0)
             return;
 
-        // Bounded concurrency prevents threadpool starvation / oversubscription
-        var maxDop = Environment.ProcessorCount;
-        using var gate = new SemaphoreSlim(maxDop, maxDop);
-
-        var tasks = new Task[players.Length];
-
+        // Non-blocking: enqueue if possible, otherwise drop by policy
         for (var i = 0; i < players.Length; i++)
         {
             var player = players[i];
-            tasks[i] = ProcessClientSafelyAsync(player, gate, ct);
-        }
+            var client = player?.Client;
+            if (client is null)
+                continue;
 
-        await Task.WhenAll(tasks).ConfigureAwait(false);
+            if (!player.LoggedIn)
+            {
+                ClientRegistry.TryRemove(client.Id, out _);
+                continue;
+            }
+
+            // Dedup: if this client is still processing a prior update, skip this tick
+            if (!client.TryBeginUpdate())
+                continue;
+
+            // If the queue is full, TryWrite will fail OR DropOldest will make room
+            if (!_clientUpdateQueue.Writer.TryWrite(player))
+                client.EndUpdate();
+        }
     }
 
-    private async Task ProcessClientSafelyAsync(Aisling player, SemaphoreSlim gate, CancellationToken ct)
+    /// <summary>
+    /// Continuously processes scheduled client updates.
+    ///
+    /// This loop is throughput driven, not tick-driven:
+    /// - It blocks efficiently when no work exists.
+    /// - When work arrives, it drains the queue as fast as possible.
+    ///
+    /// The server tick controls *when* clients may update.
+    /// This worker controls *how fast* those updates are executed.
+    ///
+    /// Client updates are synchronous and non-overlapping per client
+    /// (enforced by the in-flight gate)
+    /// </summary>
+    private async Task ClientUpdateWorkerAsync(CancellationToken ct)
     {
-        if (player?.Client == null)
-            return;
+        var reader = _clientUpdateQueue.Reader;
 
-        await gate.WaitAsync(ct).ConfigureAwait(false);
+        while (!ct.IsCancellationRequested)
+        {
+            try
+            {
+                await reader.WaitToReadAsync(ct).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException)
+            {
+                break;
+            }
+
+            while (reader.TryRead(out Aisling player))
+                ProcessClientUpdate(player);
+        }
+    }
+
+    private void ProcessClientUpdate(Aisling player)
+    {
+        var client = player?.Client;
 
         try
         {
+            if (client is null)
+                return;
+
             if (!player.LoggedIn)
             {
-                ClientRegistry.TryRemove(player.Client.Id, out _);
+                ClientRegistry.TryRemove(client.Id, out _);
                 return;
             }
 
-            await player.Client.Update().ConfigureAwait(false);
+            client.Update();
         }
         catch (Exception ex)
         {
             SentrySdk.CaptureException(ex);
-
-            try
-            {
-                player.Client.CloseTransport();
-            }
-            catch { }
-
-            ClientRegistry.TryRemove(player.Client.Id, out _);
+            try { client.CloseTransport(); } catch { }
+            ClientRegistry.TryRemove(client.Id, out _);
         }
         finally
         {
-            gate.Release();
+            // Release per-client in-flight gate if you used TryBeginUpdate() pre-enqueue
+            client?.EndUpdate();
         }
     }
 
