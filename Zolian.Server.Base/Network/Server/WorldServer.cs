@@ -5,7 +5,6 @@ using System.Net;
 using System.Net.Sockets;
 using System.Numerics;
 using System.Text;
-using System.Threading.Channels;
 
 using Chaos.Cryptography;
 using Chaos.Networking.Abstractions;
@@ -69,20 +68,6 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
     // Expose logged-in players for server components and scripts
     public IEnumerable<Aisling> Aislings => ClientRegistry.Where(c => c is { Aisling.LoggedIn: true }).Select(c => c.Aisling);
 
-    // The number of concurrent client update workers
-    private readonly int _clientWorkerCount = 12;
-
-    // Client update queue and workers for processing player updates in parallel without blocking the main server loop
-    private readonly Channel<Aisling> _clientUpdateQueue =
-        Channel.CreateBounded<Aisling>(new BoundedChannelOptions(4096)
-        {
-            FullMode = BoundedChannelFullMode.DropOldest,
-            SingleWriter = true, // tick loop only
-            SingleReader = false // _clientWorkerCount
-        });
-
-    private Task[] _clientWorkers;
-
     public WorldServer(
         IClientRegistry<IWorldClient> clientRegistry,
         IClientFactory<WorldClient> clientProvider,
@@ -112,125 +97,50 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
 
     #region Server Init
 
+    /// <summary>
+    /// Startup and supervision of the main server loop, which is responsible for:
+    /// - Handling client connections and disconnections
+    /// - Processing player components and game logic
+    /// - Processing world updates related to monsters / maps / items / mundanes
+    /// - Managing server components and subsystems
+    /// </summary>
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         _ = base.ExecuteAsync(stoppingToken);
+        ServerSetup.Instance.Running = true;
 
-        using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken);
-        var ct = linkedCts.Token;
+        UpdateComponentsRoutine();
 
-        // Start client worker tasks
-        _clientWorkers = new Task[_clientWorkerCount];
+        var tasks = new Task[]
+            {
+                ClientsLoopAsync(stoppingToken),
+                MapsLoopAsync(stoppingToken),
+                TrapsLoopAsync(stoppingToken),
+                MonstersLoopAsync(stoppingToken),
+                MundanesLoopAsync(stoppingToken),
+                GroundItemsLoopAsync(stoppingToken),
+                GroundMoneyLoopAsync(stoppingToken)
+            };
 
-        for (var i = 0; i < _clientWorkers.Length; i++)
-        {
-            _clientWorkers[i] = Task.Run(() => ClientUpdateWorkerAsync(ct), ct);
-        }
+        ServerSetup.EventsLogger("Server loops started!");
 
         try
         {
-            ServerSetup.Instance.Running = true;
-
-            // Components keep their own internal loops
-            UpdateComponentsRoutine();
-
-            // Tick cadence: player loop frequency (GameSpeed)
-            var tickInterval = TimeSpan.FromMilliseconds(GameSpeed);
-            using var timer = new PeriodicTimer(tickInterval);
-
-            // Accumulators preserve per-system update rates
-            var monstersAccMs = 0;
-            var mundanesAccMs = 0;
-            var groundItemsAccMs = 0;
-            var groundMoneyAccMs = 0;
-
-            // Use high resolution time to compute dt
-            var lastTick = Stopwatch.GetTimestamp();
-
-            while (await timer.WaitForNextTickAsync(ct).ConfigureAwait(false))
-            {
-                if (!ServerSetup.Instance.Running)
-                    continue;
-
-                var now = Stopwatch.GetTimestamp();
-                var dt = Stopwatch.GetElapsedTime(lastTick, now);
-                lastTick = now;
-
-                // Convert dt to ms for accumulators
-                var dtMs = (int)Math.Clamp(dt.TotalMilliseconds, 0, 10_000);
-                monstersAccMs += dtMs;
-                mundanesAccMs += dtMs;
-                groundItemsAccMs += dtMs;
-                groundMoneyAccMs += dtMs;
-
-                try
-                {
-                    // Phase 1: low-latency player work
-                    //
-                    // IMPORTANT:
-                    // This does NOT execute client updates directly.
-                    // Each tick declares which clients are *eligible* to update at this time.
-                    //
-                    // Execution is handled asynchronously by the client update workers.
-                    // The per-client in-flight gate ensures we never overlap updates for the same client,
-                    // calling this every tick is intentional and safe.
-                    //
-                    // Separating "when updates are allowed" (time-based) from
-                    // "when updates actually run" (throughput-based) keeps the world tick stable
-                    // even when individual clients are slow.
-                    EnqueueClientUpdates();
-
-                    // Phase 2: maps & traps (still at GameSpeed cadence)
-                    UpdateMaps(dt);
-                    CheckTraps(dt);
-
-                    // Phase 3: slower systems, gated by their intervals
-                    if (monstersAccMs >= MonstersIntervalMs)
-                    {
-                        var monsterDt = TimeSpan.FromMilliseconds(monstersAccMs);
-                        monstersAccMs = 0;
-                        UpdateMonsters(monsterDt);
-                    }
-
-                    if (mundanesAccMs >= MundanesIntervalMs)
-                    {
-                        var mundaneDt = TimeSpan.FromMilliseconds(mundanesAccMs);
-                        mundanesAccMs = 0;
-                        UpdateMundanes(mundaneDt);
-                    }
-
-                    if (groundItemsAccMs >= GroundItemsIntervalMs)
-                    {
-                        groundItemsAccMs = 0;
-                        UpdateGroundItems();
-                    }
-
-                    if (groundMoneyAccMs >= GroundMoneyIntervalMs)
-                    {
-                        groundMoneyAccMs = 0;
-                        UpdateGroundMoney();
-                    }
-                }
-                catch (OperationCanceledException) when (ct.IsCancellationRequested)
-                {
-                    // Normal shutdown
-                    break;
-                }
-                catch (Exception ex)
-                {
-                    SentrySdk.CaptureException(ex);
-                }
-            }
+            await Task.WhenAll(tasks).ConfigureAwait(false);
         }
-        catch (OperationCanceledException)
+        catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
         {
             // Normal shutdown
+            ServerSetup.Instance.Running = false;
         }
         catch (Exception ex)
         {
-            ServerSetup.ConnectionLogger(ex.Message, LogLevel.Error);
-            ServerSetup.ConnectionLogger(ex.StackTrace, LogLevel.Error);
             SentrySdk.CaptureException(ex);
+            ServerSetup.EventsLogger($"ERR ExecuteAsync crashed: {ex.GetType().Name} {ex.Message}", LogLevel.Critical);
+            ServerSetup.Instance.Running = false;
+
+            // In case of an unexpected exception, log and exit to allow for a clean restart
+            Environment.Exit(0);
         }
     }
 
@@ -267,109 +177,200 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
         }
     }
 
-    /// <summary>
-    /// Declares client update *eligibility* for the current server tick.
-    ///
-    /// This method is intentionally called every tick.
-    /// It does not execute client updates directly
-    /// Clients are only enqueued if they are not already updating
-    /// (guarded by a per-client in-flight gate)
-    ///
-    /// This allows:
-    /// - time-based update cadence (GameSpeed)
-    /// - independent client lag (slow clients don't stall the tick)
-    /// - bounded execution via the worker pool
-    /// </summary>
-    private void EnqueueClientUpdates()
+    private async Task ClientsLoopAsync(CancellationToken ct)
     {
+        using var timer = new PeriodicTimer(TimeSpan.FromMilliseconds(GameSpeed));
+
+        while (ServerSetup.Instance.Running && await timer.WaitForNextTickAsync(ct).ConfigureAwait(false))
+        {
+            try
+            {
+                UpdateClientsTick();
+            }
+            catch (Exception ex)
+            {
+                SentrySdk.CaptureException(ex);
+            }
+        }
+    }
+
+    private static async Task MapsLoopAsync(CancellationToken ct)
+    {
+        using var timer = new PeriodicTimer(TimeSpan.FromMilliseconds(GameSpeed));
+
+        var last = Stopwatch.GetTimestamp();
+
+        while (ServerSetup.Instance.Running && await timer.WaitForNextTickAsync(ct).ConfigureAwait(false))
+        {
+            var now = Stopwatch.GetTimestamp();
+            var dt = Stopwatch.GetElapsedTime(last, now);
+            last = now;
+            // Allow slightly longer ticks for map updates to prevent timing issues, but hard clamp edge cases
+            dt = ClampDt(dt, GameSpeed * 2);
+
+            try
+            {
+                UpdateMaps(dt);
+            }
+            catch (Exception ex)
+            {
+                SentrySdk.CaptureException(ex);
+            }
+        }
+    }
+
+    private async Task TrapsLoopAsync(CancellationToken ct)
+    {
+        using var timer = new PeriodicTimer(TimeSpan.FromMilliseconds(GameSpeed));
+
+        var last = Stopwatch.GetTimestamp();
+
+        while (ServerSetup.Instance.Running && await timer.WaitForNextTickAsync(ct).ConfigureAwait(false))
+        {
+            var now = Stopwatch.GetTimestamp();
+            var dt = Stopwatch.GetElapsedTime(last, now);
+            last = now;
+            dt = ClampDt(dt, GameSpeed);
+
+            try
+            {
+                CheckTraps(dt);
+            }
+            catch (Exception ex)
+            {
+                SentrySdk.CaptureException(ex);
+            }
+        }
+    }
+
+    private static async Task MonstersLoopAsync(CancellationToken ct)
+    {
+        using var timer = new PeriodicTimer(TimeSpan.FromMilliseconds(MonstersIntervalMs));
+
+        var last = Stopwatch.GetTimestamp();
+
+        while (ServerSetup.Instance.Running && await timer.WaitForNextTickAsync(ct).ConfigureAwait(false))
+        {
+            var now = Stopwatch.GetTimestamp();
+            var dt = Stopwatch.GetElapsedTime(last, now);
+            last = now;
+            // Allow longer ticks for monster updates to prevent timing issues, but hard clamp edge cases
+            dt = ClampDt(dt, MonstersIntervalMs * 3);
+
+            try
+            {
+                UpdateMonsters(dt);
+            }
+            catch (Exception ex)
+            {
+                SentrySdk.CaptureException(ex);
+            }
+        }
+    }
+
+    private static async Task MundanesLoopAsync(CancellationToken ct)
+    {
+        using var timer = new PeriodicTimer(TimeSpan.FromMilliseconds(MundanesIntervalMs));
+
+        var last = Stopwatch.GetTimestamp();
+
+        while (ServerSetup.Instance.Running && await timer.WaitForNextTickAsync(ct).ConfigureAwait(false))
+        {
+            var now = Stopwatch.GetTimestamp();
+            var dt = Stopwatch.GetElapsedTime(last, now);
+            last = now;
+            dt = ClampDt(dt, MundanesIntervalMs);
+
+            try
+            {
+                UpdateMundanes(dt);
+            }
+            catch (Exception ex)
+            {
+                SentrySdk.CaptureException(ex);
+            }
+        }
+    }
+
+    private static async Task GroundItemsLoopAsync(CancellationToken ct)
+    {
+        using var timer = new PeriodicTimer(TimeSpan.FromMilliseconds(60000));
+
+        while (ServerSetup.Instance.Running && await timer.WaitForNextTickAsync(ct).ConfigureAwait(false))
+        {
+            try
+            {
+                UpdateGroundItems();
+            }
+            catch (Exception ex)
+            {
+                SentrySdk.CaptureException(ex);
+            }
+        }
+    }
+
+    private static async Task GroundMoneyLoopAsync(CancellationToken ct)
+    {
+        using var timer = new PeriodicTimer(TimeSpan.FromMilliseconds(60000));
+
+        while (ServerSetup.Instance.Running && await timer.WaitForNextTickAsync(ct).ConfigureAwait(false))
+        {
+            try
+            {
+                UpdateGroundMoney();
+            }
+            catch (Exception ex)
+            {
+                SentrySdk.CaptureException(ex);
+            }
+        }
+    }
+
+    private static TimeSpan ClampDt(TimeSpan dt, int maxMs)
+    {
+        if (dt.TotalMilliseconds <= maxMs) return dt;
+        return TimeSpan.FromMilliseconds(maxMs);
+    }
+
+    private void UpdateClientsTick()
+    {
+        // Snapshot of connected players to avoid collection modification during iteration
         var players = Aislings.ToArray();
         if (players.Length == 0)
             return;
 
-        // Non-blocking: enqueue if possible, otherwise drop by policy
         for (var i = 0; i < players.Length; i++)
         {
             var player = players[i];
-            var client = player?.Client;
+            if (player is null)
+                continue;
+
+            var client = player.Client;
             if (client is null)
                 continue;
 
-            if (!player.LoggedIn)
-            {
-                ClientRegistry.TryRemove(client.Id, out _);
-                continue;
-            }
-
-            // Dedup: if this client is still processing a prior update, skip this tick
-            if (!client.TryBeginUpdate())
-                continue;
-
-            // If the queue is full, TryWrite will fail OR DropOldest will make room
-            if (!_clientUpdateQueue.Writer.TryWrite(player))
-                client.EndUpdate();
-        }
-    }
-
-    /// <summary>
-    /// Continuously processes scheduled client updates.
-    ///
-    /// This loop is throughput driven, not tick-driven:
-    /// - It blocks efficiently when no work exists.
-    /// - When work arrives, it drains the queue as fast as possible.
-    ///
-    /// The server tick controls *when* clients may update.
-    /// This worker controls *how fast* those updates are executed.
-    ///
-    /// Client updates are synchronous and non-overlapping per client
-    /// (enforced by the in-flight gate)
-    /// </summary>
-    private async Task ClientUpdateWorkerAsync(CancellationToken ct)
-    {
-        var reader = _clientUpdateQueue.Reader;
-
-        while (!ct.IsCancellationRequested)
-        {
             try
             {
-                await reader.WaitToReadAsync(ct).ConfigureAwait(false);
+                if (!player.LoggedIn)
+                {
+                    try { client.CloseTransport(); }
+                    catch { }
+
+                    ClientRegistry.TryRemove(client.Id, out _);
+                    continue;
+                }
+
+                client.Update();
             }
-            catch (OperationCanceledException)
+            catch (Exception ex)
             {
-                break;
-            }
+                SentrySdk.CaptureException(ex);
 
-            while (reader.TryRead(out Aisling player))
-                ProcessClientUpdate(player);
-        }
-    }
+                try { client.CloseTransport(); }
+                catch { }
 
-    private void ProcessClientUpdate(Aisling player)
-    {
-        var client = player?.Client;
-
-        try
-        {
-            if (client is null)
-                return;
-
-            if (!player.LoggedIn)
-            {
                 ClientRegistry.TryRemove(client.Id, out _);
-                return;
             }
-
-            client.Update();
-        }
-        catch (Exception ex)
-        {
-            SentrySdk.CaptureException(ex);
-            try { client.CloseTransport(); } catch { }
-            ClientRegistry.TryRemove(client.Id, out _);
-        }
-        finally
-        {
-            // Release per-client in-flight gate if you used TryBeginUpdate() pre-enqueue
-            client?.EndUpdate();
         }
     }
 

@@ -34,45 +34,45 @@ public static class Commander
 
             .Add(new CommandDefinition(
                 Name: "Restart",
-                Aliases: new[] { "restart" },
+                Aliases: ["restart"],
                 AccessLevel: 0,
-                ArgSpecs: Array.Empty<ArgSpec>(),
+                ArgSpecs: [],
                 Handler: Restart,
                 Description: "- Force restart and reload:"
             ))
 
             .Add(new CommandDefinition(
                 Name: "Chaos",
-                Aliases: new[] { "chaos" },
+                Aliases: ["chaos"],
                 AccessLevel: 0,
-                ArgSpecs: Array.Empty<ArgSpec>(),
+                ArgSpecs: [],
                 Handler: Chaos,
                 Description: "- Force shutdown:"
             ))
 
             .Add(new CommandDefinition(
                 Name: "Cancel Chaos",
-                Aliases: new[] { "cc" },
+                Aliases: ["cc"],
                 AccessLevel: 0,
-                ArgSpecs: Array.Empty<ArgSpec>(),
+                ArgSpecs: [],
                 Handler: CancelChaos,
                 Description: "- Halt shutdown:"
             ))
 
             .Add(new CommandDefinition(
                 Name: "Reload Maps",
-                Aliases: new[] { "rm" },
+                Aliases: ["rm"],
                 AccessLevel: 0,
-                ArgSpecs: Array.Empty<ArgSpec>(),
+                ArgSpecs: [],
                 Handler: OnMapReload,
                 Description: "- Reload all maps:"
             ))
 
             .Add(new CommandDefinition(
                 Name: "Reset IP",
-                Aliases: new[] { "ip" },
+                Aliases: ["ip"],
                 AccessLevel: 0,
-                ArgSpecs: Array.Empty<ArgSpec>(),
+                ArgSpecs: [],
                 Handler: OnIpReset,
                 Description: "- Resets restricted IPs"
             ))
@@ -83,50 +83,47 @@ public static class Commander
 
             .Add(new CommandDefinition(
                 Name: "Learn Spell",
-                Aliases: new[] { "spell" },
+                Aliases: ["spell"],
                 AccessLevel: 0,
-                ArgSpecs: new[]
-                {
+                ArgSpecs:
+                [
                     new ArgSpec("name", ArgKind.String),
                     new ArgSpec("level", ArgKind.Int32, Optional: true, Default: "100"),
-                },
+                ],
                 Handler: OnLearnSpell
             ))
 
             .Add(new CommandDefinition(
                 Name: "Learn Skill",
-                Aliases: new[] { "skill" },
+                Aliases: ["skill"],
                 AccessLevel: 0,
-                ArgSpecs: new[]
-                {
+                ArgSpecs: [
                     new ArgSpec("name", ArgKind.String),
                     new ArgSpec("level", ArgKind.Int32, Optional: true, Default: "100"),
-                },
+                ],
                 Handler: OnLearnSkill
             ))
 
             .Add(new CommandDefinition(
                 Name: "Teleport",
-                Aliases: new[] { "map", "t" },
+                Aliases: ["map", "t"],
                 AccessLevel: 0,
-                ArgSpecs: new[]
-                {
+                ArgSpecs: [
                     new ArgSpec("t", ArgKind.String),
                     new ArgSpec("x", ArgKind.Int32),
                     new ArgSpec("y", ArgKind.Int32),
-                },
+                ],
                 Handler: OnTeleport
             ))
 
             .Add(new CommandDefinition(
                 Name: "Create Item",
-                Aliases: new[] { "give" },
+                Aliases: ["give"],
                 AccessLevel: 0,
-                ArgSpecs: new[]
-                {
+                ArgSpecs: [
                     new ArgSpec("item", ArgKind.String),
                     new ArgSpec("amount", ArgKind.Int32, Optional: true, Default: "1"),
-                },
+                ],
                 Handler: OnItemCreate
             ))
 
@@ -136,69 +133,63 @@ public static class Commander
 
             .Add(new CommandDefinition(
                 Name: "Group",
-                Aliases: new[] { "group", "party" },
+                Aliases: ["group", "party"],
                 AccessLevel: 0,
-                ArgSpecs: new[]
-                {
+                ArgSpecs: [
                     new ArgSpec("who", ArgKind.String),
-                },
+                ],
                 Handler: OnRemoteGroup
             ))
 
             .Add(new CommandDefinition(
                 Name: "Summon Player",
-                Aliases: new[] { "s" },
+                Aliases: ["s"],
                 AccessLevel: 0,
-                ArgSpecs: new[]
-                {
+                ArgSpecs: [
                     new ArgSpec("who", ArgKind.String),
-                },
+                ],
                 Handler: OnSummonPlayer
             ))
 
             .Add(new CommandDefinition(
                 Name: "Teleport to Player",
-                Aliases: new[] { "p" },
+                Aliases: ["p"],
                 AccessLevel: 0,
-                ArgSpecs: new[]
-                {
+                ArgSpecs: [
                     new ArgSpec("who", ArgKind.String),
-                },
+                ],
                 Handler: OnPortToPlayer
             ))
 
             .Add(new CommandDefinition(
                 Name: "Sex Change",
-                Aliases: new[] { "sex" },
+                Aliases: ["sex"],
                 AccessLevel: 0,
-                ArgSpecs: new[]
-                {
+                ArgSpecs: [
                     new ArgSpec("who", ArgKind.String),
                     new ArgSpec("s", ArgKind.Int32),
-                },
+                ],
                 Handler: OnSexChange
             ))
 
             .Add(new CommandDefinition(
                 Name: "Kill Player",
-                Aliases: new[] { "kill" },
+                Aliases: ["kill"],
                 AccessLevel: 0,
-                ArgSpecs: new[]
-                {
+                ArgSpecs: [
                     new ArgSpec("who", ArgKind.String),
-                },
+                ],
                 Handler: OnKillCommand
             ))
 
             .Add(new CommandDefinition(
                 Name: "Create Monster",
-                Aliases: new[] { "sm" },
+                Aliases: ["sm"],
                 AccessLevel: 0,
-                ArgSpecs: new[]
-                {
+                ArgSpecs: [
                     new ArgSpec("who", ArgKind.String),
                     new ArgSpec("amount", ArgKind.Int32, Optional: true, Default: "1"),
-                },
+                ],
                 Handler: OnMonsterSummon
             ))
 
