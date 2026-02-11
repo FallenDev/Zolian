@@ -1,9 +1,12 @@
 ﻿using System.Diagnostics;
+using System.Runtime.CompilerServices;
+
 using Darkages.Common;
 using Darkages.Network.Server;
 using Darkages.Object;
 using Darkages.Sprites;
 using Darkages.Sprites.Entity;
+using Darkages.Types;
 
 namespace Darkages.Network.Components;
 
@@ -66,12 +69,15 @@ public class ObjectComponent(WorldServer server) : WorldServerComponent(server)
 
     private static void UpdateClientObjects(Aisling user)
     {
-        var payload = new List<Sprite>();
+        // Lazy initialize, the animation payload list only if we encounter an enchantable item
+        List<(ushort anim, Position pos)> animPayload = null;
 
         // Get nearby sprites
         var objects = ObjectManager
             .GetObjects(user.Map, s => s.WithinRangeOf(user, 13), ObjectManager.Get.All)
-            .ToList();
+            .ToArray();
+
+        var payload = new List<Sprite>(objects.Length);
 
         foreach (var obj in objects)
         {
@@ -80,8 +86,21 @@ public class ObjectComponent(WorldServer server) : WorldServerComponent(server)
             switch (obj)
             {
                 case Item item:
-                    if (!user.SpritesInView.ContainsKey(item.ItemVisibilityId))
-                        payload.Add(item);
+                    {
+                        if (!user.SpritesInView.ContainsKey(item.ItemVisibilityId))
+                            payload.Add(item);
+
+                        if (!user.GameSettings.GroundQualities) break;
+                        if (!item.Template.Enchantable) break;
+
+                        var anim = GetQualityAnimId(item);
+                        if (anim == 0) break;
+
+                        // Initialize once per update loop -- pre-size initially to 4
+                        animPayload ??= new List<(ushort anim, Position pos)>(4);
+                        var itemPos = item.Position;
+                        animPayload.Add((anim, itemPos));
+                    }
                     break;
 
                 case Aisling or Monster or Mundane or Money:
@@ -91,11 +110,22 @@ public class ObjectComponent(WorldServer server) : WorldServerComponent(server)
             }
         }
 
-        if (payload.Count == 0) return;
-        var toUpdate = AddObjects(payload, user);
+        if (payload.Count > 0)
+        {
+            var toUpdate = AddObjects(payload, user);
+            if (toUpdate.Count > 0)
+                user.Client.SendVisibleEntities(toUpdate);
+        }
 
-        if (toUpdate.Count > 0)
-            user.Client.SendVisibleEntities(toUpdate);
+        if (animPayload is null || animPayload.Count == 0) return;
+
+        var animCount = animPayload.Count;
+
+        for (var i = 0; i < animCount; i++)
+        {
+            var (anim, pos) = animPayload[i];
+            user.Client.SendAnimation(anim, pos);
+        }
     }
 
     private static void HandleObjectsOutOfView(Aisling user)
@@ -187,4 +217,18 @@ public class ObjectComponent(WorldServer server) : WorldServerComponent(server)
 
         return toUpdate;
     }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static ushort GetQualityAnimId(Item item)
+    {
+        return item.ItemQuality switch
+        {
+            Item.Quality.Epic => 397,
+            Item.Quality.Legendary => 398,
+            Item.Quality.Forsaken => 399,
+            Item.Quality.Mythic or Item.Quality.Primordial or Item.Quality.Transcendent => 400,
+            _ => 0
+        };
+    }
+
 }

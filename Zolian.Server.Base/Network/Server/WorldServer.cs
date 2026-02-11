@@ -24,6 +24,7 @@ using Darkages.Models;
 using Darkages.Network.Client;
 using Darkages.Network.Client.Abstractions;
 using Darkages.Network.Components;
+using Darkages.Network.Server.PerformanceTesting;
 using Darkages.Object;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;
@@ -48,6 +49,7 @@ namespace Darkages.Network.Server;
 public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IWorldClient>
 {
     private readonly IClientFactory<WorldClient> _clientProvider;
+    public IClientRegistry<IWorldClient> WorldClientRegistry => ClientRegistry;
     public ServerPacketLogger ServerPacketLogger { get; } = new();
     public ClientPacketLogger ClientPacketLogger { get; } = new();
     private readonly MServerTable _serverTable;
@@ -113,10 +115,8 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
 
         var tasks = new Task[]
             {
-                ClientsLoopAsync(stoppingToken),
                 MapsLoopAsync(stoppingToken),
                 TrapsLoopAsync(stoppingToken),
-                MonstersLoopAsync(stoppingToken),
                 MundanesLoopAsync(stoppingToken),
                 GroundItemsLoopAsync(stoppingToken),
                 GroundMoneyLoopAsync(stoppingToken)
@@ -161,7 +161,9 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
             [typeof(PlayerStatusBarAndThreatComponent)] = new PlayerStatusBarAndThreatComponent(this),
             [typeof(PlayerSkillSpellCooldownComponent)] = new PlayerSkillSpellCooldownComponent(this),
             [typeof(MoonPhaseComponent)] = new MoonPhaseComponent(this),
-            [typeof(ClientCreationLimit)] = new ClientCreationLimit(this)
+            [typeof(ClientCreationLimit)] = new ClientCreationLimit(this),
+            [typeof(UpdateClientsComponent)] = new UpdateClientsComponent(this),
+            [typeof(UpdateMonstersComponent)] = new UpdateMonstersComponent(this)
         };
     }
 
@@ -174,23 +176,6 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
         foreach (var component in _serverComponents.Values)
         {
             _ = Task.Run(component.Update);
-        }
-    }
-
-    private async Task ClientsLoopAsync(CancellationToken ct)
-    {
-        using var timer = new PeriodicTimer(TimeSpan.FromMilliseconds(GameSpeed));
-
-        while (ServerSetup.Instance.Running && await timer.WaitForNextTickAsync(ct).ConfigureAwait(false))
-        {
-            try
-            {
-                UpdateClientsTick();
-            }
-            catch (Exception ex)
-            {
-                SentrySdk.CaptureException(ex);
-            }
         }
     }
 
@@ -235,31 +220,6 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
             try
             {
                 CheckTraps(dt);
-            }
-            catch (Exception ex)
-            {
-                SentrySdk.CaptureException(ex);
-            }
-        }
-    }
-
-    private static async Task MonstersLoopAsync(CancellationToken ct)
-    {
-        using var timer = new PeriodicTimer(TimeSpan.FromMilliseconds(MonstersIntervalMs));
-
-        var last = Stopwatch.GetTimestamp();
-
-        while (ServerSetup.Instance.Running && await timer.WaitForNextTickAsync(ct).ConfigureAwait(false))
-        {
-            var now = Stopwatch.GetTimestamp();
-            var dt = Stopwatch.GetElapsedTime(last, now);
-            last = now;
-            // Allow longer ticks for monster updates to prevent timing issues, but hard clamp edge cases
-            dt = ClampDt(dt, MonstersIntervalMs * 3);
-
-            try
-            {
-                UpdateMonsters(dt);
             }
             catch (Exception ex)
             {
@@ -332,48 +292,6 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
         return TimeSpan.FromMilliseconds(maxMs);
     }
 
-    private void UpdateClientsTick()
-    {
-        // Snapshot of connected players to avoid collection modification during iteration
-        var players = Aislings.ToArray();
-        if (players.Length == 0)
-            return;
-
-        for (var i = 0; i < players.Length; i++)
-        {
-            var player = players[i];
-            if (player is null)
-                continue;
-
-            var client = player.Client;
-            if (client is null)
-                continue;
-
-            try
-            {
-                if (!player.LoggedIn)
-                {
-                    try { client.CloseTransport(); }
-                    catch { }
-
-                    ClientRegistry.TryRemove(client.Id, out _);
-                    continue;
-                }
-
-                client.Update();
-            }
-            catch (Exception ex)
-            {
-                SentrySdk.CaptureException(ex);
-
-                try { client.CloseTransport(); }
-                catch { }
-
-                ClientRegistry.TryRemove(client.Id, out _);
-            }
-        }
-    }
-
     private static void UpdateGroundItems()
     {
         try
@@ -438,60 +356,6 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
         {
             SentrySdk.CaptureException(ex);
         }
-    }
-
-    private static void UpdateMonsters(TimeSpan elapsedTime)
-    {
-        try
-        {
-            var now = DateTime.UtcNow;
-
-            foreach (var mapKvp in ServerSetup.Instance.GlobalMapCache)
-            {
-                var area = mapKvp.Value;
-                var monstersById = ObjectManager.GetObjects<Monster>(area, m => !m.Skulled);
-
-                if (monstersById.IsEmpty())
-                    continue;
-
-                foreach (var kv in monstersById)
-                {
-                    var monster = kv.Value;
-                    ProcessMonster(monster, elapsedTime, now);
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            SentrySdk.CaptureException(ex);
-        }
-    }
-
-    private static void ProcessMonster(Monster monster, TimeSpan elapsedTime, DateTime now)
-    {
-        if (monster == null) return;
-
-        if (monster.CurrentHp <= 0)
-        {
-            monster.Skulled = true;
-            if (monster.Target is Aisling aisling)
-                monster.AIScript?.OnDeath(aisling.Client);
-            else
-                monster.AIScript?.OnDeath();
-            return;
-        }
-
-        monster.AIScript?.Update(elapsedTime);
-        monster.LastUpdated = now;
-
-        // Handle buffs and debuffs
-        if (!monster.MonsterBuffAndDebuffStopWatch.IsRunning)
-            monster.MonsterBuffAndDebuffStopWatch.Start();
-
-        if (monster.MonsterBuffAndDebuffStopWatch.Elapsed.TotalMilliseconds < 1000) return;
-        monster.UpdateBuffs(monster);
-        monster.UpdateDebuffs(monster);
-        monster.MonsterBuffAndDebuffStopWatch.Restart();
     }
 
     private static void UpdateMundanes(TimeSpan elapsedTime)

@@ -87,8 +87,6 @@ public class WorldClient : WorldClientBase, IWorldClient
     private readonly Stopwatch _lanternSw = Stopwatch.StartNew();
     private readonly Stopwatch _dayDreamSw = Stopwatch.StartNew();
     private readonly Stopwatch _mailSw = Stopwatch.StartNew();
-    private readonly Stopwatch _itemAnimSw = Stopwatch.StartNew();
-    private readonly Stopwatch _invisibleSw = Stopwatch.StartNew();
     private readonly Stopwatch _deathRattleSw = Stopwatch.StartNew();
 
     public Aisling Aisling { get; set; }
@@ -181,46 +179,13 @@ public class WorldClient : WorldClientBase, IWorldClient
         if (Aisling is not { LoggedIn: true })
             return;
 
-        CheckInvisible(_invisibleSw);
         EquipLantern(_lanternSw);
         CheckDayDreaming(_dayDreamSw);
         CheckForMail(_mailSw);
-        DisplayQualityPillar(_itemAnimSw);
-        ApplyAffliction(_afflictionSw);
+        //ApplyAffliction(_afflictionSw);
         HandleDeathRattleRefresh(_deathRattleSw);
         HandleBadTrades();
         HandleSecOffenseEle();
-    }
-
-    private void CheckInvisible(Stopwatch sw)
-    {
-        if (Aisling.IsInvisible) return;
-        if (sw.ElapsedMilliseconds < 50) return;
-        sw.Restart();
-
-        Buff hide = null;
-        Buff shadowfade = null;
-        Buff blend = null;
-
-        foreach (var buff in Aisling.Buffs.Values)
-        {
-            if (buff is null) continue;
-
-            var name = buff.Name;
-            if (hide is null && string.Equals(name, "Hide", StringComparison.Ordinal))
-                hide = buff;
-            else if (shadowfade is null && string.Equals(name, "Shadowfade", StringComparison.Ordinal))
-                shadowfade = buff;
-            else if (blend is null && string.Equals(name, "Blend", StringComparison.Ordinal))
-                blend = buff;
-
-            if (hide is not null && shadowfade is not null && blend is not null)
-                break;
-        }
-
-        hide?.OnEnded(Aisling, hide);
-        shadowfade?.OnEnded(Aisling, shadowfade);
-        blend?.OnEnded(Aisling, blend);
     }
 
     private void EquipLantern(Stopwatch sw)
@@ -291,8 +256,9 @@ public class WorldClient : WorldClientBase, IWorldClient
 
         var hasUnreadMail = false;
 
-        foreach (var letter in Aisling.PersonalLetters.Values)
+        foreach (var post in Aisling.PersonalLetters)
         {
+            var letter = post.Value;
             if (letter.ReadPost) continue;
             hasUnreadMail = true;
             break;
@@ -300,40 +266,6 @@ public class WorldClient : WorldClientBase, IWorldClient
 
         if (hasUnreadMail)
             SendAttributes(StatUpdateType.Secondary);
-    }
-
-    private void DisplayQualityPillar(Stopwatch sw)
-    {
-        if (sw.ElapsedMilliseconds < 125) return;
-        sw.Restart();
-
-        if (!Aisling.GameSettings.GroundQualities) return;
-
-        var objects = ObjectManager.GetObjects<Item>(Aisling.Map, item => item.Template.Enchantable && item.WithinRangeOf(Aisling, 13));
-        if (objects.IsEmpty) return;
-
-        try
-        {
-            foreach (var entry in objects.Values)
-            {
-                if (entry is null) continue;
-                var pos = entry.Position;
-
-                ushort anim = entry.ItemQuality switch
-                {
-                    Item.Quality.Epic => 397,
-                    Item.Quality.Legendary => 398,
-                    Item.Quality.Forsaken => 399,
-                    Item.Quality.Mythic or Item.Quality.Primordial or Item.Quality.Transcendent => 400,
-                    _ => 0
-                };
-
-                if (anim == 0) continue;
-
-                Aisling.Client.SendAnimation(anim, new Position(pos.X, pos.Y));
-            }
-        }
-        catch { }
     }
 
     private void ApplyAffliction(Stopwatch sw)

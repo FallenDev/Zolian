@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+
 using Darkages.Sprites;
 using Darkages.Sprites.Entity;
 using Darkages.Types;
@@ -31,8 +32,8 @@ public class ObjectManager
     public static void DelObject<T>(T obj) where T : Sprite => ObjectService.RemoveGameObject(obj);
     public static T GetObject<T>(Area map, Predicate<T> p) where T : Sprite => ObjectService.Query(map, p);
     public static Sprite GetObject(Area map, Predicate<Sprite> p, Get selections) => GetObjects(map, p, selections).FirstOrDefault();
-    public static ConcurrentDictionary<long, T> GetObjects<T>(Area map, Predicate<T> p) where T : Sprite => map == null ? GetObjects(p) : ObjectService.QueryAllWithPredicate(map, p);
-    private static ConcurrentDictionary<long, T> GetObjects<T>(Predicate<T> p) where T : Sprite => ObjectService.QueryAllWithPredicate(p);
+    public static ConcurrentDictionary<long, T> GetObjects<T>(Area map, Predicate<T> p) where T : Sprite => map is null ? new ConcurrentDictionary<long, T>() : ObjectService.QueryAllWithPredicate(map, p);
+    public static void FillObjects<T>(Area map, Predicate<T> p, List<T> results) where T : Sprite => ObjectService.FillWithPredicate(map, p, results);
 
     public static List<Sprite> GetObjects(Area map, Predicate<Sprite> p, Get selections)
     {
@@ -43,46 +44,55 @@ public class ObjectManager
             switch (selections)
             {
                 case Get.Aislings:
-                    bucket.AddRange(ObjectService.QueryAllWithPredicate<Aisling>(map, p).Values);
+                    ObjectService.FillSpriteBucket<Aisling>(map, p, bucket);
                     break;
+
                 case Get.Monsters:
-                    bucket.AddRange(ObjectService.QueryAllWithPredicate<Monster>(map, p).Values);
+                    ObjectService.FillSpriteBucket<Monster>(map, p, bucket);
                     break;
+
                 case Get.Damageable:
-                    bucket.AddRange(ObjectService.QueryAllWithPredicate<Monster>(map, p).Values);
-                    bucket.AddRange(ObjectService.QueryAllWithPredicate<Aisling>(map, p).Values);
+                    ObjectService.FillSpriteBucket<Monster>(map, p, bucket);
+                    ObjectService.FillSpriteBucket<Aisling>(map, p, bucket);
                     break;
+
                 case Get.Mundanes:
-                    bucket.AddRange(ObjectService.QueryAllWithPredicate<Mundane>(map, p).Values);
+                    ObjectService.FillSpriteBucket<Mundane>(map, p, bucket);
                     break;
+
                 case Get.UpdateNonPlayerSprites:
-                    bucket.AddRange(ObjectService.QueryAllWithPredicate<Monster>(map, p).Values);
-                    bucket.AddRange(ObjectService.QueryAllWithPredicate<Mundane>(map, p).Values);
+                    ObjectService.FillSpriteBucket<Monster>(map, p, bucket);
+                    ObjectService.FillSpriteBucket<Mundane>(map, p, bucket);
                     break;
+
                 case Get.Movable:
-                    bucket.AddRange(ObjectService.QueryAllWithPredicate<Aisling>(map, p).Values);
-                    bucket.AddRange(ObjectService.QueryAllWithPredicate<Monster>(map, p).Values);
-                    bucket.AddRange(ObjectService.QueryAllWithPredicate<Mundane>(map, p).Values);
+                    ObjectService.FillSpriteBucket<Aisling>(map, p, bucket);
+                    ObjectService.FillSpriteBucket<Monster>(map, p, bucket);
+                    ObjectService.FillSpriteBucket<Mundane>(map, p, bucket);
                     break;
+
                 case Get.Items:
-                    bucket.AddRange(ObjectService.QueryAllWithPredicate<Item>(map, p).Values);
+                    ObjectService.FillSpriteBucket<Item>(map, p, bucket);
                     break;
+
                 case Get.Money:
-                    bucket.AddRange(ObjectService.QueryAllWithPredicate<Money>(map, p).Values);
+                    ObjectService.FillSpriteBucket<Money>(map, p, bucket);
                     break;
+
                 case Get.AllButAislings:
-                    bucket.AddRange(ObjectService.QueryAllWithPredicate<Monster>(map, p).Values);
-                    bucket.AddRange(ObjectService.QueryAllWithPredicate<Mundane>(map, p).Values);
-                    bucket.AddRange(ObjectService.QueryAllWithPredicate<Item>(map, p).Values);
-                    bucket.AddRange(ObjectService.QueryAllWithPredicate<Money>(map, p).Values);
+                    ObjectService.FillSpriteBucket<Monster>(map, p, bucket);
+                    ObjectService.FillSpriteBucket<Mundane>(map, p, bucket);
+                    ObjectService.FillSpriteBucket<Item>(map, p, bucket);
+                    ObjectService.FillSpriteBucket<Money>(map, p, bucket);
                     break;
+
                 case Get.All:
                 default:
-                    bucket.AddRange(ObjectService.QueryAllWithPredicate<Aisling>(map, p).Values);
-                    bucket.AddRange(ObjectService.QueryAllWithPredicate<Monster>(map, p).Values);
-                    bucket.AddRange(ObjectService.QueryAllWithPredicate<Mundane>(map, p).Values);
-                    bucket.AddRange(ObjectService.QueryAllWithPredicate<Money>(map, p).Values);
-                    bucket.AddRange(ObjectService.QueryAllWithPredicate<Item>(map, p).Values);
+                    ObjectService.FillSpriteBucket<Aisling>(map, p, bucket);
+                    ObjectService.FillSpriteBucket<Monster>(map, p, bucket);
+                    ObjectService.FillSpriteBucket<Mundane>(map, p, bucket);
+                    ObjectService.FillSpriteBucket<Money>(map, p, bucket);
+                    ObjectService.FillSpriteBucket<Item>(map, p, bucket);
                     break;
             }
         }

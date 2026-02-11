@@ -82,13 +82,4 @@ public class ItemTest
         var items = ObjectService.QueryAllWithPredicate<Item>(variantItem.Map, i => i.Serial == variantItem.Serial);
         Assert.Equals(variantItem, items.First());
     }
-
-    [Test]
-    public void QueryAllItemsFromGameWorldWithPredicate()
-    {
-        ObjectService.AddGameObject(variantItem);
-        ObjectService.AddGameObject(nonVariantItem);
-        var items = ObjectService.QueryAllWithPredicate<Item>(i => i.Serial == variantItem.Serial);
-        Assert.Equals(variantItem, items.First());
-    }
 }
