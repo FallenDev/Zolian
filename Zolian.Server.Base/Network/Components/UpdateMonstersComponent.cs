@@ -61,6 +61,9 @@ public class UpdateMonstersComponent(WorldServer server) : WorldServerComponent(
         {
             var map = mapKvp.Value;
 
+            // Only update monsters on maps that have players -- 30 min delay after players leave
+            if (!MapActivityGate.ShouldUpdateMonsters(map)) continue;
+
             var monstersById = ObjectManager.GetObjects<Monster>(map, m => !m.Skulled);
             if (monstersById.IsEmpty)
                 continue;

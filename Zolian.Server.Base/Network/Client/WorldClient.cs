@@ -45,6 +45,8 @@ using Microsoft.Extensions.Logging;
 
 using ServiceStack;
 
+using static ServiceStack.Diagnostics.Events;
+
 using BodyColor = Chaos.DarkAges.Definitions.BodyColor;
 using BodySprite = Chaos.DarkAges.Definitions.BodySprite;
 using EquipmentSlot = Chaos.DarkAges.Definitions.EquipmentSlot;
@@ -446,6 +448,9 @@ public class WorldClient : WorldClientBase, IWorldClient
             var skillSet = DecideOnSkillsToPull();
             if (!skillSet.IsNullOrEmpty())
                 SendMetaData(MetaDataRequestType.DataByName, ServerSetup.Instance.Game.MetafileManager, skillSet);
+
+            // Increment playerCount for current map
+            Aisling.Map.OnPlayerEnter();
         }
         catch (Exception ex)
         {
@@ -1552,6 +1557,9 @@ public class WorldClient : WorldClientBase, IWorldClient
     {
         try
         {
+            // Decrement playerCount for current map
+            Aisling.Map.OnPlayerLeave();
+
             // Close Popups
             this.CloseDialog();
             Aisling.CancelExchange();
@@ -4315,6 +4323,9 @@ public class WorldClient : WorldClientBase, IWorldClient
             Aisling.Pos = new Vector2(position.X, position.Y);
             Aisling.CurrentMapId = area.ID;
 
+            // Increment playerCount for current map
+            Aisling.Map.OnPlayerEnter();
+
             Enter();
         }
         else
@@ -4343,6 +4354,9 @@ public class WorldClient : WorldClientBase, IWorldClient
             Aisling.LastPosition = new Position(Aisling.Pos);
             Aisling.Pos = new Vector2(position.X, position.Y);
             Aisling.CurrentMapId = target.ID;
+
+            // Increment playerCount for current map
+            Aisling.Map.OnPlayerEnter();
 
             Enter();
         }
@@ -4422,6 +4436,9 @@ public class WorldClient : WorldClientBase, IWorldClient
                             break;
                         }
 
+                        // Decrement playerCount for current map
+                        client.Aisling.Map.OnPlayerLeave();
+
                         client.WarpToAdjacentMap(value);
                         breakOuterLoop = true;
                         break;
@@ -4430,6 +4447,9 @@ public class WorldClient : WorldClientBase, IWorldClient
                     if (value.WarpType != WarpType.World) continue;
                     if (!ServerSetup.Instance.GlobalWorldMapTemplateCache.ContainsKey(value.To.PortalKey)) return;
                     if (client.Aisling.World != value.To.PortalKey) client.Aisling.World = (byte)value.To.PortalKey;
+
+                    // Decrement playerCount for current map on World Map transition
+                    client.Aisling.Map.OnPlayerLeave();
 
                     var portal = new PortalSession();
                     PortalSession.TransitionToMap(client);
@@ -4458,6 +4478,9 @@ public class WorldClient : WorldClientBase, IWorldClient
                 {
                     if (value.WarpType == WarpType.Map)
                     {
+                        // Decrement playerCount for current map
+                        client.Aisling.Map.OnPlayerLeave();
+
                         client.WarpToAdjacentMap(value);
                         breakOuterLoop = true;
                         break;
@@ -4466,6 +4489,9 @@ public class WorldClient : WorldClientBase, IWorldClient
                     if (value.WarpType != WarpType.World) continue;
                     if (!ServerSetup.Instance.GlobalWorldMapTemplateCache.ContainsKey(value.To.PortalKey)) return;
                     if (client.Aisling.World != value.To.PortalKey) client.Aisling.World = (byte)value.To.PortalKey;
+
+                    // Decrement playerCount for current map on World Map transition
+                    client.Aisling.Map.OnPlayerLeave();
 
                     var portal = new PortalSession();
                     PortalSession.TransitionToMap(client);

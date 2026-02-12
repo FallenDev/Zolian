@@ -2880,14 +2880,19 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
 
         var serial = client.Aisling.Serial;
 
+        // If a player has properly logged out, we can skip the additional cleanup, because it was already performed
         if (aisling.Client.ExitConfirmed)
         {
             ServerSetup.ConnectionLogger($"{aisling.Username} either logged out or was removed from the server.");
             return;
         }
 
+        // If a player disconnects without confirming exit, we initiate a cleanup process
         try
         {
+            // Decrement playerCount for current map
+            client.Aisling.Map.OnPlayerLeave();
+
             // Close Popups
             client.CloseDialog();
             aisling.CancelExchange();

@@ -102,6 +102,9 @@ public class UpdateMapsComponent(WorldServer server) : WorldServerComponent(serv
                     try { (ServerSetup.Instance.TempGlobalMapCache as dynamic)?.Clear(); } catch { }
                     try { (ServerSetup.Instance.TempGlobalWarpTemplateCache as dynamic)?.Clear(); } catch { }
                     try { (ServerSetup.Instance.GlobalMundaneCache as dynamic)?.Clear(); } catch { }
+                    
+                    // Clear player activity
+                    MapActivityGate.ClearAll();
 
                     // Reload authoritative sources from the database
                     AreaStorage.Instance.CacheFromDatabase();

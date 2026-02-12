@@ -549,7 +549,7 @@ public static class Commander
             ObjectManager.DelObject(npc);
 
         ServerSetup.Instance.GlobalMundaneCache = [];
-
+        MapActivityGate.ClearAll();
         AreaStorage.Instance.CacheFromDatabase();
         DatabaseLoad.CacheFromDatabase(new WarpTemplate());
 
