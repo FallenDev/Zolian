@@ -1,99 +1,88 @@
 using Darkages.Common;
 
-using NUnit.Framework;
+using Xunit;
 
-namespace ZolianTest.Common;
+namespace ZolianTest.Unit.Common;
 
-internal class GeneratorTest
+public sealed class GeneratorTest
 {
-    [SetUp]
-    public void Setup() { }
-
-    [Test]
+    [Fact]
     public void ShouldGenerateDeterminedNumberRange()
     {
         for (var i = 0; i < 1000; i++)
         {
             var result = Generator.GenerateDeterminedNumberRange(15, 28);
-            var inRange = result is >= 15 and <= 28;
-            Assert.That(inRange);
+            Assert.InRange(result, 15, 28);
         }
     }
 
-    [Test]
+    [Fact]
     public void ShouldGenerateMapLocation()
     {
         for (var i = 0; i < 1000; i++)
         {
             var result = Generator.GenerateMapLocation(50);
-            var inRange = result is >= 0 and <= 50;
-            Assert.That(inRange);
+            Assert.InRange(result, 0, 50);
         }
     }
 
-    [Test]
+    [Fact]
     public void ShouldRandNumGen3()
     {
         for (var i = 0; i < 1000; i++)
         {
             var result = Generator.RandNumGen3();
-            var inRange = result is >= 0 and <= 3;
-            Assert.That(inRange);
+            Assert.InRange(result, 0, 3);
         }
     }
 
-    [Test]
+    [Fact]
     public void ShouldRandNumGen10()
     {
         for (var i = 0; i < 1000; i++)
         {
             var result = Generator.RandNumGen10();
-            var inRange = result is >= 0 and <= 10;
-            Assert.That(inRange);
+            Assert.InRange(result, 0, 10);
         }
     }
 
-    [Test]
+    [Fact]
     public void ShouldRandNumGen20()
     {
         for (var i = 0; i < 1000; i++)
         {
             var result = Generator.RandNumGen20();
-            var inRange = result is >= 0 and <= 20;
-            Assert.That(inRange);
+            Assert.InRange(result, 0, 20);
         }
     }
 
-    [Test]
+    [Fact]
     public void ShouldRandNumGen100()
     {
         for (var i = 0; i < 1000; i++)
         {
             var result = Generator.RandNumGen100();
-            var inRange = result is >= 0 and <= 100;
-            Assert.That(inRange);
+            Assert.InRange(result, 0, 100);
         }
     }
 
-    [Test]
+    [Fact]
     public void ShouldRandomNumPercentGen()
     {
         for (var i = 0; i < 1000; i++)
         {
             var result = Generator.RandomPercentPrecise();
-            var inRange = result is >= 0.00 and <= 1.0;
-            Assert.That(inRange);
+            Assert.InRange(result, 0.0, 1.0);
         }
     }
 
-    [Test]
+    [Fact]
     public void ShouldGenerateRandomMonsterStatVariance()
     {
         for (var i = 0; i < 1000; i++)
         {
             var result = Generator.RandomMonsterStatVariance(300);
-            var inRange = result is > 300 and <= 354;
-            Assert.That(inRange);
+            Assert.InRange(result, 301, 354); // method uses > 300 and <= 354
         }
     }
 }

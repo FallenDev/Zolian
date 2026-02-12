@@ -24,7 +24,6 @@ using Darkages.Models;
 using Darkages.Network.Client;
 using Darkages.Network.Client.Abstractions;
 using Darkages.Network.Components;
-using Darkages.Network.Server.PerformanceTesting;
 using Darkages.Object;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;

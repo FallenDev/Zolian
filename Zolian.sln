@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.4.33205.214
+# Visual Studio Version 18
+VisualStudioVersion = 18.2.11415.280 d18.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Zolian.GameServer", "Zolian.GameServer\Zolian.GameServer.csproj", "{4275224B-1A23-4334-9DF6-6F746F34A8A5}"
 EndProject
@@ -43,6 +43,7 @@ Global
 		SolutionGuid = {1FF53ACE-247E-42A8-9832-7B757ED739F0}
 	EndGlobalSection
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		Server.Configurations\Server.Configurations.projitems*{2b209986-7a39-4646-a97e-e8a853fe86ac}*SharedItemsImports = 5
 		Server.Configurations\Server.Configurations.projitems*{4275224b-1a23-4334-9df6-6f746f34a8a5}*SharedItemsImports = 5
 		Server.Configurations\Server.Configurations.projitems*{ba99df5e-e48a-411a-8b1a-4458116cb513}*SharedItemsImports = 13
 		Server.Configurations\Server.Configurations.projitems*{f2a7e04e-65a8-44a6-a642-01c8f4a6149c}*SharedItemsImports = 5

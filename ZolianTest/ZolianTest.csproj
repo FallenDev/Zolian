@@ -1,7 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net10.0</TargetFramework>
+		<TargetFramework>net10.0-windows</TargetFramework>
+		<OutputType>Exe</OutputType>
+		<ImplicitUsings>enable</ImplicitUsings>
 		<LangVersion>latest</LangVersion>
 		<EnableWindowsTargeting>True</EnableWindowsTargeting>
 		<Authors>Zolian Contributors</Authors>
@@ -20,19 +22,22 @@
 
 	<ItemGroup>
 		<PackageReference Include="Chaos-Networking" Version="3.0.5" />
-		<PackageReference Include="Microsoft.Data.SqlClient" Version="7.0.0-preview2.25289.6" />
-		<PackageReference Include="Microsoft.DependencyValidation.Analyzers" Version="0.11.0" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.3" />
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
-		<PackageReference Include="NUnit" Version="4.4.0" />
-		<PackageReference Include="Sentry" Version="6.1.0" />
-		<PackageReference Include="Sentry.Extensions.Logging" Version="6.1.0" />
-		<PackageReference Include="Sentry.Profiling" Version="6.1.0" />
 		<PackageReference Include="ServiceStack" Version="10.0.6" />
 		<PackageReference Include="ServiceStack.Text" Version="10.0.6" />
+		<PackageReference Include="xunit.runner.visualstudio" Version="3.1.5">
+		  <PrivateAssets>all</PrivateAssets>
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="xunit.v3" Version="3.2.2" />
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\Zolian.GameServer\Zolian.GameServer.csproj" />
 		<ProjectReference Include="..\Zolian.Server.Base\Zolian.Server.Base.csproj" />
 	</ItemGroup>
+
+	<Import Project="..\Server.Configurations\Server.Configurations.projitems" Label="Shared" />
 
 </Project>

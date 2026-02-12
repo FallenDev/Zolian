@@ -2,7 +2,7 @@
 
 namespace Darkages.CommandSystem;
 
-internal readonly struct Token
+public readonly struct Token
 {
     public readonly int Start;
     public readonly int Length;
@@ -16,7 +16,7 @@ internal readonly struct Token
     public ReadOnlySpan<char> Slice(ReadOnlySpan<char> source) => source.Slice(Start, Length);
 }
 
-internal static class Tokenizer
+public static class Tokenizer
 {
     /// <summary>
     /// Tokenizes command line into tokens, supporting quoted strings with "..."

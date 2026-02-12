@@ -45,8 +45,6 @@ using Microsoft.Extensions.Logging;
 
 using ServiceStack;
 
-using static ServiceStack.Diagnostics.Events;
-
 using BodyColor = Chaos.DarkAges.Definitions.BodyColor;
 using BodySprite = Chaos.DarkAges.Definitions.BodySprite;
 using EquipmentSlot = Chaos.DarkAges.Definitions.EquipmentSlot;

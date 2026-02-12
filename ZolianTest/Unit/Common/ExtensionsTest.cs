@@ -1,52 +1,50 @@
-﻿using Darkages.Common;
-using NUnit.Framework;
+using Darkages.Common;
 
-namespace ZolianTest.Common;
+using Xunit;
 
-internal class ExtensionsTest
+namespace ZolianTest.Unit.Common;
+
+public sealed class ExtensionsLegacyTests
 {
-    [SetUp]
-    public void Setup() { }
-
-    [Test]
+    [Fact]
     public void ShouldClampMinimumValue()
     {
         var result = 20.IntClamp(50, 6000);
-        Assert.That(result == 50);
+        Assert.Equal(50, result);
     }
 
-    [Test]
+    [Fact]
     public void ShouldClampMaximumValue()
     {
         var result = 6500.IntClamp(50, 6000);
-        Assert.That(result == 6000);
+        Assert.Equal(6000, result);
     }
 
-    [Test]
+    [Fact]
     public void ShouldNotIsWithinMinimumValue()
     {
         var result = 20.IntIsWithin(50, 6000);
-        Assert.That(result == false);
+        Assert.False(result);
     }
 
-    [Test]
+    [Fact]
     public void ShouldIsWithinMinimumValue()
     {
         var result = 150.IntIsWithin(50, 6000);
-        Assert.That(result);
+        Assert.True(result);
     }
 
-    [Test]
+    [Fact]
     public void ShouldNotIsWithinMaximumValue()
     {
         var result = 9000.IntIsWithin(50, 6000);
-        Assert.That(result == false);
+        Assert.False(result);
     }
 
-    [Test]
+    [Fact]
     public void ShouldIsWithinMaximumValue()
     {
         var result = 5500.IntIsWithin(50, 6000);
-        Assert.That(result);
+        Assert.True(result);
     }
 }
