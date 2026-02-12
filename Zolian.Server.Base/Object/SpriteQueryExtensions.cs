@@ -12,23 +12,18 @@ namespace Darkages.Object
     /// </summary>
     public static class SpriteQueryExtensions
     {
-        /// <summary>
-        /// Materializes a snapshot of the dictionary's values
-        /// </summary>
-        private static List<T> SnapshotValues<T>(this IDictionary<long, T>? dict)
-        {
-            if (dict is null || dict.Count == 0)
-                return [];
-
-            // Materialize to prevent mutation issues
-            return dict.Values.ToList();
-        }
+        private static readonly List<Sprite> EmptySprites = new(0);
+        private static readonly List<Aisling> EmptyAislings = new(0);
+        private static readonly List<Monster> EmptyMonsters = new(0);
+        private static readonly List<Mundane> EmptyMundanes = new(0);
 
         /// <summary>
-        /// Normalizes a list to never be null or empty
-        /// Note: returns the same empty list instance for efficiency
+        /// Normalizes a list to never be null.
+        /// Uses a shared empty list instance for the empty case.
         /// </summary>
-        private static List<Sprite> Normalize(List<Sprite>? list) => list is null || list.Count == 0 ? [] : list;
+        private static List<Sprite> NormalizeSprites(List<Sprite>? list) => list is null || list.Count == 0 ? EmptySprites : list;
+
+        private static List<T> Normalize<T>(List<T>? list, List<T> empty) => list is null || list.Count == 0 ? empty : list;
 
         /// <summary>
         /// Gets all sprites at the specified coordinates.
@@ -36,14 +31,14 @@ namespace Darkages.Object
         public static List<Sprite> GetSpritesAt(this Sprite self, int x, int y)
         {
             var map = self.Map;
-            if (map is null) return [];
+            if (map is null) return EmptySprites;
 
             var list = ObjectManager.GetObjects(
                 map,
                 i => i is not null && (int)i.Pos.X == x && (int)i.Pos.Y == y,
                 ObjectManager.Get.All);
 
-            return Normalize(list);
+            return NormalizeSprites(list);
         }
 
         /// <summary>
@@ -52,14 +47,14 @@ namespace Darkages.Object
         public static List<Sprite> GetDamageableAt(this Sprite self, int x, int y)
         {
             var map = self.Map;
-            if (map is null) return [];
+            if (map is null) return EmptySprites;
 
             var list = ObjectManager.GetObjects(
                 map,
                 i => i is not null && (int)i.Pos.X == x && (int)i.Pos.Y == y,
                 ObjectManager.Get.Damageable);
 
-            return Normalize(list);
+            return NormalizeSprites(list);
         }
 
         /// <summary>
@@ -68,7 +63,7 @@ namespace Darkages.Object
         public static List<Sprite> DamageableNearbySnapshot(this Sprite self)
         {
             var map = self.Map;
-            if (map is null) return [];
+            if (map is null) return EmptySprites;
 
             var range = ServerSetup.Instance.Config.WithinRangeProximity;
 
@@ -77,7 +72,7 @@ namespace Darkages.Object
                 i => i is not null && i.WithinRangeOf(self, range),
                 ObjectManager.Get.Damageable);
 
-            return Normalize(list);
+            return NormalizeSprites(list);
         }
 
         /// <summary>
@@ -86,7 +81,7 @@ namespace Darkages.Object
         public static List<Sprite> DamageableWithinRangeSnapshot(this Sprite self, Sprite target, int range)
         {
             var map = self.Map;
-            if (map is null || target is null) return [];
+            if (map is null || target is null) return EmptySprites;
 
             var list = ObjectManager.GetObjects(
                 map,
@@ -94,10 +89,17 @@ namespace Darkages.Object
                 ObjectManager.Get.Damageable);
 
             if (list is null || list.Count == 0)
-                return [];
+                return EmptySprites;
 
-            // Filter after snapshot to avoid mutation issues
-            return list.Where(s => s.Alive).ToList();
+            // Filter in-place to avoid a second allocation.
+            // (This list is already a snapshot, so it's safe to mutate the list structure.)
+            for (var i = list.Count - 1; i >= 0; i--)
+            {
+                if (!list[i].Alive)
+                    list.RemoveAt(i);
+            }
+
+            return list.Count == 0 ? EmptySprites : list;
         }
 
         /// <summary>
@@ -106,15 +108,17 @@ namespace Darkages.Object
         public static List<Aisling> AislingsNearbySnapshot(this Sprite self)
         {
             var map = self.Map;
-            if (map is null) return [];
+            if (map is null) return EmptyAislings;
 
             var range = ServerSetup.Instance.Config.WithinRangeProximity;
 
-            var dict = ObjectManager.GetObjects<Aisling>(
+            List<Aisling> results = [];
+            ObjectManager.FillObjects(
                 map,
-                i => i is not null && i.WithinRangeOf(self, range));
+                i => i is not null && i.WithinRangeOf(self, range),
+                results);
 
-            return dict.SnapshotValues();
+            return Normalize(results, EmptyAislings);
         }
 
         /// <summary>
@@ -123,13 +127,15 @@ namespace Darkages.Object
         public static List<Aisling> AislingsEarShotNearbySnapshot(this Sprite self)
         {
             var map = self.Map;
-            if (map is null) return [];
+            if (map is null) return EmptyAislings;
 
-            var dict = ObjectManager.GetObjects<Aisling>(
+            List<Aisling> results = [];
+            ObjectManager.FillObjects(
                 map,
-                i => i is not null && i.WithinRangeOf(self, 14));
+                i => i is not null && i.WithinRangeOf(self, 14),
+                results);
 
-            return dict.SnapshotValues();
+            return Normalize(results, EmptyAislings);
         }
 
         /// <summary>
@@ -138,13 +144,15 @@ namespace Darkages.Object
         public static List<Aisling> AislingsOnMapSnapshot(this Sprite self)
         {
             var map = self.Map;
-            if (map is null) return [];
+            if (map is null) return EmptyAislings;
 
-            var dict = ObjectManager.GetObjects<Aisling>(
+            List<Aisling> results = [];
+            ObjectManager.FillObjects(
                 map,
-                i => i is not null && i.Map == map);
+                i => i is not null && i.Map == map,
+                results);
 
-            return dict.SnapshotValues();
+            return Normalize(results, EmptyAislings);
         }
 
         /// <summary>
@@ -153,15 +161,17 @@ namespace Darkages.Object
         public static List<Monster> MonstersNearbySnapshot(this Sprite self)
         {
             var map = self.Map;
-            if (map is null) return [];
+            if (map is null) return EmptyMonsters;
 
             var range = ServerSetup.Instance.Config.WithinRangeProximity;
 
-            var dict = ObjectManager.GetObjects<Monster>(
+            List<Monster> results = [];
+            ObjectManager.FillObjects(
                 map,
-                i => i is not null && i.WithinRangeOf(self, range));
+                i => i is not null && i.WithinRangeOf(self, range),
+                results);
 
-            return dict.SnapshotValues();
+            return Normalize(results, EmptyMonsters);
         }
 
         /// <summary>
@@ -170,13 +180,15 @@ namespace Darkages.Object
         public static List<Monster> MonstersOnMapSnapshot(this Sprite self)
         {
             var map = self.Map;
-            if (map is null) return [];
+            if (map is null) return EmptyMonsters;
 
-            var dict = ObjectManager.GetObjects<Monster>(
+            List<Monster> results = [];
+            ObjectManager.FillObjects(
                 map,
-                i => i is not null);
+                i => i is not null,
+                results);
 
-            return dict.SnapshotValues();
+            return Normalize(results, EmptyMonsters);
         }
 
         /// <summary>
@@ -185,15 +197,17 @@ namespace Darkages.Object
         public static List<Mundane> MundanesNearbySnapshot(this Sprite self)
         {
             var map = self.Map;
-            if (map is null) return [];
+            if (map is null) return EmptyMundanes;
 
             var range = ServerSetup.Instance.Config.WithinRangeProximity;
 
-            var dict = ObjectManager.GetObjects<Mundane>(
+            List<Mundane> results = [];
+            ObjectManager.FillObjects(
                 map,
-                i => i is not null && i.WithinRangeOf(self, range));
+                i => i is not null && i.WithinRangeOf(self, range),
+                results);
 
-            return dict.SnapshotValues();
+            return Normalize(results, EmptyMundanes);
         }
 
         /// <summary>
@@ -202,14 +216,14 @@ namespace Darkages.Object
         public static List<Sprite> GetMovableAt(this Sprite self, int x, int y)
         {
             var map = self.Map;
-            if (map is null) return [];
+            if (map is null) return EmptySprites;
 
             var list = ObjectManager.GetObjects(
                 map,
                 i => i is not null && (int)i.Pos.X == x && (int)i.Pos.Y == y,
                 ObjectManager.Get.Movable);
 
-            return Normalize(list);
+            return NormalizeSprites(list);
         }
     }
 }
