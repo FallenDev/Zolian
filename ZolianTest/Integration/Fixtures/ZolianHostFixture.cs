@@ -21,26 +21,21 @@ public sealed class ZolianHostFixture : IAsyncLifetime
 
     public async ValueTask InitializeAsync()
     {
-        // If you used the csproj “CopyToOutputDirectory” approach:
         var configPath = Path.Combine(AppContext.BaseDirectory, "ServerConfig.json");
 
         _host = ZolianTestHost.BuildHost(configPath);
 
         await _host.StartAsync().ConfigureAwait(false);
 
-        // Gate: server is considered "up" when Running flips true
+        // Force DI to create ServerSetup (so Instance is assigned)
+        var setup = _host.Services.GetRequiredService<ServerSetup>();
+
+        // Gate on the instance we just resolved (not the static)
         await WaitUntilAsync(
-            predicate: static () => ServerSetup.Instance.Running,
+            predicate: () => setup.Running,
             timeout: TimeSpan.FromSeconds(30),
             poll: TimeSpan.FromMilliseconds(25)
         ).ConfigureAwait(false);
-
-        // Optional hardening (recommended): Running + one real invariant
-        // await WaitUntilAsync(
-        //     predicate: () => ServerSetup.Instance.Running && Setup.GlobalMapCache.Count > 0,
-        //     timeout: TimeSpan.FromSeconds(30),
-        //     poll: TimeSpan.FromMilliseconds(25)
-        // ).ConfigureAwait(false);
     }
 
     public async ValueTask DisposeAsync()

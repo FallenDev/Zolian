@@ -25,16 +25,16 @@ public static class ZolianTestHost
 {
     public static IHost BuildHost(string serverConfigJsonPath)
     {
-        var configDir = Path.GetDirectoryName(serverConfigJsonPath)
-                       ?? throw new InvalidOperationException("ServerConfig.json path invalid.");
+        if (!File.Exists(serverConfigJsonPath)) throw new FileNotFoundException("ServerConfig.json not found for integration host.", serverConfigJsonPath);
+
+        var configDir = Path.GetDirectoryName(serverConfigJsonPath) ?? throw new InvalidOperationException("ServerConfig.json path invalid.");
 
         var config = new ConfigurationBuilder()
             .SetBasePath(configDir)
             .AddJsonFile(Path.GetFileName(serverConfigJsonPath), optional: false, reloadOnChange: false)
             .Build();
 
-        var constants = config.GetSection("ServerConfig").Get<ServerConstants>()
-                        ?? throw new InvalidOperationException("Missing ServerConfig section in ServerConfig.json");
+        var constants = config.GetSection("ServerConfig").Get<ServerConstants>() ?? throw new InvalidOperationException("Missing ServerConfig section in ServerConfig.json");
 
         return Host.CreateDefaultBuilder()
             .ConfigureServices(services =>
@@ -52,7 +52,8 @@ public static class ZolianTestHost
                 services.Configure<ServerOptions>(config.GetSection("Content"));
 
                 services.AddSingleton<IServerConstants, ServerConstants>(_ => constants);
-                services.AddSingleton<IServerContext, ServerSetup>();
+                services.AddSingleton<ServerSetup>();
+                services.AddSingleton<IServerContext>(sp => sp.GetRequiredService<ServerSetup>());
                 services.AddSingleton<GameServerIServer, Server>();
 
                 services.AddCryptography();
