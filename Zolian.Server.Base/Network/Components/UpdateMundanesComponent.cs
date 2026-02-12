@@ -6,9 +6,9 @@ using Darkages.Sprites.Entity;
 
 namespace Darkages.Network.Components;
 
-public class UpdateMonstersComponent(WorldServer server) : WorldServerComponent(server)
+public class UpdateMundanesComponent(WorldServer server) : WorldServerComponent(server)
 {
-    private const int ComponentSpeed = 200;
+    private const int ComponentSpeed = 1500;
 
     protected internal override async Task Update()
     {
@@ -27,7 +27,7 @@ public class UpdateMonstersComponent(WorldServer server) : WorldServerComponent(
             {
                 var remainingMs = TicksToMs(nextTick - now);
                 if (remainingMs > 0)
-                    await Task.Delay(Math.Min(remainingMs, 50)).ConfigureAwait(false);
+                    await Task.Delay(Math.Min(remainingMs, 150)).ConfigureAwait(false);
 
                 continue;
             }
@@ -39,7 +39,7 @@ public class UpdateMonstersComponent(WorldServer server) : WorldServerComponent(
             // Clamp dt to avoid huge steps after pauses / debugger / GC / hitch
             dt = ClampDt(dt, TimeSpan.FromMilliseconds(tickMs * 2));
 
-            UpdateMonsterRoutine(dt);
+            UpdateMundanesRoutine(dt);
 
             // Schedule next tick; if we're behind by multiple ticks, skip ahead (no catch-up spiral)
             nextTick += MsToTicks(tickMs);
@@ -53,7 +53,7 @@ public class UpdateMonstersComponent(WorldServer server) : WorldServerComponent(
         }
     }
 
-    private void UpdateMonsterRoutine(TimeSpan dt)
+    private void UpdateMundanesRoutine(TimeSpan dt)
     {
         var now = DateTime.UtcNow;
 
@@ -61,43 +61,23 @@ public class UpdateMonstersComponent(WorldServer server) : WorldServerComponent(
         {
             var map = mapKvp.Value;
 
-            var monstersById = ObjectManager.GetObjects<Monster>(map, m => !m.Skulled);
-            if (monstersById.IsEmpty)
+            var mundanesById = ObjectManager.GetObjects<Mundane>(map, m => m != null);
+            if (mundanesById.IsEmpty)
                 continue;
 
-            foreach (var kv in monstersById)
+            foreach (var kv in mundanesById)
             {
-                var monster = kv.Value;
-                ProcessMonster(monster, dt, now);
+                var mundane = kv.Value;
+                ProcessMundane(mundane, dt, now);
             }
         }
     }
 
-    private static void ProcessMonster(Monster monster, TimeSpan elapsedTime, DateTime now)
+    private static void ProcessMundane(Mundane mundane, TimeSpan elapsedTime, DateTime now)
     {
-        if (monster == null) return;
-
-        if (monster.CurrentHp <= 0)
-        {
-            monster.Skulled = true;
-            if (monster.Target is Aisling aisling)
-                monster.AIScript?.OnDeath(aisling.Client);
-            else
-                monster.AIScript?.OnDeath();
-            return;
-        }
-
-        monster.AIScript?.Update(elapsedTime);
-        monster.LastUpdated = now;
-
-        // Handle buffs and debuffs
-        if (!monster.MonsterBuffAndDebuffStopWatch.IsRunning)
-            monster.MonsterBuffAndDebuffStopWatch.Start();
-
-        if (monster.MonsterBuffAndDebuffStopWatch.Elapsed.TotalMilliseconds < 1000) return;
-        monster.UpdateBuffs(monster);
-        monster.UpdateDebuffs(monster);
-        monster.MonsterBuffAndDebuffStopWatch.Restart();
+        if (mundane == null) return;
+        mundane.Update(elapsedTime);
+        mundane.LastUpdated = now;
     }
 
     private static TimeSpan ClampDt(TimeSpan dt, TimeSpan max) => dt < TimeSpan.Zero ? TimeSpan.Zero : (dt > max ? max : dt);

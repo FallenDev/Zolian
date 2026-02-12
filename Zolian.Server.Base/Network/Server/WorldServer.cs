@@ -54,18 +54,10 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
     public ClientPacketLogger ClientPacketLogger { get; } = new();
     private readonly MServerTable _serverTable;
     private static readonly string[] GameMastersIPs = ServerSetup.Instance.GameMastersIPs;
-    public static readonly Lock MapReloadLock = new();
+    public readonly Lock MapReloadLock = new();
     public readonly MetafileManager MetafileManager;
     public FrozenDictionary<int, Metafile> Metafiles { get; set; }
     private ConcurrentDictionary<Type, WorldServerComponent> _serverComponents;
-    private readonly WorldServerTimer _trapTimer = new(TimeSpan.FromSeconds(1));
-    private const int GameSpeed = 50;
-
-    // Subsystem intervals (ms)
-    private const int MonstersIntervalMs = 200;       // 5x per second
-    private const int MundanesIntervalMs = 1500;      // 1.5 seconds
-    private const int GroundItemsIntervalMs = 60000;  // 60 seconds
-    private const int GroundMoneyIntervalMs = 60000;  // 60 seconds
 
     // Expose logged-in players for server components and scripts
     public IEnumerable<Aisling> Aislings => ClientRegistry.Where(c => c is { Aisling.LoggedIn: true }).Select(c => c.Aisling);
@@ -108,19 +100,15 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
     /// </summary>
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        _ = base.ExecuteAsync(stoppingToken);
+        _ = base.ExecuteAsync(stoppingToken).ConfigureAwait(false);
         ServerSetup.Instance.Running = true;
 
-        UpdateComponentsRoutine();
+        var tasks = new List<Task>(_serverComponents.Count);
 
-        var tasks = new Task[]
-            {
-                MapsLoopAsync(stoppingToken),
-                TrapsLoopAsync(stoppingToken),
-                MundanesLoopAsync(stoppingToken),
-                GroundItemsLoopAsync(stoppingToken),
-                GroundMoneyLoopAsync(stoppingToken)
-            };
+        foreach (var component in _serverComponents.Values)
+        {
+            tasks.Add(component.Update());
+        }
 
         ServerSetup.EventsLogger("Server loops started!");
 
@@ -163,331 +151,15 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
             [typeof(MoonPhaseComponent)] = new MoonPhaseComponent(this),
             [typeof(ClientCreationLimit)] = new ClientCreationLimit(this),
             [typeof(UpdateClientsComponent)] = new UpdateClientsComponent(this),
-            [typeof(UpdateMonstersComponent)] = new UpdateMonstersComponent(this)
+            [typeof(UpdateGroundObjectsComponent)] = new UpdateGroundObjectsComponent(this),
+            [typeof(UpdateMapsComponent)] = new UpdateMapsComponent(this),
+            [typeof(UpdateMonstersComponent)] = new UpdateMonstersComponent(this),
+            [typeof(UpdateMundanesComponent)] = new UpdateMundanesComponent(this),
+            [typeof(UpdateTrapsComponent)] = new UpdateTrapsComponent(this)
         };
     }
 
     #endregion
-
-    #region Server Loop
-
-    private void UpdateComponentsRoutine()
-    {
-        foreach (var component in _serverComponents.Values)
-        {
-            _ = Task.Run(component.Update);
-        }
-    }
-
-    private static async Task MapsLoopAsync(CancellationToken ct)
-    {
-        using var timer = new PeriodicTimer(TimeSpan.FromMilliseconds(GameSpeed));
-
-        var last = Stopwatch.GetTimestamp();
-
-        while (ServerSetup.Instance.Running && await timer.WaitForNextTickAsync(ct).ConfigureAwait(false))
-        {
-            var now = Stopwatch.GetTimestamp();
-            var dt = Stopwatch.GetElapsedTime(last, now);
-            last = now;
-            // Allow slightly longer ticks for map updates to prevent timing issues, but hard clamp edge cases
-            dt = ClampDt(dt, GameSpeed * 2);
-
-            try
-            {
-                UpdateMaps(dt);
-            }
-            catch (Exception ex)
-            {
-                SentrySdk.CaptureException(ex);
-            }
-        }
-    }
-
-    private async Task TrapsLoopAsync(CancellationToken ct)
-    {
-        using var timer = new PeriodicTimer(TimeSpan.FromMilliseconds(GameSpeed));
-
-        var last = Stopwatch.GetTimestamp();
-
-        while (ServerSetup.Instance.Running && await timer.WaitForNextTickAsync(ct).ConfigureAwait(false))
-        {
-            var now = Stopwatch.GetTimestamp();
-            var dt = Stopwatch.GetElapsedTime(last, now);
-            last = now;
-            dt = ClampDt(dt, GameSpeed);
-
-            try
-            {
-                CheckTraps(dt);
-            }
-            catch (Exception ex)
-            {
-                SentrySdk.CaptureException(ex);
-            }
-        }
-    }
-
-    private static async Task MundanesLoopAsync(CancellationToken ct)
-    {
-        using var timer = new PeriodicTimer(TimeSpan.FromMilliseconds(MundanesIntervalMs));
-
-        var last = Stopwatch.GetTimestamp();
-
-        while (ServerSetup.Instance.Running && await timer.WaitForNextTickAsync(ct).ConfigureAwait(false))
-        {
-            var now = Stopwatch.GetTimestamp();
-            var dt = Stopwatch.GetElapsedTime(last, now);
-            last = now;
-            dt = ClampDt(dt, MundanesIntervalMs);
-
-            try
-            {
-                UpdateMundanes(dt);
-            }
-            catch (Exception ex)
-            {
-                SentrySdk.CaptureException(ex);
-            }
-        }
-    }
-
-    private static async Task GroundItemsLoopAsync(CancellationToken ct)
-    {
-        using var timer = new PeriodicTimer(TimeSpan.FromMilliseconds(60000));
-
-        while (ServerSetup.Instance.Running && await timer.WaitForNextTickAsync(ct).ConfigureAwait(false))
-        {
-            try
-            {
-                UpdateGroundItems();
-            }
-            catch (Exception ex)
-            {
-                SentrySdk.CaptureException(ex);
-            }
-        }
-    }
-
-    private static async Task GroundMoneyLoopAsync(CancellationToken ct)
-    {
-        using var timer = new PeriodicTimer(TimeSpan.FromMilliseconds(60000));
-
-        while (ServerSetup.Instance.Running && await timer.WaitForNextTickAsync(ct).ConfigureAwait(false))
-        {
-            try
-            {
-                UpdateGroundMoney();
-            }
-            catch (Exception ex)
-            {
-                SentrySdk.CaptureException(ex);
-            }
-        }
-    }
-
-    private static TimeSpan ClampDt(TimeSpan dt, int maxMs)
-    {
-        if (dt.TotalMilliseconds <= maxMs) return dt;
-        return TimeSpan.FromMilliseconds(maxMs);
-    }
-
-    private static void UpdateGroundItems()
-    {
-        try
-        {
-            var items = ServerSetup.Instance.GlobalMapCache
-                .SelectMany(kvp => ObjectManager.GetObjects<Item>(kvp.Value, i => i.ItemPane == Item.ItemPanes.Ground).Select(innerKvp => innerKvp.Value))
-                .ToArray();
-
-            if (items.Length == 0)
-                return;
-
-            var now = DateTime.UtcNow;
-
-            Parallel.ForEach(
-                items,
-                new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount },
-                item =>
-                {
-                    var abandonedDiff = now - item.AbandonedDate;
-
-                    // For corpses: remove if abandoned for more than 3 minutes
-                    if (abandonedDiff.TotalMinutes > 3 && item.Template.Name == "Corpse")
-                    {
-                        item.Remove();
-                        return;
-                    }
-
-                    if (abandonedDiff.TotalMinutes > 30)
-                        item.Remove();
-                });
-        }
-        catch (Exception ex)
-        {
-            SentrySdk.CaptureException(ex);
-        }
-    }
-
-    private static void UpdateGroundMoney()
-    {
-        try
-        {
-            var moneyDrops = ServerSetup.Instance.GlobalGroundMoneyCache.Select(kvp => kvp.Value).ToArray();
-            if (moneyDrops.Length == 0)
-                return;
-
-            var now = DateTime.UtcNow;
-
-            Parallel.ForEach(moneyDrops,
-                new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount },
-                money =>
-                {
-                    var abandonedDiff = now - money.AbandonedDate;
-
-                    if (abandonedDiff.TotalMinutes <= 30)
-                        return;
-
-                    if (ServerSetup.Instance.GlobalGroundMoneyCache.TryRemove(money.MoneyId, out _))
-                        money.Remove();
-                });
-        }
-        catch (Exception ex)
-        {
-            SentrySdk.CaptureException(ex);
-        }
-    }
-
-    private static void UpdateMundanes(TimeSpan elapsedTime)
-    {
-        try
-        {
-            var now = DateTime.UtcNow;
-
-            foreach (var mapKvp in ServerSetup.Instance.GlobalMapCache)
-            {
-                var area = mapKvp.Value;
-                var mundanesById = ObjectManager.GetObjects<Mundane>(area, m => m != null);
-
-                if (mundanesById.IsEmpty())
-                    continue;
-
-                foreach (var kv in mundanesById)
-                {
-                    var mundane = kv.Value;
-                    ProcessMundane(mundane, elapsedTime, now);
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            SentrySdk.CaptureException(ex);
-        }
-    }
-
-    private static void ProcessMundane(Mundane mundane, TimeSpan elapsedTime, DateTime now)
-    {
-        if (mundane == null) return;
-        mundane.Update(elapsedTime);
-        mundane.LastUpdated = now;
-    }
-
-    private void CheckTraps(TimeSpan elapsedTime)
-    {
-        if (!_trapTimer.Update(elapsedTime)) return;
-
-        var traps = ServerSetup.Instance.Traps.Values.ToArray();
-        foreach (var trap in traps)
-        {
-            try
-            {
-                trap?.Update();
-            }
-            catch (Exception ex)
-            {
-                SentrySdk.CaptureException(ex);
-            }
-        }
-    }
-
-    /// <summary>
-    /// Updates the state of all maps in the game world.
-    /// </summary>
-    /// <param name="elapsedTime"></param>
-    private static void UpdateMaps(TimeSpan elapsedTime)
-    {
-        try
-        {
-            foreach (var kvp in ServerSetup.Instance.GlobalMapCache)
-            {
-                try
-                {
-                    kvp.Value?.Update(elapsedTime);
-                }
-                catch (Exception ex)
-                {
-                    SentrySdk.CaptureException(ex);
-                }
-            }
-        }
-        catch
-        {
-            SentrySdk.CaptureMessage($"Map failed to update; Reload Maps initiated: {DateTime.UtcNow}");
-
-            // Ensure only one reload routine runs at a time and avoid races with readers
-            lock (MapReloadLock)
-            {
-                try
-                {
-                    // Take a snapshot of current mundanes and remove them safely.
-                    var mundanesSnapshot = ServerSetup.Instance.GlobalMundaneCache?.Values.ToArray() ?? Array.Empty<Mundane>();
-                    foreach (var npc in mundanesSnapshot)
-                    {
-                        try
-                        {
-                            ObjectManager.DelObject(npc);
-                        }
-                        catch (Exception delEx)
-                        {
-                            SentrySdk.CaptureException(delEx);
-                        }
-                    }
-
-                    // Try to clear caches in a best-effort, safe manner.
-                    // Use dynamic invocation so this code will attempt Clear() on
-                    // common collection types (ConcurrentDictionary, Dictionary, etc.)
-                    // and will not crash if Clear is not available.
-                    try { (ServerSetup.Instance.TempGlobalMapCache as dynamic)?.Clear(); } catch { }
-                    try { (ServerSetup.Instance.TempGlobalWarpTemplateCache as dynamic)?.Clear(); } catch { }
-                    try { (ServerSetup.Instance.GlobalMundaneCache as dynamic)?.Clear(); } catch { }
-
-                    // Reload authoritative sources from the database
-                    AreaStorage.Instance.CacheFromDatabase();
-                    DatabaseLoad.CacheFromDatabase(new WarpTemplate());
-
-                    // Notify connected players (snapshot to avoid modifying collection during iteration)
-                    var connectedPlayers = ServerSetup.Instance.Game.Aislings.ToArray();
-                    foreach (var connected in connectedPlayers)
-                    {
-                        try
-                        {
-                            connected.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=qSelf-Heal Routine Invokes Reload Maps");
-                            connected.Client.ClientRefreshed();
-                        }
-                        catch { }
-                    }
-                }
-                catch (Exception reloadEx)
-                {
-                    SentrySdk.CaptureException(reloadEx);
-                }
-            }
-        }
-    }
-
-    #endregion
-
-    #region Server Utilities
 
     public static void CancelIfCasting(WorldClient client)
     {
@@ -497,8 +169,6 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
 
         client.Aisling.IsCastingSpell = false;
     }
-
-    #endregion
 
     #region OnHandlers
 
