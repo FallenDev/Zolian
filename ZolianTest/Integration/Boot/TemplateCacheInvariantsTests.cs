@@ -50,4 +50,10 @@ public sealed class TemplateCacheInvariantsTests
         Assert.True(_fx.Setup.GlobalBuffCache.Count > 0);
         Assert.True(_fx.Setup.GlobalDeBuffCache.Count > 0);
     }
+
+    [Fact]
+    public void Monster_creation_script_is_configured()
+    {
+        Assert.False(string.IsNullOrWhiteSpace(ServerSetup.Instance.Config.MonsterCreationScript));
+    }
 }
