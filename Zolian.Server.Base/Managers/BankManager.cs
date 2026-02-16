@@ -21,6 +21,7 @@ public class BankManager
         client.Aisling.GoldPoints -= gold;
         client.Aisling.BankedGold += gold;
         client.SendAttributes(StatUpdateType.ExpGold);
+        client.Aisling.PlayerSaveDirty = true;
     }
 
     public void WithdrawGold(IWorldClient client, ulong gold)
@@ -28,6 +29,7 @@ public class BankManager
         client.Aisling.GoldPoints += gold;
         client.Aisling.BankedGold -= gold;
         client.SendAttributes(StatUpdateType.ExpGold);
+        client.Aisling.PlayerSaveDirty = true;
     }
 
     /// <summary>
@@ -87,6 +89,8 @@ public class BankManager
             ServerSetup.EventsLogger($"Issue pawning items from {client.RemoteIp} - {client.Aisling.Serial}");
             SentrySdk.CaptureException(ex);
         }
+
+        client.Aisling.PlayerSaveDirty = true;
     }
 
     private static DataTable ItemsDataTable()

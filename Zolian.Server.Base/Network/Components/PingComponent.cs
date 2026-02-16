@@ -43,13 +43,13 @@ public class PingComponent(WorldServer server) : WorldServerComponent(server)
 
     private static void Ping()
     {
-        foreach (var player in Server.Aislings)
+        Server.ForEachLoggedInAisling(static player =>
         {
             try
             {
-                player?.Client?.SendHeartBeat(HeartbeatFirst, HeartbeatSecond);
+                player.Client.SendHeartBeat(HeartbeatFirst, HeartbeatSecond);
             }
             catch { }
-        }
+        });
     }
 }

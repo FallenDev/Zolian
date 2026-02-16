@@ -230,9 +230,8 @@ public static class Commander
         if (string.IsNullOrWhiteSpace(who))
             return null;
 
-        var players = ServerSetup.Instance.Game.Aislings;
-        return players.FirstOrDefault(i => i != null &&
-                                           string.Equals(i.Username, who, StringComparison.CurrentCultureIgnoreCase));
+        ServerSetup.Instance.Game.TryGetLoggedInAisling(who, out Aisling player);
+        return player;
     }
 
     // --- Commands ---
@@ -245,49 +244,52 @@ public static class Commander
         if (!RequireDeath(client, "{=bRestricted GM Command - Shuts down server"))
             return;
 
-        var players = ServerSetup.Instance.Game.Aislings.ToList();
+        var formatted = "{=qDeath{=g: {=bServer maintenance in 1 minute.";
 
         ServerSetup.EventsLogger("--------------------------------------------", LogLevel.Warning);
         ServerSetup.EventsLogger("", LogLevel.Warning);
         ServerSetup.EventsLogger("--------------- Server Chaos ---------------", LogLevel.Warning);
 
-        foreach (var connected in players)
-        {
-            connected.Client.SendServerMessage(ServerMessageType.GroupChat,
-                "{=qDeath{=g: {=bServer maintenance in 1 minute.");
-
-            _ = ChaosPerPlayerTimersAsync(client, connected);
-        }
+        ServerSetup.Instance.Game.ForEachLoggedInAisling(state: (formatted, client),
+            action: static (player, s) =>
+            {
+                player.Client.SendServerMessage(ServerMessageType.GroupChat, s.formatted);
+                _ = ChaosPerPlayerTimersAsync(s.client, player);
+            });
     }
 
     private static async Task ChaosPerPlayerTimersAsync(WorldClient gmClient, Aisling connected)
     {
+        var ccMsg = "{=bServer maintenance was cancelled";
         try
         {
             await Task.Delay(15000).ConfigureAwait(false);
-            connected.Client.SendServerMessage(ServerMessageType.GroupChat,
-                "{=qDeath{=g: {=bServer maintenance in 45 seconds.");
+            if (!gmClient.Aisling.GameMasterChaosCancel)
+                connected.Client.SendServerMessage(ServerMessageType.GroupChat, "{=qDeath{=g: {=bServer maintenance in 45 seconds.");
 
             await Task.Delay(15000).ConfigureAwait(false);
-            connected.Client.SendServerMessage(ServerMessageType.GroupChat,
-                "{=qDeath{=g: {=bServer maintenance in 30 seconds.");
+            if (!gmClient.Aisling.GameMasterChaosCancel)
+                connected.Client.SendServerMessage(ServerMessageType.GroupChat, "{=qDeath{=g: {=bServer maintenance in 30 seconds.");
 
             await Task.Delay(15000).ConfigureAwait(false);
-            connected.Client.SendServerMessage(ServerMessageType.GroupChat,
-                "{=qDeath{=g: {=bServer maintenance in 15 seconds.");
+            if (!gmClient.Aisling.GameMasterChaosCancel)
+                connected.Client.SendServerMessage(ServerMessageType.GroupChat, "{=qDeath{=g: {=bServer maintenance in 15 seconds.");
 
             await Task.Delay(10000).ConfigureAwait(false);
-            connected.Client.SendServerMessage(ServerMessageType.GroupChat,
-                "{=qDeath{=g: {=bServer maintenance in 5 seconds.");
+            if (!gmClient.Aisling.GameMasterChaosCancel)
+                connected.Client.SendServerMessage(ServerMessageType.GroupChat, "{=qDeath{=g: {=bServer maintenance in 5 seconds.");
 
+            // Last chance to cancel chaos using /cc
             await Task.Delay(3000).ConfigureAwait(false);
 
             if (gmClient.Aisling.GameMasterChaosCancel)
             {
+                connected.Client.SendServerMessage(ServerMessageType.GroupChat, ccMsg);
                 gmClient.Aisling.GameMasterChaosCancel = false;
                 return;
             }
 
+            // Places server in maintenance mode
             ServerSetup.Instance.Running = false;
 
             connected.Client.SendServerMessage(ServerMessageType.GroupChat,
@@ -298,6 +300,7 @@ public static class Commander
 
             await Task.Delay(2000).ConfigureAwait(false);
 
+            // Kicks all players -- Throws them through the disconnect loop that saves and protects their state
             if (!gmClient.Aisling.GameMasterChaosCancel)
             {
                 connected.Client.CloseTransport();
@@ -326,18 +329,25 @@ public static class Commander
         client.Aisling.GameMasterChaosCancel = true;
     }
 
-    private static void Restart(object? ctx, ParsedArgs args)
+    private static async void Restart(object? ctx, ParsedArgs args)
     {
-        var players = ServerSetup.Instance.Game.Aislings.ToList();
-
+        var formatted = "{=g-Server Restarted-";
         ServerSetup.EventsLogger("---------------------------------------------", LogLevel.Warning);
         ServerSetup.EventsLogger("", LogLevel.Warning);
         ServerSetup.EventsLogger("------------- Server Restart Initiated -------------", LogLevel.Warning);
 
-        foreach (var connected in players)
-            connected.Client.SendServerMessage(ServerMessageType.GroupChat, "{=g-Server Restart-");
-
+        // Prevent further action until server restarts
         ServerSetup.Instance.Running = false;
+
+        ServerSetup.Instance.Game.ForEachLoggedInAisling(state: formatted,
+            action: static (player, msg) =>
+            {
+                player.Client.SendServerMessage(ServerMessageType.GroupChat, msg);
+                player.Client.CloseTransport();
+            });
+
+        // Ensure each player state had enough time to save
+        await Task.Delay(3000).ConfigureAwait(false);
         Environment.Exit(0);
     }
 
@@ -384,8 +394,8 @@ public static class Commander
 
         if (!player.GameSettings.GMPort)
         {
-            client.SendServerMessage(ServerMessageType.ActiveMessage, $"{player.Username}, has requested not to be summoned.");
-            player.Client.SendServerMessage(ServerMessageType.ActiveMessage,
+            client.SendServerMessage(ServerMessageType.AdminMessage, $"{player.Username}, has requested not to be summoned.");
+            player.Client.SendServerMessage(ServerMessageType.AdminMessage,
                 $"GM {client.Aisling.Username} wished to summon you, but was told you were busy");
             return;
         }
@@ -536,9 +546,6 @@ public static class Commander
             return;
 
         ServerSetup.EventsLogger($"{client.RemoteIp} used GM Command -Reload Maps- on character: {client.Aisling.Username}");
-
-        var players = ServerSetup.Instance.Game.Aislings;
-
         ServerSetup.EventsLogger("---------------------------------------------", LogLevel.Warning);
         ServerSetup.EventsLogger("------------- Maps Reloaded -------------", LogLevel.Warning);
 
@@ -553,12 +560,14 @@ public static class Commander
         AreaStorage.Instance.CacheFromDatabase();
         DatabaseLoad.CacheFromDatabase(new WarpTemplate());
 
-        foreach (var connected in players)
-        {
-            connected.Client.SendServerMessage(ServerMessageType.ActiveMessage,
-                $"{{=q{client.Aisling.Username} Invokes Reload Maps");
-            connected.Client.ClientRefreshed();
-        }
+        var formatted = $"{{=q{client.Aisling.Username} Invoked Reload Maps";
+
+        ServerSetup.Instance.Game.ForEachLoggedInAisling(state: formatted,
+            action: static (player, msg) =>
+            {
+                player.Client.SendServerMessage(ServerMessageType.AdminMessage, msg);
+                player.Client.ClientRefreshed();
+            });
     }
 
     private static void OnItemCreate(object? ctx, ParsedArgs args)

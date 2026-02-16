@@ -2,6 +2,7 @@
 
 using Darkages.Database;
 using Darkages.Network.Server;
+
 using Microsoft.Extensions.Logging;
 
 namespace Darkages.Network.Components;
@@ -40,11 +41,11 @@ public class PlayerSaveComponent(WorldServer server) : WorldServerComponent(serv
         }
     }
 
-    private async Task UpdatePlayerSaveAsync()
+    private static async Task UpdatePlayerSaveAsync()
     {
         try
         {
-            await StorageManager.AislingBucket.ServerSave([.. Server.Aislings]);
+            await StorageManager.AislingBucket.ServerSave(Server.Aislings);
         }
         catch (Exception e)
         {

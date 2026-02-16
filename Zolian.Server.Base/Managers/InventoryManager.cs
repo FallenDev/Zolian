@@ -115,6 +115,7 @@ public class InventoryManager : ObjectManager
             if (!succeeded) return;
             client.SendRemoveItemFromPane(item.InventorySlot);
             client.LastItemDropped = item;
+            client.Aisling.PlayerSaveDirty = true;
             UpdatePlayersWeight(client);
         }
         catch
@@ -150,6 +151,8 @@ public class InventoryManager : ObjectManager
                 client.Aisling.Inventory.Items.TryUpdate(item.InventorySlot, item, item);
                 UpdateSlot(client, item);
             }
+
+            client.Aisling.PlayerSaveDirty = true;
         }
         catch
         {
@@ -167,6 +170,7 @@ public class InventoryManager : ObjectManager
             RemoveFromInventory(client, toBeRemoved);
         }
 
+        client.Aisling.PlayerSaveDirty = true;
         return true;
     }
 

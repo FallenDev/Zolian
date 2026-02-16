@@ -46,25 +46,20 @@ public class ObjectComponent(WorldServer server) : WorldServerComponent(server)
 
     private static void UpdateObjects()
     {
-        foreach (var user in Server.Aislings)
+        Server.ForEachLoggedInAisling(static player =>
         {
-            if (user?.Client == null) continue;
-            if (!user.LoggedIn) continue;
-            if (user.Map is not { Ready: true }) continue;
+            if (player.Map is not { Ready: true }) return;
 
             try
             {
                 // Remove objects that left view
-                HandleObjectsOutOfView(user);
+                HandleObjectsOutOfView(player);
 
                 // Add objects that entered view
-                UpdateClientObjects(user);
+                UpdateClientObjects(player);
             }
-            catch
-            {
-                // ignored
-            }
-        }
+            catch { }
+        });
     }
 
     private static void UpdateClientObjects(Aisling user)

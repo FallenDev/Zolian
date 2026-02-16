@@ -58,9 +58,6 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
     public FrozenDictionary<int, Metafile> Metafiles { get; set; }
     private ConcurrentDictionary<Type, WorldServerComponent> _serverComponents;
 
-    // Expose logged-in players for server components and scripts
-    public IEnumerable<Aisling> Aislings => ClientRegistry.Where(c => c is { Aisling.LoggedIn: true }).Select(c => c.Aisling);
-
     public WorldServer(
         IClientRegistry<IWorldClient> clientRegistry,
         IClientFactory<WorldClient> clientProvider,
@@ -87,6 +84,81 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
         RegisterServerComponents();
         MetafileManager = new MetafileManager();
     }
+
+    #region Player Retrieval
+
+    /// <summary>
+    /// Gets an enumerable collection of logged-in Aislings from the client registry.
+    /// </summary>
+    /// <remarks>This property filters the client registry to return only those clients that have an Aisling
+    /// logged in. It is important to note that the collection may be empty if no Aislings are currently logged
+    /// in.</remarks>
+    public IEnumerable<Aisling> Aislings => ClientRegistry.Where(c => c is { Aisling.LoggedIn: true }).Select(c => c.Aisling);
+
+
+    /// <summary>
+    /// Exposes logged-in players for server components and scripts allocation-free
+    /// </summary>
+    public void ForEachLoggedInAisling(Action<Aisling> action)
+    {
+        foreach (var client in ClientRegistry)
+        {
+            if (client is { Aisling.LoggedIn: true })
+                action(client.Aisling);
+        }
+    }
+
+    /// <summary>
+    /// Exposes logged-in players with caller-provided state.
+    /// </summary>
+    public void ForEachLoggedInAisling<TState>(TState state, Action<Aisling, TState> action)
+    {
+        foreach (var client in ClientRegistry)
+        {
+            var a = client.Aisling;
+            if (a == null || !a.LoggedIn)
+                continue;
+
+            action(a, state);
+        }
+    }
+
+    /// <summary>
+    /// Exposes logged-in players for server components and scripts allocation-free
+    /// </summary>
+    public void ForEachLoggedOutAisling(Action<Aisling> action)
+    {
+        foreach (var client in ClientRegistry)
+        {
+            if (client is { Aisling.LoggedIn: false })
+                action(client.Aisling);
+        }
+    }
+
+    /// <summary>
+    /// Tries to find a logged-in player by username (case-insensitive) and allocation-free
+    /// </summary>
+    public bool TryGetLoggedInAisling(string name, out Aisling aisling)
+    {
+        foreach (var client in ClientRegistry)
+        {
+            var a = client.Aisling;
+
+            if (a == null || !a.LoggedIn)
+                continue;
+
+            if (string.Equals(a.Username, name, StringComparison.OrdinalIgnoreCase))
+            {
+                aisling = a;
+                return true;
+            }
+        }
+
+        aisling = null;
+        return false;
+    }
+
+    #endregion
 
     #region Server Init
 
@@ -868,14 +940,14 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
             }
 
             ServerSetup.ConnectionLogger($"Received successful redirect: {redirect.Id}");
-            var existingAisling = Aislings.FirstOrDefault(user => user.Username.EqualsI(redirect.Name));
+            TryGetLoggedInAisling(redirect.Name, out var loggedInAisling);
 
             //double logon, disconnect both clients
-            if (existingAisling == null && redirect.Type != ServerType.Lobby) return LoadAislingAsync(localClient, redirect);
+            if (loggedInAisling == null && redirect.Type != ServerType.Lobby) return LoadAislingAsync(localClient, redirect);
             localClient.CloseTransport();
             if (redirect.Type == ServerType.Lobby) return default;
             ServerSetup.ConnectionLogger($"Duplicate login, player {redirect.Name}, disconnecting both clients.");
-            existingAisling?.Client.CloseTransport();
+            loggedInAisling?.Client.CloseTransport();
             return default;
         }
     }
@@ -1101,7 +1173,7 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
         ValueTask InnerOnWorldListRequest(IWorldClient localClient)
         {
             localClient.LastWorldListRequest = readyTime;
-            localClient.SendWorldList(Aislings.ToList());
+            localClient.SendWorldList(Aislings);
 
             return default;
         }
@@ -1139,40 +1211,58 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
             switch (localArgs.TargetName)
             {
                 case "#" when client.Aisling.GameMaster:
-                    foreach (var player in Aislings)
                     {
-                        player.Client?.SendServerMessage(ServerMessageType.GroupChat, $"{{=b{client.Aisling.Username}{{=q: {localArgs.Message}");
+                        var formatted = $"{{-b:{client.Aisling.Username}}}{{=q: {localArgs.Message}}}";
+
+                        ForEachLoggedInAisling(state: formatted,
+                            action: static (player, msg) =>
+                        {
+                            player.Client?.SendServerMessage(ServerMessageType.GroupChat, msg);
+                        });
+
+                        return default;
                     }
-                    return default;
                 case "#" when client.Aisling.GameMaster != true:
                     client.SystemMessage("You cannot broadcast in this way.");
                     return default;
                 case "!":
-                    foreach (var player in Aislings)
                     {
-                        if (player.Client is null) continue;
-                        if (!player.GameSettings.GroupChat) continue;
-                        if (player.IgnoredList.ListContains(client.Aisling.Username)) continue;
-                        player.Client.SendServerMessage(ServerMessageType.GuildChat, $"{{=q{client.Aisling.Username}{{=a: {localArgs.Message}");
+                        var formatted = $"{{=q{client.Aisling.Username}{{=a: {localArgs.Message}";
+                        var sender = client.Aisling.Username;
+
+                        ForEachLoggedInAisling(state: (formatted, sender),
+                            action: static (player, s) =>
+                            {
+                                if (!player.GameSettings.GroupChat) return;
+                                if (player.IgnoredList.ListContains(s.sender)) return;
+
+                                player.Client?.SendServerMessage(ServerMessageType.GuildChat, s.formatted);
+                            });
+
+                        return default;
                     }
-                    return default;
                 case "!!" when client.Aisling.GroupParty?.PartyMembers != null:
-                    foreach (var player in Aislings)
                     {
-                        if (player.Client is null) continue;
-                        if (!player.GameSettings.GroupChat) continue;
-                        if (player.GroupParty == client.Aisling.GroupParty)
-                        {
-                            player.Client.SendServerMessage(ServerMessageType.GroupChat, $"[!{client.Aisling.Username}] {localArgs.Message}");
-                        }
+                        var formatted = $"[!{client.Aisling.Username}] {localArgs.Message}";
+                        var sender = client.Aisling;
+
+                        ForEachLoggedInAisling(state: (formatted, sender),
+                            action: static (player, s) =>
+                            {
+                                if (!player.GameSettings.GroupChat) return;
+                                if (player.IgnoredList.ListContains(s.sender.Username)) return;
+                                if (player.GroupParty != s.sender.GroupParty) return;
+                                player.Client?.SendServerMessage(ServerMessageType.GroupChat, s.formatted);
+                            });
+
+                        return default;
                     }
-                    return default;
                 case "!!" when client.Aisling.GroupParty?.PartyMembers == null:
                     client.SystemMessage("{=eYou're not in a group or party.");
                     return default;
             }
 
-            var targetAisling = Aislings.FirstOrDefault(player => player.Username.EqualsI(localArgs.TargetName));
+            TryGetLoggedInAisling(localArgs.TargetName, out var targetAisling);
 
             if (targetAisling == null)
             {

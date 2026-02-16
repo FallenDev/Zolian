@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 
 using Darkages.Network.Server;
+using Darkages.Sprites.Entity;
 
 namespace Darkages.Network.Components;
 
@@ -39,20 +40,14 @@ public class PlayerSaveDirtyComponent(WorldServer server) : WorldServerComponent
 
     private async Task UpdateDirtyPlayersAsync()
     {
-        try
+        Server.ForEachLoggedInAisling(async static player =>
         {
-            var dirtyPlayers = Server.Aislings.Where(a => a.PlayerSaveDirty).ToArray();
-            if (dirtyPlayers.Length == 0) return;
-
-            foreach (var aisling in dirtyPlayers)
+            try
             {
-                // Ensure cached player is still loggged in
-                if (aisling?.Client?.Aisling == null) continue;
-
-                // Player save, dirty flag is reset after successful save within AislingStorage.PlayerSaveRoutine()
-                _ = await aisling.Client.Save();
+                if (!player.PlayerSaveDirty) return;
+                _ = await player.Client.Save();
             }
-        }
-        catch { }
+            catch { }
+        });
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+
 using Darkages.Network.Server;
 
 namespace Darkages.Network.Components;
@@ -65,20 +66,14 @@ public class DayLightComponent(WorldServer server) : WorldServerComponent(server
         if (ServerSetup.Instance.LightLevel == start)
             ServerSetup.Instance.LightLevel = end;
 
-        foreach (var player in Server.Aislings)
+        Server.ForEachLoggedInAisling(static player =>
         {
-            if (player?.Client == null) continue;
-            if (!player.LoggedIn) continue;
-
             try
             {
                 player.Client.SendLightLevel((LightLevel)ServerSetup.Instance.LightLevel);
             }
-            catch (Exception ex)
-            {
-                SentrySdk.CaptureException(ex);
-            }
-        }
+            catch { }
+        });
 
         ServerSetup.Instance.LightPhase++;
     }

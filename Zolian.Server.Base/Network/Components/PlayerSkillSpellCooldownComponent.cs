@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+
 using Darkages.Network.Server;
 using Darkages.Sprites.Entity;
 using Darkages.Types;
@@ -48,11 +49,8 @@ public class PlayerSkillSpellCooldownComponent(WorldServer server) : WorldServer
     {
         if (!ServerSetup.Instance.Running) return;
 
-        foreach (var player in Server.Aislings)
+        Server.ForEachLoggedInAisling(static player =>
         {
-            if (player?.Client == null) continue;
-            if (!player.LoggedIn) continue;
-
             try
             {
                 var client = player.Client;
@@ -63,7 +61,7 @@ public class PlayerSkillSpellCooldownComponent(WorldServer server) : WorldServer
                 if (client.CooldownControl.Elapsed.TotalMilliseconds <
                     client.SkillSpellTimer.Delay.TotalMilliseconds)
                 {
-                    continue;
+                    return;
                 }
 
                 var hasteFlag = player.HasteFlag;
@@ -80,12 +78,8 @@ public class PlayerSkillSpellCooldownComponent(WorldServer server) : WorldServer
                 player.HasteFlag = false;
                 client.CooldownControl.Restart();
             }
-            catch (Exception ex)
-            {
-                SentrySdk.CaptureException(ex);
-
-            }
-        }
+            catch { }
+        });
     }
 
     private static void ProcessSkills(Aisling player, Skill skill, bool hasteFlag)

@@ -176,11 +176,13 @@ public class Forsaken(WorldServer server, Mundane mundane) : MundaneScript(serve
                         };
                         client.Aisling.LegendBook.AddLegend(legend, client);
                         client.SendAttributes(StatUpdateType.Full);
+                        var formatted = $"{{=c{client.Aisling.Username} has realigned their chi";
 
-                        foreach (var player in ServerSetup.Instance.Game.Aislings)
-                        {
-                            player.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=c{client.Aisling.Username} has realigned their chi");
-                        }
+                        ServerSetup.Instance.Game.ForEachLoggedInAisling(state: formatted,
+                            action: static (player, msg) =>
+                            {
+                                player.Client.SendServerMessage(ServerMessageType.ActiveMessage, msg);
+                            });
 
                         client.CloseDialog();
                     }
@@ -369,10 +371,14 @@ public class Forsaken(WorldServer server, Mundane mundane) : MundaneScript(serve
                                 client.Aisling.LegendBook.AddLegend(legend, client);
                                 client.Aisling.Stage = ClassStage.Advance;
                                 client.SendAttributes(StatUpdateType.Full);
-                                foreach (var player in ServerSetup.Instance.Game.Aislings)
-                                {
-                                    player.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=c{client.Aisling.Username} has advanced to Berserker");
-                                }
+                                var formatted = $"{{=c{client.Aisling.Username} has advanced to Berserker";
+
+                                ServerSetup.Instance.Game.ForEachLoggedInAisling(state: formatted,
+                                    action: static (player, msg) =>
+                                    {
+                                        player.Client.SendServerMessage(ServerMessageType.ActiveMessage, msg);
+                                    });
+
                                 client.CloseDialog();
                             }
                             else
@@ -434,10 +440,14 @@ public class Forsaken(WorldServer server, Mundane mundane) : MundaneScript(serve
                             client.Aisling.LegendBook.AddLegend(legend, client);
                             client.Aisling.Stage = ClassStage.Advance;
                             client.SendAttributes(StatUpdateType.Full);
-                            foreach (var announceClient in ServerSetup.Instance.Game.Aislings)
-                            {
-                                announceClient.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=c{client.Aisling.Username} has advanced to Defender");
-                            }
+                            var formatted = $"{{=c{client.Aisling.Username} has advanced to Defender";
+
+                            ServerSetup.Instance.Game.ForEachLoggedInAisling(state: formatted,
+                                action: static (player, msg) =>
+                                {
+                                    player.Client.SendServerMessage(ServerMessageType.ActiveMessage, msg);
+                                });
+
                             client.CloseDialog();
                         }
                         else
@@ -490,18 +500,22 @@ public class Forsaken(WorldServer server, Mundane mundane) : MundaneScript(serve
                             client.Aisling.LegendBook.AddLegend(legend, client);
                             client.Aisling.Stage = ClassStage.Advance;
                             client.SendAttributes(StatUpdateType.Full);
-                            foreach (var announceClient in ServerSetup.Instance.Game.Aislings)
-                            {
-                                announceClient.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=c{client.Aisling.Username} has advanced to Assassin");
-                            }
+                            var formatted = $"{{=c{client.Aisling.Username} has advanced to Assassin";
+
+                            ServerSetup.Instance.Game.ForEachLoggedInAisling(state: formatted,
+                                action: static (player, msg) =>
+                                {
+                                    player.Client.SendServerMessage(ServerMessageType.ActiveMessage, msg);
+                                });
+
                             client.CloseDialog();
                         }
                         else
                         {
                             var options = new List<Dialog.OptionsDataItem>
-                        {
-                            new (0x05, "Alright")
-                        };
+                            {
+                                new (0x05, "Alright")
+                            };
 
                             client.SendOptionsDialog(Mundane, "You currently do not meet the vitality requirement.", options.ToArray());
                         }
@@ -548,10 +562,14 @@ public class Forsaken(WorldServer server, Mundane mundane) : MundaneScript(serve
                                 client.Aisling.LegendBook.AddLegend(legend, client);
                                 client.Aisling.Stage = ClassStage.Advance;
                                 client.SendAttributes(StatUpdateType.Full);
-                                foreach (var announceClient in ServerSetup.Instance.Game.Aislings)
-                                {
-                                    announceClient.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=c{client.Aisling.Username} has advanced to Cleric");
-                                }
+                                var formatted = $"{{=c{client.Aisling.Username} has advanced to Cleric";
+
+                                ServerSetup.Instance.Game.ForEachLoggedInAisling(state: formatted,
+                                    action: static (player, msg) =>
+                                    {
+                                        player.Client.SendServerMessage(ServerMessageType.ActiveMessage, msg);
+                                    });
+
                                 client.CloseDialog();
                             }
                             else
@@ -613,10 +631,14 @@ public class Forsaken(WorldServer server, Mundane mundane) : MundaneScript(serve
                             client.Aisling.LegendBook.AddLegend(legend, client);
                             client.Aisling.Stage = ClassStage.Advance;
                             client.SendAttributes(StatUpdateType.Full);
-                            foreach (var announceClient in ServerSetup.Instance.Game.Aislings)
-                            {
-                                announceClient.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=c{client.Aisling.Username} has advanced to Arcanus");
-                            }
+                            var formatted = $"{{=c{client.Aisling.Username} has advanced to Arcanus";
+
+                            ServerSetup.Instance.Game.ForEachLoggedInAisling(state: formatted,
+                                action: static (player, msg) =>
+                                {
+                                    player.Client.SendServerMessage(ServerMessageType.ActiveMessage, msg);
+                                });
+
                             client.CloseDialog();
                         }
                         else
@@ -671,10 +693,14 @@ public class Forsaken(WorldServer server, Mundane mundane) : MundaneScript(serve
                                 client.Aisling.LegendBook.AddLegend(legend, client);
                                 client.Aisling.Stage = ClassStage.Advance;
                                 client.SendAttributes(StatUpdateType.Full);
-                                foreach (var announceClient in ServerSetup.Instance.Game.Aislings)
-                                {
-                                    announceClient.Client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=c{client.Aisling.Username} has advanced to Monk");
-                                }
+                                var formatted = $"{{=c{client.Aisling.Username} has advanced to Monk";
+
+                                ServerSetup.Instance.Game.ForEachLoggedInAisling(state: formatted,
+                                    action: static (player, msg) =>
+                                    {
+                                        player.Client.SendServerMessage(ServerMessageType.ActiveMessage, msg);
+                                    });
+
                                 client.CloseDialog();
                             }
                             else
@@ -754,11 +780,13 @@ public class Forsaken(WorldServer server, Mundane mundane) : MundaneScript(serve
                         client.Aisling.LegendBook.AddLegend(legend, client);
                         client.Aisling.Stage = ClassStage.Master;
                         client.SendAttributes(StatUpdateType.Full);
-                        foreach (var announceClient in ServerSetup.Instance.Game.Aislings)
-                        {
-                            announceClient.Client.SendServerMessage(ServerMessageType.ActiveMessage,
-                                $"{{=c{client.Aisling.Username} has mastered the path of {client.Aisling.Path}");
-                        }
+                        var formatted = $"{{=c{client.Aisling.Username} has mastered the path of {client.Aisling.Path}";
+
+                        ServerSetup.Instance.Game.ForEachLoggedInAisling(state: formatted,
+                            action: static (player, msg) =>
+                            {
+                                player.Client.SendServerMessage(ServerMessageType.ActiveMessage, msg);
+                            });
 
                         var options = new List<Dialog.OptionsDataItem>
                         {

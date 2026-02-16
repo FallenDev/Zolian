@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+
 using Darkages.Database;
 using Darkages.Network.Server;
 using Darkages.Templates;
@@ -45,18 +46,20 @@ public class MessageClearComponent(WorldServer server) : WorldServerComponent(se
         var now = DateTime.UtcNow;
         var timeout = TimeSpan.FromSeconds(5);
 
-        foreach (var player in Server.Aislings)
-        {
-            if (player?.Client == null) continue;
-            if (!player.LoggedIn) continue;
-
-            var sinceLast = now - player.Client.LastMessageSent;
-            if (sinceLast > timeout)
+        Server.ForEachLoggedInAisling(state: (now, timeout),
+            action: static (player, s) =>
             {
-                // Clear the orange bar message
-                player.Client.SendServerMessage(ServerMessageType.OrangeBar1, "\u0000");
-            }
-        }
+                try
+                {
+                    var sinceLast = s.now - player.Client.LastMessageSent;
+                    if (sinceLast > s.timeout)
+                    {
+                        // Clear the orange bar message
+                        player.Client.SendServerMessage(ServerMessageType.OrangeBar1, "\u0000");
+                    }
+                }
+                catch { }
+            });
     }
 
     private static void RefreshBoardCache()

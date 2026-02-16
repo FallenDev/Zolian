@@ -41,43 +41,42 @@ public class UpdateClientsComponent(WorldServer server) : WorldServerComponent(s
 
     private void UpdateClientRoutine()
     {
-        var players = Server.Aislings.ToArray();
-        if (players.Length == 0) return;
-
-        for (int i = 0; i < players.Length; i++)
+        Server.ForEachLoggedInAisling(static player =>
         {
-            var player = players[i];
-            if (player == null) continue;
-            var client = player.Client;
-            if (client == null) continue;
-
             try
             {
-                if (!player.LoggedIn)
+                var client = player.Client;
+                if (client == null) return;
+
+                try
                 {
+                    if (!player.LoggedIn)
+                    {
+                        try
+                        {
+                            client.CloseTransport();
+                            ServerSetup.Instance.Game.WorldClientRegistry.TryRemove(client.Id, out _);
+                        }
+                        catch { }
+                        return;
+                    }
+
+                    client.Update();
+                }
+                catch (Exception ex)
+                {
+                    SentrySdk.CaptureException(ex);
+
                     try
                     {
                         client.CloseTransport();
                         ServerSetup.Instance.Game.WorldClientRegistry.TryRemove(client.Id, out _);
                     }
                     catch { }
-                    continue;
+                    return;
                 }
-
-                client.Update();
             }
-            catch (Exception ex)
-            {
-                SentrySdk.CaptureException(ex);
-
-                try
-                {
-                    client.CloseTransport();
-                    ServerSetup.Instance.Game.WorldClientRegistry.TryRemove(client.Id, out _);
-                }
-                catch { }
-                continue;
-            }
-        }
+            catch { }
+        });
     }
 }

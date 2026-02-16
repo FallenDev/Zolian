@@ -102,7 +102,7 @@ public class UpdateMapsComponent(WorldServer server) : WorldServerComponent(serv
                     try { (ServerSetup.Instance.TempGlobalMapCache as dynamic)?.Clear(); } catch { }
                     try { (ServerSetup.Instance.TempGlobalWarpTemplateCache as dynamic)?.Clear(); } catch { }
                     try { (ServerSetup.Instance.GlobalMundaneCache as dynamic)?.Clear(); } catch { }
-                    
+
                     // Clear player activity
                     MapActivityGate.ClearAll();
 
@@ -111,16 +111,18 @@ public class UpdateMapsComponent(WorldServer server) : WorldServerComponent(serv
                     DatabaseLoad.CacheFromDatabase(new WarpTemplate());
 
                     // Notify connected players (snapshot to avoid modifying collection during iteration)
-                    var connectedPlayers = ServerSetup.Instance.Game.Aislings.ToArray();
-                    foreach (var connected in connectedPlayers)
-                    {
-                        try
+                    var formatted = "{=qSelf-Heal Routine Invokes Reload Maps";
+
+                    Server.ForEachLoggedInAisling(state: formatted,
+                        action: static (player, msg) =>
                         {
-                            connected.Client.SendServerMessage(ServerMessageType.ActiveMessage, "{=qSelf-Heal Routine Invokes Reload Maps");
-                            connected.Client.ClientRefreshed();
-                        }
-                        catch { }
-                    }
+                            try
+                            {
+                                player.Client.SendServerMessage(ServerMessageType.ActiveMessage, msg);
+                                player.Client.ClientRefreshed();
+                            }
+                            catch { }
+                        });
                 }
                 catch (Exception reloadEx)
                 {

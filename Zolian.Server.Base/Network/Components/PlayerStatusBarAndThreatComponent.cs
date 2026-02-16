@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+
 using Darkages.Network.Server;
 using Darkages.Sprites.Entity;
 
@@ -39,22 +40,16 @@ public class PlayerStatusBarAndThreatComponent(WorldServer server) : WorldServer
         }
     }
 
-    private void UpdatePlayerStatusBarAndThreat()
+    private static void UpdatePlayerStatusBarAndThreat()
     {
-        foreach (var player in Server.Aislings)
+        Server.ForEachLoggedInAisling(static player =>
         {
-            if (player?.Client == null) continue;
-            if (!player.LoggedIn) continue;
-
             try
             {
                 ProcessUpdates(player);
             }
-            catch (Exception ex)
-            {
-                SentrySdk.CaptureException(ex);
-            }
-        }
+            catch { }
+        });
     }
 
     private static void ProcessUpdates(Aisling player)

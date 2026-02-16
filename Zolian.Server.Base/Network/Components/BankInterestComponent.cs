@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+
 using Darkages.Network.Server;
 using Darkages.Sprites.Entity;
 
@@ -40,22 +41,16 @@ public class BankInterestComponent(WorldServer server) : WorldServerComponent(se
         }
     }
 
-    private void AccrueInterest()
+    private static void AccrueInterest()
     {
-        foreach (var player in Server.Aislings)
+        Server.ForEachLoggedInAisling(static player =>
         {
-            if (player?.Client == null) continue;
-            if (!player.LoggedIn) continue;
-
             try
             {
                 ApplyInterest(player);
             }
-            catch (Exception ex)
-            {
-                SentrySdk.CaptureException(ex);
-            }
-        }
+            catch { }
+        });
     }
 
     private static void ApplyInterest(Aisling player)

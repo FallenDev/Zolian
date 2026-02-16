@@ -54,6 +54,7 @@ public class EquipmentManager
         if (displaySlot is <= 0 or > 18) return;
         if (item?.Template == null) return;
         if (!item.Template.Flags.FlagIsSet(ItemFlags.Equipable)) return;
+        Client.Aisling.PlayerSaveDirty = true;
 
         HandleEquipmentSwap(displaySlot, item);
     }
@@ -136,6 +137,7 @@ public class EquipmentManager
         if (givenBack) return;
 
         AddItemToBankOnIssue(itemObj);
+        Client.Aisling.PlayerSaveDirty = true;
     }
 
     private bool AddItemToBankOnIssue(Item item)
@@ -168,6 +170,7 @@ public class EquipmentManager
         }
 
         Client.SendAttributes(StatUpdateType.WeightGold);
+        Client.Aisling.PlayerSaveDirty = true;
     }
 
     private bool HandleUnreturnedItem(Item itemObj)

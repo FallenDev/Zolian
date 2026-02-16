@@ -191,13 +191,16 @@ public class DoubleXp(Spell spell) : SpellScript(spell)
 
     public override void OnUse(Sprite sprite, Sprite target)
     {
-        foreach (var player in ServerSetup.Instance.Game.Aislings)
+        ServerSetup.Instance.Game.ForEachLoggedInAisling(state: (sprite, spell, _buff),
+            action: static (player, s) =>
         {
-            _buff = new BuffDoubleExperience();
-            if (player == null) continue;
-            if (!player.LoggedIn) continue;
-            GlobalSpellMethods.EnhancementOnSuccess(sprite, player, Spell, _buff);
-        }
+            try
+            {
+                s._buff = new BuffDoubleExperience();
+                GlobalSpellMethods.EnhancementOnSuccess(s.sprite, player, s.spell, s._buff);
+            }
+            catch { }
+        });
     }
 }
 
@@ -213,12 +216,15 @@ public class TripleXp(Spell spell) : SpellScript(spell)
 
     public override void OnUse(Sprite sprite, Sprite target)
     {
-        foreach (var player in ServerSetup.Instance.Game.Aislings)
-        {
-            _buff = new BuffTripleExperience();
-            if (player == null) continue;
-            if (!player.LoggedIn) continue;
-            GlobalSpellMethods.EnhancementOnSuccess(sprite, player, Spell, _buff);
-        }
+        ServerSetup.Instance.Game.ForEachLoggedInAisling(state: (sprite, spell, _buff),
+            action: static (player, s) =>
+            {
+                try
+                {
+                    s._buff = new BuffTripleExperience();
+                    GlobalSpellMethods.EnhancementOnSuccess(s.sprite, player, s.spell, s._buff);
+                }
+                catch { }
+            });
     }
 }

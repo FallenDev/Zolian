@@ -78,6 +78,7 @@ public class WorldClient : WorldClientBase, IWorldClient
     public long HeartBeatStartTimestamp;
     public int HeartBeatIdx;
     public int HeartBeatCount;
+    public int HeartBeatSampleSum;
     public readonly int[] HeartBeatSamplesMs = new int[3];
     public int LastRttMs { get; set; }
     public int RollingRtt15sMs { get; set; }
@@ -2546,14 +2547,7 @@ public class WorldClient : WorldClientBase, IWorldClient
     {
         if (Interlocked.CompareExchange(ref HeartBeatInFlight, 1, 0) != 0) return;
         Volatile.Write(ref HeartBeatStartTimestamp, Stopwatch.GetTimestamp());
-
-        var args = new HeartBeatResponseArgs
-        {
-            First = first,
-            Second = second
-        };
-
-        Send(args);
+        Send(new HeartBeatResponseArgs { First = first, Second = second });
     }
 
     /// <summary>

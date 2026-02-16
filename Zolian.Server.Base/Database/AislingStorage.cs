@@ -335,13 +335,14 @@ public record AislingStorage : Sql, IEqualityOperators<AislingStorage, AislingSt
     /// Saves all players states
     /// Utilizes an active connection that self-heals if closed
     /// </summary>
-    public async Task ServerSave(List<Aisling> players, CancellationToken ct = default)
+    public async Task ServerSave(IEnumerable<Aisling> players, CancellationToken ct = default)
     {
-        if (players.Count == 0) return;
+        var count = players.Count();
+        if (count == 0) return;
         const int maxConcurrency = 10;
         using var throttler = new SemaphoreSlim(maxConcurrency, maxConcurrency);
 
-        var tasks = new List<Task>(players.Count);
+        var tasks = new List<Task>(count);
 
         foreach (var p in players)
         {

@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+
 using Darkages.Enums;
 using Darkages.Network.Client;
 using Darkages.Network.Server;
@@ -41,22 +42,16 @@ public class PlayerRegenerationComponent(WorldServer server) : WorldServerCompon
         }
     }
 
-    private void UpdatePlayerRegeneration()
+    private static void UpdatePlayerRegeneration()
     {
-        foreach (var player in Server.Aislings)
+        Server.ForEachLoggedInAisling(static player =>
         {
-            if (player?.Client == null) continue;
-            if (!player.LoggedIn) continue;
-
             try
             {
                 ProcessUpdates(player);
             }
-            catch (Exception ex)
-            {
-                SentrySdk.CaptureException(ex);
-            }
-        }
+            catch { }
+        });
     }
 
     private static void ProcessUpdates(Aisling player)
