@@ -9,8 +9,6 @@ namespace Darkages.Object;
 
 public abstract class ObjectService
 {
-    private static readonly ConcurrentDictionary<(int MapId, Type SpriteType), Tuple<int, Type>> _keyCache = new();
-
     /// <summary>
     /// Hot-path cache so we don't pay:
     ///  - Tuple key resolution
@@ -26,10 +24,6 @@ public abstract class ObjectService
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static Tuple<int, Type> GetKey(int mapId, Type spriteType) =>
-        _keyCache.GetOrAdd((mapId, spriteType), static k => Tuple.Create(k.MapId, k.SpriteType));
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static bool TryGetCollection<T>(Area map, out SpriteCollection<T> collection) where T : Sprite
     {
         // Fast path: already resolved for this mapId
@@ -37,9 +31,7 @@ public abstract class ObjectService
             return true;
 
         // Slow path: resolve from Area.SpriteCollections once, then cache
-        var key = GetKey(map.ID, typeof(T));
-
-        if (!map.SpriteCollections.TryGetValue(key, out var objCollection) || objCollection is not SpriteCollection<T> typed)
+        if (!map.SpriteCollections.TryGetValue((map.ID, typeof(T)), out var objCollection) || objCollection is not SpriteCollection<T> typed)
         {
             collection = null!;
             return false;
@@ -116,6 +108,23 @@ public abstract class ObjectService
         if (!TryGetCollection<T>(map, out var spriteCollection)) return;
         spriteCollection.FillSpriteBucket(predicate, bucket);
     }
+
+    public static Sprite QueryFirstSprite<T>(Area map, Predicate<Sprite> predicate) where T : Sprite
+    {
+        if (map is null) return default;
+
+        return TryGetCollection<T>(map, out var spriteCollection)
+            ? spriteCollection.QueryFirstSprite(predicate)
+            : default;
+    }
+
+    public static void ForEachSpriteBucket<T>(Area map, Predicate<Sprite> predicate, Action<Sprite> action) where T : Sprite
+    {
+        if (map is null) return;
+
+        if (!TryGetCollection<T>(map, out var spriteCollection)) return;
+        spriteCollection.ForEachSpriteBucket(predicate, action);
+    }
 }
 
 public sealed class SpriteCollection<T> where T : Sprite
@@ -190,6 +199,28 @@ public sealed class SpriteCollection<T> where T : Sprite
             var s = kv.Value;
             if (s != null && predicate(s))
                 bucket.Add(s);
+        }
+    }
+
+    public Sprite QueryFirstSprite(Predicate<Sprite> predicate)
+    {
+        foreach (var kv in Sprites)
+        {
+            var s = kv.Value;
+            if (s != null && predicate(s))
+                return s;
+        }
+
+        return default;
+    }
+
+    public void ForEachSpriteBucket(Predicate<Sprite> predicate, Action<Sprite> action)
+    {
+        foreach (var kv in Sprites)
+        {
+            var s = kv.Value;
+            if (s != null && predicate(s))
+                action(s);
         }
     }
 }

@@ -64,48 +64,45 @@ public class ObjectComponent(WorldServer server) : WorldServerComponent(server)
 
     private static void UpdateClientObjects(Aisling user)
     {
-        // Lazy initialize, the animation payload list only if we encounter an enchantable item
+        // Lazy initialize payload buckets only if needed.
         List<(ushort anim, Position pos)> animPayload = null;
+        List<Sprite> payload = null;
 
-        // Get nearby sprites
-        var objects = ObjectManager
-            .GetObjects(user.Map, s => s.WithinRangeOf(user, 13), ObjectManager.Get.All)
-            .ToArray();
-
-        var payload = new List<Sprite>(objects.Length);
-
-        foreach (var obj in objects)
-        {
-            if (obj == null) continue;
-
-            switch (obj)
+        ObjectManager.ForEachObject(user.Map, s => s.WithinRangeOf(user, 13), ObjectManager.Get.All,
+            obj =>
             {
-                case Item item:
-                    {
-                        if (!user.SpritesInView.ContainsKey(item.ItemVisibilityId))
-                            payload.Add(item);
+                switch (obj)
+                {
+                    case Item item:
+                        {
+                            if (!user.SpritesInView.ContainsKey(item.ItemVisibilityId))
+                            {
+                                payload ??= [];
+                                payload.Add(item);
+                            }
 
-                        if (!user.GameSettings.GroundQualities) break;
-                        if (!item.Template.Enchantable) break;
+                            if (!user.GameSettings.GroundQualities) break;
+                            if (!item.Template.Enchantable) break;
 
-                        var anim = GetQualityAnimId(item);
-                        if (anim == 0) break;
+                            var anim = GetQualityAnimId(item);
+                            if (anim == 0) break;
 
-                        // Initialize once per update loop -- pre-size initially to 4
-                        animPayload ??= new List<(ushort anim, Position pos)>(4);
-                        var itemPos = item.Position;
-                        animPayload.Add((anim, itemPos));
-                    }
-                    break;
+                            animPayload ??= new List<(ushort anim, Position pos)>(4);
+                            animPayload.Add((anim, item.Position));
+                        }
+                        break;
 
-                case Aisling or Monster or Mundane or Money:
-                    if (!user.SpritesInView.ContainsKey(obj.Serial))
-                        payload.Add(obj);
-                    break;
-            }
-        }
+                    case Aisling or Monster or Mundane or Money:
+                        if (!user.SpritesInView.ContainsKey(obj.Serial))
+                        {
+                            payload ??= [];
+                            payload.Add(obj);
+                        }
+                        break;
+                }
+            });
 
-        if (payload.Count > 0)
+        if (payload is { Count: > 0 })
         {
             var toUpdate = AddObjects(payload, user);
             if (toUpdate.Count > 0)
@@ -173,7 +170,7 @@ public class ObjectComponent(WorldServer server) : WorldServerComponent(server)
 
     private static List<Sprite> AddObjects(List<Sprite> payload, Aisling self)
     {
-        var toUpdate = new List<Sprite>();
+        var toUpdate = new List<Sprite>(payload.Count);
         if (self == null) return toUpdate;
 
         foreach (var obj in payload)

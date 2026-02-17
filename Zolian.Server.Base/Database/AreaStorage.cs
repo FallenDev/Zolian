@@ -1,17 +1,18 @@
 ﻿using System.Collections.Frozen;
 
 using Chaos.Cryptography;
+
 using Darkages.Common;
 using Darkages.Enums;
 using Darkages.Network.Server;
 using Darkages.Object;
 using Darkages.ScriptingBase;
-using Darkages.Sprites;
 using Darkages.Sprites.Entity;
 using Darkages.Types;
 
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
+
 using MapFlags = Darkages.Enums.MapFlags;
 
 namespace Darkages.Database;
@@ -114,11 +115,11 @@ public record AreaStorage
     {
         foreach (var map in ServerSetup.Instance.GlobalMapCache.Values)
         {
-            map.SpriteCollections.TryAdd(Tuple.Create(map.ID, typeof(Monster)), new SpriteCollection<Monster>());
-            map.SpriteCollections.TryAdd(Tuple.Create(map.ID, typeof(Aisling)), new SpriteCollection<Aisling>());
-            map.SpriteCollections.TryAdd(Tuple.Create(map.ID, typeof(Mundane)), new SpriteCollection<Mundane>());
-            map.SpriteCollections.TryAdd(Tuple.Create(map.ID, typeof(Item)), new SpriteCollection<Item>());
-            map.SpriteCollections.TryAdd(Tuple.Create(map.ID, typeof(Money)), new SpriteCollection<Money>());
+            map.SpriteCollections.TryAdd((map.ID, typeof(Monster)), new SpriteCollection<Monster>());
+            map.SpriteCollections.TryAdd((map.ID, typeof(Aisling)), new SpriteCollection<Aisling>());
+            map.SpriteCollections.TryAdd((map.ID, typeof(Mundane)), new SpriteCollection<Mundane>());
+            map.SpriteCollections.TryAdd((map.ID, typeof(Item)), new SpriteCollection<Item>());
+            map.SpriteCollections.TryAdd((map.ID, typeof(Money)), new SpriteCollection<Money>());
         }
     }
 }
