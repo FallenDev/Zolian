@@ -34,6 +34,7 @@ public class ObjectManager
     public static Sprite GetObject(Area map, Predicate<Sprite> p, Get selections) => GetObjects(map, p, selections).FirstOrDefault();
     public static ConcurrentDictionary<long, T> GetObjects<T>(Area map, Predicate<T> p) where T : Sprite => map is null ? new ConcurrentDictionary<long, T>() : ObjectService.QueryAllWithPredicate(map, p);
     public static void FillObjects<T>(Area map, Predicate<T> p, List<T> results) where T : Sprite => ObjectService.FillWithPredicate(map, p, results);
+    public static void ForEachObject<T>(Area map, Predicate<T> p, Action<T> action) where T : Sprite => ObjectService.ForEachWithPredicate(map, p, action);
 
     /// <summary>
     /// This avoids allocating the intermediate List in GetObjects()

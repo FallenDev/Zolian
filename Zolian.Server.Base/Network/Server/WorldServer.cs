@@ -2450,16 +2450,28 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
 
             client.LastRttMs = rttMs;
 
-            // Rolling mean calculation
-            client.HeartBeatSamplesMs[client.HeartBeatIdx] = rttMs;
-            client.HeartBeatIdx = (client.HeartBeatIdx + 1) % client.HeartBeatSamplesMs.Length;
-            if (client.HeartBeatCount < client.HeartBeatSamplesMs.Length) client.HeartBeatCount++;
+            // Rolling mean calculation with O(1) update.
+            var samples = client.HeartBeatSamplesMs;
+            var sampleCount = client.HeartBeatCount;
+            var sampleIdx = client.HeartBeatIdx;
+            var sampleSum = client.HeartBeatSampleSum;
 
-            int sum = 0;
-            for (int i = 0; i < client.HeartBeatCount; i++)
-                sum += client.HeartBeatSamplesMs[i];
+            if (sampleCount == samples.Length)
+                sampleSum -= samples[sampleIdx];
+            else
+                sampleCount++;
 
-            client.RollingRtt15sMs = (int)Math.Round(sum / (double)client.HeartBeatCount);
+            samples[sampleIdx] = rttMs;
+            sampleSum += rttMs;
+            sampleIdx++;
+
+            if (sampleIdx == samples.Length)
+                sampleIdx = 0;
+
+            client.HeartBeatCount = sampleCount;
+            client.HeartBeatIdx = sampleIdx;
+            client.HeartBeatSampleSum = sampleSum;
+            client.RollingRtt15sMs = (int)Math.Round(sampleSum / (double)sampleCount);
 
             // EMA Smoothing
             const double alpha = 0.25;

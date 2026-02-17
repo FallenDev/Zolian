@@ -1,5 +1,4 @@
-﻿using System.Collections.Concurrent;
-using System.Numerics;
+﻿using System.Numerics;
 using System.Security.Cryptography;
 
 using Chaos.Geometry;
@@ -268,9 +267,7 @@ public class Movable : Identifiable
     {
         try
         {
-            var selectedPlayers = new ConcurrentDictionary<long, Aisling>();
-            AddPlayersToSelection(selectedPlayers, WithinRangeOf);
-            SendToSelectedPlayers(selectedPlayers, c => c.SendAnimation(targetEffect, position, targetSerial, speed, casterEffect, casterSerial));
+            SendToAislings(WithinRangeOf, c => c.SendAnimation(targetEffect, position, targetSerial, speed, casterEffect, casterSerial), filterAnimations: true);
         }
         catch { }
 
@@ -285,7 +282,7 @@ public class Movable : Identifiable
     /// <param name="definer">Specific users, Scope must also be "DefinedAislings"</param>
     public void SendTargetedClientMethod(PlayerScope op, Action<WorldClient> method, IEnumerable<Aisling> definer = null)
     {
-        var selectedPlayers = new ConcurrentDictionary<long, Aisling>();
+        var filterAnimations = method.Method.Name.Contains("SendArmorBodyAnimationNearby") || method.Method.Name.Contains("SendAnimationNearby");
 
         try
         {
@@ -293,66 +290,42 @@ public class Movable : Identifiable
             {
                 // Player, Monster, Mundane Scope
                 case PlayerScope.NearbyAislings:
-                    {
-                        AddPlayersToSelection(selectedPlayers, WithinRangeOf);
-                    }
-                    break;
+                    SendToAislings(WithinRangeOf, method, filterAnimations);
+                    return;
                 case PlayerScope.VeryNearbyAislings:
-                    {
-                        AddPlayersToSelection(selectedPlayers, player => WithinRangeOf(player, ServerSetup.Instance.Config.VeryNearByProximity));
-                    }
-                    break;
+                    SendToAislings(player => WithinRangeOf(player, ServerSetup.Instance.Config.VeryNearByProximity), method, filterAnimations);
+                    return;
                 case PlayerScope.AislingsOnSameMap:
-                    {
-                        AddPlayersToSelection(selectedPlayers, player => CurrentMapId == player.CurrentMapId);
-                    }
-                    break;
+                    SendToAislings(player => CurrentMapId == player.CurrentMapId, method, filterAnimations);
+                    return;
                 case PlayerScope.DefinedAislings when definer == null:
                     return;
                 case PlayerScope.DefinedAislings:
-                    {
-                        foreach (var player in definer)
-                            selectedPlayers.TryAdd(player.Serial, player);
-                    }
-                    break;
+                    SendToDefinedAislings(definer, method, filterAnimations);
+                    return;
                 case PlayerScope.All:
-                    {
-                        foreach (var player in ServerSetup.Instance.Game.Aislings)
-                            selectedPlayers.TryAdd(player.Serial, player);
-                    }
-                    break;
+                    SendToAllLoggedInAislings(method, filterAnimations);
+                    return;
                 // Player only Scope
                 case PlayerScope.NearbyAislingsExludingSelf when this is Aisling:
-                    {
-                        AddPlayersToSelection(selectedPlayers, player => WithinRangeOf(player) && Serial != player.Serial);
-                    }
-                    break;
+                    SendToAislings(player => WithinRangeOf(player) && Serial != player.Serial, method, filterAnimations);
+                    return;
                 case PlayerScope.GroupMembers when this is Aisling aisling:
-                    {
-                        AddPlayersToSelection(selectedPlayers, player => aisling.GroupParty.Has(player));
-                    }
-                    break;
+                    SendToAislings(player => aisling.GroupParty.Has(player), method, filterAnimations);
+                    return;
                 case PlayerScope.NearbyGroupMembersExcludingSelf when this is Aisling aisling:
-                    {
-                        AddPlayersToSelection(selectedPlayers, player => WithinRangeOf(player) && aisling.GroupParty.Has(player) && Serial != player.Serial);
-                    }
-                    break;
+                    SendToAislings(player => WithinRangeOf(player) && aisling.GroupParty.Has(player) && Serial != player.Serial, method, filterAnimations);
+                    return;
                 case PlayerScope.NearbyGroupMembers when this is Aisling aisling:
-                    {
-                        AddPlayersToSelection(selectedPlayers, player => WithinRangeOf(player) && aisling.GroupParty.Has(player) && Serial != player.Serial);
-                    }
-                    break;
+                    SendToAislings(player => WithinRangeOf(player) && aisling.GroupParty.Has(player) && Serial != player.Serial, method, filterAnimations);
+                    return;
                 case PlayerScope.Clan when this is Aisling aisling:
-                    {
-                        AddPlayersToSelection(selectedPlayers, player => !string.IsNullOrEmpty(player.Clan) && string.Equals(player.Clan, aisling.Clan, StringComparison.CurrentCultureIgnoreCase) && Serial != player.Serial);
-                    }
-                    break;
+                    SendToAislings(player => !string.IsNullOrEmpty(player.Clan) && string.Equals(player.Clan, aisling.Clan, StringComparison.CurrentCultureIgnoreCase) && Serial != player.Serial, method, filterAnimations);
+                    return;
                 case PlayerScope.Self when this is Aisling aisling:
                     method(aisling.Client);
                     return;
             }
-
-            SendToSelectedPlayers(selectedPlayers, method);
         }
         catch
         {
@@ -361,31 +334,37 @@ public class Movable : Identifiable
         }
     }
 
-    private void AddPlayersToSelection(ConcurrentDictionary<long, Aisling> selectedPlayers, Func<Aisling, bool> filter)
+    private void SendToAislings(Predicate<Aisling> predicate, Action<WorldClient> method, bool filterAnimations)
     {
-        var objs = ObjectManager.GetObjects<Aisling>(Map, player => player != null && filter(player));
-        foreach (var (serial, player) in objs)
+        ObjectManager.ForEachObject(Map, predicate, player =>
         {
-            selectedPlayers.TryAdd(serial, player);
-        }
+            SendToPlayer(player, method, filterAnimations);
+        });
     }
 
-    private static void SendToSelectedPlayers(ConcurrentDictionary<long, Aisling> players, Action<WorldClient> method)
+    private static void SendToDefinedAislings(IEnumerable<Aisling> players, Action<WorldClient> method, bool filterAnimations)
+    {
+        foreach (var player in players)
+            SendToPlayer(player, method, filterAnimations);
+    }
+
+    private static void SendToAllLoggedInAislings(Action<WorldClient> method, bool filterAnimations)
+    {
+        ServerSetup.Instance.Game.ForEachLoggedInAisling(player => SendToPlayer(player, method, filterAnimations));
+    }
+
+    private static void SendToPlayer(Aisling player, Action<WorldClient> method, bool filterAnimations)
     {
         try
         {
-            foreach (var (serial, player) in players)
-            {
-                if (player?.Client == null) continue;
-                if ((method.Method.Name.Contains("SendArmorBodyAnimationNearby") || method.Method.Name.Contains("SendAnimationNearby"))
-                    && !player.GameSettings.Animations) continue;
-                method(player.Client);
-            }
+            if (player?.Client == null) return;
+            if (filterAnimations && !player.GameSettings.Animations) return;
+            method(player.Client);
         }
         catch
         {
-            ServerSetup.EventsLogger($"Issue with {method.Method.Name} within SendToSelectedPlayers called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}");
-            SentrySdk.CaptureMessage($"Issue with {method.Method.Name} within SendToSelectedPlayers called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
+            ServerSetup.EventsLogger($"Issue with {method.Method.Name} within SendToPlayer called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}");
+            SentrySdk.CaptureMessage($"Issue with {method.Method.Name} within SendToPlayer called from {new System.Diagnostics.StackTrace().GetFrame(1)?.GetMethod()?.Name ?? "Unknown"}", SentryLevel.Error);
         }
     }
 }

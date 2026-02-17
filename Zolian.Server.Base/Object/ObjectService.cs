@@ -101,6 +101,14 @@ public abstract class ObjectService
         spriteCollection.FillWithPredicate(predicate, results);
     }
 
+    public static void ForEachWithPredicate<T>(Area map, Predicate<T> predicate, Action<T> action) where T : Sprite
+    {
+        if (map is null) return;
+
+        if (!TryGetCollection<T>(map, out var spriteCollection)) return;
+        spriteCollection.ForEachWithPredicate(predicate, action);
+    }
+
     public static void FillSpriteBucket<T>(Area map, Predicate<Sprite> predicate, List<Sprite> bucket) where T : Sprite
     {
         if (map is null) return;
@@ -162,6 +170,16 @@ public sealed class SpriteCollection<T> where T : Sprite
             var s = kv.Value;
             if (s != null && predicate(s))
                 results.Add(s);
+        }
+    }
+
+    public void ForEachWithPredicate(Predicate<T> predicate, Action<T> action)
+    {
+        foreach (var kv in Sprites)
+        {
+            var s = kv.Value;
+            if (s != null && predicate(s))
+                action(s);
         }
     }
 
