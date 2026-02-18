@@ -42,35 +42,35 @@ public class Identifiable : Sprite
         switch (Direction)
         {
             case 0:
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X, (int)Pos.Y - tileCount));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X + tileCount, (int)Pos.Y - tileCount));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X - tileCount, (int)Pos.Y - tileCount));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X + tileCount, (int)Pos.Y));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X - tileCount, (int)Pos.Y));
+                FillDamageableSpritesInPosition((int)Pos.X, (int)Pos.Y - tileCount, results);
+                FillDamageableSpritesInPosition((int)Pos.X + tileCount, (int)Pos.Y - tileCount, results);
+                FillDamageableSpritesInPosition((int)Pos.X - tileCount, (int)Pos.Y - tileCount, results);
+                FillDamageableSpritesInPosition((int)Pos.X + tileCount, (int)Pos.Y, results);
+                FillDamageableSpritesInPosition((int)Pos.X - tileCount, (int)Pos.Y, results);
                 break;
 
             case 1:
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X + tileCount, (int)Pos.Y));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X + tileCount, (int)Pos.Y + tileCount));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X + tileCount, (int)Pos.Y - tileCount));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X, (int)Pos.Y + tileCount));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X, (int)Pos.Y - tileCount));
+                FillDamageableSpritesInPosition((int)Pos.X + tileCount, (int)Pos.Y, results);
+                FillDamageableSpritesInPosition((int)Pos.X + tileCount, (int)Pos.Y + tileCount, results);
+                FillDamageableSpritesInPosition((int)Pos.X + tileCount, (int)Pos.Y - tileCount, results);
+                FillDamageableSpritesInPosition((int)Pos.X, (int)Pos.Y + tileCount, results);
+                FillDamageableSpritesInPosition((int)Pos.X, (int)Pos.Y - tileCount, results);
                 break;
 
             case 2:
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X, (int)Pos.Y + tileCount));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X + tileCount, (int)Pos.Y + tileCount));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X - tileCount, (int)Pos.Y + tileCount));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X + tileCount, (int)Pos.Y));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X - tileCount, (int)Pos.Y));
+                FillDamageableSpritesInPosition((int)Pos.X, (int)Pos.Y + tileCount, results);
+                FillDamageableSpritesInPosition((int)Pos.X + tileCount, (int)Pos.Y + tileCount, results);
+                FillDamageableSpritesInPosition((int)Pos.X - tileCount, (int)Pos.Y + tileCount, results);
+                FillDamageableSpritesInPosition((int)Pos.X + tileCount, (int)Pos.Y, results);
+                FillDamageableSpritesInPosition((int)Pos.X - tileCount, (int)Pos.Y, results);
                 break;
 
             case 3:
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X - tileCount, (int)Pos.Y));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X - tileCount, (int)Pos.Y + tileCount));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X - tileCount, (int)Pos.Y - tileCount));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X, (int)Pos.Y + tileCount));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X, (int)Pos.Y - tileCount));
+                FillDamageableSpritesInPosition((int)Pos.X - tileCount, (int)Pos.Y, results);
+                FillDamageableSpritesInPosition((int)Pos.X - tileCount, (int)Pos.Y + tileCount, results);
+                FillDamageableSpritesInPosition((int)Pos.X - tileCount, (int)Pos.Y - tileCount, results);
+                FillDamageableSpritesInPosition((int)Pos.X, (int)Pos.Y + tileCount, results);
+                FillDamageableSpritesInPosition((int)Pos.X, (int)Pos.Y - tileCount, results);
                 break;
         }
 
@@ -85,107 +85,107 @@ public class Identifiable : Sprite
         {
             // North
             case 0:
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X, (int)Pos.Y - 1));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X + 1, (int)Pos.Y - 1));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X + 2, (int)Pos.Y - 1));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X - 1, (int)Pos.Y - 1));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X - 2, (int)Pos.Y - 1));
+                FillDamageableSpritesInPosition((int)Pos.X, (int)Pos.Y - 1, results);
+                FillDamageableSpritesInPosition((int)Pos.X + 1, (int)Pos.Y - 1, results);
+                FillDamageableSpritesInPosition((int)Pos.X + 2, (int)Pos.Y - 1, results);
+                FillDamageableSpritesInPosition((int)Pos.X - 1, (int)Pos.Y - 1, results);
+                FillDamageableSpritesInPosition((int)Pos.X - 2, (int)Pos.Y - 1, results);
 
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X, (int)Pos.Y - 2));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X + 1, (int)Pos.Y - 2));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X + 2, (int)Pos.Y - 2));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X - 1, (int)Pos.Y - 2));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X - 2, (int)Pos.Y - 2));
+                FillDamageableSpritesInPosition((int)Pos.X, (int)Pos.Y - 2, results);
+                FillDamageableSpritesInPosition((int)Pos.X + 1, (int)Pos.Y - 2, results);
+                FillDamageableSpritesInPosition((int)Pos.X + 2, (int)Pos.Y - 2, results);
+                FillDamageableSpritesInPosition((int)Pos.X - 1, (int)Pos.Y - 2, results);
+                FillDamageableSpritesInPosition((int)Pos.X - 2, (int)Pos.Y - 2, results);
 
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X, (int)Pos.Y - 3));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X + 1, (int)Pos.Y - 3));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X + 2, (int)Pos.Y - 3));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X - 1, (int)Pos.Y - 3));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X - 2, (int)Pos.Y - 3));
+                FillDamageableSpritesInPosition((int)Pos.X, (int)Pos.Y - 3, results);
+                FillDamageableSpritesInPosition((int)Pos.X + 1, (int)Pos.Y - 3, results);
+                FillDamageableSpritesInPosition((int)Pos.X + 2, (int)Pos.Y - 3, results);
+                FillDamageableSpritesInPosition((int)Pos.X - 1, (int)Pos.Y - 3, results);
+                FillDamageableSpritesInPosition((int)Pos.X - 2, (int)Pos.Y - 3, results);
 
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X, (int)Pos.Y - 4));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X + 1, (int)Pos.Y - 4));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X + 2, (int)Pos.Y - 4));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X - 1, (int)Pos.Y - 4));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X - 2, (int)Pos.Y - 4));
+                FillDamageableSpritesInPosition((int)Pos.X, (int)Pos.Y - 4, results);
+                FillDamageableSpritesInPosition((int)Pos.X + 1, (int)Pos.Y - 4, results);
+                FillDamageableSpritesInPosition((int)Pos.X + 2, (int)Pos.Y - 4, results);
+                FillDamageableSpritesInPosition((int)Pos.X - 1, (int)Pos.Y - 4, results);
+                FillDamageableSpritesInPosition((int)Pos.X - 2, (int)Pos.Y - 4, results);
                 break;
             // East
             case 1:
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X + 1, (int)Pos.Y));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X + 1, (int)Pos.Y + 1));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X + 1, (int)Pos.Y + 2));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X + 1, (int)Pos.Y - 1));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X + 1, (int)Pos.Y - 2));
+                FillDamageableSpritesInPosition((int)Pos.X + 1, (int)Pos.Y, results);
+                FillDamageableSpritesInPosition((int)Pos.X + 1, (int)Pos.Y + 1, results);
+                FillDamageableSpritesInPosition((int)Pos.X + 1, (int)Pos.Y + 2, results);
+                FillDamageableSpritesInPosition((int)Pos.X + 1, (int)Pos.Y - 1, results);
+                FillDamageableSpritesInPosition((int)Pos.X + 1, (int)Pos.Y - 2, results);
 
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X + 2, (int)Pos.Y));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X + 2, (int)Pos.Y + 1));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X + 2, (int)Pos.Y + 2));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X + 2, (int)Pos.Y - 1));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X + 2, (int)Pos.Y - 2));
+                FillDamageableSpritesInPosition((int)Pos.X + 2, (int)Pos.Y, results);
+                FillDamageableSpritesInPosition((int)Pos.X + 2, (int)Pos.Y + 1, results);
+                FillDamageableSpritesInPosition((int)Pos.X + 2, (int)Pos.Y + 2, results);
+                FillDamageableSpritesInPosition((int)Pos.X + 2, (int)Pos.Y - 1, results);
+                FillDamageableSpritesInPosition((int)Pos.X + 2, (int)Pos.Y - 2, results);
 
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X + 3, (int)Pos.Y));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X + 3, (int)Pos.Y + 1));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X + 3, (int)Pos.Y + 2));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X + 3, (int)Pos.Y - 1));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X + 3, (int)Pos.Y - 2));
+                FillDamageableSpritesInPosition((int)Pos.X + 3, (int)Pos.Y, results);
+                FillDamageableSpritesInPosition((int)Pos.X + 3, (int)Pos.Y + 1, results);
+                FillDamageableSpritesInPosition((int)Pos.X + 3, (int)Pos.Y + 2, results);
+                FillDamageableSpritesInPosition((int)Pos.X + 3, (int)Pos.Y - 1, results);
+                FillDamageableSpritesInPosition((int)Pos.X + 3, (int)Pos.Y - 2, results);
 
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X + 4, (int)Pos.Y));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X + 4, (int)Pos.Y + 1));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X + 4, (int)Pos.Y + 2));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X + 4, (int)Pos.Y - 1));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X + 4, (int)Pos.Y - 2));
+                FillDamageableSpritesInPosition((int)Pos.X + 4, (int)Pos.Y, results);
+                FillDamageableSpritesInPosition((int)Pos.X + 4, (int)Pos.Y + 1, results);
+                FillDamageableSpritesInPosition((int)Pos.X + 4, (int)Pos.Y + 2, results);
+                FillDamageableSpritesInPosition((int)Pos.X + 4, (int)Pos.Y - 1, results);
+                FillDamageableSpritesInPosition((int)Pos.X + 4, (int)Pos.Y - 2, results);
                 break;
             // South
             case 2:
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X, (int)Pos.Y + 1));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X + 1, (int)Pos.Y + 1));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X + 2, (int)Pos.Y + 1));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X - 1, (int)Pos.Y + 1));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X - 2, (int)Pos.Y + 1));
+                FillDamageableSpritesInPosition((int)Pos.X, (int)Pos.Y + 1, results);
+                FillDamageableSpritesInPosition((int)Pos.X + 1, (int)Pos.Y + 1, results);
+                FillDamageableSpritesInPosition((int)Pos.X + 2, (int)Pos.Y + 1, results);
+                FillDamageableSpritesInPosition((int)Pos.X - 1, (int)Pos.Y + 1, results);
+                FillDamageableSpritesInPosition((int)Pos.X - 2, (int)Pos.Y + 1, results);
 
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X, (int)Pos.Y + 2));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X + 1, (int)Pos.Y + 2));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X + 2, (int)Pos.Y + 2));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X - 1, (int)Pos.Y + 2));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X - 2, (int)Pos.Y + 2));
+                FillDamageableSpritesInPosition((int)Pos.X, (int)Pos.Y + 2, results);
+                FillDamageableSpritesInPosition((int)Pos.X + 1, (int)Pos.Y + 2, results);
+                FillDamageableSpritesInPosition((int)Pos.X + 2, (int)Pos.Y + 2, results);
+                FillDamageableSpritesInPosition((int)Pos.X - 1, (int)Pos.Y + 2, results);
+                FillDamageableSpritesInPosition((int)Pos.X - 2, (int)Pos.Y + 2, results);
 
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X, (int)Pos.Y + 3));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X + 1, (int)Pos.Y + 3));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X + 2, (int)Pos.Y + 3));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X - 1, (int)Pos.Y + 3));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X - 2, (int)Pos.Y + 3));
+                FillDamageableSpritesInPosition((int)Pos.X, (int)Pos.Y + 3, results);
+                FillDamageableSpritesInPosition((int)Pos.X + 1, (int)Pos.Y + 3, results);
+                FillDamageableSpritesInPosition((int)Pos.X + 2, (int)Pos.Y + 3, results);
+                FillDamageableSpritesInPosition((int)Pos.X - 1, (int)Pos.Y + 3, results);
+                FillDamageableSpritesInPosition((int)Pos.X - 2, (int)Pos.Y + 3, results);
 
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X, (int)Pos.Y + 4));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X + 1, (int)Pos.Y + 4));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X + 2, (int)Pos.Y + 4));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X - 1, (int)Pos.Y + 4));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X - 2, (int)Pos.Y + 4));
+                FillDamageableSpritesInPosition((int)Pos.X, (int)Pos.Y + 4, results);
+                FillDamageableSpritesInPosition((int)Pos.X + 1, (int)Pos.Y + 4, results);
+                FillDamageableSpritesInPosition((int)Pos.X + 2, (int)Pos.Y + 4, results);
+                FillDamageableSpritesInPosition((int)Pos.X - 1, (int)Pos.Y + 4, results);
+                FillDamageableSpritesInPosition((int)Pos.X - 2, (int)Pos.Y + 4, results);
                 break;
             // West
             case 3:
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X - 1, (int)Pos.Y));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X - 1, (int)Pos.Y + 1));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X - 1, (int)Pos.Y + 2));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X - 1, (int)Pos.Y - 1));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X - 1, (int)Pos.Y - 2));
+                FillDamageableSpritesInPosition((int)Pos.X - 1, (int)Pos.Y, results);
+                FillDamageableSpritesInPosition((int)Pos.X - 1, (int)Pos.Y + 1, results);
+                FillDamageableSpritesInPosition((int)Pos.X - 1, (int)Pos.Y + 2, results);
+                FillDamageableSpritesInPosition((int)Pos.X - 1, (int)Pos.Y - 1, results);
+                FillDamageableSpritesInPosition((int)Pos.X - 1, (int)Pos.Y - 2, results);
 
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X - 2, (int)Pos.Y));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X - 2, (int)Pos.Y + 1));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X - 2, (int)Pos.Y + 2));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X - 2, (int)Pos.Y - 1));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X - 2, (int)Pos.Y - 2));
+                FillDamageableSpritesInPosition((int)Pos.X - 2, (int)Pos.Y, results);
+                FillDamageableSpritesInPosition((int)Pos.X - 2, (int)Pos.Y + 1, results);
+                FillDamageableSpritesInPosition((int)Pos.X - 2, (int)Pos.Y + 2, results);
+                FillDamageableSpritesInPosition((int)Pos.X - 2, (int)Pos.Y - 1, results);
+                FillDamageableSpritesInPosition((int)Pos.X - 2, (int)Pos.Y - 2, results);
 
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X - 3, (int)Pos.Y));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X - 3, (int)Pos.Y + 1));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X - 3, (int)Pos.Y + 2));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X - 3, (int)Pos.Y - 1));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X - 3, (int)Pos.Y - 2));
+                FillDamageableSpritesInPosition((int)Pos.X - 3, (int)Pos.Y, results);
+                FillDamageableSpritesInPosition((int)Pos.X - 3, (int)Pos.Y + 1, results);
+                FillDamageableSpritesInPosition((int)Pos.X - 3, (int)Pos.Y + 2, results);
+                FillDamageableSpritesInPosition((int)Pos.X - 3, (int)Pos.Y - 1, results);
+                FillDamageableSpritesInPosition((int)Pos.X - 3, (int)Pos.Y - 2, results);
 
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X - 4, (int)Pos.Y));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X - 4, (int)Pos.Y + 1));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X - 4, (int)Pos.Y + 2));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X - 4, (int)Pos.Y - 1));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X - 4, (int)Pos.Y - 2));
+                FillDamageableSpritesInPosition((int)Pos.X - 4, (int)Pos.Y, results);
+                FillDamageableSpritesInPosition((int)Pos.X - 4, (int)Pos.Y + 1, results);
+                FillDamageableSpritesInPosition((int)Pos.X - 4, (int)Pos.Y + 2, results);
+                FillDamageableSpritesInPosition((int)Pos.X - 4, (int)Pos.Y - 1, results);
+                FillDamageableSpritesInPosition((int)Pos.X - 4, (int)Pos.Y - 2, results);
                 break;
         }
 
@@ -199,27 +199,27 @@ public class Identifiable : Sprite
         switch (Direction)
         {
             case 0:
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X, (int)Pos.Y - tileCount));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X - tileCount, (int)Pos.Y - tileCount));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X + tileCount, (int)Pos.Y - tileCount));
+                FillDamageableSpritesInPosition((int)Pos.X, (int)Pos.Y - tileCount, results);
+                FillDamageableSpritesInPosition((int)Pos.X - tileCount, (int)Pos.Y - tileCount, results);
+                FillDamageableSpritesInPosition((int)Pos.X + tileCount, (int)Pos.Y - tileCount, results);
                 break;
 
             case 1:
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X + tileCount, (int)Pos.Y));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X + tileCount, (int)Pos.Y + tileCount));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X + tileCount, (int)Pos.Y - tileCount));
+                FillDamageableSpritesInPosition((int)Pos.X + tileCount, (int)Pos.Y, results);
+                FillDamageableSpritesInPosition((int)Pos.X + tileCount, (int)Pos.Y + tileCount, results);
+                FillDamageableSpritesInPosition((int)Pos.X + tileCount, (int)Pos.Y - tileCount, results);
                 break;
 
             case 2:
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X, (int)Pos.Y + tileCount));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X + tileCount, (int)Pos.Y + tileCount));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X - tileCount, (int)Pos.Y + tileCount));
+                FillDamageableSpritesInPosition((int)Pos.X, (int)Pos.Y + tileCount, results);
+                FillDamageableSpritesInPosition((int)Pos.X + tileCount, (int)Pos.Y + tileCount, results);
+                FillDamageableSpritesInPosition((int)Pos.X - tileCount, (int)Pos.Y + tileCount, results);
                 break;
 
             case 3:
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X - tileCount, (int)Pos.Y));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X - tileCount, (int)Pos.Y + tileCount));
-                results.AddRange(GetDamageableSpritesInPosition((int)Pos.X - tileCount, (int)Pos.Y - tileCount));
+                FillDamageableSpritesInPosition((int)Pos.X - tileCount, (int)Pos.Y, results);
+                FillDamageableSpritesInPosition((int)Pos.X - tileCount, (int)Pos.Y + tileCount, results);
+                FillDamageableSpritesInPosition((int)Pos.X - tileCount, (int)Pos.Y - tileCount, results);
                 break;
         }
 
@@ -250,19 +250,19 @@ public class Identifiable : Sprite
             switch (Direction)
             {
                 case 0:
-                    results.AddRange(GetSprites((int)Pos.X, (int)Pos.Y - i));
+                    FillSpritesInPosition((int)Pos.X, (int)Pos.Y - i, results);
                     break;
 
                 case 1:
-                    results.AddRange(GetSprites((int)Pos.X + i, (int)Pos.Y));
+                    FillSpritesInPosition((int)Pos.X + i, (int)Pos.Y, results);
                     break;
 
                 case 2:
-                    results.AddRange(GetSprites((int)Pos.X, (int)Pos.Y + i));
+                    FillSpritesInPosition((int)Pos.X, (int)Pos.Y + i, results);
                     break;
 
                 case 3:
-                    results.AddRange(GetSprites((int)Pos.X - i, (int)Pos.Y));
+                    FillSpritesInPosition((int)Pos.X - i, (int)Pos.Y, results);
                     break;
             }
 
@@ -277,19 +277,19 @@ public class Identifiable : Sprite
             switch (Direction)
             {
                 case 0:
-                    results.AddRange(GetDamageableSpritesInPosition((int)Pos.X, (int)Pos.Y - i));
+                    FillDamageableSpritesInPosition((int)Pos.X, (int)Pos.Y - i, results);
                     break;
 
                 case 1:
-                    results.AddRange(GetDamageableSpritesInPosition((int)Pos.X + i, (int)Pos.Y));
+                    FillDamageableSpritesInPosition((int)Pos.X + i, (int)Pos.Y, results);
                     break;
 
                 case 2:
-                    results.AddRange(GetDamageableSpritesInPosition((int)Pos.X, (int)Pos.Y + i));
+                    FillDamageableSpritesInPosition((int)Pos.X, (int)Pos.Y + i, results);
                     break;
 
                 case 3:
-                    results.AddRange(GetDamageableSpritesInPosition((int)Pos.X - i, (int)Pos.Y));
+                    FillDamageableSpritesInPosition((int)Pos.X - i, (int)Pos.Y, results);
                     break;
             }
 
@@ -305,38 +305,38 @@ public class Identifiable : Sprite
             {
                 case 0:
                     // forward
-                    results.AddRange(GetDamageableSpritesInPosition((int)Pos.X, (int)Pos.Y - i));
+                    FillDamageableSpritesInPosition((int)Pos.X, (int)Pos.Y - i, results);
                     // right
-                    results.AddRange(GetDamageableSpritesInPosition((int)Pos.X + sides, (int)Pos.Y - i));
+                    FillDamageableSpritesInPosition((int)Pos.X + sides, (int)Pos.Y - i, results);
                     // left
-                    results.AddRange(GetDamageableSpritesInPosition((int)Pos.X - sides, (int)Pos.Y - i));
+                    FillDamageableSpritesInPosition((int)Pos.X - sides, (int)Pos.Y - i, results);
                     break;
 
                 case 1:
                     // forward
-                    results.AddRange(GetDamageableSpritesInPosition((int)Pos.X + i, (int)Pos.Y));
+                    FillDamageableSpritesInPosition((int)Pos.X + i, (int)Pos.Y, results);
                     // right
-                    results.AddRange(GetDamageableSpritesInPosition((int)Pos.X + i, (int)Pos.Y + sides));
+                    FillDamageableSpritesInPosition((int)Pos.X + i, (int)Pos.Y + sides, results);
                     // left
-                    results.AddRange(GetDamageableSpritesInPosition((int)Pos.X + i, (int)Pos.Y - sides));
+                    FillDamageableSpritesInPosition((int)Pos.X + i, (int)Pos.Y - sides, results);
                     break;
 
                 case 2:
                     // forward
-                    results.AddRange(GetDamageableSpritesInPosition((int)Pos.X, (int)Pos.Y + i));
+                    FillDamageableSpritesInPosition((int)Pos.X, (int)Pos.Y + i, results);
                     // right
-                    results.AddRange(GetDamageableSpritesInPosition((int)Pos.X - sides, (int)Pos.Y + i));
+                    FillDamageableSpritesInPosition((int)Pos.X - sides, (int)Pos.Y + i, results);
                     // left
-                    results.AddRange(GetDamageableSpritesInPosition((int)Pos.X + sides, (int)Pos.Y + i));
+                    FillDamageableSpritesInPosition((int)Pos.X + sides, (int)Pos.Y + i, results);
                     break;
 
                 case 3:
                     // forward
-                    results.AddRange(GetDamageableSpritesInPosition((int)Pos.X - i, (int)Pos.Y));
+                    FillDamageableSpritesInPosition((int)Pos.X - i, (int)Pos.Y, results);
                     // right
-                    results.AddRange(GetDamageableSpritesInPosition((int)Pos.X - i, (int)Pos.Y - sides));
+                    FillDamageableSpritesInPosition((int)Pos.X - i, (int)Pos.Y - sides, results);
                     // left
-                    results.AddRange(GetDamageableSpritesInPosition((int)Pos.X - i, (int)Pos.Y + sides));
+                    FillDamageableSpritesInPosition((int)Pos.X - i, (int)Pos.Y + sides, results);
                     break;
             }
 
@@ -378,19 +378,19 @@ public class Identifiable : Sprite
             switch (Direction)
             {
                 case 0:
-                    results.AddRange(GetDamageableSpritesInPosition((int)Pos.X, (int)Pos.Y - i));
+                    FillDamageableSpritesInPosition((int)Pos.X, (int)Pos.Y - i, results);
                     break;
 
                 case 1:
-                    results.AddRange(GetDamageableSpritesInPosition((int)Pos.X + i, (int)Pos.Y));
+                    FillDamageableSpritesInPosition((int)Pos.X + i, (int)Pos.Y, results);
                     break;
 
                 case 2:
-                    results.AddRange(GetDamageableSpritesInPosition((int)Pos.X, (int)Pos.Y + i));
+                    FillDamageableSpritesInPosition((int)Pos.X, (int)Pos.Y + i, results);
                     break;
 
                 case 3:
-                    results.AddRange(GetDamageableSpritesInPosition((int)Pos.X - i, (int)Pos.Y));
+                    FillDamageableSpritesInPosition((int)Pos.X - i, (int)Pos.Y, results);
                     break;
             }
 
@@ -405,19 +405,19 @@ public class Identifiable : Sprite
             switch (Direction)
             {
                 case 0:
-                    results.AddRange(GetDamageableSpritesInPosition((int)Pos.X, (int)Pos.Y + i));
+                    FillDamageableSpritesInPosition((int)Pos.X, (int)Pos.Y + i, results);
                     break;
 
                 case 1:
-                    results.AddRange(GetDamageableSpritesInPosition((int)Pos.X - i, (int)Pos.Y));
+                    FillDamageableSpritesInPosition((int)Pos.X - i, (int)Pos.Y, results);
                     break;
 
                 case 2:
-                    results.AddRange(GetDamageableSpritesInPosition((int)Pos.X, (int)Pos.Y - i));
+                    FillDamageableSpritesInPosition((int)Pos.X, (int)Pos.Y - i, results);
                     break;
 
                 case 3:
-                    results.AddRange(GetDamageableSpritesInPosition((int)Pos.X + i, (int)Pos.Y));
+                    FillDamageableSpritesInPosition((int)Pos.X + i, (int)Pos.Y, results);
                     break;
             }
 

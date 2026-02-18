@@ -299,7 +299,9 @@ public abstract class Sprite : INotifyPropertyChanged
     #region SpriteQueryExtensions Helpers
 
     protected List<Sprite> GetSprites(int x, int y) => this.GetSpritesAt(x, y);
+    protected void FillSpritesInPosition(int x, int y, List<Sprite> bucket) => this.FillSpritesAt(x, y, bucket);
     protected List<Sprite> GetDamageableSpritesInPosition(int x, int y) => this.GetDamageableAt(x, y);
+    protected void FillDamageableSpritesInPosition(int x, int y, List<Sprite> bucket) => this.FillDamageableAt(x, y, bucket);
     public List<Sprite> DamageableNearby() => this.DamageableNearbySnapshot();
     public List<Sprite> DamageableWithinRange(Sprite target, int range) => this.DamageableWithinRangeSnapshot(target, range);
     public List<Aisling> AislingsNearby() => this.AislingsNearbySnapshot();

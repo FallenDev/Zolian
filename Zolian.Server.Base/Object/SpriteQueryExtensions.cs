@@ -3,8 +3,6 @@ using Darkages.Sprites;
 using Darkages.Sprites.Entity;
 using Darkages.Types;
 
-using ServiceStack;
-
 namespace Darkages.Object
 {
     /// <summary>
@@ -20,8 +18,6 @@ namespace Darkages.Object
         private static readonly List<Monster> EmptyMonsters = [];
         private static readonly List<Mundane> EmptyMundanes = [];
         private static readonly List<Item> EmptyItems = [];
-        private static readonly List<Damageable> EmptyDamageables = [];
-        private static readonly List<Movable> EmptyMovables = [];
 
         /// <summary>
         /// Normalizes a list to never be null.
@@ -31,6 +27,38 @@ namespace Darkages.Object
         private static List<T> Normalize<T>(List<T>? list, List<T> empty) => list is null || list.Count == 0 ? empty : list;
 
         #region Sprites in location
+
+        /// <summary>
+        /// Appends all sprites at the specified coordinates into <paramref name="bucket"/>.
+        /// Avoids per-query temporary list allocations.
+        /// </summary>
+        public static void FillSpritesAt(this Sprite self, int x, int y, List<Sprite> bucket)
+        {
+            var map = self.Map;
+            if (map is null || bucket is null) return;
+
+            ObjectManager.FillObjects(
+                map,
+                i => i is not null && (int)i.Pos.X == x && (int)i.Pos.Y == y,
+                ObjectManager.Get.All,
+                bucket);
+        }
+
+        /// <summary>
+        /// Appends all damageable sprites at the specified coordinates into <paramref name="bucket"/>.
+        /// Avoids per-query temporary list allocations.
+        /// </summary>
+        public static void FillDamageableAt(this Sprite self, int x, int y, List<Sprite> bucket)
+        {
+            var map = self.Map;
+            if (map is null || bucket is null) return;
+
+            ObjectManager.FillObjects(
+                map,
+                i => i is not null && (int)i.Pos.X == x && (int)i.Pos.Y == y,
+                ObjectManager.Get.Damageable,
+                bucket);
+        }
 
         /// <summary>
         /// Gets all sprites at the specified coordinates.
