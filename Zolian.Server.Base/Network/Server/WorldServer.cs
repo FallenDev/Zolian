@@ -372,65 +372,77 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
         ValueTask InnerOnPickup(IWorldClient localClient, PickupArgs localArgs)
         {
             var map = localClient.Aisling.Map;
-            var itemObjs = ObjectManager.GetObjects<Item>(map, i => (int)i.Pos.X == localArgs.SourcePoint.X && (int)i.Pos.Y == localArgs.SourcePoint.Y).Values.Where(i => !i.Template.Flags.FlagIsSet(ItemFlags.Trap)).ToList();
-            var moneyObjs = ObjectManager.GetObjects(map, i => (int)i.Pos.X == localArgs.SourcePoint.X && (int)i.Pos.Y == localArgs.SourcePoint.Y, ObjectManager.Get.Money).ToList();
+            List<Item> itemsList = [];
+            ObjectManager.FillObjects(map, i => (int)i.Pos.X == localArgs.SourcePoint.X && (int)i.Pos.Y == localArgs.SourcePoint.Y, itemsList);
 
-            if (!itemObjs.IsEmpty())
+            var moneyObjs = ObjectManager.GetObjects(map, i => (int)i.Pos.X == localArgs.SourcePoint.X && (int)i.Pos.Y == localArgs.SourcePoint.Y, ObjectManager.Get.Money);
+
+            if (itemsList.Count > 0)
             {
+                var index = 0;
                 if (localClient.Aisling.Inventory.IsFull)
                 {
                     localClient.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cYour inventory is full");
                     return default;
                 }
 
-                var item = itemObjs.FirstOrDefault();
+                var item = itemsList[index];
+
+                // Rail - Prevent pickup from other maps
                 if (item?.CurrentMapId != localClient.Aisling.CurrentMapId) return default;
+                // Rail - Prevent pickup from distances out of player's reach
                 if (!(localClient.Aisling.Position.DistanceFrom(item.Position) <= ServerSetup.Instance.Config.ClickLootDistance)) return default;
-                var cantPickup = false;
 
-                if (item.Template.Flags.FlagIsSet(ItemFlags.Unique) && item.Template.Name == "Necra Scribblings" && localClient.Aisling.Stage >= ClassStage.Master)
+                // Check within inventory for uniqueness, if found move onto next item
+                if (item.Template.Flags.FlagIsSet(ItemFlags.Unique))
                 {
-                    if (itemObjs.Count >= 2)
+                    var found = false;
+
+                    foreach (var bankItem in localClient.Aisling.BankManager.Items.Values)
                     {
-                        cantPickup = true;
+                        if (bankItem == null) continue;
+                        if (bankItem.Template.Name != item.Template.Name) continue;
+                        found = true;
+                        break;
                     }
-                    else
-                        return default;
-                }
 
-                foreach (var invItem in localClient.Aisling.Inventory.Items.Values)
-                {
-                    if (invItem == null) continue;
-                    if (!invItem.Template.Flags.FlagIsSet(ItemFlags.Unique)) continue;
-                    if (invItem.Template.Name != item.Template.Name) continue;
-                    localClient.SendServerMessage(ServerMessageType.ActiveMessage, "You may only hold one in your possession.");
-
-                    if (itemObjs.Count >= 2)
+                    foreach (var invItem in localClient.Aisling.Inventory.Items.Values)
                     {
-                        cantPickup = true;
+                        if (invItem == null) continue;
+                        if (invItem.Template.Name != item.Template.Name) continue;
+                        found = true;
+                        break;
                     }
-                    else
-                        return default;
-                }
 
-                foreach (var invItem in localClient.Aisling.BankManager.Items.Values)
-                {
-                    if (invItem == null) continue;
-                    if (!invItem.Template.Flags.FlagIsSet(ItemFlags.Unique)) continue;
-                    if (invItem.Template.Name != item.Template.Name) continue;
-                    localClient.SendServerMessage(ServerMessageType.ActiveMessage, "You may only hold one in your possession.");
-
-                    if (itemObjs.Count >= 2)
+                    // If a player already holds the item, warn them and move onto the next
+                    if (found)
                     {
-                        cantPickup = true;
-                    }
-                    else
-                        return default;
-                }
+                        localClient.SendServerMessage(ServerMessageType.ActiveMessage, "You may only hold one in your possession.");
 
-                if (cantPickup)
-                {
-                    item = itemObjs[^1];
+                        try
+                        {
+                            index++;
+                            if (index >= 0 && index < itemsList.Count)
+                                item = itemsList[index];
+                        }
+                        catch { }
+
+                        // If the item still unique, attempt money pickup then return
+                        if (item.Template.Flags.FlagIsSet(ItemFlags.Unique))
+                        {
+                            foreach (var obj in moneyObjs)
+                            {
+                                if (obj?.CurrentMapId != localClient.Aisling.CurrentMapId) break;
+                                if (!(localClient.Aisling.Position.DistanceFrom(obj.Position) <= ServerSetup.Instance.Config.ClickLootDistance)) break;
+
+                                if (obj is not Money money) continue;
+
+                                Money.GiveTo(money, localClient.Aisling);
+                            }
+
+                            return default;
+                        }
+                    }
                 }
 
                 if (item.GiveTo(localClient.Aisling))
@@ -1500,13 +1512,7 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
 
         ValueTask InnerOnItemDroppedOnCreature(IWorldClient localClient, ItemDroppedOnCreatureArgs localArgs)
         {
-            var result = new List<Sprite>();
-            var listA = ObjectManager.GetObjects<Monster>(localClient.Aisling.Map, i => i != null && i.WithinRangeOf(localClient.Aisling, ServerSetup.Instance.Config.WithinRangeProximity)).Values.ToList();
-            var listB = ObjectManager.GetObjects<Mundane>(localClient.Aisling.Map, i => i != null && i.WithinRangeOf(localClient.Aisling, ServerSetup.Instance.Config.WithinRangeProximity)).Values.ToList();
-            var listC = ObjectManager.GetObjects<Aisling>(localClient.Aisling.Map, i => i != null && i.WithinRangeOf(localClient.Aisling, ServerSetup.Instance.Config.WithinRangeProximity)).Values.ToList();
-            result.AddRange(listA);
-            result.AddRange(listB);
-            result.AddRange(listC);
+            var result = SpriteQueryExtensions.MovableNearbySnapshot(client.Aisling);
 
             foreach (var sprite in result.Where(sprite => sprite.Serial == localArgs.TargetId))
             {
@@ -1622,14 +1628,7 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
 
         ValueTask InnerOnGoldDroppedOnCreature(IWorldClient localClient, GoldDroppedOnCreatureArgs localArgs)
         {
-            var result = new List<Sprite>();
-            var listA = ObjectManager.GetObjects<Monster>(localClient.Aisling.Map, i => i != null && i.WithinRangeOf(localClient.Aisling, ServerSetup.Instance.Config.WithinRangeProximity)).Values.ToList();
-            var listB = ObjectManager.GetObjects<Mundane>(localClient.Aisling.Map, i => i != null && i.WithinRangeOf(localClient.Aisling, ServerSetup.Instance.Config.WithinRangeProximity)).Values.ToList();
-            var listC = ObjectManager.GetObjects<Aisling>(localClient.Aisling.Map, i => i != null && i.WithinRangeOf(localClient.Aisling, ServerSetup.Instance.Config.WithinRangeProximity)).Values.ToList();
-
-            result.AddRange(listA);
-            result.AddRange(listB);
-            result.AddRange(listC);
+            var result = SpriteQueryExtensions.MovableNearbySnapshot(client.Aisling);
 
             foreach (var sprite in result.Where(sprite => sprite.Serial == localArgs.TargetId))
             {

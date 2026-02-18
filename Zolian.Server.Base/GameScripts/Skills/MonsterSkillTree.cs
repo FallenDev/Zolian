@@ -7,6 +7,7 @@ using Chaos.Networking.Entities.Server;
 using Darkages.Common;
 using Darkages.Enums;
 using Darkages.GameScripts.Affects;
+using Darkages.Object;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Sprites.Entity;
@@ -1100,7 +1101,7 @@ public class Megaflare(Skill skill) : SkillScript(skill)
 
         try
         {
-            var nearby = GetObjects<Aisling>(sprite.Map, i => i != null && i.WithinRangeOf(sprite, 6)).ToList();
+            var nearby = SpriteQueryExtensions.AislingsWithinRangeSnapshot(sprite, sprite, 6);
 
             if (nearby.Count == 0)
             {
@@ -1108,12 +1109,13 @@ public class Megaflare(Skill skill) : SkillScript(skill)
                 return;
             }
 
-            foreach (var (_, enemy) in nearby.Where(enemy => enemy.Value != null && enemy.Value.Serial != sprite.Serial))
+            foreach (var enemy in nearby.Where(enemy => enemy.Serial != sprite.Serial))
             {
+                if (enemy is not Aisling aisling) continue;
                 var dmgCalc = DamageCalc(sprite);
-                enemy.ApplyElementalSkillDamage(sprite, dmgCalc, ElementManager.Element.Fire, Skill);
+                aisling.ApplyElementalSkillDamage(sprite, dmgCalc, ElementManager.Element.Fire, Skill);
                 GlobalSkillMethods.OnSuccessWithoutAction(enemy, sprite, Skill, dmgCalc, false);
-                enemy.SendAnimationNearby(217, enemy.Position);
+                aisling.SendAnimationNearby(217, aisling.Position);
             }
 
             if (sprite is not Damageable damageable) return;

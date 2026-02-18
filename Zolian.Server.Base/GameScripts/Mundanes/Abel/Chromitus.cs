@@ -2,6 +2,7 @@
 using Darkages.Enums;
 using Darkages.Network.Client;
 using Darkages.Network.Server;
+using Darkages.Object;
 using Darkages.ScriptingBase;
 using Darkages.Sprites;
 using Darkages.Sprites.Entity;
@@ -52,17 +53,21 @@ public class Chromitus : MundaneScript
                 break;
             case 0x01:
                 {
-                    var damageables = GetObjects<Damageable>(map, p => p != null && p.Map.ID == randMap);
+                    // Check if map is empty
+                    var damageables = SpriteQueryExtensions.DamageableOnMapSnapshot(map);
 
+                    // If empty, populate with monsters
                     if (damageables.IsNullOrEmpty())
                         PopulateMapWithAppropriateMonsters(client, map);
 
+                    // Port group
                     if (client.Aisling.GroupId != 0 && client.Aisling.GroupParty != null)
                     {
                         PortGroup(client, map, rand);
                         return;
                     }
 
+                    // Port single player
                     client.TransitionToMap(map, rand == 0 ? new Position(4, 4) : new Position(122, 117));
                 }
                 break;

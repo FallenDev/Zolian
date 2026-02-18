@@ -53,7 +53,7 @@ public class UpdateMonstersComponent(WorldServer server) : WorldServerComponent(
         }
     }
 
-    private void UpdateMonsterRoutine(TimeSpan dt)
+    private static void UpdateMonsterRoutine(TimeSpan dt)
     {
         var now = DateTime.UtcNow;
 
@@ -64,13 +64,13 @@ public class UpdateMonstersComponent(WorldServer server) : WorldServerComponent(
             // Only update monsters on maps that have players -- 30 min delay after players leave
             if (!MapActivityGate.ShouldUpdateMonsters(map)) continue;
 
-            var monstersById = ObjectManager.GetObjects<Monster>(map, m => !m.Skulled);
-            if (monstersById.IsEmpty)
+            var monsters = SpriteQueryExtensions.MonstersOnMapSnapshot(map).Where(m => !m.Skulled);
+
+            if (!monsters.Any())
                 continue;
 
-            foreach (var kv in monstersById)
+            foreach (var monster in monsters)
             {
-                var monster = kv.Value;
                 ProcessMonster(monster, dt, now);
             }
         }

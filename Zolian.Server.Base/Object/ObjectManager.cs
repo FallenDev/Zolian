@@ -1,6 +1,4 @@
-﻿using System.Collections.Concurrent;
-
-using Darkages.Sprites;
+﻿using Darkages.Sprites;
 using Darkages.Sprites.Entity;
 using Darkages.Types;
 
@@ -49,7 +47,6 @@ public class ObjectManager
             _ => ObjectService.QueryFirstSprite<Aisling>(map, p) ?? ObjectService.QueryFirstSprite<Monster>(map, p) ?? ObjectService.QueryFirstSprite<Mundane>(map, p) ?? ObjectService.QueryFirstSprite<Money>(map, p) ?? ObjectService.QueryFirstSprite<Item>(map, p)
         };
     }
-    public static ConcurrentDictionary<long, T> GetObjects<T>(Area map, Predicate<T> p) where T : Sprite => map is null ? [] : ObjectService.QueryAllWithPredicate(map, p);
     public static void FillObjects<T>(Area map, Predicate<T> p, List<T> results) where T : Sprite => ObjectService.FillWithPredicate(map, p, results);
     public static void ForEachObject<T>(Area map, Predicate<T> p, Action<T> action) where T : Sprite => ObjectService.ForEachWithPredicate(map, p, action);
 

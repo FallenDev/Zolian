@@ -44,7 +44,7 @@ public class Rift : AreaScript
         if (_playersOnMap.IsEmpty) return;
 
         // Check for alive monsters on the map.
-        _monstersOnMap = ObjectManager.GetObjects<Monster>(Area, p => p is { Alive: true }).Count;
+        _monstersOnMap = ObjectService.CountWithPredicate<Monster>(Area, p => p is { Alive: true });
 
         // If there are still monsters alive, do nothing further.
         if (_monstersOnMap != 0) return;
@@ -111,8 +111,11 @@ public class Rift : AreaScript
         _playersOnMap.TryRemove(client.Aisling.Serial, out _);
 
         // Player leaves map, reset their rift boss summon status and kill counters.
-        client.SummonRiftBoss = false;
-        client.Aisling.MonsterKillCounters.Clear();
+        if (client != null)
+        {
+            client.SummonRiftBoss = false;
+            client.Aisling.MonsterKillCounters.Clear();
+        }
 
         // If there are still players on the map, do nothing further.
         if (!_playersOnMap.IsEmpty) return;
@@ -120,9 +123,9 @@ public class Rift : AreaScript
         _animate = false;
 
         // If map is empty, remove all monsters.
-        var monsters = ObjectManager.GetObjects<Monster>(Area, p => p is { Alive: true });
+        var monsters = SpriteQueryExtensions.MonstersOnMapSnapshot(Area);
         foreach (var monster in monsters)
-            monster.Value.Remove();
+            monster.Remove();
     }
 
     // When a player walks, ensure they are tracked in the players on map.

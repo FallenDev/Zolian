@@ -296,6 +296,8 @@ public abstract class Sprite : INotifyPropertyChanged
         return true;
     }
 
+    #region SpriteQueryExtensions Helpers
+
     protected List<Sprite> GetSprites(int x, int y) => this.GetSpritesAt(x, y);
     protected List<Sprite> GetDamageableSpritesInPosition(int x, int y) => this.GetDamageableAt(x, y);
     public List<Sprite> DamageableNearby() => this.DamageableNearbySnapshot();
@@ -307,6 +309,8 @@ public abstract class Sprite : INotifyPropertyChanged
     public List<Monster> MonstersOnMap() => this.MonstersOnMapSnapshot();
     public List<Mundane> MundanesNearby() => this.MundanesNearbySnapshot();
     public List<Sprite> GetMovableSpritesInPosition(int x, int y) => this.GetMovableAt(x, y);
+
+    #endregion
 
     #region Within Range & Distance
 

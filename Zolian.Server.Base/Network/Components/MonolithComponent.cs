@@ -14,6 +14,10 @@ namespace Darkages.Network.Components;
 public class MonolithComponent(WorldServer server) : WorldServerComponent(server)
 {
     private const int ComponentSpeed = 3_000;
+    private const double TargetVisibleMonsters = 2.0;
+    private const int ViewTileWidth = 13;
+    private const int ViewTileHeight = 13;
+    private const double DensityPerSpawnableTile = TargetVisibleMonsters / (ViewTileWidth * ViewTileHeight);
 
     protected internal override async Task Update()
     {
@@ -57,18 +61,17 @@ public class MonolithComponent(WorldServer server) : WorldServerComponent(server
             // Templates for this map only
             if (!ServerSetup.Instance.MonsterTemplateByMapCache.TryGetValue(map.ID, out var templates) || templates.Length == 0) continue;
 
-            var monsters = ObjectManager.GetObjects<Monster>(map, m => m.IsAlive);
+            var monsters = SpriteQueryExtensions.MonstersOnMapSnapshot(map);
 
             // Map based overload guard
-            var maxMonsters = CalculateMaxMonsters(map);
+            var maxMonsters = CalculateMaxSprite(map);
             if (monsters.Count >= maxMonsters) continue;
 
             var countsByName = new Dictionary<string, int>(StringComparer.Ordinal);
 
             // Count existing monsters by template name
-            foreach (var kvp in monsters)
+            foreach (var monster in monsters)
             {
-                var monster = kvp.Value;
                 var name = monster?.Template?.Name;
                 if (string.IsNullOrEmpty(name))
                     continue;
@@ -96,21 +99,25 @@ public class MonolithComponent(WorldServer server) : WorldServerComponent(server
         }
     }
 
-    private static int CalculateMaxMonsters(Area map)
+    /// <summary>
+    /// Calculates the maximum number of monsters that can spawn within the specified area based on the number of
+    /// spawnable tiles and a predefined density factor.
+    /// </summary>
+    /// <remarks>The returned value is clamped to ensure that the number of monsters remains within reasonable
+    /// limits for the given area size. This helps maintain balanced gameplay and prevents excessive or insufficient
+    /// monster spawns in very large or small areas.</remarks>
+    /// <param name="map">The area in which monsters can spawn. Must provide the number of spawnable tiles via the SpawnableTileCount
+    /// property.</param>
+    /// <returns>The maximum number of monsters allowed to spawn in the area, constrained to a minimum and maximum value
+    /// determined by the spawnable tile count.</returns>
+    private static int CalculateMaxSprite(Area map)
     {
-        var area = map.Height * map.Width;
-
-        // Monsters in a single 12x12 view on average
-        const double targetVisible = 2.0;
-        const int viewSize = 12 * 12;
-
-        // Density = monsters per tile
-        var density = targetVisible / viewSize;
-        var ideal = area * density;
+        var spawnable = map.SpawnableTileCount;
+        var ideal = Math.Round(spawnable * DensityPerSpawnableTile);
 
         // Sanity Clamps
-        var min = Math.Max(5, area / 500);
-        var max = Math.Max(min, area / 30);
+        var min = Math.Max(5, spawnable / 500); // ex: 10,000 tiles = 20 min
+        var max = Math.Max(min, spawnable / 50); // ex: 10,000 tiles = 200 max
 
         return (int)Math.Clamp(ideal, min, max);
     }
@@ -128,32 +135,37 @@ public class MonolithComponent(WorldServer server) : WorldServerComponent(server
     private static void PlaceNode(Area map)
     {
         if (map.MiningNodes.MapNodeFlagIsSet(MiningNodes.Default)) return;
-        if (map.Height < 15 || map.Width < 15) return;
+        // Maps that are small, do not spawn 
+        if (map.Height <= 15 || map.Width <= 15) return;
 
         try
         {
-            map.MiningNodesCount = ObjectManager
-                .GetObjects<Item>(map, i => i is
-                {
-                    Template: { Name: "Raw Dark Iron" } or { Name: "Raw Copper" } or { Name: "Raw Obsidian" }
-                    or { Name: "Raw Cobalt Steel" } or { Name: "Raw Hybrasyl" } or { Name: "Raw Talos" }
-                    or { Name: "Chaos Ore" }
-                })
-                .Count;
+            var ores = SpriteQueryExtensions.ItemsOnMapSnapshot(map).Where(i => OreNames.Contains(i.Template.Name));
+            map.MiningNodesCount = ores.Count();
 
-            if (map.MiningNodesCount >= 20) return;
-            if (map.MiningNodesCount >= (map.Height * map.Width) / 200) return;
+            var maxSprite = CalculateMaxSprite(map);
+            var maxNode = CalculateMaxResourceNodes(maxSprite, 5) + 1;
+
+            if (map.MiningNodesCount >= maxNode) return;
 
             var node = MiningNode(map);
             if (node == null) return;
 
             TryPlaceObjectRandomly(map, node, 10);
         }
-        catch
-        {
-            // suppressed
-        }
+        catch { }
     }
+
+    private static readonly HashSet<string> OreNames = new(StringComparer.Ordinal)
+    {
+        "Raw Talos",
+        "Raw Copper",
+        "Raw Dark Iron",
+        "Raw Hybrasyl",
+        "Raw Cobalt Steel",
+        "Raw Obsidian",
+        "Chaos Ore"
+    };
 
     private static Item MiningNode(Area map)
     {
@@ -183,31 +195,37 @@ public class MonolithComponent(WorldServer server) : WorldServerComponent(server
     private static void PlaceFlower(Area map)
     {
         if (map.WildFlowers.MapFlowerFlagIsSet(WildFlowers.Default)) return;
-        if (map.Height < 15 || map.Width < 15) return;
+        // Maps that are small, do not spawn 
+        if (map.Height <= 15 || map.Width <= 15) return;
 
         try
         {
-            map.WildFlowersCount = ObjectManager
-                .GetObjects<Item>(map, i => i is
-                {
-                    Template: { Name: "Gloom Bloom" } or { Name: "Betrayal Blossom" } or { Name: "Bocan Branch" }
-                    or { Name: "Cactus Lilium" } or { Name: "Prahed Bellis" } or { Name: "Aiten Bloom" }
-                    or { Name: "Reict Weed" }
-                })
-                .Count;
+            var flowers = SpriteQueryExtensions.ItemsOnMapSnapshot(map).Where(i => FlowerNames.Contains(i.Template.Name));
+            map.WildFlowersCount = flowers.Count();
 
-            if (map.WildFlowersCount >= 2) return;
+            var maxSprite = CalculateMaxSprite(map);
+            var maxNode = CalculateMaxResourceNodes(maxSprite, 7) + 1;
+
+            if (map.WildFlowersCount >= maxNode) return;
 
             var node = FlowerNode(map);
             if (node == null) return;
 
             TryPlaceObjectRandomly(map, node, 10);
         }
-        catch
-        {
-            // suppressed
-        }
+        catch { }
     }
+
+    private static readonly HashSet<string> FlowerNames = new(StringComparer.Ordinal)
+    {
+        "Gloom Bloom",
+        "Betrayal Blossom",
+        "Bocan Branch",
+        "Cactus Lilium",
+        "Prahed Bellis",
+        "Aiten Bloom",
+        "Reict Weed"
+    };
 
     private static Item FlowerNode(Area map)
     {
@@ -242,5 +260,18 @@ public class MonolithComponent(WorldServer server) : WorldServerComponent(server
             ObjectManager.AddObject(node);
             break;
         }
+    }
+
+    private static int CalculateMaxResourceNodes(int maxMonsters, int divisor, int min = 1)
+    {
+        if (maxMonsters <= 0) return 0;
+
+        // 5 monsters -> mining = ceil(5/4)=2, flowers=ceil(5/6)=1
+        var ideal = (int)Math.Ceiling(maxMonsters / (double)divisor);
+
+        if (ideal < min) ideal = min;
+        if (ideal > maxMonsters) ideal = maxMonsters;
+
+        return ideal;
     }
 }

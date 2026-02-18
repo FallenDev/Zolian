@@ -48,15 +48,13 @@ public class UpdateGroundObjectsComponent(WorldServer server) : WorldServerCompo
             foreach (var mapKvp in ServerSetup.Instance.GlobalMapCache)
             {
                 var map = mapKvp.Value;
+                var items = SpriteQueryExtensions.ItemsOnMapSnapshot(map).Where(i => i.ItemPane == Item.ItemPanes.Ground);
 
-                // Existing API returns a new dictionary; iterate it directly (no SelectMany/ToArray).
-                var itemsById = ObjectManager.GetObjects<Item>(map, i => i.ItemPane == Item.ItemPanes.Ground);
-                if (itemsById.IsEmpty)
+                if (!items.Any())
                     continue;
 
-                foreach (var kv in itemsById)
+                foreach (var item in items)
                 {
-                    var item = kv.Value;
                     if (item is null)
                         continue;
 

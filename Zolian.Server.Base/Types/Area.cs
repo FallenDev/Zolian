@@ -20,13 +20,15 @@ public class Area : Map
     private readonly Lock _mapLoadLock = new();
     private int _maxXBounds;
     private int _maxYBounds;
+    public int SpawnableTileCount;
 
     private int _playerCount;
     public bool HasPlayers => Volatile.Read(ref _playerCount) > 0;
     public void OnPlayerEnter() => Interlocked.Increment(ref _playerCount);
     public void OnPlayerLeave() => Interlocked.Decrement(ref _playerCount);
 
-    public ConcurrentDictionary<(int MapId, Type SpriteType), object> SpriteCollections { get; } = []; private FrozenDictionary<int, Vector2> MapGridDict { get; set; }
+    public ConcurrentDictionary<(int MapId, Type SpriteType), object> SpriteCollections { get; } = [];
+    private FrozenDictionary<int, Vector2> MapGridDict { get; set; }
     private Dictionary<int, Vector2> TempMapGridDict { get; } = [];
     public int MiningNodesCount { get; set; }
     public int WildFlowersCount { get; set; }
@@ -154,7 +156,10 @@ public class Area : Map
                             if (ParseMapWalls(a, b))
                                 TileContent[x, y] = Enums.TileContent.Wall;
                             else
+                            {
                                 TileContent[x, y] = Enums.TileContent.None;
+                                SpawnableTileCount++;
+                            }
                         }
                         else
                         {

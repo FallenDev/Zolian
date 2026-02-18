@@ -33,13 +33,33 @@ public abstract class ObjectService
         // Slow path: resolve from Area.SpriteCollections once, then cache
         if (!map.SpriteCollections.TryGetValue((map.ID, typeof(T)), out var objCollection) || objCollection is not SpriteCollection<T> typed)
         {
-            collection = null!;
+            collection = null;
             return false;
         }
 
         CollectionCache<T>.ByMapId.TryAdd(map.ID, typed);
         collection = typed;
         return true;
+    }
+
+    /// <summary>
+    /// Returns a count of sprites of type <typeparamref name="T"/> in <paramref name="map"/>
+    /// that match <paramref name="predicate"/>.
+    ///
+    /// Notes:
+    /// - Zero allocations (no lists/dicts created)
+    /// - Enumerates the backing ConcurrentDictionary once
+    /// - Safe under concurrent adds/removes (snapshot-ish semantics of enumeration)
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int CountWithPredicate<T>(Area map, Predicate<T> predicate) where T : Sprite
+    {
+        if (map is null || predicate is null) return 0;
+
+        if (!TryGetCollection<T>(map, out var spriteCollection))
+            return 0;
+
+        return spriteCollection.CountWithPredicate(predicate);
     }
 
     public static void AddGameObject<T>(T obj) where T : Sprite
@@ -72,17 +92,6 @@ public abstract class ObjectService
         return TryGetCollection<T>(map, out var spriteCollection)
             ? spriteCollection.Query(predicate)
             : default;
-    }
-
-    public static ConcurrentDictionary<long, T> QueryAllWithPredicate<T>(Area map, Predicate<T> predicate) where T : Sprite
-    {
-        // NOTE: This is allocation-heavy. Prefer FillWithPredicate(map, predicate, results)
-        // when you want a zero-alloc hot path.
-        if (map is null) return new ConcurrentDictionary<long, T>();
-
-        return TryGetCollection<T>(map, out var spriteCollection)
-            ? spriteCollection.QueryAllWithPredicate(predicate)
-            : new ConcurrentDictionary<long, T>();
     }
 
     public static void FillWithPredicate<T>(Area map, Predicate<T> predicate, List<T> results) where T : Sprite
@@ -159,17 +168,24 @@ public sealed class SpriteCollection<T> where T : Sprite
         return default;
     }
 
-    public ConcurrentDictionary<long, T> QueryAllWithPredicate(Predicate<T> predicate)
+    /// <summary>
+    /// Counts sprites matching <paramref name="predicate"/> with no allocations.
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public int CountWithPredicate(Predicate<T> predicate)
     {
-        var result = new ConcurrentDictionary<long, T>();
+        if (predicate is null) return 0;
 
-        foreach (var (key, sprite) in Sprites)
+        var count = 0;
+
+        foreach (var kv in Sprites)
         {
-            if (sprite != null && predicate(sprite))
-                result.TryAdd(key, sprite);
+            var s = kv.Value;
+            if (s != null && predicate(s))
+                count++;
         }
 
-        return result;
+        return count;
     }
 
     public void FillWithPredicate(Predicate<T> predicate, List<T> results)

@@ -53,21 +53,20 @@ public class UpdateMundanesComponent(WorldServer server) : WorldServerComponent(
         }
     }
 
-    private void UpdateMundanesRoutine(TimeSpan dt)
+    private static void UpdateMundanesRoutine(TimeSpan dt)
     {
         var now = DateTime.UtcNow;
 
         foreach (var mapKvp in ServerSetup.Instance.GlobalMapCache)
         {
             var map = mapKvp.Value;
+            var mundanes = SpriteQueryExtensions.MundanesOnMapSnapshot(map);
 
-            var mundanesById = ObjectManager.GetObjects<Mundane>(map, m => m != null);
-            if (mundanesById.IsEmpty)
+            if (mundanes.Count == 0)
                 continue;
 
-            foreach (var kv in mundanesById)
+            foreach (var mundane in mundanes)
             {
-                var mundane = kv.Value;
                 ProcessMundane(mundane, dt, now);
             }
         }
