@@ -1,5 +1,6 @@
 ﻿using System.Collections.Frozen;
 using System.Numerics;
+
 using Darkages.Compression;
 using Darkages.Enums;
 using Darkages.Models;
@@ -21,10 +22,18 @@ public record Node : IEqualityOperators<Node, Node, bool>
 
 public class MetafileManager
 {
+    private const string MetafileFolderName = "metafile";
+    private const string SEventPrefix = "SEvent";
+    private const string SClassPrefix = "SClass";
+    private const string ItemInfoPrefix = "ItemInfo";
+    private const string NationDescName = "NationDesc";
+    private const string QuestsFolderName = "Quests";
+    private const string CirclePrefix = "Circle";
     protected static readonly Dictionary<int, Metafile> MetaFiles = [];
+
     static MetafileManager()
     {
-        var filePath = Path.Combine(ServerSetup.Instance.StoragePath, "metafile");
+        var filePath = Path.Combine(ServerSetup.Instance.StoragePath, MetafileFolderName);
 
         if (!Directory.Exists(filePath)) return;
 
@@ -34,10 +43,10 @@ public class MetafileManager
         {
             var metaFile = CompressableObject.Load<Metafile>(file);
 
-            if (metaFile.Name.StartsWith("SEvent")) continue;
-            if (metaFile.Name.StartsWith("SClass")) continue;
-            if (metaFile.Name.StartsWith("ItemInfo")) continue;
-            if (metaFile.Name.StartsWith("NationDesc")) continue;
+            if (metaFile.Name.StartsWith(SEventPrefix, StringComparison.Ordinal)) continue;
+            if (metaFile.Name.StartsWith(SClassPrefix, StringComparison.Ordinal)) continue;
+            if (metaFile.Name.StartsWith(ItemInfoPrefix, StringComparison.Ordinal)) continue;
+            if (metaFile.Name.StartsWith(NationDescName, StringComparison.Ordinal)) continue;
 
             MetaFiles.TryAdd(Random.Shared.Next(), metaFile);
         }
@@ -63,7 +72,7 @@ public class MetafileManager
                      .OrderBy(v => v.Value.LevelRequired)
                      .BatchesOf(1024))
         {
-            var metaFile = new Metafile { Name = $"ItemInfo{i}", Nodes = [] };
+            var metaFile = new Metafile { Name = string.Concat(ItemInfoPrefix, i), Nodes = [] };
 
             foreach (var template in from v in batch select v.Value)
             {
@@ -81,7 +90,7 @@ public class MetafileManager
                      .OrderBy(v => v.Value.Template.LevelRequired)
                      .BatchesOf(1024))
         {
-            var metaFile = new Metafile { Name = $"ItemInfo{i}", Nodes = [] };
+            var metaFile = new Metafile { Name = string.Concat(ItemInfoPrefix, i), Nodes = [] };
 
             foreach (var item in from v in batch select v.Value)
             {
@@ -97,33 +106,19 @@ public class MetafileManager
 
     private static void LoadQuestDescriptions()
     {
-        var metaFile1 = new Metafile { Name = "SEvent1", Nodes = [] };
-        var metaFileLocation1 = ServerSetup.Instance.StoragePath + "\\Quests\\Circle1";
-        var metaFile2 = new Metafile { Name = "SEvent2", Nodes = [] };
-        var metaFileLocation2 = ServerSetup.Instance.StoragePath + "\\Quests\\Circle2";
-        var metaFile3 = new Metafile { Name = "SEvent3", Nodes = [] };
-        var metaFileLocation3 = ServerSetup.Instance.StoragePath + "\\Quests\\Circle3";
-        var metaFile4 = new Metafile { Name = "SEvent4", Nodes = [] };
-        var metaFileLocation4 = ServerSetup.Instance.StoragePath + "\\Quests\\Circle4";
-        var metaFile5 = new Metafile { Name = "SEvent5", Nodes = [] };
-        var metaFileLocation5 = ServerSetup.Instance.StoragePath + "\\Quests\\Circle5";
-        var metaFile6 = new Metafile { Name = "SEvent6", Nodes = [] };
-        var metaFileLocation6 = ServerSetup.Instance.StoragePath + "\\Quests\\Circle6";
-        var metaFile7 = new Metafile { Name = "SEvent7", Nodes = [] };
-        var metaFileLocation7 = ServerSetup.Instance.StoragePath + "\\Quests\\Circle7";
+        var questsRoot = Path.Combine(ServerSetup.Instance.StoragePath, QuestsFolderName);
 
-        LoadCircleQuestDescriptions(metaFileLocation1, metaFile1);
-        LoadCircleQuestDescriptions(metaFileLocation2, metaFile2);
-        LoadCircleQuestDescriptions(metaFileLocation3, metaFile3);
-        LoadCircleQuestDescriptions(metaFileLocation4, metaFile4);
-        LoadCircleQuestDescriptions(metaFileLocation5, metaFile5);
-        LoadCircleQuestDescriptions(metaFileLocation6, metaFile6);
-        LoadCircleQuestDescriptions(metaFileLocation7, metaFile7);
+        for (var circle = 1; circle <= 7; circle++)
+        {
+            var metaFile = new Metafile { Name = string.Concat(SEventPrefix, circle), Nodes = [] };
+            var circleDirectory = Path.Combine(questsRoot, string.Concat(CirclePrefix, circle));
+            LoadCircleQuestDescriptions(circleDirectory, metaFile);
+        }
     }
 
     private static void CreateNationDescMeta()
     {
-        var metaFile = new Metafile { Name = "NationDesc", Nodes = [] };
+        var metaFile = new Metafile { Name = NationDescName, Nodes = [] };
 
         for (var i = 0; i <= 13; i++)
         {

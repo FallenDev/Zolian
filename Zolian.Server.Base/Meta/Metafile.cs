@@ -31,6 +31,12 @@ public class Metafile : CompressableObject
                     continue;
                 }
 
+                if (atomSize == 1)
+                {
+                    Nodes.Add(new MetafileNode(name, reader.ReadStringB()));
+                    continue;
+                }
+
                 var atoms = new string[atomSize];
                 for (var j = 0; j < atomSize; j++)
                     atoms[j] = reader.ReadStringB();

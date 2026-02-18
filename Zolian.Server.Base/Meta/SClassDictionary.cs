@@ -1,10 +1,12 @@
 ﻿using System.Collections.Frozen;
+
 using Darkages.Enums;
 
 namespace Darkages.Meta;
 
 public static class SClassDictionary
 {
+    private const string SClassPrefix = "SClass";
     internal static FrozenDictionary<(Race race, Class path, Class pastClass, Job job), string> SkillMap;
 
     public static void SkillMapper()
@@ -17,7 +19,7 @@ public static class SClassDictionary
 
     private static Dictionary<(Race race, Class path, Class pastClass, Job job), string> GenerateSkillMap()
     {
-        var skillMap = new Dictionary<(Race race, Class path, Class pastClass, Job job), string>();
+        var skillMap = new Dictionary<(Race race, Class path, Class pastClass, Job job), string>(4096);
         var sClassCounter = 50; // Starting number for SClass
         var races = Enum.GetValues<Race>().Where(race => race != Race.UnDecided);
         var paths = Enum.GetValues<SClassMapper>();
@@ -52,7 +54,7 @@ public static class SClassDictionary
 
     private static void AddSkillMapEntry(Dictionary<(Race race, Class path, Class pastClass, Job job), string> skillMap, (Race race, Class path, Class pastClass, Job job) key, ref int sClassCounter)
     {
-        var value = $"SClass{sClassCounter++}";
+        var value = string.Concat(SClassPrefix, sClassCounter++);
         skillMap[key] = value;
     }
 }

@@ -18,7 +18,7 @@ public abstract class AbilityMetaBuilder : MetafileManager
             var job = abilityTuple.Key.job;
 
             SkillBuilder(sClass, race, class1, class2, job);
-            sClass.Nodes.Add(new MetafileNode("", ""));
+            sClass.Nodes.Add(new MetafileNode(string.Empty, string.Empty));
             SpellBuilder(sClass, race, class1, class2, job);
             CompileTemplate(sClass);
             MetaFiles.TryAdd(Random.Shared.Next(), sClass);
@@ -27,7 +27,7 @@ public abstract class AbilityMetaBuilder : MetafileManager
 
     private static void SkillBuilder(Metafile sClass, Race race, Class currentClass, Class previousClass, Job job)
     {
-        sClass.Nodes.Add(new MetafileNode("Skill", ""));
+        sClass.Nodes.Add(new MetafileNode("Skill", string.Empty));
 
         foreach (var template in ServerSetup.Instance.GlobalSkillTemplateCache
                      .Where(p => p.Value.Prerequisites != null)
@@ -65,12 +65,12 @@ public abstract class AbilityMetaBuilder : MetafileManager
             }
         }
 
-        sClass.Nodes.Add(new MetafileNode("Skill_End", ""));
+        sClass.Nodes.Add(new MetafileNode("Skill_End", string.Empty));
     }
 
     private static void SpellBuilder(Metafile sClass, Race race, Class currentClass, Class previousClass, Job job)
     {
-        sClass.Nodes.Add(new MetafileNode("Spell", ""));
+        sClass.Nodes.Add(new MetafileNode("Spell", string.Empty));
 
         foreach (var template in ServerSetup.Instance.GlobalSpellTemplateCache
                      .Where(p => p.Value.Prerequisites != null)
@@ -108,7 +108,7 @@ public abstract class AbilityMetaBuilder : MetafileManager
             }
         }
 
-        sClass.Nodes.Add(new MetafileNode("Spell_End", ""));
+        sClass.Nodes.Add(new MetafileNode("Spell_End", string.Empty));
     }
 
     private static void AddSkillNodeToMetaFile(Metafile sClass, SkillTemplate template)
