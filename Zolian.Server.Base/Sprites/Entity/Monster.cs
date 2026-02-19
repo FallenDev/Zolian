@@ -495,104 +495,123 @@ public sealed class Monster : Damageable
 
     public void PreWalkChecks()
     {
-        if (CantMove) return;
-        if (ThrownBack) return;
-
-        while (Target != null)
+        lock (WalkLock)
         {
-            if (Target is not Aisling aisling)
+            if (CantMove) return;
+            if (ThrownBack) return;
+
+            while (Target != null)
             {
-                Wander();
-                return;
-            }
+                if (Target is not Aisling aisling)
+                {
+                    Wander();
+                    return;
+                }
 
-            if (aisling.IsInvisible || aisling.Dead || aisling.Skulled || !aisling.LoggedIn || Map.ID != aisling.Map.ID)
-            {
-                ClearTarget();
-                Wander();
-                return;
-            }
-
-            if (NextTo((int)Target.Pos.X, (int)Target.Pos.Y))
-            {
-                NextToTarget();
-            }
-            else
-            {
-                BeginPathFind();
-            }
-
-            return;
-        }
-
-        BashEnabled = false;
-        CastEnabled = false;
-
-        PatrolIfSet();
-    }
-
-    public void NextToTarget()
-    {
-        if (Target == null) return;
-
-        if (Facing((int)Target.Pos.X, (int)Target.Pos.Y, out var direction))
-        {
-            BashEnabled = true;
-            AbilityEnabled = true;
-            CastEnabled = true;
-        }
-        else
-        {
-            BashEnabled = false;
-            AbilityEnabled = true;
-            CastEnabled = true;
-            Direction = (byte)direction;
-            Turn();
-        }
-    }
-
-    public void BeginPathFind()
-    {
-        BashEnabled = false;
-        CastEnabled = true;
-
-        try
-        {
-            if (Target != null && Aggressive)
-            {
-                AStar = true;
-                _location = new Vector2(Pos.X, Pos.Y);
-                _targetPos = new Vector2(Target.Pos.X, Target.Pos.Y);
-                _path = Map.FindPath(this, _location, _targetPos);
-
-                if (ThrownBack) return;
-
-                if (_targetPos == Vector2.Zero)
+                if (aisling.IsInvisible || aisling.Dead || aisling.Skulled || !aisling.LoggedIn || Map.ID != aisling.Map.ID)
                 {
                     ClearTarget();
                     Wander();
                     return;
                 }
 
-                if (_path.Count > 0)
+                Target.GetPositionSnapshot(out var targetX, out var targetY);
+
+                if (NextTo(targetX, targetY))
                 {
-                    if (!_path.IsEmpty())
-                        _path.RemoveAt(0);
-                    AStarPath(this, _path);
+                    NextToTarget();
+                }
+                else
+                {
+                    BeginPathFind();
                 }
 
-                if (_path.Count != 0) return;
-                AStar = false;
+                return;
+            }
 
-                if (Target != null && WalkTo((int)Target.Pos.X, (int)Target.Pos.Y)) return;
+            BashEnabled = false;
+            CastEnabled = false;
+
+            PatrolIfSet();
+        }
+    }
+
+    public void NextToTarget()
+    {
+        lock (WalkLock)
+        {
+            if (Target == null) return;
+
+            Target.GetPositionSnapshot(out var targetX, out var targetY);
+
+            if (Facing(targetX, targetY, out var direction))
+            {
+                BashEnabled = true;
+                AbilityEnabled = true;
+                CastEnabled = true;
+            }
+            else
+            {
+                BashEnabled = false;
+                AbilityEnabled = true;
+                CastEnabled = true;
+                Direction = (byte)direction;
+                Turn();
             }
         }
-        catch
-        {
-            // ignored
-        }
+    }
 
-        Wander();
+    public void BeginPathFind()
+    {
+        lock (WalkLock)
+        {
+            BashEnabled = false;
+            CastEnabled = true;
+
+            try
+            {
+                if (Target != null && Aggressive)
+                {
+                    AStar = true;
+                    GetPositionSnapshot(out var selfX, out var selfY);
+                    Target.GetPositionSnapshot(out var targetX, out var targetY);
+                    _location = new Vector2(selfX, selfY);
+                    _targetPos = new Vector2(targetX, targetY);
+                    _path = Map.FindPath(this, _location, _targetPos);
+
+                    if (ThrownBack) return;
+
+                    if (_targetPos == Vector2.Zero)
+                    {
+                        ClearTarget();
+                        Wander();
+                        return;
+                    }
+
+                    if (_path.Count > 0)
+                    {
+                        if (!_path.IsEmpty())
+                            _path.RemoveAt(0);
+                        AStarPath(this, _path);
+                    }
+
+                    if (_path.Count != 0) return;
+                    AStar = false;
+
+                    if (Target != null)
+                    {
+                        Target.GetPositionSnapshot(out targetX, out targetY);
+                        if (WalkTo(targetX, targetY)) return;
+                    }
+                }
+            }
+            catch
+            {
+                // ignored
+            }
+
+            Wander();
+        }
     }
 
     public void PatrolIfSet()

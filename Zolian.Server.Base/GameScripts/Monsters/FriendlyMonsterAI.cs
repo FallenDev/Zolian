@@ -268,9 +268,11 @@ public class BaseFriendlyMonster : MonsterScript
                 }
             }
 
-            if (monster.Target != null && monster.NextTo((int)monster.Target.Pos.X, (int)monster.Target.Pos.Y))
+            monster.Target.GetPositionSnapshot(out var targetX, out var targetY);
+
+            if (monster.Target != null && monster.NextTo(targetX, targetY))
             {
-                if (monster.Facing((int)monster.Target.Pos.X, (int)monster.Target.Pos.Y, out var direction))
+                if (monster.Facing(targetX, targetY, out var direction))
                 {
                     monster.BashEnabled = true;
                     monster.AbilityEnabled = true;
@@ -289,7 +291,7 @@ public class BaseFriendlyMonster : MonsterScript
             {
                 monster.BashEnabled = false;
                 monster.CastEnabled = true;
-                if (monster.WalkTo((int)monster.Target.Pos.X, (int)monster.Target.Pos.Y)) return;
+                if (monster.WalkTo(targetX, targetY)) return;
                 monster.Wander();
             }
         }

@@ -324,12 +324,13 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
                 if (localClient.Aisling.Map?.Script.Item2 == null) return default;
 
                 localClient.Aisling.Map.Script.Item2.OnPlayerWalk(localClient.Aisling.Client, localClient.Aisling.LastPosition, localClient.Aisling.Position);
+                localClient.Aisling.GetPositionSnapshot(out var aislingX, out var aislingY);
 
                 foreach (var trap in ServerSetup.Instance.Traps.Select(i => i.Value))
                 {
                     if (trap?.Owner == null || trap.Owner.Serial == localClient.Aisling.Serial ||
-                        localClient.Aisling.X != trap.Location.X ||
-                        localClient.Aisling.Y != trap.Location.Y ||
+                        aislingX != trap.Location.X ||
+                        aislingY != trap.Location.Y ||
                         localClient.Aisling.Map != trap.TrapItem.Map) continue;
 
                     if (trap.Owner is Aisling && !localClient.Aisling.Map.Flags.MapFlagIsSet(MapFlags.PlayerKill)) continue;
@@ -373,9 +374,17 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
         {
             var map = localClient.Aisling.Map;
             List<Item> itemsList = [];
-            ObjectManager.FillObjects(map, i => (int)i.Pos.X == localArgs.SourcePoint.X && (int)i.Pos.Y == localArgs.SourcePoint.Y, itemsList);
+            ObjectManager.FillObjects(map, i =>
+            {
+                i.GetPositionSnapshot(out var spriteX, out var spriteY);
+                return spriteX == localArgs.SourcePoint.X && spriteY == localArgs.SourcePoint.Y;
+            }, itemsList);
 
-            var moneyObjs = ObjectManager.GetObjects(map, i => (int)i.Pos.X == localArgs.SourcePoint.X && (int)i.Pos.Y == localArgs.SourcePoint.Y, ObjectManager.Get.Money);
+            var moneyObjs = ObjectManager.GetObjects(map, i =>
+            {
+                i.GetPositionSnapshot(out var spriteX, out var spriteY);
+                return spriteX == localArgs.SourcePoint.X && spriteY == localArgs.SourcePoint.Y;
+            }, ObjectManager.Get.Money);
 
             if (itemsList.Count > 0)
             {
@@ -527,11 +536,15 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
             }
 
             if (localClient.Aisling.Map.IsWall(localClient.Aisling, localArgs.DestinationPoint.X, localArgs.DestinationPoint.Y))
-                if ((int)localClient.Aisling.Pos.X != localArgs.DestinationPoint.X || (int)localClient.Aisling.Pos.Y != localArgs.DestinationPoint.Y)
+            {
+                localClient.Aisling.GetPositionSnapshot(out var aislingX, out var aislingY);
+
+                if (aislingX != localArgs.DestinationPoint.X || aislingY != localArgs.DestinationPoint.Y)
                 {
                     localClient.SendServerMessage(ServerMessageType.ActiveMessage, "Something is in the way.");
                     return default;
                 }
+            }
 
             if (item.Template.Flags.FlagIsSet(ItemFlags.Stackable))
             {
@@ -920,7 +933,8 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
                     break;
             }
 
-            info.Position ??= new Position(localClient.Aisling.X, localClient.Aisling.Y);
+            localClient.Aisling.GetPositionSnapshot(out var aislingX, out var aislingY);
+            info.Position ??= new Position(aislingX, aislingY);
             localClient.Aisling.CastSpell(spell, info);
             return default;
         }
@@ -2312,8 +2326,6 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
             {
                 localClient.Aisling.CurrentMapId = selectedPortalNode.Destination.AreaID;
                 localClient.Aisling.Pos = new Vector2(selectedPortalNode.Destination.Location.X, selectedPortalNode.Destination.Location.Y);
-                localClient.Aisling.X = selectedPortalNode.Destination.Location.X;
-                localClient.Aisling.Y = selectedPortalNode.Destination.Location.Y;
                 localClient.Aisling.Client.TransitionToMap(selectedPortalNode.Destination.AreaID, selectedPortalNode.Destination.Location);
             }
 

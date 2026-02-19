@@ -1268,9 +1268,14 @@ public class WorldClient : WorldClientBase, IWorldClient
             Point? point;
 
             if (position is null)
+            {
                 point = null;
+            }
             else
-                point = new Point(position.X, position.Y);
+            {
+                position.GetSnapshot(out var x, out var y);
+                point = new Point(x, y);
+            }
 
             var args = new AnimationArgs
             {
@@ -1652,6 +1657,8 @@ public class WorldClient : WorldClientBase, IWorldClient
         if (aisling.MonsterForm != 0)
             monsterForm = aisling.MonsterForm;
 
+        aisling.GetPositionSnapshot(out var x, out var y);
+
         var args = new DisplayAislingArgs
         {
             AccessoryColor1 = (DisplayColor)aisling.Accessory1Color,
@@ -1682,8 +1689,8 @@ public class WorldClient : WorldClientBase, IWorldClient
             ShieldSprite = (byte)aisling.ShieldImg,
             Sprite = monsterForm,
             WeaponSprite = (ushort)aisling.WeaponImg,
-            X = aisling.X,
-            Y = aisling.Y
+            X = x,
+            Y = y
         };
 
         if (aisling.EquipmentManager.OverHelm != null && aisling.HeadAccessoryImg != 0)
@@ -1953,10 +1960,12 @@ public class WorldClient : WorldClientBase, IWorldClient
     /// </summary>
     public void SendLocation()
     {
+        Aisling.GetPositionSnapshot(out var x, out var y);
+
         var args = new LocationArgs
         {
-            X = Aisling.X,
-            Y = Aisling.Y
+            X = x,
+            Y = y
         };
 
         Send(args);
@@ -4464,9 +4473,11 @@ public class WorldClient : WorldClientBase, IWorldClient
 
             lock (_warpCheckLock)
             {
-                foreach (var _ in value.Activations.Where(o =>
-                             o.Location.X == x &&
-                             o.Location.Y == y))
+                client.Aisling.GetPositionSnapshot(out var aislingX, out var aislingY);
+
+                foreach (var warp in value.Activations.Where(o =>
+                             o.Location.X == aislingX &&
+                             o.Location.Y == aislingY))
                 {
                     if (value.WarpType == WarpType.Map)
                     {

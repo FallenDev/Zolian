@@ -151,14 +151,24 @@ public class ShapeShifter : MonsterScript
 
             if (monster.Image == monster.Template.Image)
             {
-                if (monster.Target != null && monster.NextTo((int)monster.Target.Pos.X, (int)monster.Target.Pos.Y))
+                if (monster.Target != null)
                 {
-                    monster.NextToTarget();
+                    monster.Target.GetPositionSnapshot(out var targetX, out var targetY);
+
+                    if (monster.NextTo(targetX, targetY))
+                    {
+                        monster.NextToTarget();
+                    }
+                    else
+                    {
+                        monster.BeginPathFind();
+                    }
                 }
                 else
                 {
                     monster.BeginPathFind();
                 }
+
             }
             else
             {
@@ -247,12 +257,16 @@ public class SelfDestruct : MonsterScript
             return;
         if (monster.CantAttack) return;
         if (monster.Target != null)
-            if (!monster.Facing((int)monster.Target.Pos.X, (int)monster.Target.Pos.Y, out var direction))
+        {
+            monster.Target.GetPositionSnapshot(out var targetX, out var targetY);
+
+            if (!monster.Facing(targetX, targetY, out var direction))
             {
                 monster.Direction = (byte)direction;
                 monster.Turn();
                 return;
             }
+        }
 
         if (monster.Target is not Damageable damageable) return;
 
@@ -429,11 +443,15 @@ public class Turret : MonsterScript
         if (monster is null) return;
 
         if (monster.Target != null)
-            if (!monster.Facing((int)monster.Target.Pos.X, (int)monster.Target.Pos.Y, out var direction))
+        {
+            monster.Target.GetPositionSnapshot(out var targetX, out var targetY);
+
+            if (!monster.Facing(targetX, targetY, out var direction))
             {
                 monster.Direction = (byte)direction;
                 monster.Turn();
             }
+        }
 
         var gatling = monster.SkillScripts.FirstOrDefault(i => i.Skill.CanUse() && i.Skill.Template.Name == "Gatling");
         if (gatling?.Skill == null) return;

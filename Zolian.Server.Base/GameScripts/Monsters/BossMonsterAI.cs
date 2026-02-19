@@ -1053,14 +1053,18 @@ public class WorldBossBahamut : MonsterScript
         if (monster is null || monster.CantAttack) return;
 
         if (monster.Target != null)
-            if (Monster.NextTo((int)Monster.Target.Pos.X, (int)Monster.Target.Pos.Y))
+        {
+            monster.Target.GetPositionSnapshot(out var targetX, out var targetY);
+
+            if (Monster.NextTo(targetX, targetY))
             {
-                if (!monster.Facing((int)monster.Target.Pos.X, (int)monster.Target.Pos.Y, out var direction))
+                if (!monster.Facing(targetX, targetY, out var direction))
                 {
                     monster.Direction = (byte)direction;
                     monster.Turn();
                 }
             }
+        }
 
         var scripts = monster.SkillScripts;
 
@@ -1128,6 +1132,8 @@ public class WorldBossBahamut : MonsterScript
                 return;
             }
 
+            monster.Target.GetPositionSnapshot(out var targetX, out var targetY);
+
             if (monster.GetFiveByFourRectInFront().Contains(monster.Target))
             {
                 monster.BashEnabled = true;
@@ -1140,7 +1146,7 @@ public class WorldBossBahamut : MonsterScript
                     monster.SendTargetedClientMethod(PlayerScope.NearbyAislings, c => c.SendPublicMessage(monster.Serial, PublicMessageType.Normal, $"{monster.Name}: {GhostChat[RandomNumberGenerator.GetInt32(Count + 1) % GhostChat.Length]}"));
                 }
             }
-            else if (monster.Target != null && monster.NextTo((int)monster.Target.Pos.X, (int)monster.Target.Pos.Y))
+            else if (monster.Target != null && monster.NextTo(targetX, targetY))
             {
                 monster.NextToTarget();
             }

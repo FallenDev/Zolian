@@ -15,20 +15,19 @@ namespace Darkages.Sprites;
 
 public class Movable : Identifiable
 {
-    private readonly Lock _walkLock = new();
+    protected readonly Lock WalkLock = new();
 
     /// <summary>
     /// Walking logic for NPCs
     /// </summary>
     private bool Walk()
     {
-        lock (_walkLock)
+        lock (WalkLock)
         {
-            var currentPosX = X;
-            var currentPosY = Y;
+            GetPositionSnapshot(out var currentPosX, out var currentPosY);
 
-            PendingX = X;
-            PendingY = Y;
+            PendingX = currentPosX;
+            PendingY = currentPosY;
 
             var allowGhostWalk = false;
 
@@ -92,64 +91,67 @@ public class Movable : Identifiable
 
     public bool WalkTo(int x, int y)
     {
-        var buffer = new byte[2];
-        var length = float.PositiveInfinity;
-        var offset = 0;
-
-        for (byte i = 0; i < 4; i++)
+        lock (WalkLock)
         {
-            var newX = (int)Pos.X + Directions[i][0];
-            var newY = (int)Pos.Y + Directions[i][1];
-            var pos = new Vector2(newX, newY);
+            var buffer = new byte[2];
+            var length = float.PositiveInfinity;
+            var offset = 0;
+            GetPositionSnapshot(out var currentX, out var currentY);
 
-            if (this is Monster { AStar: false })
+            for (byte i = 0; i < 4; i++)
             {
-                if ((int)pos.X == x && (int)pos.Y == y) return false;
+                var posX = currentX + Directions[i][0];
+                var posY = currentY + Directions[i][1];
+
+                if (this is Monster { AStar: false })
+                {
+                    if (posX == x && posY == y) return false;
+                }
+
+                var ghostWalk = false;
+
+                if (this is Monster monster)
+                    ghostWalk = monster.Template.IgnoreCollision;
+
+                try
+                {
+                    if (!ghostWalk && Map.IsWall(posX, posY)) continue;
+                    if (Area.IsSpriteInLocationOnWalk(this, posX, posY)) continue;
+                }
+                catch (Exception ex)
+                {
+                    ServerSetup.EventsLogger($"{ex}\nUnknown exception in WalkTo method.");
+                    SentrySdk.CaptureException(ex);
+                }
+
+                var xDist = x - posX;
+                var yDist = y - posY;
+
+                // Chebyshev Distance
+                TargetDistance = Math.Max(Math.Abs(xDist), Math.Abs(yDist));
+
+                if (length < TargetDistance) continue;
+
+                if (length > TargetDistance)
+                {
+                    length = (float)TargetDistance;
+                    offset = 0;
+                }
+
+                if (offset < buffer.Length)
+                    buffer[offset] = i;
+
+                offset++;
             }
 
-            var ghostWalk = false;
+            if (offset == 0) return false;
+            var r = Random.Shared.Next(0, offset) % buffer.Length;
+            if (r < 0 || buffer.Length <= r) return Walk();
+            var pendingDirection = buffer[r];
+            Direction = pendingDirection;
 
-            if (this is Monster monster)
-                ghostWalk = monster.Template.IgnoreCollision;
-
-            try
-            {
-                if (!ghostWalk && Map.IsWall((int)pos.X, (int)pos.Y)) continue;
-                if (Area.IsSpriteInLocationOnWalk(this, (int)pos.X, (int)pos.Y)) continue;
-            }
-            catch (Exception ex)
-            {
-                ServerSetup.EventsLogger($"{ex}\nUnknown exception in WalkTo method.");
-                SentrySdk.CaptureException(ex);
-            }
-
-            var xDist = x - (int)pos.X;
-            var yDist = y - (int)pos.Y;
-
-            // Chebyshev Distance
-            TargetDistance = Math.Max(Math.Abs(xDist), Math.Abs(yDist));
-
-            if (length < TargetDistance) continue;
-
-            if (length > TargetDistance)
-            {
-                length = (float)TargetDistance;
-                offset = 0;
-            }
-
-            if (offset < buffer.Length)
-                buffer[offset] = i;
-
-            offset++;
+            return Walk();
         }
-
-        if (offset == 0) return false;
-        var r = Random.Shared.Next(0, offset) % buffer.Length;
-        if (r < 0 || buffer.Length <= r) return Walk();
-        var pendingDirection = buffer[r];
-        Direction = pendingDirection;
-
-        return Walk();
     }
 
     public void Wander()
@@ -159,25 +161,24 @@ public class Movable : Identifiable
         var savedDirection = Direction;
         var update = false;
 
-        Direction = (byte)RandomNumberGenerator.GetInt32(5);
+        Direction = (byte)RandomNumberGenerator.GetInt32(5); // 0 - 4
         if (Direction != savedDirection) update = true;
 
+        // Attempts to walk and change direction
         if (Walk() || !update) return;
 
-        foreach (var player in AislingsNearby())
-        {
-            player?.Client.SendCreatureTurn(Serial, (Direction)Direction);
-        }
-
-        LastTurnUpdated = DateTime.UtcNow;
+        // If last direction isn't the same as new direction, turn
+        Turn();
     }
 
     private void CheckTraps(Monster monster)
     {
+        monster.GetPositionSnapshot(out var monsterX, out var monsterY);
+
         foreach (var trap in ServerSetup.Instance.Traps.Values.Where(t => t.TrapItem.Map.ID == monster.Map.ID))
         {
             if (trap.Owner == null || trap.Owner.Serial == monster.Serial ||
-                monster.X != trap.Location.X || monster.Y != trap.Location.Y) continue;
+                monsterX != trap.Location.X || monsterY != trap.Location.Y) continue;
 
             var triggered = Trap.Activate(trap, monster);
             if (!triggered) continue;
@@ -224,7 +225,7 @@ public class Movable : Identifiable
 
     private void Step0COnWalk(int x, int y)
     {
-        lock (_walkLock)
+        lock (WalkLock)
         {
             var readyTime = DateTime.UtcNow;
             Pos = new Vector2(PendingX, PendingY);
@@ -241,14 +242,17 @@ public class Movable : Identifiable
 
     private Task<bool> StepAddAndRemoveObjectOnMovementAbilities(int x, int y)
     {
-        var readyTime = DateTime.UtcNow;
-        Pos = new Vector2(x, y);
-        LastMovementChanged = readyTime;
-        LastPosition = new Position(x, y);
-        PendingX = x;
-        PendingY = y;
-        UpdateAddAndRemove();
-        return Task.FromResult(true);
+        lock (WalkLock)
+        {
+            var readyTime = DateTime.UtcNow;
+            Pos = new Vector2(x, y);
+            LastMovementChanged = readyTime;
+            LastPosition = new Position(x, y);
+            PendingX = x;
+            PendingY = y;
+            UpdateAddAndRemove();
+            return Task.FromResult(true);
+        }
     }
 
     public void StepAddAndUpdateDisplay(Sprite sprite)

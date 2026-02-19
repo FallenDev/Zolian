@@ -39,9 +39,11 @@ public class Area : Map
 
     public static bool IsLocationOnMap(Sprite sprite)
     {
-        foreach (var (nodeId, node) in sprite.Map.MapGridDict)
+        sprite.GetPositionSnapshot(out var spriteX, out var spriteY);
+
+        foreach (var (_, node) in sprite.Map.MapGridDict)
         {
-            if ((int)node.X != (int)sprite.Pos.X && (int)node.Y != (int)sprite.Pos.Y) continue;
+            if ((int)node.X != spriteX || (int)node.Y != spriteY) continue;
             return true;
         }
 
@@ -103,14 +105,27 @@ public class Area : Map
     /// </summary>
     public static bool IsSpriteInLocationOnWalk(Sprite sprite, int x, int y)
     {
+        sprite.GetPositionSnapshot(out var spriteX, out var spriteY);
+
         if (sprite is not Mundane)
-            if (sprite.CurrentHp <= 0 || ((int)sprite.Pos.X == x && (int)sprite.Pos.Y == y)) return false; // Some monster logic needs this check
+            if (sprite.CurrentHp <= 0 || (spriteX == x && spriteY == y)) return false; // Some monster logic needs this check
+
         var spritesOnLocation = sprite.GetMovableSpritesInPosition(x, y);
         if (spritesOnLocation.IsNullOrEmpty()) return false;
+
         var first = spritesOnLocation.FirstOrDefault();
+        if (first == null) return false;
+
+        first.GetPositionSnapshot(out var firstX, out var firstY);
+
         if (sprite is Mundane or Aisling)
-            return sprite.Pos != first?.Pos;
-        return sprite.Target?.Pos != first?.Pos;
+            return spriteX != firstX || spriteY != firstY;
+
+        if (sprite.Target == null)
+            return true;
+
+        sprite.Target.GetPositionSnapshot(out var targetX, out var targetY);
+        return targetX != firstX || targetY != firstY;
     }
 
     /// <summary>

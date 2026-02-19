@@ -50,10 +50,9 @@ public static class GlobalSkillMethods
     {
         try
         {
-            var spriteX = spritePos.X;
-            var spriteY = spritePos.Y;
-            var inputX = inputPos.X;
-            var inputY = inputPos.Y;
+            spritePos.GetSnapshot(out var spriteX, out var spriteY);
+            inputPos.GetSnapshot(out var inputX, out var inputY);
+
             var diffX = Math.Abs(spriteX - inputX);
             var diffY = Math.Abs(spriteY - inputY);
             return diffX + diffY;
@@ -313,7 +312,9 @@ public static class GlobalSkillMethods
             FailedAttemptBodyAnimation(sprite);
             if (target is null) return;
             if (sprite is not Damageable damageDealer) return;
-            if (damageDealer.NextTo(target.X, target.Y))
+            target.GetPositionSnapshot(out var targetX, out var targetY);
+
+            if (damageDealer.NextTo(targetX, targetY))
                 damageDealer.SendAnimationNearby(skill.Template.MissAnimation, null, target.Serial);
         }
         catch

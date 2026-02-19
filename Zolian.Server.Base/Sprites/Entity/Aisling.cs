@@ -155,7 +155,7 @@ public sealed class Aisling : Player, IAisling
     {
         get
         {
-            if (JobClass is Job.DarkKnight or Job.ShaolinMonk or Job.Templar 
+            if (JobClass is Job.DarkKnight or Job.ShaolinMonk or Job.Templar
                 or Job.Samurai or Job.Dragoon) return true;
 
             var twoHandedUser = false;
@@ -600,70 +600,72 @@ public sealed class Aisling : Player, IAisling
 
     public bool Walk()
     {
-        if (CantMove) return false;
-
-        if (Resting != Enums.RestPosition.Standing)
+        lock (WalkLock)
         {
-            Resting = Enums.RestPosition.Standing;
-            Client.SendAttributes(StatUpdateType.Full);
-            Client.UpdateDisplay();
+            if (CantMove) return false;
+
+            if (Resting != Enums.RestPosition.Standing)
+            {
+                Resting = Enums.RestPosition.Standing;
+                Client.SendAttributes(StatUpdateType.Full);
+                Client.UpdateDisplay();
+            }
+
+            GetPositionSnapshot(out var oldPosX, out var oldPosY);
+
+            PendingX = oldPosX;
+            PendingY = oldPosY;
+
+            var allowGhostWalk = GameMaster || Dead;
+
+            // Check position before we add direction, add direction, check position to see if we can commit
+            if (!allowGhostWalk)
+            {
+                if (Map.IsWall(this, oldPosX, oldPosY)) return false;
+                if (Area.IsSpriteInLocationOnWalk(this, PendingX, PendingY)) return false;
+            }
+
+            switch (Direction)
+            {
+                case 0:
+                    PendingY--;
+                    break;
+                case 1:
+                    PendingX++;
+                    break;
+                case 2:
+                    PendingY++;
+                    break;
+                case 3:
+                    PendingX--;
+                    break;
+            }
+
+            if (!allowGhostWalk)
+            {
+                if (Map.IsWall(this, PendingX, PendingY)) return false;
+                if (Area.IsSpriteInLocationOnWalk
+                        (this, PendingX, PendingY)) return false;
+            }
+
+            foreach (var player in AislingsNearby())
+            {
+                if (player?.Serial == Serial) continue;
+                player?.Client.SendCreatureWalk(Serial, new Point(oldPosX, oldPosY), (Direction)Direction);
+            }
+
+            LastPosition = new Position(oldPosX, oldPosY);
+            Pos = new Vector2(PendingX, PendingY);
+            LastMovementChanged = DateTime.UtcNow;
+
+            Client.SendConfirmClientWalk(new Position(oldPosX, oldPosY), (Direction)Direction);
+
+            // Reset our PendingX & PendingY
+            PendingX = oldPosX;
+            PendingY = oldPosY;
+
+            return true;
         }
-
-        var oldPosX = X;
-        var oldPosY = Y;
-
-        PendingX = X;
-        PendingY = Y;
-
-        var allowGhostWalk = GameMaster || Dead;
-
-        // Check position before we add direction, add direction, check position to see if we can commit
-        if (!allowGhostWalk)
-        {
-            if (Map.IsWall(this, oldPosX, oldPosY)) return false;
-            if (Area.IsSpriteInLocationOnWalk(this, PendingX, PendingY)) return false;
-        }
-
-        switch (Direction)
-        {
-            case 0:
-                PendingY--;
-                break;
-            case 1:
-                PendingX++;
-                break;
-            case 2:
-                PendingY++;
-                break;
-            case 3:
-                PendingX--;
-                break;
-        }
-
-        if (!allowGhostWalk)
-        {
-            if (Map.IsWall(this, PendingX, PendingY)) return false;
-            if (Area.IsSpriteInLocationOnWalk
-                    (this, PendingX, PendingY)) return false;
-        }
-
-        foreach (var player in AislingsNearby())
-        {
-            if (player?.Serial == Serial) continue;
-            player?.Client.SendCreatureWalk(Serial, new Point(oldPosX, oldPosY), (Direction)Direction);
-        }
-
-        LastPosition = new Position(oldPosX, oldPosY);
-        Pos = new Vector2(PendingX, PendingY);
-        LastMovementChanged = DateTime.UtcNow;
-
-        Client.SendConfirmClientWalk(new Position(oldPosX, oldPosY), (Direction)Direction);
-
-        // Reset our PendingX & PendingY
-        PendingX = oldPosX;
-        PendingY = oldPosY;
-
-        return true;
     }
 
     public async Task AutoRoutine()
