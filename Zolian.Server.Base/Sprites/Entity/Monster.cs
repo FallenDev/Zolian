@@ -50,6 +50,7 @@ public sealed class Monster : Damageable
 
     public TargetRecord TargetRecord { get; set; }
     public readonly Lock TaggedAislingsLock = new();
+    public PrimaryStat MajorAttribute { get; set; }
     public bool Aggressive { get; set; }
     public bool ThrownBack { get; set; }
     public bool AStar { get; private set; }

@@ -16,16 +16,19 @@ namespace Darkages.Sprites;
 
 public abstract class Sprite : INotifyPropertyChanged
 {
-    public Position LastPosition;
-    public event PropertyChangedEventHandler PropertyChanged;
+    public uint Serial { get; set; }
+    public int CurrentMapId { get; set; }
+    /// <summary>
+    /// Gets or sets whether or not the entity is a summoned sprite
+    /// </summary>
+    public bool Summoned;
     public readonly Stopwatch MonsterBuffAndDebuffStopWatch = new();
     private readonly Stopwatch _threatControl = new();
 
-    public bool Alive => CurrentHp > 1;
-    public bool Summoned;
-
     #region Buffs Debuffs
 
+    public ConcurrentDictionary<string, Buff> Buffs { get; }
+    public ConcurrentDictionary<string, Debuff> Debuffs { get; }
     protected int _frozenStack;
     protected int _comaAwakeStack;
 
@@ -56,7 +59,10 @@ public abstract class Sprite : INotifyPropertyChanged
     public bool IsCradhed => HasDebuff(i => i.Name.Contains("Cradh"));
     public bool IsVulnerable => IsFrozen || IsStopped || IsSleeping || Berserk || IsCharmed || IsWeakened || HasDebuff("Decay");
     public bool IsBlocked => IsFrozen || IsStopped || IsSleeping;
-
+    public bool CantCast => IsFrozen || IsStopped || IsSleeping || IsSilenced;
+    public bool CantAttack => IsFrozen || IsStopped || IsSleeping || IsCharmed;
+    public bool CantMove => IsFrozen || IsStopped || IsSleeping || IsBeagParalyzed;
+    public bool HasDoT => IsBleeding || IsPoisoned;
     public bool ClawFistEmpowerment { get; set; }
     public bool HardenedHands => HasBuff("Hardened Hands");
     public bool RasenShoheki => HasBuff("Rasen Shoheki");
@@ -76,10 +82,7 @@ public abstract class Sprite : INotifyPropertyChanged
 
     #endregion
 
-    public bool CantCast => IsFrozen || IsStopped || IsSleeping || IsSilenced;
-    public bool CantAttack => IsFrozen || IsStopped || IsSleeping || IsCharmed;
-    public bool CantMove => IsFrozen || IsStopped || IsSleeping || IsBeagParalyzed;
-    public bool HasDoT => IsBleeding || IsPoisoned;
+    public bool Alive => CurrentHp > 1;
     private long CheckHp => Math.Clamp(BaseHp + BonusHp, 0, long.MaxValue);
     public long MaximumHp => Math.Clamp(CheckHp, 0, long.MaxValue);
     private long CheckMp => Math.Clamp(BaseMp + BonusMp, 0, long.MaxValue);
@@ -87,6 +90,7 @@ public abstract class Sprite : INotifyPropertyChanged
     public int Regen => (_Regen + BonusRegen).IntClamp(1, 150);
     public int Dmg => _Dmg + BonusDmg;
     public double SealedModifier { get; set; }
+
     public int SealedAc
     {
         get
@@ -120,9 +124,6 @@ public abstract class Sprite : INotifyPropertyChanged
     public int Dex => (_Dex + BonusDex).IntClamp(0, ServerSetup.Instance.Config.StatCap);
     public int Luck => _Luck + BonusLuck;
 
-    public Area Map => ServerSetup.Instance.GlobalMapCache.GetValueOrDefault(CurrentMapId);
-    public Position Position => new(Pos);
-
     public ushort Level => TileType switch
     {
         TileContent.Aisling => ((Aisling)this).ExpLevel,
@@ -131,14 +132,12 @@ public abstract class Sprite : INotifyPropertyChanged
         _ => 0
     };
 
-    protected static readonly int[][] Directions =
-    [
-        [+0, -1],
-        [+1, +0],
-        [+0, +1],
-        [-1, +0]
-    ];
-
+    public double Amplified { get; set; }
+    public ElementManager.Element OffenseElement { get; set; }
+    public ElementManager.Element SecondaryOffensiveElement { get; set; }
+    public ElementManager.Element DefenseElement { get; set; }
+    public ElementManager.Element SecondaryDefensiveElement { get; set; }
+    public Sprite Target { get; set; }
     protected double TargetDistance { get; set; }
 
     protected Sprite()
@@ -163,43 +162,141 @@ public abstract class Sprite : INotifyPropertyChanged
         LastMovementChanged = readyTime;
         LastTurnUpdated = readyTime;
         LastUpdated = readyTime;
+        _x = 0;
+        _y = 0;
         LastPosition = new Position(Vector2.Zero);
     }
 
-    public uint Serial { get; set; }
-    public int CurrentMapId { get; set; }
-    public double Amplified { get; set; }
-    public ElementManager.Element OffenseElement { get; set; }
-    public ElementManager.Element SecondaryOffensiveElement { get; set; }
-    public ElementManager.Element DefenseElement { get; set; }
-    public ElementManager.Element SecondaryDefensiveElement { get; set; }
-    public DateTime AbandonedDate { get; set; }
-    public Sprite Target { get; set; }
-    public int X { get; set; }
-    public int Y { get; set; }
-    public Vector2 Pos
-    {
-        get => new(X, Y);
-        set
-        {
-            if (Pos == value) return;
-            X = (int)value.X;
-            Y = (int)value.Y;
-            NotifyPropertyChanged();
-        }
-    }
+    #region Positioning
+
+    public Position Position => new(Pos);
+    public Position LastPosition;
+    public Area Map => ServerSetup.Instance.GlobalMapCache.GetValueOrDefault(CurrentMapId);
+
+    public event PropertyChangedEventHandler PropertyChanged;
+    private readonly Lock _positionLock = new();
+    private int _x;
+    private int _y;
     public TileContent TileType { get; set; }
     public byte Direction { get; set; }
     protected int PendingX { get; set; }
     protected int PendingY { get; set; }
-    public DateTime LastMenuInvoked { get; set; }
+
+    public int X
+    {
+        get
+        {
+            lock (_positionLock)
+                return _x;
+        }
+        set => UpdatePosition(value, null);
+    }
+
+    public int Y
+    {
+        get
+        {
+            lock (_positionLock)
+                return _y;
+        }
+        set => UpdatePosition(null, value);
+    }
+
+    public Vector2 Pos
+    {
+        get
+        {
+            GetPositionSnapshot(out var x, out var y);
+            return new Vector2(x, y);
+        }
+        set => UpdatePosition((int)value.X, (int)value.Y);
+    }
+
+    protected static readonly int[][] Directions =
+    [
+        [+0, -1],
+        [+1, +0],
+        [+0, +1],
+        [-1, +0]
+    ];
+
+    private void UpdatePosition(int? x, int? y)
+    {
+        var changed = false;
+
+        lock (_positionLock)
+        {
+            var nextX = x ?? _x;
+            var nextY = y ?? _y;
+
+            if (nextX == _x && nextY == _y)
+                return;
+
+            _x = nextX;
+            _y = nextY;
+            changed = true;
+        }
+
+        if (changed)
+            NotifyPropertyChanged();
+    }
+
+    public void GetPositionSnapshot(out int x, out int y)
+    {
+        lock (_positionLock)
+        {
+            x = _x;
+            y = _y;
+        }
+    }
+
+    #endregion
+
+    #region Within Range & Distance
+
+    public int DistanceFrom(int x, int y)
+    {
+        GetPositionSnapshot(out var selfX, out var selfY);
+
+        // Manhattan Distance
+        return Math.Abs(selfX - x) + Math.Abs(selfY - y);
+    }
+
+    public int DistanceFrom(Sprite other)
+    {
+        if (other is null) return int.MaxValue;
+
+        other.GetPositionSnapshot(out var otherX, out var otherY);
+        return DistanceFrom(otherX, otherY);
+    }
+
+    public bool WithinRangeOf(Sprite other) => other != null && WithinRangeOf(other, ServerSetup.Instance.Config.WithinRangeProximity);
+    public bool WithinEarShotOf(Sprite other) => other != null && WithinRangeOf(other, 14);
+    public bool WithinMonsterSpellRangeOf(Sprite other) => other != null && WithinRangeOf(other, 10);
+    public bool WithinRangeOf(Sprite other, int distance)
+    {
+        if (other == null) return false;
+
+        if (CurrentMapId != other.CurrentMapId)
+            return false;
+
+        other.GetPositionSnapshot(out var ox, out var oy);
+        return WithinDistanceOf(ox, oy, distance);
+    }
+    public bool WithinRangeOfTile(Position pos, int distance) => pos != null && WithinDistanceOf(pos.X, pos.Y, distance);
+    private bool WithinDistanceOf(int x, int y, int subjectLength) => DistanceFrom(x, y) < subjectLength;
+
+    #endregion
+
+    #region State Timers
+
     public DateTime LastMovementChanged { get; set; }
     public DateTime LastTargetAcquired { get; set; }
     public DateTime LastTurnUpdated { get; set; }
     public DateTime LastUpdated { get; set; }
-    public PrimaryStat MajorAttribute { get; set; }
-    public ConcurrentDictionary<string, Buff> Buffs { get; }
-    public ConcurrentDictionary<string, Debuff> Debuffs { get; }
+    public DateTime AbandonedDate { get; set; }
+    
+    #endregion
 
     #region Stats
 
@@ -311,26 +408,6 @@ public abstract class Sprite : INotifyPropertyChanged
     public List<Monster> MonstersOnMap() => this.MonstersOnMapSnapshot();
     public List<Mundane> MundanesNearby() => this.MundanesNearbySnapshot();
     public List<Sprite> GetMovableSpritesInPosition(int x, int y) => this.GetMovableAt(x, y);
-
-    #endregion
-
-    #region Within Range & Distance
-
-    public bool WithinRangeOf(Sprite other) => other != null && WithinRangeOf(other, ServerSetup.Instance.Config.WithinRangeProximity);
-    public bool WithinEarShotOf(Sprite other) => other != null && WithinRangeOf(other, 14);
-    public bool WithinMonsterSpellRangeOf(Sprite other) => other != null && WithinRangeOf(other, 10);
-    public bool WithinRangeOf(Sprite other, int distance)
-    {
-        if (other == null) return false;
-        return CurrentMapId == other.CurrentMapId && WithinDistanceOf((int)other.Pos.X, (int)other.Pos.Y, distance);
-    }
-    public bool WithinRangeOfTile(Position pos, int distance) => pos != null && WithinDistanceOf(pos.X, pos.Y, distance);
-    private bool WithinDistanceOf(int x, int y, int subjectLength) => DistanceFrom(x, y) < subjectLength;
-    public int DistanceFrom(int x, int y)
-    {
-        // Manhattan Distance
-        return Math.Abs(X - x) + Math.Abs(Y - y);
-    }
 
     #endregion
 
