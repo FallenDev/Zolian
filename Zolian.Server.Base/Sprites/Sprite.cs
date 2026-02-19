@@ -3,10 +3,8 @@ using Darkages.Enums;
 using Darkages.Types;
 
 using System.Collections.Concurrent;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Numerics;
-using System.Runtime.CompilerServices;
 using MapFlags = Darkages.Enums.MapFlags;
 using Darkages.Network.Server;
 using Darkages.Object;
@@ -14,7 +12,7 @@ using Darkages.Sprites.Entity;
 
 namespace Darkages.Sprites;
 
-public abstract class Sprite : INotifyPropertyChanged
+public abstract class Sprite
 {
     public uint Serial { get; set; }
     public int CurrentMapId { get; set; }
@@ -164,19 +162,50 @@ public abstract class Sprite : INotifyPropertyChanged
         LastUpdated = readyTime;
         _x = 0;
         _y = 0;
+        _lastX = 0;
+        _lastY = 0;
         LastPosition = new Position(Vector2.Zero);
     }
 
     #region Positioning
 
-    public Position Position => new(Pos);
-    public Position LastPosition;
-    public Area Map => ServerSetup.Instance.GlobalMapCache.GetValueOrDefault(CurrentMapId);
+    public Position Position
+    {
+        get
+        {
+            GetPositionSnapshot(out var x, out var y);
+            return new Position(x, y);
+        }
+    }
 
-    public event PropertyChangedEventHandler PropertyChanged;
+    public Position LastPosition
+    {
+        get
+        {
+            lock (_positionLock)
+                return new Position(_lastX, _lastY);
+        }
+        set
+        {
+            if (value == null) return;
+
+            value.GetSnapshot(out var x, out var y);
+
+            lock (_positionLock)
+            {
+                _lastX = x;
+                _lastY = y;
+            }
+        }
+    }
+
+    public Area Map => ServerSetup.Instance.GlobalMapCache.GetValueOrDefault(CurrentMapId);
     private readonly Lock _positionLock = new();
     private int _x;
     private int _y;
+    private ushort _lastX;
+    private ushort _lastY;
+
     public TileContent TileType { get; set; }
     public byte Direction { get; set; }
     protected int PendingX { get; set; }
@@ -222,8 +251,6 @@ public abstract class Sprite : INotifyPropertyChanged
 
     private void UpdatePosition(int? x, int? y)
     {
-        var changed = false;
-
         lock (_positionLock)
         {
             var nextX = x ?? _x;
@@ -234,11 +261,7 @@ public abstract class Sprite : INotifyPropertyChanged
 
             _x = nextX;
             _y = nextY;
-            changed = true;
         }
-
-        if (changed)
-            NotifyPropertyChanged();
     }
 
     public void GetPositionSnapshot(out int x, out int y)
@@ -295,7 +318,7 @@ public abstract class Sprite : INotifyPropertyChanged
     public DateTime LastTurnUpdated { get; set; }
     public DateTime LastUpdated { get; set; }
     public DateTime AbandonedDate { get; set; }
-    
+
     #endregion
 
     #region Stats
@@ -351,11 +374,6 @@ public abstract class Sprite : INotifyPropertyChanged
         if (CurrentMapId <= 0 || !ServerSetup.Instance.GlobalMapCache.TryGetValue(CurrentMapId, out var value)) return true;
 
         return value.Flags.MapFlagIsSet(MapFlags.PlayerKill);
-    }
-
-    private void NotifyPropertyChanged([CallerMemberName] string propertyName = "")
-    {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 
     protected bool CanAttack(Sprite attackingPlayer)
