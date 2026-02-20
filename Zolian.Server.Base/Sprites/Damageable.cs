@@ -187,13 +187,10 @@ public class Damageable : Movable
 
         if (damageDealingSprite is Aisling aisling)
         {
-            var time = DateTime.UtcNow;
-            var estTime = time.TimeOfDay;
             aisling.DamageCounter += dmg;
             if (aisling.ThreatMeter + dmg >= long.MaxValue)
                 aisling.ThreatMeter = 500000;
             aisling.ThreatMeter += dmg;
-            ShowDmg(aisling, estTime);
         }
 
         if (this is Aisling damagedPlayer)
@@ -311,6 +308,11 @@ public class Damageable : Movable
                 dmg = (long)(dmg * .90);
         }
 
+        if (damageDealingSprite is Aisling aislingAttacker && this is Aisling aislingDefener)
+        {
+            if (aislingAttacker.GroupParty.Has(aislingDefener)) return false;
+        }
+
         if (RasenShoheki || (Immunity && !forced))
         {
             if (RasenShoheki)
@@ -396,6 +398,11 @@ public class Damageable : Movable
 
             if (monster.Camouflage)
                 dmg = (long)(dmg * .90);
+        }
+
+        if (damageDealingSprite is Aisling aislingAttacker && this is Aisling aislingDefener)
+        {
+            if (aislingAttacker.GroupParty.Has(aislingDefener)) return false;
         }
 
         if (RasenShoheki || (Immunity && !forced))
@@ -1402,69 +1409,17 @@ public class Damageable : Movable
         // If the source of the damage is not from a player, return
         if (source is not Aisling playerDamageDealer) return;
 
-        // Update damage counter and threat meter
-        var time = DateTime.UtcNow;
-        var estTime = time.TimeOfDay;
-        playerDamageDealer.DamageCounter += dmg;
+        // Update threat meter
         if (playerDamageDealer.ThreatMeter + dmg >= long.MaxValue)
             playerDamageDealer.ThreatMeter = (long)(long.MaxValue * .95);
-        playerDamageDealer.ThreatMeter += dmg;
 
-        // Show damage numbers if enabled
-        if (playerDamageDealer.GameSettings.DmgNumbers)
-            ShowDmg(playerDamageDealer, estTime);
+        playerDamageDealer.ThreatMeter += dmg;
+        playerDamageDealer.DamageCounter += dmg;
 
         // Trigger any scripts on damage taken
         if (this is not Monster monster) return;
         if (monster.Template?.ScriptName == null) return;
         monster.AIScript?.OnDamaged(playerDamageDealer.Client, dmg, source);
-    }
-
-    private static void ShowDmg(Aisling aisling, TimeSpan elapsedTime)
-    {
-        if (!aisling.AttackDmgTrack.Update(elapsedTime)) return;
-        aisling.AttackDmgTrack.Delay = TimeSpan.FromSeconds(1);
-
-        var dmgShow = aisling.DamageCounter.ToString();
-        aisling.Client.SendPublicMessage(aisling.Serial, PublicMessageType.Chant, $"{dmgShow}");
-        ShowDmgTierAnimation(aisling);
-        aisling.DamageCounter = 0;
-    }
-
-    private static void ShowDmgTierAnimation(Aisling aisling)
-    {
-        switch (aisling.DamageCounter)
-        {
-            case >= 1000000 and < 5000000: // 1M
-                aisling.SendAnimationNearby(405, aisling.Position);
-                break;
-            case >= 5000000 and < 10000000: // 5M
-                aisling.SendAnimationNearby(406, aisling.Position);
-                break;
-            case >= 10000000 and < 20000000: // 10M
-                aisling.SendAnimationNearby(407, aisling.Position);
-                break;
-            case >= 20000000 and < 50000000: // 20M
-                aisling.SendAnimationNearby(408, aisling.Position);
-                break;
-            case >= 50000000 and < 100000000: // 50M
-                aisling.SendAnimationNearby(409, aisling.Position);
-                break;
-            case >= 100000000 and < 500000000: // 100M
-                aisling.SendAnimationNearby(410, aisling.Position);
-                break;
-            case >= 500000000 and < 1000000000: // 500M
-                aisling.SendAnimationNearby(411, aisling.Position);
-                break;
-            case >= 1000000000 and < 2000000000: // 1B
-                aisling.SendAnimationNearby(412, aisling.Position);
-                break;
-            case >= 2000000000: // 2B
-                aisling.SendAnimationNearby(413, aisling.Position);
-                break;
-            default:
-                return;
-        }
     }
 
     #endregion

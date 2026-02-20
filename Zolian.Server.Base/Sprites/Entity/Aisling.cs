@@ -88,7 +88,6 @@ public sealed class Aisling : Player, IAisling
         DiscoveredMaps = [];
         IgnoredList = [];
         GroupId = 0;
-        AttackDmgTrack = new WorldServerTimer(TimeSpan.FromSeconds(1));
         ThreatTimer = new WorldServerTimer(TimeSpan.FromSeconds(60));
         TileType = TileContent.Aisling;
         AislingTracker = DateTime.UtcNow;
@@ -104,7 +103,6 @@ public sealed class Aisling : Player, IAisling
     public bool ProfileOpen { get; set; }
     public bool UsingTwoHanded { get; set; }
     public int LastMapId { get; set; }
-    public WorldServerTimer AttackDmgTrack { get; }
     public WorldServerTimer ThreatTimer { get; set; }
     public UserOptions GameSettings { get; init; } = new();
     public SkillBook SkillBook { get; set; }

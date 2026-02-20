@@ -3168,6 +3168,9 @@ public class WorldClient : WorldClientBase, IWorldClient
                             Name = creature.Template.BaseName
                         };
 
+                        if (creature.Summoned)
+                            creatureInfo.CreatureType = CreatureType.WalkThrough;
+
                         visibleArgs.Add(creatureInfo);
 
                         break;

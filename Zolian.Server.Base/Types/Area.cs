@@ -119,7 +119,10 @@ public class Area : Map
         first.GetPositionSnapshot(out var firstX, out var firstY);
 
         if (sprite is Mundane or Aisling)
+        {
+            if (first is Monster monster && monster.Summoned) return false;
             return spriteX != firstX || spriteY != firstY;
+        }
 
         if (sprite.Target == null)
             return true;

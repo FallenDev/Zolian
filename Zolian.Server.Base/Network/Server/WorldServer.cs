@@ -26,7 +26,6 @@ using Darkages.Network.Client.Abstractions;
 using Darkages.Network.Components;
 using Darkages.Object;
 using Darkages.ScriptingBase;
-using Darkages.Sprites;
 using Darkages.Sprites.Entity;
 using Darkages.Templates;
 using Darkages.Types;
@@ -219,6 +218,7 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
             [typeof(PlayerSaveDirtyComponent)] = new PlayerSaveDirtyComponent(this),
             [typeof(PlayerStatusBarAndThreatComponent)] = new PlayerStatusBarAndThreatComponent(this),
             [typeof(PlayerSkillSpellCooldownComponent)] = new PlayerSkillSpellCooldownComponent(this),
+            [typeof(DamageDisplayComponent)] = new DamageDisplayComponent(this),
             [typeof(MoonPhaseComponent)] = new MoonPhaseComponent(this),
             [typeof(ClientCreationLimit)] = new ClientCreationLimit(this),
             [typeof(UpdateClientsComponent)] = new UpdateClientsComponent(this),
