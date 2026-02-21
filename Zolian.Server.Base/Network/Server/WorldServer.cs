@@ -226,7 +226,8 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
             [typeof(UpdateMapsComponent)] = new UpdateMapsComponent(this),
             [typeof(UpdateMonstersComponent)] = new UpdateMonstersComponent(this),
             [typeof(UpdateMundanesComponent)] = new UpdateMundanesComponent(this),
-            [typeof(UpdateTrapsComponent)] = new UpdateTrapsComponent(this)
+            [typeof(UpdateTrapsComponent)] = new UpdateTrapsComponent(this),
+            [typeof(WebApiComponent)] = new WebApiComponent(this)
         };
     }
 

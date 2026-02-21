@@ -48,6 +48,10 @@ public class ServerSetup : IServerContext
     public IPAddress IpAddress { get; set; }
     public string[] GameMastersIPs { get; set; }
     public string InternalAddress { get; set; }
+    public bool WebApiEnabled { get; set; }
+    public string WebApiPrefix { get; set; }
+    public string WebApiApiKey { get; set; }
+    public string WebApiAllowedOrigin { get; set; }
 
     // Templates
     public FrozenDictionary<int, WorldMapTemplate> GlobalWorldMapTemplateCache { get; set; }
@@ -95,12 +99,18 @@ public class ServerSetup : IServerContext
     public ServerSetup(IOptions<ServerOptions> options)
     {
         Instance = this;
+        // Setup ServerOptions
         ServerOptions = options;
         StoragePath = ServerOptions.Value.Location;
         KeyCode = ServerOptions.Value.KeyCode;
         Unlock = ServerOptions.Value.Unlock;
         InternalAddress = ServerOptions.Value.InternalIp;
         GameMastersIPs = ServerOptions.Value.GameMastersIPs;
+        WebApiEnabled = ServerOptions.Value.WebApiEnabled;
+        WebApiPrefix = ServerOptions.Value.WebApiPrefix;
+        WebApiApiKey = ServerOptions.Value.WebApiApiKey;
+        WebApiAllowedOrigin = ServerOptions.Value.WebApiAllowedOrigin;
+
         var restSettings = SetupRestClients();
         RestClient = new RestClient(restSettings.Item1);
         RestReport = new RestClient(restSettings.Item2);
