@@ -9,7 +9,7 @@ using Darkages.Sprites.Entity;
 namespace Darkages.Network.Components;
 
 /// <summary>
-/// Lightweight world-status API for external web integrations.
+/// World-status API for external web integrations
 /// </summary>
 public sealed class WebApiComponent(WorldServer server) : WorldServerComponent(server)
 {
@@ -36,6 +36,7 @@ public sealed class WebApiComponent(WorldServer server) : WorldServerComponent(s
             _listener.Start();
             ServerSetup.EventsLogger($"Web API listening on {prefix}");
 
+            // Main loop to handle incoming requests
             while (ServerSetup.Instance.Running && _listener.IsListening)
             {
                 var context = await _listener.GetContextAsync().ConfigureAwait(false);
@@ -45,11 +46,6 @@ public sealed class WebApiComponent(WorldServer server) : WorldServerComponent(s
         catch (HttpListenerException ex)
         {
             ServerSetup.EventsLogger($"Web API listener error: {ex.Message}", Microsoft.Extensions.Logging.LogLevel.Error);
-            SentrySdk.CaptureException(ex);
-        }
-        catch (PlatformNotSupportedException ex)
-        {
-            ServerSetup.EventsLogger($"Web API unsupported on this platform/runtime: {ex.Message}", Microsoft.Extensions.Logging.LogLevel.Warning);
             SentrySdk.CaptureException(ex);
         }
         catch (Exception ex)
@@ -66,10 +62,7 @@ public sealed class WebApiComponent(WorldServer server) : WorldServerComponent(s
 
                 _listener.Close();
             }
-            catch
-            {
-                // ignored
-            }
+            catch { }
         }
     }
 
@@ -103,12 +96,14 @@ public sealed class WebApiComponent(WorldServer server) : WorldServerComponent(s
 
             var path = req.Url.AbsolutePath.TrimEnd('/').ToLowerInvariant();
 
+            // Simple health check endpoint
             if (path is "/health")
             {
                 await WriteJson(res, HttpStatusCode.OK, new { status = "ok" }).ConfigureAwait(false);
                 return;
             }
 
+            // Main endpoint to get world snapshot
             if (path is "/api/world")
             {
                 var payload = BuildWorldSnapshot();
@@ -163,11 +158,13 @@ public sealed class WebApiComponent(WorldServer server) : WorldServerComponent(s
     {
         var configuredKey = ServerSetup.Instance.WebApiApiKey;
 
+        // If no API key is configured, deny access
         if (string.IsNullOrWhiteSpace(configuredKey))
-            return true;
+            return false;
 
         var providedKey = req.Headers["X-Api-Key"];
 
+        // If not provided in header, check query string for backward compatibility
         if (string.IsNullOrWhiteSpace(providedKey))
             providedKey = req.QueryString["apiKey"];
 
@@ -178,6 +175,7 @@ public sealed class WebApiComponent(WorldServer server) : WorldServerComponent(s
     {
         var allowedOrigin = ServerSetup.Instance.WebApiAllowedOrigin;
 
+        // If no allowed origin is configured, default to allowing all origins
         if (string.IsNullOrWhiteSpace(allowedOrigin))
             allowedOrigin = "*";
 
@@ -196,7 +194,7 @@ public sealed class WebApiComponent(WorldServer server) : WorldServerComponent(s
         res.ContentEncoding = Encoding.UTF8;
         res.ContentLength64 = data.Length;
 
-        await res.OutputStream.WriteAsync(data, 0, data.Length).ConfigureAwait(false);
+        await res.OutputStream.WriteAsync(data).ConfigureAwait(false);
         res.Close();
     }
 }
