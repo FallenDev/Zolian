@@ -381,6 +381,9 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
                 return spriteX == localArgs.SourcePoint.X && spriteY == localArgs.SourcePoint.Y;
             }, itemsList);
 
+            // Remove all traps from pickup logic
+            itemsList.RemoveAll(i => i.Template.Flags.FlagIsSet(ItemFlags.Trap));
+
             var moneyObjs = ObjectManager.GetObjects(map, i =>
             {
                 i.GetPositionSnapshot(out var spriteX, out var spriteY);
