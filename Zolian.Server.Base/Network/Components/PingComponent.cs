@@ -9,6 +9,8 @@ public class PingComponent(WorldServer server) : WorldServerComponent(server)
     private const int ComponentSpeed = 5000;
     private const byte HeartbeatFirst = 0x14;
     private const byte HeartbeatSecond = 0x20;
+    private static readonly TimeSpan HeartBeatTimeout = TimeSpan.FromSeconds(8);
+    private const int MaxHeartBeatMisses = 3;
 
     protected internal override async Task Update()
     {
@@ -47,7 +49,41 @@ public class PingComponent(WorldServer server) : WorldServerComponent(server)
         {
             try
             {
-                player.Client.SendHeartBeat(HeartbeatFirst, HeartbeatSecond);
+                var c = player.Client;
+                if (c is null)
+                    return;
+
+                // If a heartbeat is in-flight, check for timeout
+                if (Volatile.Read(ref c.HeartBeatInFlight) != 0)
+                {
+                    var start = Volatile.Read(ref c.HeartBeatStartTimestamp);
+
+                    // If we somehow have in-flight but no start timestamp, treat it as timed out.
+                    if (start <= 0)
+                    {
+                        Interlocked.Exchange(ref c.HeartBeatInFlight, 0);
+
+                        if (Interlocked.Increment(ref c.HeartBeatMisses) >= MaxHeartBeatMisses)
+                            c.CloseTransport();
+
+                        return;
+                    }
+
+                    var now = Stopwatch.GetTimestamp();
+                    // Still waiting on current heartbeat
+                    if (Stopwatch.GetElapsedTime(start, now) < HeartBeatTimeout) return;
+
+                    // Timed out => count as a miss
+                    Interlocked.Exchange(ref c.HeartBeatInFlight, 0);
+
+                    if (Interlocked.Increment(ref c.HeartBeatMisses) >= MaxHeartBeatMisses)
+                    {
+                        c.CloseTransport();
+                        return;
+                    }
+                }
+
+                c.SendHeartBeat(HeartbeatFirst, HeartbeatSecond);
             }
             catch { }
         });

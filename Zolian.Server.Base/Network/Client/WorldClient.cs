@@ -76,6 +76,8 @@ public class WorldClient : WorldClientBase, IWorldClient
     // Ping/Pong RTT
     public int HeartBeatInFlight;
     public long HeartBeatStartTimestamp;
+    public long HeartBeatLastAckTimestamp;
+    public int HeartBeatMisses;
     public int HeartBeatIdx;
     public int HeartBeatCount;
     public int HeartBeatSampleSum;

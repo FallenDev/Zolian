@@ -2449,20 +2449,34 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
 
         static ValueTask InnerOnHeartBeat(IWorldClient localClient, HeartBeatArgs localArgs)
         {
-            if (localArgs.First != 0x20 || localArgs.Second != 0x14) return default;
+            if (localArgs.First != 0x20 || localArgs.Second != 0x14)
+                return default;
+
             var client = localClient.Aisling.Client;
-            if (Interlocked.Exchange(ref client.HeartBeatInFlight, 0) == 0) return default;
+
+            // Only accept a reply if we had a ping in-flight
+            if (Interlocked.Exchange(ref client.HeartBeatInFlight, 0) == 0)
+                return default;
 
             var start = Volatile.Read(ref client.HeartBeatStartTimestamp);
-            if (start <= 0) return default;
+            if (start <= 0)
+                return default;
 
             var now = Stopwatch.GetTimestamp();
-            var rttMs = (int)Math.Round((now - start) * 1000.0 / Stopwatch.Frequency);
-            if (rttMs < 0) rttMs = 0;
+            var delta = now - start;
+            if (delta < 0) delta = 0;
+
+            // Integer-rounded RTT in ms: (delta * 1000 / freq) with rounding
+            var freq = Stopwatch.Frequency;
+            var rttMs = (int)((delta * 1000L + (freq / 2)) / freq);
 
             client.LastRttMs = rttMs;
+            client.HeartBeatLastAckTimestamp = now;
 
-            // Rolling mean calculation with O(1) update.
+            // OnSuccess, reset the miss count and update rolling mean and EMA
+            Interlocked.Exchange(ref client.HeartBeatMisses, 0);
+
+            // Rolling mean (O(1)) over the sample window
             var samples = client.HeartBeatSamplesMs;
             var sampleCount = client.HeartBeatCount;
             var sampleIdx = client.HeartBeatIdx;
@@ -2475,21 +2489,24 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
 
             samples[sampleIdx] = rttMs;
             sampleSum += rttMs;
-            sampleIdx++;
 
+            sampleIdx++;
             if (sampleIdx == samples.Length)
                 sampleIdx = 0;
 
             client.HeartBeatCount = sampleCount;
             client.HeartBeatIdx = sampleIdx;
             client.HeartBeatSampleSum = sampleSum;
-            client.RollingRtt15sMs = (int)Math.Round(sampleSum / (double)sampleCount);
+            client.RollingRtt15sMs = sampleSum / sampleCount;
 
-            // EMA Smoothing
-            const double alpha = 0.25;
-            client.SmoothedRttMs = client.SmoothedRttMs == 0
+            // EMA smoothing (alpha = 0.25 => 1/4)
+            const int alphaNumerator = 1;
+            const int alphaDenominator = 4;
+
+            var prev = client.SmoothedRttMs;
+            client.SmoothedRttMs = prev == 0
                 ? rttMs
-                : (int)Math.Round(client.SmoothedRttMs + alpha * (rttMs - client.SmoothedRttMs));
+                : prev + ((alphaNumerator * (rttMs - prev)) / alphaDenominator);
 
             return default;
         }
