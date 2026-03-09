@@ -61,7 +61,7 @@ public class Conn : MundaneScript
         var advExp2 = Random.Shared.Next(750000, 1000000);
         var advExp3 = Random.Shared.Next(3000000, 4500000);
 
-        _potion = potions switch
+        client.Aisling.TempPotionCraftName = potions switch
         {
             1 => "Beag Ioc Deum",
             2 => "Beothaich", // Revive

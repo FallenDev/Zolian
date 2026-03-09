@@ -53,6 +53,7 @@ public sealed class Aisling : Player, IAisling
     public string TempAdvKillQuestMonsterName { get; set; }
     public string TempRetrieveQuestName { get; set; }
     public string TempAdvRetrieveQuestName { get; set; }
+    public string TempPotionCraftName { get; set; }
     public int TempHairStyle { get; set; }
     public int TempHairColor { get; set; }
     public bool TempDepositGoldCancel { get; set; }
