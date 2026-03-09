@@ -12,9 +12,6 @@ namespace Darkages.GameScripts.Mundanes.Tutorial;
 [Script("Journey Start")]
 public class RaceChooser(WorldServer server, Mundane mundane) : MundaneScript(server, mundane)
 {
-    private Race _chosenRace = Race.UnDecided;
-    private SubClassDragonkin _dragonkin = SubClassDragonkin.Red;
-
     public override void OnClick(WorldClient client, uint serial)
     {
         base.OnClick(client, serial);
@@ -79,7 +76,7 @@ public class RaceChooser(WorldServer server, Mundane mundane) : MundaneScript(se
                 TopMenu(client);
                 break;
             case 4:
-                _chosenRace = Race.Human;
+                client.Aisling.TempRace = Race.Human;
                 client.SendOptionsDialog(Mundane, "{=aHumans are known for their tenacity, creativity, and endless capacity to learn.\n" +
                                                   "Racial bonuses: {=qSTR +1, INT +1, WIS +1, CON +1, DEX +1, Luck +1, {=aPick an {=cability",
                     new Dialog.OptionsDataItem(0x01, "{=cBack"),
@@ -87,7 +84,7 @@ public class RaceChooser(WorldServer server, Mundane mundane) : MundaneScript(se
                     new Dialog.OptionsDataItem(0x02, "{=bEnd"));
                 break;
             case 5:
-                _chosenRace = Race.Dwarf;
+                client.Aisling.TempRace = Race.Dwarf;
                 client.SendOptionsDialog(Mundane, "{=aDwarfs are steadfast, hardy, and brave. They value their culture, family and fine craftsmanship.\n" +
                                                   "Racial bonuses: {=qSTR + 2, CON +2, AC +2, {=aSpell: {=cStone Skin",
                     new Dialog.OptionsDataItem(0x01, "{=cBack"),
@@ -95,7 +92,7 @@ public class RaceChooser(WorldServer server, Mundane mundane) : MundaneScript(se
                     new Dialog.OptionsDataItem(0x02, "{=bEnd"));
                 break;
             case 6:
-                _chosenRace = Race.Halfling;
+                client.Aisling.TempRace = Race.Halfling;
                 client.SendOptionsDialog(Mundane, "{=aHalflings are the peace keepers, highly sociable, and nimble.\n" +
                                                   "Racial bonuses: {=qINT +2, DEX +4, Luck +3, {=aSkill: {=cAppraise, {=aSpell: {=cRemote Bank",
                     new Dialog.OptionsDataItem(0x01, "{=cBack"),
@@ -103,7 +100,7 @@ public class RaceChooser(WorldServer server, Mundane mundane) : MundaneScript(se
                     new Dialog.OptionsDataItem(0x02, "{=bEnd"));
                 break;
             case 7:
-                _chosenRace = Race.HighElf;
+                client.Aisling.TempRace = Race.HighElf;
                 client.SendOptionsDialog(Mundane, "{=aHigh Elves respect those who know how to handle magic, they look down on those who don't.\n" +
                                                   "Racial bonuses: {=qINT +8, WIS +3, DEX +2, {=aPick a {=cspell",
                     new Dialog.OptionsDataItem(0x01, "{=cBack"),
@@ -111,7 +108,7 @@ public class RaceChooser(WorldServer server, Mundane mundane) : MundaneScript(se
                     new Dialog.OptionsDataItem(0x02, "{=bEnd"));
                 break;
             case 8:
-                _chosenRace = Race.DarkElf;
+                client.Aisling.TempRace = Race.DarkElf;
                 client.SendOptionsDialog(Mundane, "{=aDark Elves were once corrupted and driven deep within the underworld. They're charismatic and cunning.\n" +
                                                   "Racial bonuses: {=qCON +2, DEX +3, Luck +2, {=aSkill: {=cShadowfade",
                     new Dialog.OptionsDataItem(0x01, "{=cBack"),
@@ -119,7 +116,7 @@ public class RaceChooser(WorldServer server, Mundane mundane) : MundaneScript(se
                     new Dialog.OptionsDataItem(0x02, "{=bEnd"));
                 break;
             case 9:
-                _chosenRace = Race.WoodElf;
+                client.Aisling.TempRace = Race.WoodElf;
                 client.SendOptionsDialog(Mundane, "{=aWood Elves are reclusive. They've spent their entire youth training in archery and have a natural camouflage.\n" +
                                                   "Racial bonuses: {=qWIS +2, DEX +5, {=aSkill: {=cArchery{=a, Passive: {=cCamouflage",
                     new Dialog.OptionsDataItem(0x01, "{=cBack"),
@@ -127,7 +124,7 @@ public class RaceChooser(WorldServer server, Mundane mundane) : MundaneScript(se
                     new Dialog.OptionsDataItem(0x02, "{=bEnd"));
                 break;
             case 0x0A:
-                _chosenRace = Race.HalfElf;
+                client.Aisling.TempRace = Race.HalfElf;
                 client.SendOptionsDialog(Mundane, "{=aA touch of elven blood remains. Half-Elves have strength from both humans and elves in their bloodlines.\n" +
                                                   "Racial bonuses: {=q+1 ability based stat, +4 Stat Points, {=aPick an {=cability",
                     new Dialog.OptionsDataItem(0x01, "{=cBack"),
@@ -135,7 +132,7 @@ public class RaceChooser(WorldServer server, Mundane mundane) : MundaneScript(se
                     new Dialog.OptionsDataItem(0x02, "{=bEnd"));
                 break;
             case 0x0B:
-                _chosenRace = Race.Orc;
+                client.Aisling.TempRace = Race.Orc;
                 client.SendOptionsDialog(Mundane, "{=aOrcs are strong warriors who diverted from the goblins and kobolds in the deep woodlands.\n" +
                                                   "Racial bonuses: {=qSTR +3, INT +1, CON +3, {=aSkill: {=cPain Bane",
                     new Dialog.OptionsDataItem(0x01, "{=cBack"),
@@ -150,7 +147,7 @@ public class RaceChooser(WorldServer server, Mundane mundane) : MundaneScript(se
                     new Dialog.OptionsDataItem(0x02, "{=bEnd"));
                 break;
             case 0x0D:
-                _chosenRace = Race.HalfBeast;
+                client.Aisling.TempRace = Race.HalfBeast;
                 client.SendOptionsDialog(Mundane, "{=aHalf-Beasts are a mixed race. They have blood and dna from various races and thus have various proficiencies.\n" +
                                                   "Racial bonuses: {=q+30 Stat Points, {=aSkill: {=cDash",
                     new Dialog.OptionsDataItem(0x01, "{=cBack"),
@@ -158,7 +155,7 @@ public class RaceChooser(WorldServer server, Mundane mundane) : MundaneScript(se
                     new Dialog.OptionsDataItem(0x02, "{=bEnd"));
                 break;
             case 0x1F:
-                _chosenRace = Race.Merfolk;
+                client.Aisling.TempRace = Race.Merfolk;
                 client.SendOptionsDialog(Mundane, $"{{=aMerfolk, legendary race of the sea. They have a natural defense to water-based spells.\n" +
                                                   $"Racial: {{=q+2 all stats, Splash, Tail Flip, Water Immunity",
                     new Dialog.OptionsDataItem(0x01, "{=cBack"),
@@ -186,7 +183,7 @@ public class RaceChooser(WorldServer server, Mundane mundane) : MundaneScript(se
                     new Dialog.OptionsDataItem(0x17, "{=qElement Bane"));
                 break;
             case 0x10:
-                var playerChosenRace = ClassStrings.RaceValue(_chosenRace);
+                var playerChosenRace = ClassStrings.RaceValue(client.Aisling.TempRace);
                 client.SendOptionsDialog(Mundane, $"{{=aVery well {{=q{playerChosenRace}{{=a, do you wish to be teleported to the Path of Souls now?\n" +
                                                   $"{{=aThere you will pick a class.",
                     new Dialog.OptionsDataItem(0x11, "{=qI accept"),
@@ -195,7 +192,7 @@ public class RaceChooser(WorldServer server, Mundane mundane) : MundaneScript(se
                 break;
             case 0x11:
                 {
-                    client.Aisling.Race = _chosenRace;
+                    client.Aisling.Race = client.Aisling.TempRace;
 
                     if (client.Aisling.Race != Race.UnDecided)
                     {
@@ -240,7 +237,7 @@ public class RaceChooser(WorldServer server, Mundane mundane) : MundaneScript(se
                                 RacialBonus.Halfling(client);
                                 break;
                             case Race.Dragonkin:
-                                RacialBonus.Dragonkin(client, _dragonkin);
+                                RacialBonus.Dragonkin(client, client.Aisling.TempSubRace);
                                 break;
                             case Race.HalfBeast:
                                 client.Aisling.BodyColor = 2;
@@ -294,7 +291,7 @@ public class RaceChooser(WorldServer server, Mundane mundane) : MundaneScript(se
                 OnResponse(client, 0x10, string.Empty);
                 break;
             case 0x1E:
-                _chosenRace = Race.Dragonkin;
+                client.Aisling.TempRace = Race.Dragonkin;
                 client.SendOptionsDialog(Mundane, $"{{=aScroll between the various abilities in the popup and chose one that matches the type of dragonkin blood that flows through you.",
                     new Dialog.OptionsDataItem(0x01, "{=cBack"),
                     new Dialog.OptionsDataItem(0x20, "{=bRed"),
@@ -322,43 +319,43 @@ public class RaceChooser(WorldServer server, Mundane mundane) : MundaneScript(se
                     $"{{=gSilver{{=a: Heavenly Gaze, and immunity to holy dmg.\n");
                 break;
             case 0x20:
-                _dragonkin = SubClassDragonkin.Red;
+                client.Aisling.TempSubRace = SubClassDragonkin.Red;
                 OnResponse(client, 0x10, string.Empty);
                 break;
             case 0x21:
-                _dragonkin = SubClassDragonkin.Blue;
+                client.Aisling.TempSubRace = SubClassDragonkin.Blue;
                 OnResponse(client, 0x10, string.Empty);
                 break;
             case 0x22:
-                _dragonkin = SubClassDragonkin.Green;
+                client.Aisling.TempSubRace = SubClassDragonkin.Green;
                 OnResponse(client, 0x10, string.Empty);
                 break;
             case 0x23:
-                _dragonkin = SubClassDragonkin.Black;
+                client.Aisling.TempSubRace = SubClassDragonkin.Black;
                 OnResponse(client, 0x10, string.Empty);
                 break;
             case 0x24:
-                _dragonkin = SubClassDragonkin.White;
+                client.Aisling.TempSubRace = SubClassDragonkin.White;
                 OnResponse(client, 0x10, string.Empty);
                 break;
             case 0x25:
-                _dragonkin = SubClassDragonkin.Brass;
+                client.Aisling.TempSubRace = SubClassDragonkin.Brass;
                 OnResponse(client, 0x10, string.Empty);
                 break;
             case 0x26:
-                _dragonkin = SubClassDragonkin.Bronze;
+                client.Aisling.TempSubRace = SubClassDragonkin.Bronze;
                 OnResponse(client, 0x10, string.Empty);
                 break;
             case 0x27:
-                _dragonkin = SubClassDragonkin.Copper;
+                client.Aisling.TempSubRace = SubClassDragonkin.Copper;
                 OnResponse(client, 0x10, string.Empty);
                 break;
             case 0x28:
-                _dragonkin = SubClassDragonkin.Gold;
+                client.Aisling.TempSubRace = SubClassDragonkin.Gold;
                 OnResponse(client, 0x10, string.Empty);
                 break;
             case 0x29:
-                _dragonkin = SubClassDragonkin.Silver;
+                client.Aisling.TempSubRace = SubClassDragonkin.Silver;
                 OnResponse(client, 0x10, string.Empty);
                 break;
             case 0x2A:

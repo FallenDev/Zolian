@@ -35,6 +35,30 @@ public record IgnoredRecord : IEqualityOperators<IgnoredRecord, IgnoredRecord, b
 public sealed class Aisling : Player, IAisling
 {
     public WorldClient Client { get; set; }
+    // Temp npc variables
+    public Race TempRace { get; set; } = Race.UnDecided;
+    public SubClassDragonkin TempSubRace { get; set; } = SubClassDragonkin.Red;
+    public Item? TempItemDetail { get; set; }
+    public uint TempItemDetailCost { get; set; }
+    public long TempItemRepairCost { get; set; }
+    public string TempSkillName { get; set; }
+    public string TempForgeOne { get; set; }
+    public string TempForgeTwo { get; set; }
+    public string TempForgeThree { get; set; }
+    public string TempForgeFour { get; set; }
+    public string TempTrainingSpellName { get; set; }
+    public List<Skill> TempTrainingSkills { get; set; }
+    public List<Spell> TempTrainingSpells { get; set; }
+    public string TempKillQuestMonsterName { get; set; }
+    public string TempAdvKillQuestMonsterName { get; set; }
+    public string TempRetrieveQuestName { get; set; }
+    public string TempAdvRetrieveQuestName { get; set; }
+    public int TempHairStyle { get; set; }
+    public int TempHairColor { get; set; }
+    public bool TempDepositGoldCancel { get; set; }
+    public bool TempWithdrawGoldCancel { get; set; }
+
+    // Player status variables
     public bool DeathRattle { get; set; }
     public bool PlayerSaveDirty { get; set; } = false;
     public readonly ConcurrentDictionary<uint, Sprite> SpritesInView = [];

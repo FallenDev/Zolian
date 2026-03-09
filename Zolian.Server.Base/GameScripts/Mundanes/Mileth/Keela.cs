@@ -3,7 +3,6 @@ using Darkages.Enums;
 using Darkages.Network.Client;
 using Darkages.Network.Server;
 using Darkages.ScriptingBase;
-using Darkages.Sprites;
 using Darkages.Sprites.Entity;
 using Darkages.Templates;
 using Darkages.Types;
@@ -17,7 +16,6 @@ namespace Darkages.GameScripts.Mundanes.Mileth;
 [Script("Keela")]
 public class Keela : MundaneScript
 {
-    private string _kill;
     private readonly List<SkillTemplate> _skillList;
     private readonly List<SpellTemplate> _spellList;
 
@@ -100,13 +98,13 @@ public class Keela : MundaneScript
         var advExp2 = Random.Shared.Next(750000, 1000000);
         var advExp3 = Random.Shared.Next(3000000, 4500000);
 
-        _kill = assassinThings switch
+        client.Aisling.TempKillQuestMonsterName = assassinThings switch
         {
             1 => "Mantis",
             2 => "Bat",
             3 => "Centipede",
             4 => "Honey Bee",
-            _ => _kill
+            _ => client.Aisling.TempKillQuestMonsterName
         };
 
         switch (responseID)
@@ -326,11 +324,11 @@ public class Keela : MundaneScript
                 {
                     if (client.Aisling.QuestManager.KeelaKill.IsNullOrEmpty())
                     {
-                        client.Aisling.QuestManager.KeelaKill = _kill;
+                        client.Aisling.QuestManager.KeelaKill = client.Aisling.TempKillQuestMonsterName;
                         client.Aisling.QuestManager.KeelaCount = countMon;
                     }
 
-                    client.SendOptionsDialog(Mundane, $"Do not be seen. Leave no trace.\n{{=qKill: {countMon}, {_kill}'s");
+                    client.SendOptionsDialog(Mundane, $"Do not be seen. Leave no trace.\n{{=qKill: {countMon}, {client.Aisling.TempKillQuestMonsterName}'s");
                     client.Aisling.QuestManager.KeelaQuesting = true;
                     break;
                 }

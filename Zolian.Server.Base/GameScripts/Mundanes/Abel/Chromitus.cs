@@ -14,10 +14,8 @@ using ServiceStack;
 namespace Darkages.GameScripts.Mundanes.Abel;
 
 [Script("Rifting Warden")]
-public class Chromitus : MundaneScript
+public class Chromitus(WorldServer server, Mundane mundane) : MundaneScript(server, mundane)
 {
-    public Chromitus(WorldServer server, Mundane mundane) : base(server, mundane) { }
-
     public override void OnClick(WorldClient client, uint serial)
     {
         base.OnClick(client, serial);

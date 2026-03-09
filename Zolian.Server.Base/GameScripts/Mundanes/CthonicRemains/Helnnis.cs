@@ -13,14 +13,11 @@ namespace Darkages.GameScripts.Mundanes.CthonicRemains;
 [Script("Advent Guild Leader")]
 public class Helnnis(WorldServer server, Mundane mundane) : MundaneScript(server, mundane)
 {
-    private string _kill;
-    private string _find;
-
     public override void OnClick(WorldClient client, uint serial)
     {
         base.OnClick(client, serial);
-        _kill = "";
-        _find = "";
+        client.Aisling.TempKillQuestMonsterName = "";
+        client.Aisling.TempRetrieveQuestName = "";
         TopMenu(client);
     }
 
@@ -94,7 +91,7 @@ public class Helnnis(WorldServer server, Mundane mundane) : MundaneScript(server
         var gatheringExp = Random.Shared.Next(200000000, 500000000);
 
         if (client.Aisling.QuestManager.CthonicKillTarget.IsEmpty())
-            _kill = randCounter switch
+            client.Aisling.TempKillQuestMonsterName = randCounter switch
             {
                 1 => "Dhole Larva",
                 2 => "Nagetier Dieter",
@@ -111,10 +108,10 @@ public class Helnnis(WorldServer server, Mundane mundane) : MundaneScript(server
                 _ => "Dark Cleric"
             };
         else
-            _kill = client.Aisling.QuestManager.CthonicKillTarget;
+            client.Aisling.TempKillQuestMonsterName = client.Aisling.QuestManager.CthonicKillTarget;
 
         if (client.Aisling.QuestManager.CthonicFindTarget.IsEmpty())
-            _find = randCounter switch
+            client.Aisling.TempRetrieveQuestName = randCounter switch
             {
                 1 => "Nagetier's Talon",
                 2 => "Scarlet Beetle Antenna",
@@ -129,7 +126,7 @@ public class Helnnis(WorldServer server, Mundane mundane) : MundaneScript(server
                 _ => "Ancient Bones"
             };
         else
-            _find = client.Aisling.QuestManager.CthonicFindTarget;
+            client.Aisling.TempRetrieveQuestName = client.Aisling.QuestManager.CthonicFindTarget;
 
         switch (responseId)
         {
@@ -137,8 +134,8 @@ public class Helnnis(WorldServer server, Mundane mundane) : MundaneScript(server
                 client.CloseDialog();
                 break;
             case 0x02:
-                client.SendOptionsDialog(Mundane, $"You must hunt down a {_kill}. Upon completion, I will move you up our roster.", new Dialog.OptionsDataItem(0x00, "Expect it done."));
-                client.Aisling.QuestManager.CthonicKillTarget = _kill;
+                client.SendOptionsDialog(Mundane, $"You must hunt down a {client.Aisling.TempKillQuestMonsterName}. Upon completion, I will move you up our roster.", new Dialog.OptionsDataItem(0x00, "Expect it done."));
+                client.Aisling.QuestManager.CthonicKillTarget = client.Aisling.TempKillQuestMonsterName;
                 break;
             case 0x03:
                 {
@@ -165,8 +162,8 @@ public class Helnnis(WorldServer server, Mundane mundane) : MundaneScript(server
                 }
                 break;
             case 0x04:
-                client.SendOptionsDialog(Mundane, $"You must gather {_find} x 3 items. Bring them back to me, and receive the guild's blessing.", new Dialog.OptionsDataItem(0x00, "I'll bring what I find."));
-                client.Aisling.QuestManager.CthonicFindTarget = _find;
+                client.SendOptionsDialog(Mundane, $"You must gather {client.Aisling.TempRetrieveQuestName} x 3 items. Bring them back to me, and receive the guild's blessing.", new Dialog.OptionsDataItem(0x00, "I'll bring what I find."));
+                client.Aisling.QuestManager.CthonicFindTarget = client.Aisling.TempRetrieveQuestName;
                 break;
             case 0x05:
                 {
@@ -189,7 +186,7 @@ public class Helnnis(WorldServer server, Mundane mundane) : MundaneScript(server
                     }
                     else
                     {
-                        client.SendOptionsDialog(Mundane, $"You must gather {_find} x 3 items. Bring them back to me, and receive the guild's blessing.", new Dialog.OptionsDataItem(0x00, "I will do it."));
+                        client.SendOptionsDialog(Mundane, $"You must gather {client.Aisling.TempRetrieveQuestName} x 3 items. Bring them back to me, and receive the guild's blessing.", new Dialog.OptionsDataItem(0x00, "I will do it."));
                     }
                 }
                 break;

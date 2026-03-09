@@ -13,9 +13,6 @@ namespace Darkages.GameScripts.Mundanes.Tagor;
 [Script("Tagor Training")]
 public class TagorTrainer(WorldServer server, Mundane mundane) : MundaneScript(server, mundane)
 {
-    private List<Skill> _skillList;
-    private List<Spell> _spellList;
-    private string _tempSpellName;
     private readonly List<Vector2> _dojoMeleeSpots =
     [
         new(12, 22),
@@ -111,24 +108,24 @@ public class TagorTrainer(WorldServer server, Mundane mundane) : MundaneScript(s
     public override void OnClick(WorldClient client, uint serial)
     {
         base.OnClick(client, serial);
-        _skillList = ObtainSkillList(client);
-        _spellList = ObtainSpellList(client);
+        client.Aisling.TempTrainingSkills = ObtainSkillList(client);
+        client.Aisling.TempTrainingSpells = ObtainSpellList(client);
         TopMenu(client);
     }
 
     protected override void TopMenu(WorldClient client)
     {
-        _tempSpellName = "";
+        client.Aisling.TempTrainingSpellName = "";
         base.TopMenu(client);
 
         var options = new List<Dialog.OptionsDataItem>();
 
-        if (_skillList.Count > 0)
+        if (client.Aisling.TempTrainingSkills.Count > 0)
         {
             options.Add(new(0x01, "Train Skills"));
         }
 
-        if (_spellList.Count > 0)
+        if (client.Aisling.TempTrainingSpells.Count > 0)
         {
             options.Add(new(0x02, "Train Spells"));
         }
@@ -143,7 +140,7 @@ public class TagorTrainer(WorldServer server, Mundane mundane) : MundaneScript(s
         switch (responseID)
         {
             case 0x00:
-                _tempSpellName = "";
+                client.Aisling.TempTrainingSpellName = "";
                 client.SendServerMessage(ServerMessageType.OrangeBar1, "Come back sometime!");
                 client.CloseDialog();
                 break;
@@ -152,7 +149,7 @@ public class TagorTrainer(WorldServer server, Mundane mundane) : MundaneScript(s
                 {
                     var options = new List<Dialog.OptionsDataItem>();
 
-                    if (_skillList.Count > 0)
+                    if (client.Aisling.TempTrainingSkills.Count > 0)
                     {
                         options.Add(new(0x03, "Yes"));
                         options.Add(new Dialog.OptionsDataItem(0x00, "{=bNo, thank you"));
@@ -201,7 +198,7 @@ public class TagorTrainer(WorldServer server, Mundane mundane) : MundaneScript(s
                 {
                     var options = new List<Dialog.OptionsDataItem>();
 
-                    if (_spellList.Count > 0)
+                    if (client.Aisling.TempTrainingSpells.Count > 0)
                     {
                         options.Add(new(0x04, "Yes"));
                         options.Add(new Dialog.OptionsDataItem(0x00, "{=bNo, thank you"));
@@ -250,7 +247,7 @@ public class TagorTrainer(WorldServer server, Mundane mundane) : MundaneScript(s
                             new(0x05, "Let's Train")
                         };
 
-                        _tempSpellName = spellTemplate.Name;
+                        client.Aisling.TempTrainingSpellName = spellTemplate.Name;
 
                         client.SendOptionsDialog(Mundane, "The order they're set in, is the order they'll execute.", options.ToArray());
                         break;
@@ -261,19 +258,19 @@ public class TagorTrainer(WorldServer server, Mundane mundane) : MundaneScript(s
                 }
             case 0x22:
                 {
-                    client.Aisling.SpellTrainOne = _tempSpellName;
+                    client.Aisling.SpellTrainOne = client.Aisling.TempTrainingSpellName;
                     client.SendSpellLearnDialog(Mundane, "Would you like to train another? If you're capable, you can train up to three at a time.", 0x20, ObtainSpellTemplateList(client));
                     break;
                 }
             case 0x23:
                 {
-                    client.Aisling.SpellTrainTwo = _tempSpellName;
+                    client.Aisling.SpellTrainTwo = client.Aisling.TempTrainingSpellName;
                     client.SendSpellLearnDialog(Mundane, "Would you like to train another? If you're capable, you can train up to three at a time.", 0x20, ObtainSpellTemplateList(client));
                     break;
                 }
             case 0x24:
                 {
-                    client.Aisling.SpellTrainThree = _tempSpellName;
+                    client.Aisling.SpellTrainThree = client.Aisling.TempTrainingSpellName;
                     client.SendSpellLearnDialog(Mundane, "Would you like to train another? If you're capable, you can train up to three at a time.", 0x20, ObtainSpellTemplateList(client));
                     break;
                 }

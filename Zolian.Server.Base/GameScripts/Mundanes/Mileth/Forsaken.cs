@@ -31,16 +31,6 @@ public class Forsaken(WorldServer server, Mundane mundane) : MundaneScript(serve
         { Class.Monk, (8000, 8000, "Cail's Hourglass") }
     };
 
-    private readonly SortedDictionary<Class, (int str, int intel, int wis, int con, int dex, string abilityReq)> _forsaking = new()
-    {
-        { Class.Berserker, (500, 500, 500, 500, 500, "") },
-        { Class.Defender, (500, 500, 500, 500, 500, "") },
-        { Class.Assassin, (500, 500, 500, 500, 500, "") },
-        { Class.Cleric, (500, 500, 500, 500, 500, "") },
-        { Class.Arcanus, (500, 500, 500, 500, 500, "") },
-        { Class.Monk, (500, 500, 500, 500, 500, "") }
-    };
-
     public override void OnClick(WorldClient client, uint serial)
     {
         base.OnClick(client, serial);

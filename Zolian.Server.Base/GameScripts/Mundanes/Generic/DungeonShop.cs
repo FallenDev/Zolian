@@ -12,8 +12,6 @@ namespace Darkages.GameScripts.Mundanes.Generic;
 [Script("Dungeon Shop")]
 public class DungeonShop(WorldServer server, Mundane mundane) : MundaneScript(server, mundane)
 {
-    private long _repairSum;
-
     public override void OnClick(WorldClient client, uint serial)
     {
         base.OnClick(client, serial);
@@ -94,7 +92,7 @@ public class DungeonShop(WorldServer server, Mundane mundane) : MundaneScript(se
                 break;
             case 0x04:
                 {
-                    _repairSum = NpcShopExtensions.GetRepairCosts(client);
+                    client.Aisling.TempItemRepairCost = NpcShopExtensions.GetRepairCosts(client);
 
                     var optsRepair = new List<Dialog.OptionsDataItem>
                     {
@@ -102,21 +100,21 @@ public class DungeonShop(WorldServer server, Mundane mundane) : MundaneScript(se
                         new(0x15, ServerSetup.Instance.Config.MerchantCancelMessage)
                     };
 
-                    if (_repairSum == 0)
+                    if (client.Aisling.TempItemRepairCost == 0)
                     {
                         client.SendOptionsDialog(Mundane, "Your items are still in great condition.");
                     }
                     else
                     {
-                        client.SendOptionsDialog(Mundane, "It will cost {=c" + _repairSum + "{=a Gold to repair everything. Do you Agree?", _repairSum.ToString(), optsRepair.ToArray());
+                        client.SendOptionsDialog(Mundane, "It will cost {=c" + client.Aisling.TempItemRepairCost + "{=a Gold to repair everything. Do you Agree?", client.Aisling.TempItemRepairCost.ToString(), optsRepair.ToArray());
                     }
                 }
                 break;
             case 0x14:
                 {
-                    if (client.Aisling.GoldPoints >= Convert.ToUInt32(_repairSum))
+                    if (client.Aisling.GoldPoints >= Convert.ToUInt32(client.Aisling.TempItemRepairCost))
                     {
-                        client.Aisling.GoldPoints -= Convert.ToUInt32(_repairSum);
+                        client.Aisling.GoldPoints -= Convert.ToUInt32(client.Aisling.TempItemRepairCost);
                         client.RepairEquipment();
                         client.SendOptionsDialog(Mundane, "My friend! I just finished.");
                     }

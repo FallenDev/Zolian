@@ -11,9 +11,6 @@ namespace Darkages.GameScripts.Mundanes.Generic;
 [Script("Barber")]
 public class Barber(WorldServer server, Mundane mundane) : MundaneScript(server, mundane)
 {
-    private int _styleNumber;
-    private int _colorNumber;
-
     public override void OnClick(WorldClient client, uint serial)
     {
         base.OnClick(client, serial);
@@ -49,7 +46,7 @@ public class Barber(WorldServer server, Mundane mundane) : MundaneScript(server,
                             int.TryParse(args, out var numbers);
                             if (numbers > 0)
                             {
-                                _styleNumber = numbers;
+                                client.Aisling.TempHairStyle = numbers;
                                 responseId = 0x0A;
                                 args = null;
                                 continue;
@@ -65,7 +62,7 @@ public class Barber(WorldServer server, Mundane mundane) : MundaneScript(server,
                             int.TryParse(args, out var numbers);
                             if (numbers > 0)
                             {
-                                _colorNumber = numbers;
+                                client.Aisling.TempHairColor = numbers;
                                 responseId = 0x014;
                                 args = null;
                                 continue;
@@ -91,8 +88,8 @@ public class Barber(WorldServer server, Mundane mundane) : MundaneScript(server,
                     break;
                 case 0x0A:
                     {
-                        if (_styleNumber is 0 or 19 or > 61 ||
-                            (client.Aisling.Gender == Gender.Female && _styleNumber is 18))
+                        if (client.Aisling.TempHairStyle is 0 or 19 or > 61 ||
+                            (client.Aisling.Gender == Gender.Female && client.Aisling.TempHairStyle is 18))
                         {
                             client.SendTextInput(Mundane,
                                 "Please select a valid hairstyle:\nMale Unavailable: 19\nFemale Unavailable: 18, 19",
@@ -115,10 +112,10 @@ public class Barber(WorldServer server, Mundane mundane) : MundaneScript(server,
                     };
 
                         client.Aisling.Styling = 1;
-                        client.Aisling.HairStyle = Convert.ToByte(_styleNumber);
+                        client.Aisling.HairStyle = Convert.ToByte(client.Aisling.TempHairStyle);
                         client.UpdateDisplay();
                         client.SendOptionsDialog(Mundane,
-                            $"So you're interested in #{_styleNumber}?\nIt'll cost you 5000 gold.", opts.ToArray());
+                            $"So you're interested in #{client.Aisling.TempHairStyle}?\nIt'll cost you 5000 gold.", opts.ToArray());
                     }
                     break;
                 case 0x0C:
@@ -163,7 +160,7 @@ public class Barber(WorldServer server, Mundane mundane) : MundaneScript(server,
                     break;
                 case 0x14:
                     {
-                        if (_colorNumber is < 0 or > 55)
+                        if (client.Aisling.TempHairColor is < 0 or > 55)
                         {
                             ColorList(client);
                             client.SendTextInput(Mundane, "Please select a valid color:", "0-55");
@@ -185,10 +182,10 @@ public class Barber(WorldServer server, Mundane mundane) : MundaneScript(server,
                     };
 
                         client.Aisling.Coloring = 1;
-                        client.Aisling.HairColor = Convert.ToByte(_colorNumber);
+                        client.Aisling.HairColor = Convert.ToByte(client.Aisling.TempHairColor);
                         client.UpdateDisplay();
                         client.SendOptionsDialog(Mundane,
-                            $"You're interested in #{_colorNumber}?\nIt'll cost you 20000 gold.", opts.ToArray());
+                            $"You're interested in #{client.Aisling.TempHairColor}?\nIt'll cost you 20000 gold.", opts.ToArray());
                     }
                     break;
                 case 0x16:

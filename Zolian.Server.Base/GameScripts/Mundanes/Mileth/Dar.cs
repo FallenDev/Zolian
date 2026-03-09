@@ -14,8 +14,6 @@ namespace Darkages.GameScripts.Mundanes.Mileth;
 [Script("Dar")]
 public class Dar : MundaneScript
 {
-    private string _retrieve;
-    private string _retrieveAdv;
     private readonly List<SkillTemplate> _skillList;
     private readonly List<SpellTemplate> _spellList;
     private bool _0X0A;
@@ -105,7 +103,7 @@ public class Dar : MundaneScript
         var advExp = Random.Shared.Next(150000, 300000);
         var advExp2 = Random.Shared.Next(500000, 1000000);
 
-        _retrieve = darkThings switch
+        client.Aisling.TempRetrieveQuestName = darkThings switch
         {
             1 => "Spider Leg",
             2 => "Spider Eye",
@@ -118,10 +116,10 @@ public class Dar : MundaneScript
             9 => "Spoiled Grapes",
             10 => "Royal Wax",
             11 => "Mead",
-            _ => _retrieve
+            _ => client.Aisling.TempRetrieveQuestName
         };
 
-        _retrieveAdv = darkThings switch
+        client.Aisling.TempAdvRetrieveQuestName = darkThings switch
         {
             1 => "Wolf Fur",
             2 => "Wolf Skin",
@@ -133,7 +131,7 @@ public class Dar : MundaneScript
             8 => "Mantis Eye",
             9 => "Goblin Skull",
             10 => "Mead",
-            _ => _retrieve
+            _ => client.Aisling.TempRetrieveQuestName
         };
 
         switch (responseId)
@@ -354,8 +352,8 @@ public class Dar : MundaneScript
                     {
                         client.Aisling.QuestManager.DarItem = client.Aisling.QuestManager.Dar switch
                         {
-                            <= 7 => _retrieve,
-                            8 => _retrieveAdv,
+                            <= 7 => client.Aisling.TempRetrieveQuestName,
+                            8 => client.Aisling.TempAdvRetrieveQuestName,
                             9 => "Kardi Fur",
                             _ => client.Aisling.QuestManager.DarItem
                         };

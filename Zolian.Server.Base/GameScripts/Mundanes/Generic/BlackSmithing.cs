@@ -11,14 +11,6 @@ namespace Darkages.GameScripts.Mundanes.Generic;
 [Script("BlackSmithing")]
 public class BlackSmithing(WorldServer server, Mundane mundane) : MundaneScript(server, mundane)
 {
-    private string _tempSkillName;
-    private Item _itemDetail;
-    private string _forgeNeededStoneOne;
-    private string _forgeNeededStoneTwo;
-    private string _forgeNeededStoneThree;
-    private string _forgeNeededStoneFour;
-    private uint _cost;
-
     public override void OnClick(WorldClient client, uint serial)
     {
         base.OnClick(client, serial);
@@ -91,16 +83,16 @@ public class BlackSmithing(WorldServer server, Mundane mundane) : MundaneScript(
         {
             case 0x00:
                 {
-                    _cost = NpcShopExtensions.GetSmithingCosts(client, args);
-                    _itemDetail = NpcShopExtensions.ItemDetail;
+                    client.Aisling.TempItemDetailCost = NpcShopExtensions.GetSmithingCosts(client, args);
+                    client.Aisling.TempItemDetail = NpcShopExtensions.ItemDetail;
 
-                    if (_cost == 0)
+                    if (client.Aisling.TempItemDetailCost == 0)
                     {
                         client.SendOptionsDialog(Mundane, "Huh, there seems to be an issue. Let's try that again");
                         return;
                     }
 
-                    if (_itemDetail == null)
+                    if (client.Aisling.TempItemDetail == null)
                     {
                         client.SendOptionsDialog(Mundane, "Huh, there seems to be an issue. Let's try that again");
                         return;
@@ -112,7 +104,7 @@ public class BlackSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                         new(0x81, ServerSetup.Instance.Config.MerchantCancelMessage)
                     };
 
-                    client.SendOptionsDialog(Mundane, $"It's going to cost about {_cost} gold to attempt this", opts2.ToArray());
+                    client.SendOptionsDialog(Mundane, $"It's going to cost about {client.Aisling.TempItemDetailCost} gold to attempt this", opts2.ToArray());
                     break;
                 }
             case 0x01:
@@ -281,7 +273,7 @@ public class BlackSmithing(WorldServer server, Mundane mundane) : MundaneScript(
 
             case 0x80:
                 {
-                    var item = _itemDetail;
+                    var item = client.Aisling.TempItemDetail;
                     if (item == null)
                     {
                         client.SendOptionsDialog(Mundane, "Huh, there seems to be an issue. Let's try that again");
@@ -292,8 +284,8 @@ public class BlackSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                     {
                         default:
                         case Item.GearEnhancements.None:
-                            _forgeNeededStoneOne = "Refined Talos"; // 1
-                            _forgeNeededStoneTwo = "Refined Copper"; // 1
+                            client.Aisling.TempForgeOne = "Refined Talos"; // 1
+                            client.Aisling.TempForgeTwo = "Refined Copper"; // 1
                             var opts = new List<Dialog.OptionsDataItem>();
 
                             if (client.Aisling.HasInInventory("Refined Talos", 1))
@@ -319,13 +311,13 @@ public class BlackSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                             opts.Add(new(0x81, ServerSetup.Instance.Config.MerchantCancelMessage));
 
                             client.SendOptionsDialog(Mundane, $"It will also take:\n" +
-                                                              $"{_forgeNeededStoneOne} x1\n" +
-                                                              $"{_forgeNeededStoneTwo} x1", opts.ToArray());
+                                                              $"{client.Aisling.TempForgeOne} x1\n" +
+                                                              $"{client.Aisling.TempForgeTwo} x1", opts.ToArray());
                             break;
                         case Item.GearEnhancements.One:
-                            _forgeNeededStoneOne = "Refined Copper"; // 2
-                            _forgeNeededStoneTwo = "Refined Hybrasyl"; // 1
-                            _forgeNeededStoneThree = "Refined Dark Iron"; // 1
+                            client.Aisling.TempForgeOne = "Refined Copper"; // 2
+                            client.Aisling.TempForgeTwo = "Refined Hybrasyl"; // 1
+                            client.Aisling.TempForgeThree = "Refined Dark Iron"; // 1
                             var opts1 = new List<Dialog.OptionsDataItem>();
 
                             if (client.Aisling.HasInInventory("Refined Copper", 2))
@@ -360,14 +352,14 @@ public class BlackSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                             opts1.Add(new(0x81, ServerSetup.Instance.Config.MerchantCancelMessage));
 
                             client.SendOptionsDialog(Mundane, $"It will also take:\n" +
-                                                              $"{_forgeNeededStoneOne} x2\n" +
-                                                              $"{_forgeNeededStoneTwo} x1\n" +
-                                                              $"{_forgeNeededStoneThree} x1", opts1.ToArray());
+                                                              $"{client.Aisling.TempForgeOne} x2\n" +
+                                                              $"{client.Aisling.TempForgeTwo} x1\n" +
+                                                              $"{client.Aisling.TempForgeThree} x1", opts1.ToArray());
                             break;
                         case Item.GearEnhancements.Two:
-                            _forgeNeededStoneOne = "Refined Hybrasyl"; // 3
-                            _forgeNeededStoneTwo = "Refined Dark Iron"; // 2
-                            _forgeNeededStoneThree = "Refined Cobalt Steel"; // 1
+                            client.Aisling.TempForgeOne = "Refined Hybrasyl"; // 3
+                            client.Aisling.TempForgeTwo = "Refined Dark Iron"; // 2
+                            client.Aisling.TempForgeThree = "Refined Cobalt Steel"; // 1
                             var opts2 = new List<Dialog.OptionsDataItem>();
 
                             if (client.Aisling.HasInInventory("Refined Hybrasyl", 3))
@@ -402,15 +394,15 @@ public class BlackSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                             opts2.Add(new(0x81, ServerSetup.Instance.Config.MerchantCancelMessage));
 
                             client.SendOptionsDialog(Mundane, $"It will also take:\n" +
-                                                              $"{_forgeNeededStoneOne} x3\n" +
-                                                              $"{_forgeNeededStoneTwo} x2\n" +
-                                                              $"{_forgeNeededStoneThree} x1", opts2.ToArray());
+                                                              $"{client.Aisling.TempForgeOne} x3\n" +
+                                                              $"{client.Aisling.TempForgeTwo} x2\n" +
+                                                              $"{client.Aisling.TempForgeThree} x1", opts2.ToArray());
                             break;
                         case Item.GearEnhancements.Three:
-                            _forgeNeededStoneOne = "Refined Hybrasyl"; // 3
-                            _forgeNeededStoneTwo = "Refined Dark Iron"; // 3
-                            _forgeNeededStoneThree = "Refined Cobalt Steel"; // 2
-                            _forgeNeededStoneFour = "Refined Obsidian"; // 1
+                            client.Aisling.TempForgeOne = "Refined Hybrasyl"; // 3
+                            client.Aisling.TempForgeTwo = "Refined Dark Iron"; // 3
+                            client.Aisling.TempForgeThree = "Refined Cobalt Steel"; // 2
+                            client.Aisling.TempForgeFour = "Refined Obsidian"; // 1
                             var opts3 = new List<Dialog.OptionsDataItem>();
 
                             if (client.Aisling.HasInInventory("Refined Hybrasyl", 3))
@@ -454,16 +446,16 @@ public class BlackSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                             opts3.Add(new(0x81, ServerSetup.Instance.Config.MerchantCancelMessage));
 
                             client.SendOptionsDialog(Mundane, $"It will also take:\n" +
-                                                              $"{_forgeNeededStoneOne} x3\n" +
-                                                              $"{_forgeNeededStoneTwo} x3\n" +
-                                                              $"{_forgeNeededStoneThree} x2\n" +
-                                                              $"{_forgeNeededStoneFour} x1", opts3.ToArray());
+                                                              $"{client.Aisling.TempForgeOne} x3\n" +
+                                                              $"{client.Aisling.TempForgeTwo} x3\n" +
+                                                              $"{client.Aisling.TempForgeThree} x2\n" +
+                                                              $"{client.Aisling.TempForgeFour} x1", opts3.ToArray());
                             break;
                         case Item.GearEnhancements.Four:
-                            _forgeNeededStoneOne = "Refined Dark Iron"; // 3
-                            _forgeNeededStoneTwo = "Refined Cobalt Steel"; // 3
-                            _forgeNeededStoneThree = "Refined Obsidian"; // 1
-                            _forgeNeededStoneFour = "Flawless Ruby"; // 1
+                            client.Aisling.TempForgeOne = "Refined Dark Iron"; // 3
+                            client.Aisling.TempForgeTwo = "Refined Cobalt Steel"; // 3
+                            client.Aisling.TempForgeThree = "Refined Obsidian"; // 1
+                            client.Aisling.TempForgeFour = "Flawless Ruby"; // 1
                             var opts4 = new List<Dialog.OptionsDataItem>();
 
                             if (client.Aisling.HasInInventory("Refined Dark Iron", 3))
@@ -507,16 +499,16 @@ public class BlackSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                             opts4.Add(new(0x81, ServerSetup.Instance.Config.MerchantCancelMessage));
 
                             client.SendOptionsDialog(Mundane, $"It will also take:\n" +
-                                                              $"{_forgeNeededStoneOne} x3\n" +
-                                                              $"{_forgeNeededStoneTwo} x3\n" +
-                                                              $"{_forgeNeededStoneThree} x1\n" +
-                                                              $"{_forgeNeededStoneFour} x1", opts4.ToArray());
+                                                              $"{client.Aisling.TempForgeOne} x3\n" +
+                                                              $"{client.Aisling.TempForgeTwo} x3\n" +
+                                                              $"{client.Aisling.TempForgeThree} x1\n" +
+                                                              $"{client.Aisling.TempForgeFour} x1", opts4.ToArray());
                             break;
                         case Item.GearEnhancements.Five:
-                            _forgeNeededStoneOne = "Refined Cobalt Steel"; // 3
-                            _forgeNeededStoneTwo = "Refined Obsidian"; // 2
-                            _forgeNeededStoneThree = "Flawless Ruby"; // 1
-                            _forgeNeededStoneFour = "Flawless Sapphire"; // 1
+                            client.Aisling.TempForgeOne = "Refined Cobalt Steel"; // 3
+                            client.Aisling.TempForgeTwo = "Refined Obsidian"; // 2
+                            client.Aisling.TempForgeThree = "Flawless Ruby"; // 1
+                            client.Aisling.TempForgeFour = "Flawless Sapphire"; // 1
                             var opts5 = new List<Dialog.OptionsDataItem>();
 
                             if (client.Aisling.HasInInventory("Refined Cobalt Steel", 3))
@@ -560,10 +552,10 @@ public class BlackSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                             opts5.Add(new(0x81, ServerSetup.Instance.Config.MerchantCancelMessage));
 
                             client.SendOptionsDialog(Mundane, $"It will also take:\n" +
-                                                              $"{_forgeNeededStoneOne} x3\n" +
-                                                              $"{_forgeNeededStoneTwo} x2\n" +
-                                                              $"{_forgeNeededStoneThree} x1\n" +
-                                                              $"{_forgeNeededStoneFour} x1", opts5.ToArray());
+                                                              $"{client.Aisling.TempForgeOne} x3\n" +
+                                                              $"{client.Aisling.TempForgeTwo} x2\n" +
+                                                              $"{client.Aisling.TempForgeThree} x1\n" +
+                                                              $"{client.Aisling.TempForgeFour} x1", opts5.ToArray());
                             break;
                         case Item.GearEnhancements.Six:
                             client.SendOptionsDialog(Mundane, "Huh, there seems to be an issue. Let's try that again");
@@ -578,20 +570,20 @@ public class BlackSmithing(WorldServer server, Mundane mundane) : MundaneScript(
             // Reset Npc
             case 0x81:
                 {
-                    _tempSkillName = "";
-                    _forgeNeededStoneOne = "";
-                    _forgeNeededStoneTwo = "";
-                    _forgeNeededStoneThree = "";
-                    _forgeNeededStoneFour = "";
-                    _itemDetail = null;
-                    _cost = 0;
+                    client.Aisling.TempSkillName = "";
+                    client.Aisling.TempForgeOne = "";
+                    client.Aisling.TempForgeTwo = "";
+                    client.Aisling.TempForgeThree = "";
+                    client.Aisling.TempForgeFour = "";
+                    client.Aisling.TempItemDetail = null;
+                    client.Aisling.TempItemDetailCost = 0;
                     TopMenu(client);
                     break;
                 }
             // Take Items & Reforge
             case 0x82:
                 {
-                    var item = _itemDetail;
+                    var item = client.Aisling.TempItemDetail;
                     var chance = Generator.RandomPercentPrecise();
 
                     if (client.Aisling.Luck > 0)
@@ -612,7 +604,7 @@ public class BlackSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                         return;
                     }
 
-                    if (client.Aisling.GoldPoints >= _cost)
+                    if (client.Aisling.GoldPoints >= client.Aisling.TempItemDetailCost)
                     {
                         switch (item.GearEnhancement)
                         {
@@ -633,7 +625,7 @@ public class BlackSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                                 if (client.Aisling.QuestManager.BlackSmithingTier is "Novice" or "Apprentice")
                                     client.Aisling.QuestManager.BlackSmithing++;
 
-                                _itemDetail.GearEnhancement = Item.GearEnhancements.One;
+                                client.Aisling.TempItemDetail.GearEnhancement = Item.GearEnhancements.One;
                                 break;
                             case Item.GearEnhancements.One:
                                 var oneReqOne = client.Aisling.HasItemReturnItem("Refined Copper");
@@ -653,7 +645,7 @@ public class BlackSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                                 if (client.Aisling.QuestManager.BlackSmithingTier is "Apprentice" or "Journeyman")
                                     client.Aisling.QuestManager.BlackSmithing++;
 
-                                _itemDetail.GearEnhancement = Item.GearEnhancements.Two;
+                                client.Aisling.TempItemDetail.GearEnhancement = Item.GearEnhancements.Two;
                                 break;
                             case Item.GearEnhancements.Two:
                                 var twoReqOne = client.Aisling.HasItemReturnItem("Refined Hybrasyl");
@@ -673,7 +665,7 @@ public class BlackSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                                 if (client.Aisling.QuestManager.BlackSmithingTier is "Journeyman" or "Expert")
                                     client.Aisling.QuestManager.BlackSmithing++;
 
-                                _itemDetail.GearEnhancement = Item.GearEnhancements.Three;
+                                client.Aisling.TempItemDetail.GearEnhancement = Item.GearEnhancements.Three;
                                 break;
                             case Item.GearEnhancements.Three:
                                 var threeReqOne = client.Aisling.HasItemReturnItem("Refined Hybrasyl");
@@ -695,7 +687,7 @@ public class BlackSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                                 if (client.Aisling.QuestManager.BlackSmithingTier is "Journeyman" or "Expert" or "Artisan")
                                     client.Aisling.QuestManager.BlackSmithing++;
 
-                                _itemDetail.GearEnhancement = Item.GearEnhancements.Four;
+                                client.Aisling.TempItemDetail.GearEnhancement = Item.GearEnhancements.Four;
                                 break;
                             case Item.GearEnhancements.Four:
                                 var fourReqOne = client.Aisling.HasItemReturnItem("Refined Dark Iron");
@@ -717,7 +709,7 @@ public class BlackSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                                 if (client.Aisling.QuestManager.BlackSmithingTier is "Journeyman" or "Expert" or "Artisan")
                                     client.Aisling.QuestManager.BlackSmithing++;
 
-                                _itemDetail.GearEnhancement = Item.GearEnhancements.Five;
+                                client.Aisling.TempItemDetail.GearEnhancement = Item.GearEnhancements.Five;
                                 break;
                             case Item.GearEnhancements.Five:
                                 var fiveReqOne = client.Aisling.HasItemReturnItem("Refined Cobalt Steel");
@@ -739,15 +731,15 @@ public class BlackSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                                 if (client.Aisling.QuestManager.BlackSmithingTier is "Journeyman" or "Expert" or "Artisan")
                                     client.Aisling.QuestManager.BlackSmithing++;
 
-                                _itemDetail.GearEnhancement = Item.GearEnhancements.Six;
+                                client.Aisling.TempItemDetail.GearEnhancement = Item.GearEnhancements.Six;
                                 break;
                             case Item.GearEnhancements.Six:
                                 client.SendOptionsDialog(Mundane, "Huh, there seems to be an issue. Let's try that again");
                                 return;
                         }
 
-                        client.Aisling.GoldPoints -= _cost;
-                        client.Aisling.Inventory.UpdateSlot(client, _itemDetail);
+                        client.Aisling.GoldPoints -= client.Aisling.TempItemDetailCost;
+                        client.Aisling.Inventory.UpdateSlot(client, client.Aisling.TempItemDetail);
                         client.SendAttributes(StatUpdateType.WeightGold);
                         client.SendPublicMessage(Mundane.Serial, PublicMessageType.Normal, $"{Mundane.Name}: Nicely done!");
                         client.SendOptionsDialog(Mundane, $"Nicely done {client.Aisling.Username}!");
@@ -780,7 +772,7 @@ public class BlackSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                             new(0x102, $"{client.Aisling.ComboManager.Combo2 ?? "Skill 2"}"),
                             new(0x103, $"{client.Aisling.ComboManager.Combo3 ?? "Skill 3"}")
                         };
-                        _tempSkillName = skillTemplate.Name;
+                        client.Aisling.TempSkillName = skillTemplate.Name;
 
                         client.SendOptionsDialog(Mundane, "The order they're set in, is the order they'll execute.", options.ToArray());
                         break;
@@ -791,21 +783,21 @@ public class BlackSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                 }
             case 0x101:
                 {
-                    client.Aisling.ComboManager.Combo1 = _tempSkillName;
+                    client.Aisling.ComboManager.Combo1 = client.Aisling.TempSkillName;
                     var skillTemplateList = (from skill in client.Aisling.SkillBook.Skills.Values where skill != null select skill.Template).ToList();
                     client.SendSkillLearnDialog(Mundane, "Would you like to set another, or change one?", 255, skillTemplateList);
                     break;
                 }
             case 0x102:
                 {
-                    client.Aisling.ComboManager.Combo2 = _tempSkillName;
+                    client.Aisling.ComboManager.Combo2 = client.Aisling.TempSkillName;
                     var skillTemplateList = (from skill in client.Aisling.SkillBook.Skills.Values where skill != null select skill.Template).ToList();
                     client.SendSkillLearnDialog(Mundane, "Would you like to set another, or change one?", 255, skillTemplateList);
                     break;
                 }
             case 0x103:
                 {
-                    client.Aisling.ComboManager.Combo3 = _tempSkillName;
+                    client.Aisling.ComboManager.Combo3 = client.Aisling.TempSkillName;
                     var skillTemplateList = (from skill in client.Aisling.SkillBook.Skills.Values where skill != null select skill.Template).ToList();
                     client.SendSkillLearnDialog(Mundane, "Would you like to set another, or change one?", 255, skillTemplateList);
                     break;
@@ -836,7 +828,7 @@ public class BlackSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                             new(0x205, $"{client.Aisling.ComboManager.Combo5 ?? "Skill 5"}"),
 
                         };
-                        _tempSkillName = skillTemplate.Name;
+                        client.Aisling.TempSkillName = skillTemplate.Name;
 
                         client.SendOptionsDialog(Mundane, "The order they're set in, is the order they'll execute.", options.ToArray());
                         break;
@@ -847,35 +839,35 @@ public class BlackSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                 }
             case 0x201:
                 {
-                    client.Aisling.ComboManager.Combo1 = _tempSkillName;
+                    client.Aisling.ComboManager.Combo1 = client.Aisling.TempSkillName;
                     var skillTemplateList = (from skill in client.Aisling.SkillBook.Skills.Values where skill != null select skill.Template).ToList();
                     client.SendSkillLearnDialog(Mundane, "Would you like to set another, or change one?", 511, skillTemplateList);
                     break;
                 }
             case 0x202:
                 {
-                    client.Aisling.ComboManager.Combo2 = _tempSkillName;
+                    client.Aisling.ComboManager.Combo2 = client.Aisling.TempSkillName;
                     var skillTemplateList = (from skill in client.Aisling.SkillBook.Skills.Values where skill != null select skill.Template).ToList();
                     client.SendSkillLearnDialog(Mundane, "Would you like to set another, or change one?", 511, skillTemplateList);
                     break;
                 }
             case 0x203:
                 {
-                    client.Aisling.ComboManager.Combo3 = _tempSkillName;
+                    client.Aisling.ComboManager.Combo3 = client.Aisling.TempSkillName;
                     var skillTemplateList = (from skill in client.Aisling.SkillBook.Skills.Values where skill != null select skill.Template).ToList();
                     client.SendSkillLearnDialog(Mundane, "Would you like to set another, or change one?", 511, skillTemplateList);
                     break;
                 }
             case 0x204:
                 {
-                    client.Aisling.ComboManager.Combo4 = _tempSkillName;
+                    client.Aisling.ComboManager.Combo4 = client.Aisling.TempSkillName;
                     var skillTemplateList = (from skill in client.Aisling.SkillBook.Skills.Values where skill != null select skill.Template).ToList();
                     client.SendSkillLearnDialog(Mundane, "Would you like to set another, or change one?", 511, skillTemplateList);
                     break;
                 }
             case 0x205:
                 {
-                    client.Aisling.ComboManager.Combo5 = _tempSkillName;
+                    client.Aisling.ComboManager.Combo5 = client.Aisling.TempSkillName;
                     var skillTemplateList = (from skill in client.Aisling.SkillBook.Skills.Values where skill != null select skill.Template).ToList();
                     client.SendSkillLearnDialog(Mundane, "Would you like to set another, or change one?", 511, skillTemplateList);
                     break;
@@ -907,7 +899,7 @@ public class BlackSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                             new(0x306, $"{client.Aisling.ComboManager.Combo6 ?? "Skill 6"}"),
                             new(0x307, $"{client.Aisling.ComboManager.Combo7 ?? "Skill 7"}")
                         };
-                        _tempSkillName = skillTemplate.Name;
+                        client.Aisling.TempSkillName = skillTemplate.Name;
 
                         client.SendOptionsDialog(Mundane, "The order they're set in, is the order they'll execute.", options.ToArray());
                         break;
@@ -918,49 +910,49 @@ public class BlackSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                 }
             case 0x301:
                 {
-                    client.Aisling.ComboManager.Combo1 = _tempSkillName;
+                    client.Aisling.ComboManager.Combo1 = client.Aisling.TempSkillName;
                     var skillTemplateList = (from skill in client.Aisling.SkillBook.Skills.Values where skill != null select skill.Template).ToList();
                     client.SendSkillLearnDialog(Mundane, "Would you like to set another, or change one?", 767, skillTemplateList);
                     break;
                 }
             case 0x302:
                 {
-                    client.Aisling.ComboManager.Combo2 = _tempSkillName;
+                    client.Aisling.ComboManager.Combo2 = client.Aisling.TempSkillName;
                     var skillTemplateList = (from skill in client.Aisling.SkillBook.Skills.Values where skill != null select skill.Template).ToList();
                     client.SendSkillLearnDialog(Mundane, "Would you like to set another, or change one?", 767, skillTemplateList);
                     break;
                 }
             case 0x303:
                 {
-                    client.Aisling.ComboManager.Combo3 = _tempSkillName;
+                    client.Aisling.ComboManager.Combo3 = client.Aisling.TempSkillName;
                     var skillTemplateList = (from skill in client.Aisling.SkillBook.Skills.Values where skill != null select skill.Template).ToList();
                     client.SendSkillLearnDialog(Mundane, "Would you like to set another, or change one?", 767, skillTemplateList);
                     break;
                 }
             case 0x304:
                 {
-                    client.Aisling.ComboManager.Combo4 = _tempSkillName;
+                    client.Aisling.ComboManager.Combo4 = client.Aisling.TempSkillName;
                     var skillTemplateList = (from skill in client.Aisling.SkillBook.Skills.Values where skill != null select skill.Template).ToList();
                     client.SendSkillLearnDialog(Mundane, "Would you like to set another, or change one?", 767, skillTemplateList);
                     break;
                 }
             case 0x305:
                 {
-                    client.Aisling.ComboManager.Combo5 = _tempSkillName;
+                    client.Aisling.ComboManager.Combo5 = client.Aisling.TempSkillName;
                     var skillTemplateList = (from skill in client.Aisling.SkillBook.Skills.Values where skill != null select skill.Template).ToList();
                     client.SendSkillLearnDialog(Mundane, "Would you like to set another, or change one?", 767, skillTemplateList);
                     break;
                 }
             case 0x306:
                 {
-                    client.Aisling.ComboManager.Combo6 = _tempSkillName;
+                    client.Aisling.ComboManager.Combo6 = client.Aisling.TempSkillName;
                     var skillTemplateList = (from skill in client.Aisling.SkillBook.Skills.Values where skill != null select skill.Template).ToList();
                     client.SendSkillLearnDialog(Mundane, "Would you like to set another, or change one?", 767, skillTemplateList);
                     break;
                 }
             case 0x307:
                 {
-                    client.Aisling.ComboManager.Combo7 = _tempSkillName;
+                    client.Aisling.ComboManager.Combo7 = client.Aisling.TempSkillName;
                     var skillTemplateList = (from skill in client.Aisling.SkillBook.Skills.Values where skill != null select skill.Template).ToList();
                     client.SendSkillLearnDialog(Mundane, "Would you like to set another, or change one?", 767, skillTemplateList);
                     break;
@@ -995,7 +987,7 @@ public class BlackSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                             new(0x409, $"{client.Aisling.ComboManager.Combo9 ?? "Skill 9"}"),
                             new(0x40A, $"{client.Aisling.ComboManager.Combo10 ?? "Skill 10"}")
                         };
-                        _tempSkillName = skillTemplate.Name;
+                        client.Aisling.TempSkillName = skillTemplate.Name;
 
                         client.SendOptionsDialog(Mundane, "The order they're set in, is the order they'll execute.", options.ToArray());
                         break;
@@ -1006,70 +998,70 @@ public class BlackSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                 }
             case 0x401:
                 {
-                    client.Aisling.ComboManager.Combo1 = _tempSkillName;
+                    client.Aisling.ComboManager.Combo1 = client.Aisling.TempSkillName;
                     var skillTemplateList = (from skill in client.Aisling.SkillBook.Skills.Values where skill != null select skill.Template).ToList();
                     client.SendSkillLearnDialog(Mundane, "Would you like to set another, or change one?", 1023, skillTemplateList);
                     break;
                 }
             case 0x402:
                 {
-                    client.Aisling.ComboManager.Combo2 = _tempSkillName;
+                    client.Aisling.ComboManager.Combo2 = client.Aisling.TempSkillName;
                     var skillTemplateList = (from skill in client.Aisling.SkillBook.Skills.Values where skill != null select skill.Template).ToList();
                     client.SendSkillLearnDialog(Mundane, "Would you like to set another, or change one?", 1023, skillTemplateList);
                     break;
                 }
             case 0x403:
                 {
-                    client.Aisling.ComboManager.Combo3 = _tempSkillName;
+                    client.Aisling.ComboManager.Combo3 = client.Aisling.TempSkillName;
                     var skillTemplateList = (from skill in client.Aisling.SkillBook.Skills.Values where skill != null select skill.Template).ToList();
                     client.SendSkillLearnDialog(Mundane, "Would you like to set another, or change one?", 1023, skillTemplateList);
                     break;
                 }
             case 0x404:
                 {
-                    client.Aisling.ComboManager.Combo4 = _tempSkillName;
+                    client.Aisling.ComboManager.Combo4 = client.Aisling.TempSkillName;
                     var skillTemplateList = (from skill in client.Aisling.SkillBook.Skills.Values where skill != null select skill.Template).ToList();
                     client.SendSkillLearnDialog(Mundane, "Would you like to set another, or change one?", 1023, skillTemplateList);
                     break;
                 }
             case 0x405:
                 {
-                    client.Aisling.ComboManager.Combo5 = _tempSkillName;
+                    client.Aisling.ComboManager.Combo5 = client.Aisling.TempSkillName;
                     var skillTemplateList = (from skill in client.Aisling.SkillBook.Skills.Values where skill != null select skill.Template).ToList();
                     client.SendSkillLearnDialog(Mundane, "Would you like to set another, or change one?", 1023, skillTemplateList);
                     break;
                 }
             case 0x406:
                 {
-                    client.Aisling.ComboManager.Combo6 = _tempSkillName;
+                    client.Aisling.ComboManager.Combo6 = client.Aisling.TempSkillName;
                     var skillTemplateList = (from skill in client.Aisling.SkillBook.Skills.Values where skill != null select skill.Template).ToList();
                     client.SendSkillLearnDialog(Mundane, "Would you like to set another, or change one?", 1023, skillTemplateList);
                     break;
                 }
             case 0x407:
                 {
-                    client.Aisling.ComboManager.Combo7 = _tempSkillName;
+                    client.Aisling.ComboManager.Combo7 = client.Aisling.TempSkillName;
                     var skillTemplateList = (from skill in client.Aisling.SkillBook.Skills.Values where skill != null select skill.Template).ToList();
                     client.SendSkillLearnDialog(Mundane, "Would you like to set another, or change one?", 1023, skillTemplateList);
                     break;
                 }
             case 0x408:
                 {
-                    client.Aisling.ComboManager.Combo8 = _tempSkillName;
+                    client.Aisling.ComboManager.Combo8 = client.Aisling.TempSkillName;
                     var skillTemplateList = (from skill in client.Aisling.SkillBook.Skills.Values where skill != null select skill.Template).ToList();
                     client.SendSkillLearnDialog(Mundane, "Would you like to set another, or change one?", 1023, skillTemplateList);
                     break;
                 }
             case 0x409:
                 {
-                    client.Aisling.ComboManager.Combo9 = _tempSkillName;
+                    client.Aisling.ComboManager.Combo9 = client.Aisling.TempSkillName;
                     var skillTemplateList = (from skill in client.Aisling.SkillBook.Skills.Values where skill != null select skill.Template).ToList();
                     client.SendSkillLearnDialog(Mundane, "Would you like to set another, or change one?", 1023, skillTemplateList);
                     break;
                 }
             case 0x40A:
                 {
-                    client.Aisling.ComboManager.Combo10 = _tempSkillName;
+                    client.Aisling.ComboManager.Combo10 = client.Aisling.TempSkillName;
                     var skillTemplateList = (from skill in client.Aisling.SkillBook.Skills.Values where skill != null select skill.Template).ToList();
                     client.SendSkillLearnDialog(Mundane, "Would you like to set another, or change one?", 1023, skillTemplateList);
                     break;

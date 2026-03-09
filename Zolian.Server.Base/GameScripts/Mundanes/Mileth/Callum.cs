@@ -11,9 +11,6 @@ namespace Darkages.GameScripts.Mundanes.Mileth;
 [Script("Callum")]
 public class Callum(WorldServer server, Mundane mundane) : MundaneScript(server, mundane)
 {
-    private Item? _itemDetail;
-    private uint _cost;
-
     private const ushort R_SelectItemFromSellDialog = 0x00;
     private const ushort R_Top_Detail = 0x01;
     private const ushort R_Top_Nothing = 0x02;
@@ -154,10 +151,10 @@ public class Callum(WorldServer server, Mundane mundane) : MundaneScript(server,
     private void HandleItemSelection(WorldClient client, string args)
     {
         // Compute cost and capture selected item from shared extension state
-        _cost = NpcShopExtensions.GetDetailCosts(client, args);
-        _itemDetail = NpcShopExtensions.ItemDetail;
+        client.Aisling.TempItemDetailCost = NpcShopExtensions.GetDetailCosts(client, args);
+        client.Aisling.TempItemDetail = NpcShopExtensions.ItemDetail;
 
-        if (!TryLoadAndValidateDetailTarget(client, _itemDetail, _cost, out var item, out var cost))
+        if (!TryLoadAndValidateDetailTarget(client, client.Aisling.TempItemDetail, client.Aisling.TempItemDetailCost, out var item, out var cost))
             return;
 
         ShowConfirm(client, cost);
@@ -177,9 +174,9 @@ public class Callum(WorldServer server, Mundane mundane) : MundaneScript(server,
     private void HandleConfirmYes(WorldClient client)
     {
         // Re-acquire item from extension
-        _itemDetail = NpcShopExtensions.ItemDetail;
+        client.Aisling.TempItemDetail = NpcShopExtensions.ItemDetail;
 
-        if (!TryLoadAndValidateDetailTarget(client, _itemDetail, _cost, out var item, out var cost))
+        if (!TryLoadAndValidateDetailTarget(client, client.Aisling.TempItemDetail, client.Aisling.TempItemDetailCost, out var item, out var cost))
             return;
 
         if (client.Aisling.GoldPoints < cost)

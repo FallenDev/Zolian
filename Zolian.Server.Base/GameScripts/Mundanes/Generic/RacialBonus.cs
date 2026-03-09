@@ -6,7 +6,6 @@ namespace Darkages.GameScripts.Mundanes.Generic;
 
 public static class RacialBonus
 {
-
     public static void HumanSkill(WorldClient client, string skill)
     {
         client.Aisling._Str += 1;

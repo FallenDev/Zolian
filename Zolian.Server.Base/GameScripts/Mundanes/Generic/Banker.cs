@@ -9,7 +9,6 @@ using Darkages.Models;
 using Darkages.Network.Client;
 using Darkages.Network.Server;
 using Darkages.ScriptingBase;
-using Darkages.Sprites;
 using Darkages.Sprites.Entity;
 using Darkages.Types;
 
@@ -43,10 +42,6 @@ public class Banker(WorldServer server, Mundane mundane) : MundaneScript(server,
     private const ushort Response_PawnMenu = 0x99;
     private const ushort Response_PawnConfirm = 0x991;
 
-    private readonly BankManager _bankTeller = new();
-    private bool _depositGoldCancel;
-    private bool _withdrawGoldCancel;
-
     public override void OnClick(WorldClient client, uint serial)
     {
         base.OnClick(client, serial);
@@ -59,8 +54,8 @@ public class Banker(WorldServer server, Mundane mundane) : MundaneScript(server,
     {
         base.TopMenu(client);
 
-        _depositGoldCancel = false;
-        _withdrawGoldCancel = false;
+        client.Aisling.TempDepositGoldCancel = false;
+        client.Aisling.TempWithdrawGoldCancel = false;
 
         var options = new List<Dialog.OptionsDataItem>();
 
@@ -101,7 +96,7 @@ public class Banker(WorldServer server, Mundane mundane) : MundaneScript(server,
 
         if (money <= client.Aisling.GoldPoints)
         {
-            _bankTeller.DepositGold(client, money);
+            client.Aisling.BankManager.DepositGold(client, money);
             client.SendPublicMessage(Mundane.Serial, PublicMessageType.Normal, $"Hail! We'll take your deposit of {money} coin(s)");
         }
         else
@@ -146,8 +141,8 @@ public class Banker(WorldServer server, Mundane mundane) : MundaneScript(server,
                 break;
 
             case Response_DepositGoldConfirmYes:
-                _bankTeller.DepositGold(client, _bankTeller.TempGoldDeposit);
-                client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cDeposited: {_bankTeller.TempGoldDeposit}");
+                client.Aisling.BankManager.DepositGold(client, client.Aisling.BankManager.TempGoldDeposit);
+                client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cDeposited: {client.Aisling.BankManager.TempGoldDeposit}");
                 client.CloseDialog();
                 break;
 
@@ -160,8 +155,8 @@ public class Banker(WorldServer server, Mundane mundane) : MundaneScript(server,
                 break;
 
             case Response_WithdrawGoldConfirmYes:
-                _bankTeller.WithdrawGold(client, _bankTeller.TempGoldWithdraw);
-                client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cWithdrew: {_bankTeller.TempGoldWithdraw}");
+                client.Aisling.BankManager.WithdrawGold(client, client.Aisling.BankManager.TempGoldWithdraw);
+                client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=cWithdrew: {client.Aisling.BankManager.TempGoldWithdraw}");
                 client.CloseDialog();
                 break;
 
@@ -255,7 +250,7 @@ public class Banker(WorldServer server, Mundane mundane) : MundaneScript(server,
 
     private void HandleDepositGoldPrompt(WorldClient client)
     {
-        if (_depositGoldCancel)
+        if (client.Aisling.TempDepositGoldCancel)
         {
             client.CloseDialog();
             return;
@@ -268,7 +263,7 @@ public class Banker(WorldServer server, Mundane mundane) : MundaneScript(server,
             "Deposit:",
             10);
 
-        _depositGoldCancel = true;
+        client.Aisling.TempDepositGoldCancel = true;
     }
 
     private void HandleDepositGoldConfirmPrompt(WorldClient client, string args)
@@ -285,7 +280,7 @@ public class Banker(WorldServer server, Mundane mundane) : MundaneScript(server,
             return;
         }
 
-        _bankTeller.TempGoldDeposit = depositAmount;
+        client.Aisling.BankManager.TempGoldDeposit = depositAmount;
 
         var depositOptions = new List<Dialog.OptionsDataItem>
         {
@@ -293,12 +288,12 @@ public class Banker(WorldServer server, Mundane mundane) : MundaneScript(server,
             new(Response_DepositGoldPrompt, "No")
         };
 
-        client.SendOptionsDialog(Mundane, $"Ok! So you want to go ahead and deposit {_bankTeller.TempGoldDeposit}", depositOptions.ToArray());
+        client.SendOptionsDialog(Mundane, $"Ok! So you want to go ahead and deposit {client.Aisling.BankManager.TempGoldDeposit}", depositOptions.ToArray());
     }
 
     private void HandleWithdrawGoldPrompt(WorldClient client)
     {
-        if (_withdrawGoldCancel)
+        if (client.Aisling.TempWithdrawGoldCancel)
         {
             client.CloseDialog();
             return;
@@ -311,7 +306,7 @@ public class Banker(WorldServer server, Mundane mundane) : MundaneScript(server,
             "Withdraw:",
             10);
 
-        _withdrawGoldCancel = true;
+        client.Aisling.TempWithdrawGoldCancel = true;
     }
 
     private void HandleWithdrawGoldConfirmPrompt(WorldClient client, string args)
@@ -328,7 +323,7 @@ public class Banker(WorldServer server, Mundane mundane) : MundaneScript(server,
             return;
         }
 
-        _bankTeller.TempGoldWithdraw = withdrawAmount;
+        client.Aisling.BankManager.TempGoldWithdraw = withdrawAmount;
 
         var withdrawOptions = new List<Dialog.OptionsDataItem>
         {
@@ -336,7 +331,7 @@ public class Banker(WorldServer server, Mundane mundane) : MundaneScript(server,
             new(Response_WithdrawGoldPrompt, "No")
         };
 
-        client.SendOptionsDialog(Mundane, $"Ok! So you want to go ahead and withdraw {_bankTeller.TempGoldWithdraw}", withdrawOptions.ToArray());
+        client.SendOptionsDialog(Mundane, $"Ok! So you want to go ahead and withdraw {client.Aisling.BankManager.TempGoldWithdraw}", withdrawOptions.ToArray());
     }
 
     private async Task HandleDepositItemDropAsync(WorldClient client, string args)

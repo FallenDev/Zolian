@@ -3,7 +3,6 @@ using Darkages.Enums;
 using Darkages.Network.Client;
 using Darkages.Network.Server;
 using Darkages.ScriptingBase;
-using Darkages.Sprites;
 using Darkages.Sprites.Entity;
 using Darkages.Templates;
 using Darkages.Types;
@@ -17,8 +16,6 @@ namespace Darkages.GameScripts.Mundanes.Mileth;
 [Script("Neal")]
 public class Neal : MundaneScript
 {
-    private string _kill;
-    private string _advKill;
     private readonly List<SkillTemplate> _skillList;
     private readonly List<SpellTemplate> _spellList;
 
@@ -101,22 +98,22 @@ public class Neal : MundaneScript
         var advExp2 = Random.Shared.Next(750000, 1000000);
         var advExp3 = Random.Shared.Next(3000000, 4500000);
 
-        _kill = warriorThings switch
+        client.Aisling.TempKillQuestMonsterName = warriorThings switch
         {
             1 => "Spider",
             2 => "Mouse",
             3 => "Centipede",
             4 => "Bat",
-            _ => _kill
+            _ => client.Aisling.TempKillQuestMonsterName
         };
 
-        _advKill = warriorThings switch
+        client.Aisling.TempAdvKillQuestMonsterName = warriorThings switch
         {
             1 => "Marauder",
             2 => "Kardi",
             3 => "White Bat",
             4 => "Mimic",
-            _ => _advKill
+            _ => client.Aisling.TempAdvKillQuestMonsterName
         };
 
         switch (responseID)
@@ -209,11 +206,11 @@ public class Neal : MundaneScript
                 {
                     if (client.Aisling.QuestManager.NealKill.IsNullOrEmpty())
                     {
-                        client.Aisling.QuestManager.NealKill = _kill;
+                        client.Aisling.QuestManager.NealKill = client.Aisling.TempKillQuestMonsterName;
                         client.Aisling.QuestManager.NealCount = countMon;
                     }
 
-                    client.SendOptionsDialog(Mundane, $"Make it back with your limbs intact.\n{{=qKill: {countMon}, {_kill}'s");
+                    client.SendOptionsDialog(Mundane, $"Make it back with your limbs intact.\n{{=qKill: {countMon}, {client.Aisling.TempKillQuestMonsterName}'s");
                     break;
                 }
 
@@ -829,11 +826,11 @@ public class Neal : MundaneScript
                 {
                     if (client.Aisling.QuestManager.NealKill.IsNullOrEmpty())
                     {
-                        client.Aisling.QuestManager.NealKill = _advKill;
+                        client.Aisling.QuestManager.NealKill = client.Aisling.TempAdvKillQuestMonsterName;
                         client.Aisling.QuestManager.NealCount = countMon;
                     }
 
-                    client.SendOptionsDialog(Mundane, $"Make it back, head held high!\n{{=qKill: {countMon}, {_advKill}'s");
+                    client.SendOptionsDialog(Mundane, $"Make it back, head held high!\n{{=qKill: {countMon}, {client.Aisling.TempAdvKillQuestMonsterName}'s");
                     break;
                 }
             case 0x0017:

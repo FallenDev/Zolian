@@ -11,13 +11,6 @@ namespace Darkages.GameScripts.Mundanes.Generic;
 [Script("ArmorSmithing")]
 public class ArmorSmithing(WorldServer server, Mundane mundane) : MundaneScript(server, mundane)
 {
-    private Item _itemDetail;
-    private string _forgeNeededStoneOne;
-    private string _forgeNeededStoneTwo;
-    private string _forgeNeededStoneThree;
-    private string _forgeNeededStoneFour;
-    private uint _cost;
-
     public override void OnClick(WorldClient client, uint serial)
     {
         base.OnClick(client, serial);
@@ -80,16 +73,16 @@ public class ArmorSmithing(WorldServer server, Mundane mundane) : MundaneScript(
         {
             case 0x00:
                 {
-                    _cost = NpcShopExtensions.GetArmorSmithingCosts(client, args);
-                    _itemDetail = NpcShopExtensions.ItemDetail;
+                    client.Aisling.TempItemDetailCost = NpcShopExtensions.GetArmorSmithingCosts(client, args);
+                    client.Aisling.TempItemDetail = NpcShopExtensions.ItemDetail;
 
-                    if (_cost == 0)
+                    if (client.Aisling.TempItemDetailCost == 0)
                     {
                         client.SendOptionsDialog(Mundane, "Huh, there seems to be an issue. Let's try that again");
                         return;
                     }
 
-                    if (_itemDetail == null)
+                    if (client.Aisling.TempItemDetail == null)
                     {
                         client.SendOptionsDialog(Mundane, "Huh, there seems to be an issue. Let's try that again");
                         return;
@@ -101,7 +94,7 @@ public class ArmorSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                         new(0x81, ServerSetup.Instance.Config.MerchantCancelMessage)
                     };
 
-                    client.SendOptionsDialog(Mundane, $"It's going to cost about {_cost} gold to attempt this", opts2.ToArray());
+                    client.SendOptionsDialog(Mundane, $"It's going to cost about {client.Aisling.TempItemDetailCost} gold to attempt this", opts2.ToArray());
                     break;
                 }
 
@@ -189,7 +182,7 @@ public class ArmorSmithing(WorldServer server, Mundane mundane) : MundaneScript(
 
             case 0x80:
                 {
-                    var item = _itemDetail;
+                    var item = client.Aisling.TempItemDetail;
                     if (item == null)
                     {
                         client.SendOptionsDialog(Mundane, "Huh, there seems to be an issue. Let's try that again");
@@ -202,9 +195,9 @@ public class ArmorSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                         default:
                         case Item.ItemMaterials.None:
                             {
-                                _forgeNeededStoneOne = "Refined Copper";
-                                _forgeNeededStoneTwo = "Reict Weed";
-                                _forgeNeededStoneThree = "Bee Wax";
+                                client.Aisling.TempForgeOne = "Refined Copper";
+                                client.Aisling.TempForgeTwo = "Reict Weed";
+                                client.Aisling.TempForgeThree = "Bee Wax";
                                 var opts = new List<Dialog.OptionsDataItem>();
 
                                 if (client.Aisling.HasInInventory("Refined Copper", 3))
@@ -218,7 +211,7 @@ public class ArmorSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                                         else
                                         {
                                             client.SendOptionsDialog(Mundane,
-                                                $"Seem to be missing some {_forgeNeededStoneThree}\n" +
+                                                $"Seem to be missing some {client.Aisling.TempForgeThree}\n" +
                                                 "Need: 6");
                                             return;
                                         }
@@ -226,14 +219,14 @@ public class ArmorSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                                     else
                                     {
                                         client.SendOptionsDialog(Mundane,
-                                            $"Seem to be missing some {_forgeNeededStoneTwo}\n" +
+                                            $"Seem to be missing some {client.Aisling.TempForgeTwo}\n" +
                                             "Need: 5");
                                         return;
                                     }
                                 }
                                 else
                                 {
-                                    client.SendOptionsDialog(Mundane, $"Seem to be missing some {_forgeNeededStoneOne}\n" +
+                                    client.SendOptionsDialog(Mundane, $"Seem to be missing some {client.Aisling.TempForgeOne}\n" +
                                                                       "Need: 3");
                                     return;
                                 }
@@ -241,16 +234,16 @@ public class ArmorSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                                 opts.Add(new(0x81, ServerSetup.Instance.Config.MerchantCancelMessage));
 
                                 client.SendOptionsDialog(Mundane, $"It will also take:\n" +
-                                                                  $"{_forgeNeededStoneOne} x3\n" +
-                                                                  $"{_forgeNeededStoneTwo} x5\n" +
-                                                                  $"{_forgeNeededStoneThree} x6", opts.ToArray());
+                                                                  $"{client.Aisling.TempForgeOne} x3\n" +
+                                                                  $"{client.Aisling.TempForgeTwo} x5\n" +
+                                                                  $"{client.Aisling.TempForgeThree} x6", opts.ToArray());
                             }
                             break;
                         case Item.ItemMaterials.Copper:
                             {
-                                _forgeNeededStoneOne = "Refined Dark Iron";
-                                _forgeNeededStoneTwo = "Reict Weed";
-                                _forgeNeededStoneThree = "Raw Wax";
+                                client.Aisling.TempForgeOne = "Refined Dark Iron";
+                                client.Aisling.TempForgeTwo = "Reict Weed";
+                                client.Aisling.TempForgeThree = "Raw Wax";
                                 var opts = new List<Dialog.OptionsDataItem>();
 
                                 if (client.Aisling.HasInInventory("Refined Dark Iron", 3))
@@ -264,7 +257,7 @@ public class ArmorSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                                         else
                                         {
                                             client.SendOptionsDialog(Mundane,
-                                                $"Seem to be missing some {_forgeNeededStoneThree}\n" +
+                                                $"Seem to be missing some {client.Aisling.TempForgeThree}\n" +
                                                 "Need: 6");
                                             return;
                                         }
@@ -272,14 +265,14 @@ public class ArmorSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                                     else
                                     {
                                         client.SendOptionsDialog(Mundane,
-                                            $"Seem to be missing some {_forgeNeededStoneTwo}\n" +
+                                            $"Seem to be missing some {client.Aisling.TempForgeTwo}\n" +
                                             "Need: 3");
                                         return;
                                     }
                                 }
                                 else
                                 {
-                                    client.SendOptionsDialog(Mundane, $"Seem to be missing some {_forgeNeededStoneOne}\n" +
+                                    client.SendOptionsDialog(Mundane, $"Seem to be missing some {client.Aisling.TempForgeOne}\n" +
                                                                       "Need: 3");
                                     return;
                                 }
@@ -287,17 +280,17 @@ public class ArmorSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                                 opts.Add(new(0x81, ServerSetup.Instance.Config.MerchantCancelMessage));
 
                                 client.SendOptionsDialog(Mundane, $"It will also take:\n" +
-                                                                  $"{_forgeNeededStoneOne} x3\n" +
-                                                                  $"{_forgeNeededStoneTwo} x3\n" +
-                                                                  $"{_forgeNeededStoneThree} x6", opts.ToArray());
+                                                                  $"{client.Aisling.TempForgeOne} x3\n" +
+                                                                  $"{client.Aisling.TempForgeTwo} x3\n" +
+                                                                  $"{client.Aisling.TempForgeThree} x6", opts.ToArray());
                             }
                             break;
                         case Item.ItemMaterials.Iron:
                             {
-                                _forgeNeededStoneOne = "Refined Dark Iron";
-                                _forgeNeededStoneTwo = "Refined Cobalt Steel";
-                                _forgeNeededStoneThree = "Bocan Branch";
-                                _forgeNeededStoneFour = "Scorpion Venom";
+                                client.Aisling.TempForgeOne = "Refined Dark Iron";
+                                client.Aisling.TempForgeTwo = "Refined Cobalt Steel";
+                                client.Aisling.TempForgeThree = "Bocan Branch";
+                                client.Aisling.TempForgeFour = "Scorpion Venom";
                                 var opts = new List<Dialog.OptionsDataItem>();
 
                                 if (client.Aisling.HasInInventory("Refined Dark Iron", 2))
@@ -313,7 +306,7 @@ public class ArmorSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                                             else
                                             {
                                                 client.SendOptionsDialog(Mundane,
-                                                    $"Seem to be missing some {_forgeNeededStoneFour}\n" +
+                                                    $"Seem to be missing some {client.Aisling.TempForgeFour}\n" +
                                                     "Need: 5");
                                                 return;
                                             }
@@ -321,7 +314,7 @@ public class ArmorSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                                         else
                                         {
                                             client.SendOptionsDialog(Mundane,
-                                                $"Seem to be missing some {_forgeNeededStoneThree}\n" +
+                                                $"Seem to be missing some {client.Aisling.TempForgeThree}\n" +
                                                 "Need: 3");
                                             return;
                                         }
@@ -329,14 +322,14 @@ public class ArmorSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                                     else
                                     {
                                         client.SendOptionsDialog(Mundane,
-                                            $"Seem to be missing some {_forgeNeededStoneTwo}\n" +
+                                            $"Seem to be missing some {client.Aisling.TempForgeTwo}\n" +
                                             "Need: 2");
                                         return;
                                     }
                                 }
                                 else
                                 {
-                                    client.SendOptionsDialog(Mundane, $"Seem to be missing some {_forgeNeededStoneOne}\n" +
+                                    client.SendOptionsDialog(Mundane, $"Seem to be missing some {client.Aisling.TempForgeOne}\n" +
                                                                       "Need: 2");
                                     return;
                                 }
@@ -344,18 +337,18 @@ public class ArmorSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                                 opts.Add(new(0x81, ServerSetup.Instance.Config.MerchantCancelMessage));
 
                                 client.SendOptionsDialog(Mundane, $"It will also take:\n" +
-                                                                  $"{_forgeNeededStoneOne} x2\n" +
-                                                                  $"{_forgeNeededStoneTwo} x2\n" +
-                                                                  $"{_forgeNeededStoneThree} x3\n" +
-                                                                  $"{_forgeNeededStoneFour} x5", opts.ToArray());
+                                                                  $"{client.Aisling.TempForgeOne} x2\n" +
+                                                                  $"{client.Aisling.TempForgeTwo} x2\n" +
+                                                                  $"{client.Aisling.TempForgeThree} x3\n" +
+                                                                  $"{client.Aisling.TempForgeFour} x5", opts.ToArray());
                             }
                             break;
                         case Item.ItemMaterials.Steel:
                             {
-                                _forgeNeededStoneOne = "Refined Dark Iron";
-                                _forgeNeededStoneTwo = "Refined Cobalt Steel";
-                                _forgeNeededStoneThree = "Scorpion Venom";
-                                _forgeNeededStoneFour = "Spore Sac";
+                                client.Aisling.TempForgeOne = "Refined Dark Iron";
+                                client.Aisling.TempForgeTwo = "Refined Cobalt Steel";
+                                client.Aisling.TempForgeThree = "Scorpion Venom";
+                                client.Aisling.TempForgeFour = "Spore Sac";
                                 var opts = new List<Dialog.OptionsDataItem>();
 
                                 if (client.Aisling.HasInInventory("Refined Dark Iron", 4))
@@ -371,7 +364,7 @@ public class ArmorSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                                             else
                                             {
                                                 client.SendOptionsDialog(Mundane,
-                                                    $"Seem to be missing some {_forgeNeededStoneFour}\n" +
+                                                    $"Seem to be missing some {client.Aisling.TempForgeFour}\n" +
                                                     "Need: 3");
                                                 return;
                                             }
@@ -379,7 +372,7 @@ public class ArmorSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                                         else
                                         {
                                             client.SendOptionsDialog(Mundane,
-                                                $"Seem to be missing some {_forgeNeededStoneThree}\n" +
+                                                $"Seem to be missing some {client.Aisling.TempForgeThree}\n" +
                                                 "Need: 2");
                                             return;
                                         }
@@ -387,14 +380,14 @@ public class ArmorSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                                     else
                                     {
                                         client.SendOptionsDialog(Mundane,
-                                            $"Seem to be missing some {_forgeNeededStoneTwo}\n" +
+                                            $"Seem to be missing some {client.Aisling.TempForgeTwo}\n" +
                                             "Need: 4");
                                         return;
                                     }
                                 }
                                 else
                                 {
-                                    client.SendOptionsDialog(Mundane, $"Seem to be missing some {_forgeNeededStoneOne}\n" +
+                                    client.SendOptionsDialog(Mundane, $"Seem to be missing some {client.Aisling.TempForgeOne}\n" +
                                                                       "Need: 4");
                                     return;
                                 }
@@ -402,17 +395,17 @@ public class ArmorSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                                 opts.Add(new(0x81, ServerSetup.Instance.Config.MerchantCancelMessage));
 
                                 client.SendOptionsDialog(Mundane, $"It will also take:\n" +
-                                                                  $"{_forgeNeededStoneOne} x4\n" +
-                                                                  $"{_forgeNeededStoneTwo} x4\n" +
-                                                                  $"{_forgeNeededStoneThree} x2\n" +
-                                                                  $"{_forgeNeededStoneFour} x3", opts.ToArray());
+                                                                  $"{client.Aisling.TempForgeOne} x4\n" +
+                                                                  $"{client.Aisling.TempForgeTwo} x4\n" +
+                                                                  $"{client.Aisling.TempForgeThree} x2\n" +
+                                                                  $"{client.Aisling.TempForgeFour} x3", opts.ToArray());
                             }
                             break;
                         case Item.ItemMaterials.Forged:
                             {
-                                _forgeNeededStoneOne = "Refined Talos";
-                                _forgeNeededStoneTwo = "Prahed Bellis";
-                                _forgeNeededStoneThree = "Wisp Dust";
+                                client.Aisling.TempForgeOne = "Refined Talos";
+                                client.Aisling.TempForgeTwo = "Prahed Bellis";
+                                client.Aisling.TempForgeThree = "Wisp Dust";
                                 var opts = new List<Dialog.OptionsDataItem>();
 
                                 if (client.Aisling.HasInInventory("Refined Talos", 10))
@@ -426,7 +419,7 @@ public class ArmorSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                                         else
                                         {
                                             client.SendOptionsDialog(Mundane,
-                                                $"Seem to be missing some {_forgeNeededStoneThree}\n" +
+                                                $"Seem to be missing some {client.Aisling.TempForgeThree}\n" +
                                                 "Need: 25");
                                             return;
                                         }
@@ -434,14 +427,14 @@ public class ArmorSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                                     else
                                     {
                                         client.SendOptionsDialog(Mundane,
-                                            $"Seem to be missing some {_forgeNeededStoneTwo}\n" +
+                                            $"Seem to be missing some {client.Aisling.TempForgeTwo}\n" +
                                             "Need: 6");
                                         return;
                                     }
                                 }
                                 else
                                 {
-                                    client.SendOptionsDialog(Mundane, $"Seem to be missing some {_forgeNeededStoneOne}\n" +
+                                    client.SendOptionsDialog(Mundane, $"Seem to be missing some {client.Aisling.TempForgeOne}\n" +
                                                                       "Need: 10");
                                     return;
                                 }
@@ -449,16 +442,16 @@ public class ArmorSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                                 opts.Add(new(0x81, ServerSetup.Instance.Config.MerchantCancelMessage));
 
                                 client.SendOptionsDialog(Mundane, $"It will also take:\n" +
-                                                                  $"{_forgeNeededStoneOne} x10\n" +
-                                                                  $"{_forgeNeededStoneTwo} x6\n" +
-                                                                  $"{_forgeNeededStoneThree} x25", opts.ToArray());
+                                                                  $"{client.Aisling.TempForgeOne} x10\n" +
+                                                                  $"{client.Aisling.TempForgeTwo} x6\n" +
+                                                                  $"{client.Aisling.TempForgeThree} x25", opts.ToArray());
                             }
                             break;
                         case Item.ItemMaterials.Elven:
                             {
-                                _forgeNeededStoneOne = "Refined Cobalt Steel";
-                                _forgeNeededStoneTwo = "Refined Hybrasyl";
-                                _forgeNeededStoneThree = "Wraith Blood";
+                                client.Aisling.TempForgeOne = "Refined Cobalt Steel";
+                                client.Aisling.TempForgeTwo = "Refined Hybrasyl";
+                                client.Aisling.TempForgeThree = "Wraith Blood";
                                 var opts = new List<Dialog.OptionsDataItem>();
 
                                 if (client.Aisling.HasInInventory("Refined Cobalt Steel", 6))
@@ -472,7 +465,7 @@ public class ArmorSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                                         else
                                         {
                                             client.SendOptionsDialog(Mundane,
-                                                $"Seem to be missing some {_forgeNeededStoneThree}\n" +
+                                                $"Seem to be missing some {client.Aisling.TempForgeThree}\n" +
                                                 "Need: 9");
                                             return;
                                         }
@@ -480,14 +473,14 @@ public class ArmorSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                                     else
                                     {
                                         client.SendOptionsDialog(Mundane,
-                                            $"Seem to be missing some {_forgeNeededStoneTwo}\n" +
+                                            $"Seem to be missing some {client.Aisling.TempForgeTwo}\n" +
                                             "Need: 3");
                                         return;
                                     }
                                 }
                                 else
                                 {
-                                    client.SendOptionsDialog(Mundane, $"Seem to be missing some {_forgeNeededStoneOne}\n" +
+                                    client.SendOptionsDialog(Mundane, $"Seem to be missing some {client.Aisling.TempForgeOne}\n" +
                                                                       "Need: 6");
                                     return;
                                 }
@@ -495,17 +488,17 @@ public class ArmorSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                                 opts.Add(new(0x81, ServerSetup.Instance.Config.MerchantCancelMessage));
 
                                 client.SendOptionsDialog(Mundane, $"It will also take:\n" +
-                                                                  $"{_forgeNeededStoneOne} x6\n" +
-                                                                  $"{_forgeNeededStoneTwo} x3\n" +
-                                                                  $"{_forgeNeededStoneThree} x9", opts.ToArray());
+                                                                  $"{client.Aisling.TempForgeOne} x6\n" +
+                                                                  $"{client.Aisling.TempForgeTwo} x3\n" +
+                                                                  $"{client.Aisling.TempForgeThree} x9", opts.ToArray());
                             }
                             break;
                         case Item.ItemMaterials.Dwarven:
                             {
-                                _forgeNeededStoneOne = "Refined Talos";
-                                _forgeNeededStoneTwo = "Refined Copper";
-                                _forgeNeededStoneThree = "Fairy Wing";
-                                _forgeNeededStoneFour = "Nautilus Shell";
+                                client.Aisling.TempForgeOne = "Refined Talos";
+                                client.Aisling.TempForgeTwo = "Refined Copper";
+                                client.Aisling.TempForgeThree = "Fairy Wing";
+                                client.Aisling.TempForgeFour = "Nautilus Shell";
                                 var opts = new List<Dialog.OptionsDataItem>();
 
                                 if (client.Aisling.HasInInventory("Refined Talos", 6))
@@ -521,7 +514,7 @@ public class ArmorSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                                             else
                                             {
                                                 client.SendOptionsDialog(Mundane,
-                                                    $"Seem to be missing some {_forgeNeededStoneFour}\n" +
+                                                    $"Seem to be missing some {client.Aisling.TempForgeFour}\n" +
                                                     "Need: 8");
                                                 return;
                                             }
@@ -529,7 +522,7 @@ public class ArmorSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                                         else
                                         {
                                             client.SendOptionsDialog(Mundane,
-                                                $"Seem to be missing some {_forgeNeededStoneThree}\n" +
+                                                $"Seem to be missing some {client.Aisling.TempForgeThree}\n" +
                                                 "Need: 25");
                                             return;
                                         }
@@ -537,14 +530,14 @@ public class ArmorSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                                     else
                                     {
                                         client.SendOptionsDialog(Mundane,
-                                            $"Seem to be missing some {_forgeNeededStoneTwo}\n" +
+                                            $"Seem to be missing some {client.Aisling.TempForgeTwo}\n" +
                                             "Need: 5");
                                         return;
                                     }
                                 }
                                 else
                                 {
-                                    client.SendOptionsDialog(Mundane, $"Seem to be missing some {_forgeNeededStoneOne}\n" +
+                                    client.SendOptionsDialog(Mundane, $"Seem to be missing some {client.Aisling.TempForgeOne}\n" +
                                                                       "Need: 6");
                                     return;
                                 }
@@ -552,18 +545,18 @@ public class ArmorSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                                 opts.Add(new(0x81, ServerSetup.Instance.Config.MerchantCancelMessage));
 
                                 client.SendOptionsDialog(Mundane, $"It will also take:\n" +
-                                                                  $"{_forgeNeededStoneOne} x6\n" +
-                                                                  $"{_forgeNeededStoneTwo} x5\n" +
-                                                                  $"{_forgeNeededStoneThree} x25\n" +
-                                                                  $"{_forgeNeededStoneFour} x8", opts.ToArray());
+                                                                  $"{client.Aisling.TempForgeOne} x6\n" +
+                                                                  $"{client.Aisling.TempForgeTwo} x5\n" +
+                                                                  $"{client.Aisling.TempForgeThree} x25\n" +
+                                                                  $"{client.Aisling.TempForgeFour} x8", opts.ToArray());
                             }
                             break;
                         case Item.ItemMaterials.Mythril:
                             {
-                                _forgeNeededStoneOne = "Refined Hybrasyl";
-                                _forgeNeededStoneTwo = "Aiten Bloom";
-                                _forgeNeededStoneThree = "Sea Twine";
-                                _forgeNeededStoneFour = "Spiked Nautilus Shell";
+                                client.Aisling.TempForgeOne = "Refined Hybrasyl";
+                                client.Aisling.TempForgeTwo = "Aiten Bloom";
+                                client.Aisling.TempForgeThree = "Sea Twine";
+                                client.Aisling.TempForgeFour = "Spiked Nautilus Shell";
                                 var opts = new List<Dialog.OptionsDataItem>();
 
                                 if (client.Aisling.HasInInventory("Refined Hybrasyl", 10))
@@ -579,7 +572,7 @@ public class ArmorSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                                             else
                                             {
                                                 client.SendOptionsDialog(Mundane,
-                                                    $"Seem to be missing some {_forgeNeededStoneFour}\n" +
+                                                    $"Seem to be missing some {client.Aisling.TempForgeFour}\n" +
                                                     "Need: 6");
                                                 return;
                                             }
@@ -587,7 +580,7 @@ public class ArmorSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                                         else
                                         {
                                             client.SendOptionsDialog(Mundane,
-                                                $"Seem to be missing some {_forgeNeededStoneThree}\n" +
+                                                $"Seem to be missing some {client.Aisling.TempForgeThree}\n" +
                                                 "Need: 8");
                                             return;
                                         }
@@ -595,14 +588,14 @@ public class ArmorSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                                     else
                                     {
                                         client.SendOptionsDialog(Mundane,
-                                            $"Seem to be missing some {_forgeNeededStoneTwo}\n" +
+                                            $"Seem to be missing some {client.Aisling.TempForgeTwo}\n" +
                                             "Need: 6");
                                         return;
                                     }
                                 }
                                 else
                                 {
-                                    client.SendOptionsDialog(Mundane, $"Seem to be missing some {_forgeNeededStoneOne}\n" +
+                                    client.SendOptionsDialog(Mundane, $"Seem to be missing some {client.Aisling.TempForgeOne}\n" +
                                                                       "Need: 10");
                                     return;
                                 }
@@ -610,10 +603,10 @@ public class ArmorSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                                 opts.Add(new(0x81, ServerSetup.Instance.Config.MerchantCancelMessage));
 
                                 client.SendOptionsDialog(Mundane, $"It will also take:\n" +
-                                                                  $"{_forgeNeededStoneOne} x10\n" +
-                                                                  $"{_forgeNeededStoneTwo} x6\n" +
-                                                                  $"{_forgeNeededStoneThree} x8\n" +
-                                                                  $"{_forgeNeededStoneFour} x6", opts.ToArray());
+                                                                  $"{client.Aisling.TempForgeOne} x10\n" +
+                                                                  $"{client.Aisling.TempForgeTwo} x6\n" +
+                                                                  $"{client.Aisling.TempForgeThree} x8\n" +
+                                                                  $"{client.Aisling.TempForgeFour} x6", opts.ToArray());
                             }
                             break;
                         case Item.ItemMaterials.Hybrasyl:
@@ -636,19 +629,19 @@ public class ArmorSmithing(WorldServer server, Mundane mundane) : MundaneScript(
             // Reset Npc
             case 0x81:
                 {
-                    _forgeNeededStoneOne = "";
-                    _forgeNeededStoneTwo = "";
-                    _forgeNeededStoneThree = "";
-                    _forgeNeededStoneFour = "";
-                    _itemDetail = null;
-                    _cost = 0;
+                    client.Aisling.TempForgeOne = "";
+                    client.Aisling.TempForgeTwo = "";
+                    client.Aisling.TempForgeThree = "";
+                    client.Aisling.TempForgeFour = "";
+                    client.Aisling.TempItemDetail = null;
+                    client.Aisling.TempItemDetailCost = 0;
                     TopMenu(client);
                     break;
                 }
             // Take Items & Reforge
             case 0x82:
                 {
-                    var item = _itemDetail;
+                    var item = client.Aisling.TempItemDetail;
                     var chance = Generator.RandomPercentPrecise();
 
                     if (client.Aisling.Luck > 0)
@@ -669,7 +662,7 @@ public class ArmorSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                         return;
                     }
 
-                    if (client.Aisling.GoldPoints >= _cost)
+                    if (client.Aisling.GoldPoints >= client.Aisling.TempItemDetailCost)
                     {
                         switch (item.ItemMaterial)
                         {
@@ -694,7 +687,7 @@ public class ArmorSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                                     if (client.Aisling.QuestManager.ArmorSmithingTier is "Novice")
                                         client.Aisling.QuestManager.ArmorSmithing++;
 
-                                    _itemDetail.ItemMaterial = Item.ItemMaterials.Copper;
+                                    client.Aisling.TempItemDetail.ItemMaterial = Item.ItemMaterials.Copper;
                                 }
                                 break;
                             case Item.ItemMaterials.Copper:
@@ -717,7 +710,7 @@ public class ArmorSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                                     if (client.Aisling.QuestManager.ArmorSmithingTier is "Novice" or "Apprentice")
                                         client.Aisling.QuestManager.ArmorSmithing++;
 
-                                    _itemDetail.ItemMaterial = Item.ItemMaterials.Iron;
+                                    client.Aisling.TempItemDetail.ItemMaterial = Item.ItemMaterials.Iron;
                                 }
                                 break;
                             case Item.ItemMaterials.Iron:
@@ -743,7 +736,7 @@ public class ArmorSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                                     if (client.Aisling.QuestManager.ArmorSmithingTier is "Apprentice")
                                         client.Aisling.QuestManager.ArmorSmithing++;
 
-                                    _itemDetail.ItemMaterial = Item.ItemMaterials.Steel;
+                                    client.Aisling.TempItemDetail.ItemMaterial = Item.ItemMaterials.Steel;
                                 }
                                 break;
                             case Item.ItemMaterials.Steel:
@@ -769,7 +762,7 @@ public class ArmorSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                                     if (client.Aisling.QuestManager.ArmorSmithingTier is "Apprentice")
                                         client.Aisling.QuestManager.ArmorSmithing++;
 
-                                    _itemDetail.ItemMaterial = Item.ItemMaterials.Forged;
+                                    client.Aisling.TempItemDetail.ItemMaterial = Item.ItemMaterials.Forged;
                                 }
                                 break;
                             case Item.ItemMaterials.Forged:
@@ -793,7 +786,7 @@ public class ArmorSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                                     if (client.Aisling.QuestManager.ArmorSmithingTier is "Apprentice" or "Journeyman")
                                         client.Aisling.QuestManager.ArmorSmithing++;
 
-                                    _itemDetail.ItemMaterial = Item.ItemMaterials.Elven;
+                                    client.Aisling.TempItemDetail.ItemMaterial = Item.ItemMaterials.Elven;
                                 }
                                 break;
                             case Item.ItemMaterials.Elven:
@@ -817,7 +810,7 @@ public class ArmorSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                                     if (client.Aisling.QuestManager.ArmorSmithingTier is "Journeyman")
                                         client.Aisling.QuestManager.ArmorSmithing++;
 
-                                    _itemDetail.ItemMaterial = Item.ItemMaterials.Dwarven;
+                                    client.Aisling.TempItemDetail.ItemMaterial = Item.ItemMaterials.Dwarven;
                                 }
                                 break;
                             case Item.ItemMaterials.Dwarven:
@@ -843,7 +836,7 @@ public class ArmorSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                                     if (client.Aisling.QuestManager.ArmorSmithingTier is "Journeyman")
                                         client.Aisling.QuestManager.ArmorSmithing++;
 
-                                    _itemDetail.ItemMaterial = Item.ItemMaterials.Mythril;
+                                    client.Aisling.TempItemDetail.ItemMaterial = Item.ItemMaterials.Mythril;
                                 }
                                 break;
                             case Item.ItemMaterials.Mythril:
@@ -869,7 +862,7 @@ public class ArmorSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                                     if (client.Aisling.QuestManager.ArmorSmithingTier is "Journeyman")
                                         client.Aisling.QuestManager.ArmorSmithing++;
 
-                                    _itemDetail.ItemMaterial = Item.ItemMaterials.Hybrasyl;
+                                    client.Aisling.TempItemDetail.ItemMaterial = Item.ItemMaterials.Hybrasyl;
                                 }
                                 break;
                             case Item.ItemMaterials.Hybrasyl:
@@ -882,8 +875,8 @@ public class ArmorSmithing(WorldServer server, Mundane mundane) : MundaneScript(
                                 return;
                         }
 
-                        client.Aisling.GoldPoints -= _cost;
-                        client.Aisling.Inventory.UpdateSlot(client, _itemDetail);
+                        client.Aisling.GoldPoints -= client.Aisling.TempItemDetailCost;
+                        client.Aisling.Inventory.UpdateSlot(client, client.Aisling.TempItemDetail);
                         client.SendAttributes(StatUpdateType.WeightGold);
                         client.SendPublicMessage(Mundane.Serial, PublicMessageType.Normal, $"{Mundane.Name}: Nicely done!");
                         client.SendOptionsDialog(Mundane, $"Nicely done {client.Aisling.Username}!");

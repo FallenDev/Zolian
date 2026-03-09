@@ -12,7 +12,6 @@ namespace Darkages.GameScripts.Mundanes.Mileth;
 [Script("Conn")]
 public class Conn : MundaneScript
 {
-    private string _potion;
     private readonly List<SkillTemplate> _skillList;
     private readonly List<SpellTemplate> _spellList;
 
