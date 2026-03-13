@@ -32,6 +32,11 @@ public class Legend
         return LegendMarks.Any(i => i.Text != null && i.Text.Equals(lpVal));
     }
 
+    public bool HasQuantity(string lpVal, int quantity)
+    {
+        return LegendMarks.Count(i => i.Text != null && i.Text.Equals(lpVal)) >= quantity;
+    }
+
     public bool HasKey(string key)
     {
         return LegendMarks.Any(i => i.Key != null && i.Key.Equals(key));

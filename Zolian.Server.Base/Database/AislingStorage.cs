@@ -197,6 +197,22 @@ public record AislingStorage : Sql, IEqualityOperators<AislingStorage, AislingSt
                 cmd5.Parameters.Add("@CthonicRemainsExplorationLevel", SqlDbType.Int).Value = 0;
                 cmd5.Parameters.Add("@EndedOmegasRein", SqlDbType.Bit).Value = false;
                 cmd5.Parameters.Add("@CraftedMoonArmor", SqlDbType.Bit).Value = false;
+                cmd5.Parameters.Add("@EvermoreWhispersStarted", SqlDbType.Bit).Value = false;
+                cmd5.Parameters.Add("@EvermoreArchivistDeniedGuild", SqlDbType.Bit).Value = false;
+                cmd5.Parameters.Add("@EvermoreYselleDeniedGuild", SqlDbType.Bit).Value = false;
+                cmd5.Parameters.Add("@EvermoreOrrinDeniedGuild", SqlDbType.Bit).Value = false;
+                cmd5.Parameters.Add("@EvermoreAssassinsSigilAttuned", SqlDbType.Bit).Value = false;
+                cmd5.Parameters.Add("@EvermoreNightshadeVenomCrafted", SqlDbType.Bit).Value = false;
+                cmd5.Parameters.Add("@EvermoreBloodOathRewardClaimed", SqlDbType.Bit).Value = false;
+                cmd5.Parameters.Add("@EvermoreMarkedTrialStarted", SqlDbType.Bit).Value = false;
+                cmd5.Parameters.Add("@EvermoreShadowCloakClaimed", SqlDbType.Bit).Value = false;
+                cmd5.Parameters.Add("@EvermoreArdynChoice", SqlDbType.VarChar).Value = "";
+                cmd5.Parameters.Add("@EvermoreDarkKnightPathUnlocked", SqlDbType.Bit).Value = false;
+                cmd5.Parameters.Add("@EvermoreVeilOfEternityStarted", SqlDbType.Bit).Value = false;
+                cmd5.Parameters.Add("@EvermoreFirstBladeRewardClaimed", SqlDbType.Bit).Value = false;
+                cmd5.Parameters.Add("@EvermoreGuildTeleportUnlocked", SqlDbType.Bit).Value = false;
+                cmd5.Parameters.Add("@EvermoreNinjaPathUnlocked", SqlDbType.Bit).Value = false;
+                cmd5.Parameters.Add("@EvermoreThiefPathUnlocked", SqlDbType.Bit).Value = false;
 
                 #endregion
 
@@ -464,7 +480,11 @@ public record AislingStorage : Sql, IEqualityOperators<AislingStorage, AislingSt
             obj.QuestManager.HonoringTheFallen, obj.QuestManager.ReadTheFallenNotes, obj.QuestManager.GivenTarnishedBreastplate, obj.QuestManager.EternalBond, obj.QuestManager.ArmorCraftingCodex,
             obj.QuestManager.ArmorApothecaryAccepted, obj.QuestManager.ArmorCodexDeciphered, obj.QuestManager.ArmorCraftingCodexLearned, obj.QuestManager.ArmorCraftingAdvancedCodexLearned,
             obj.QuestManager.CthonicKillTarget, obj.QuestManager.CthonicFindTarget, obj.QuestManager.CthonicKillCompletions, obj.QuestManager.CthonicCleansingOne, obj.QuestManager.CthonicCleansingTwo,
-            obj.QuestManager.CthonicDepthsCleansing, obj.QuestManager.CthonicRuinsAccess, obj.QuestManager.CthonicRemainsExplorationLevel, obj.QuestManager.EndedOmegasRein, obj.QuestManager.CraftedMoonArmor);
+            obj.QuestManager.CthonicDepthsCleansing, obj.QuestManager.CthonicRuinsAccess, obj.QuestManager.CthonicRemainsExplorationLevel, obj.QuestManager.EndedOmegasRein, obj.QuestManager.CraftedMoonArmor,
+            obj.QuestManager.EvermoreWhispersStarted, obj.QuestManager.EvermoreArchivistDeniedGuild, obj.QuestManager.EvermoreYselleDeniedGuild, obj.QuestManager.EvermoreOrrinDeniedGuild,
+            obj.QuestManager.EvermoreAssassinsSigilAttuned, obj.QuestManager.EvermoreNightshadeVenomCrafted, obj.QuestManager.EvermoreBloodOathRewardClaimed, obj.QuestManager.EvermoreMarkedTrialStarted,
+            obj.QuestManager.EvermoreShadowCloakClaimed, obj.QuestManager.EvermoreArdynChoice, obj.QuestManager.EvermoreDarkKnightPathUnlocked, obj.QuestManager.EvermoreVeilOfEternityStarted,
+            obj.QuestManager.EvermoreFirstBladeRewardClaimed, obj.QuestManager.EvermoreGuildTeleportUnlocked, obj.QuestManager.EvermoreNinjaPathUnlocked, obj.QuestManager.EvermoreThiefPathUnlocked);
 
         return qDt;
     }
@@ -1140,6 +1160,22 @@ public record AislingStorage : Sql, IEqualityOperators<AislingStorage, AislingSt
         qDt.Columns.Add("CthonicRemainsExplorationLevel", typeof(int));
         qDt.Columns.Add("EndedOmegasRein", typeof(bool));
         qDt.Columns.Add("CraftedMoonArmor", typeof(bool));
+        qDt.Columns.Add("EvermoreWhispersStarted", typeof(bool));
+        qDt.Columns.Add("EvermoreArchivistDeniedGuild", typeof(bool));
+        qDt.Columns.Add("EvermoreYselleDeniedGuild", typeof(bool));
+        qDt.Columns.Add("EvermoreOrrinDeniedGuild", typeof(bool));
+        qDt.Columns.Add("EvermoreAssassinsSigilAttuned", typeof(bool));
+        qDt.Columns.Add("EvermoreNightshadeVenomCrafted", typeof(bool));
+        qDt.Columns.Add("EvermoreBloodOathRewardClaimed", typeof(bool));
+        qDt.Columns.Add("EvermoreMarkedTrialStarted", typeof(bool));
+        qDt.Columns.Add("EvermoreShadowCloakClaimed", typeof(bool));
+        qDt.Columns.Add("EvermoreArdynChoice", typeof(string));
+        qDt.Columns.Add("EvermoreDarkKnightPathUnlocked", typeof(bool));
+        qDt.Columns.Add("EvermoreVeilOfEternityStarted", typeof(bool));
+        qDt.Columns.Add("EvermoreFirstBladeRewardClaimed", typeof(bool));
+        qDt.Columns.Add("EvermoreGuildTeleportUnlocked", typeof(bool));
+        qDt.Columns.Add("EvermoreNinjaPathUnlocked", typeof(bool));
+        qDt.Columns.Add("EvermoreThiefPathUnlocked", typeof(bool));
         return qDt;
     }
 

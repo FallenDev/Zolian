@@ -62,10 +62,46 @@ public class MundaneComponent(WorldServer server) : WorldServerComponent(server)
             Mundane.Create(template);
         }
 
-        // Update the MundaneByMapCache
         if (ServerSetup.Instance.TempMundaneByMapCache.Count == 0) return;
+
+        // Update the MundaneByMapCache
+        AttemptFrozenMergeIfExist();
+
         ServerSetup.Instance.MundaneByMapCache = ServerSetup.Instance.TempMundaneByMapCache.ToFrozenDictionary(kvp => kvp.Key, kvp => kvp.Value.ToArray());
         ServerSetup.Instance.TempMundaneByMapCache.Clear();
-        ServerSetup.EventsLogger($"Mundanes Spawned: {ServerSetup.Instance.MundaneByMapCache.Count}");
+        // Debug
+        //ServerSetup.EventsLogger($"Mundanes Spawned: {ServerSetup.Instance.MundaneByMapCache.Count}");
+    }
+
+    private static void AttemptFrozenMergeIfExist()
+    {
+        if (ServerSetup.Instance.MundaneByMapCache is null) return;
+
+        try
+        {
+            // Update the MundaneByMapCache: merge existing frozen cache into the temp dictionary
+            if (ServerSetup.Instance.MundaneByMapCache.Count >= 1)
+            {
+                foreach (var kvp in ServerSetup.Instance.MundaneByMapCache)
+                {
+                    // kvp.Key -> int, kvp.Value -> Mundane[]
+                    if (!ServerSetup.Instance.TempMundaneByMapCache.TryGetValue(kvp.Key, out var list))
+                    {
+                        // create new list from the frozen array
+                        ServerSetup.Instance.TempMundaneByMapCache[kvp.Key] = [.. kvp.Value];
+                    }
+                    else
+                    {
+                        // append any missing items
+                        foreach (var m in kvp.Value)
+                        {
+                            if (!list.Contains(m))
+                                list.Add(m);
+                        }
+                    }
+                }
+            }
+        }
+        catch { }
     }
 }

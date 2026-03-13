@@ -3815,6 +3815,15 @@ public class WorldClient : WorldClientBase, IWorldClient
         SendServerMessage(ServerMessageType.ActiveMessage, "Issue with giving you the item directly, deposited to bank");
     }
 
+    public bool TryGiveQuantity(Aisling aisling, string itemName, int range)
+    {
+        var item = new Item();
+        item = item.Create(aisling, itemName);
+        item.Stacks = (ushort)range;
+
+        return item.Template.Name != null && item.GiveTo(Aisling);
+    }
+
     public void TakeAwayQuantity(Sprite owner, string item, int range)
     {
         var foundItem = Aisling.Inventory.Has(i => i.Template.Name.Equals(item, StringComparison.OrdinalIgnoreCase));

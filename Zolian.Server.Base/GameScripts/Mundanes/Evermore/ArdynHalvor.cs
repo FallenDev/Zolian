@@ -1,4 +1,5 @@
-﻿using Darkages.Common;
+using Darkages.Common;
+using Darkages.Enums;
 using Darkages.Network.Client;
 using Darkages.Network.Server;
 using Darkages.ScriptingBase;
@@ -26,16 +27,22 @@ public class ArdynHalvor(WorldServer server, Mundane mundane) : MundaneScript(se
     {
         base.TopMenu(client);
 
-        var options = new[]
+        var options = new List<Dialog.OptionsDataItem>
         {
-        new Dialog.OptionsDataItem(R_Briefing, "Confront Ardyn about the leak."),
-        new Dialog.OptionsDataItem(R_Expose, "Expose Ardyn."),
-        new Dialog.OptionsDataItem(R_Kill, "Kill Ardyn quietly."),
-        new Dialog.OptionsDataItem(R_Recruit, "Recruit Ardyn."),
-        new Dialog.OptionsDataItem(R_Leave, "Walk away."),
-    };
+            new(R_Briefing, "Confront Ardyn about the leak.")
+        };
 
-        client.SendOptionsDialog(Mundane, "...polish, polish... signatures are easy to copy.", options);
+        if (client.Aisling.QuestManager.AssassinsGuildReputation >= 4
+            && string.IsNullOrWhiteSpace(client.Aisling.QuestManager.EvermoreArdynChoice))
+        {
+            options.Add(new(R_Expose, "Expose Ardyn."));
+            options.Add(new(R_Kill, "Kill Ardyn quietly."));
+            options.Add(new(R_Recruit, "Recruit Ardyn."));
+        }
+
+        options.Add(new(R_Leave, "Walk away."));
+
+        client.SendOptionsDialog(Mundane, "...polish, polish... signatures are easy to copy.", options.ToArray());
     }
 
     public override void OnResponse(WorldClient client, ushort responseId, string args)
@@ -47,7 +54,7 @@ public class ArdynHalvor(WorldServer server, Mundane mundane) : MundaneScript(se
         {
             case R_Briefing:
                 client.SendOptionsDialog(Mundane,
-                    "The Fractured Veil: Gather 10 Enchanted Residue, follow Ardyn at night, then choose to expose, kill, or recruit him.");
+                    "The Fractured Veil: Gather 10 Enchanted Residue, shadow Ardyn through the night market, then decide whether his usefulness is worth the rot he caused.");
                 return;
 
             case R_Expose:
@@ -64,9 +71,17 @@ public class ArdynHalvor(WorldServer server, Mundane mundane) : MundaneScript(se
 
     private void ResolveTierFour(WorldClient client, ushort choice)
     {
-        if (client.Aisling.QuestManager.AssassinsGuildReputation < 3)
+        var quests = client.Aisling.QuestManager;
+
+        if (quests.AssassinsGuildReputation < 4)
         {
             client.SendOptionsDialog(Mundane, "You are not authorized to decide this.");
+            return;
+        }
+
+        if (!string.IsNullOrWhiteSpace(quests.EvermoreArdynChoice))
+        {
+            client.SendOptionsDialog(Mundane, $"Judgment has already been passed: {quests.EvermoreArdynChoice}.");
             return;
         }
 
@@ -77,19 +92,42 @@ public class ArdynHalvor(WorldServer server, Mundane mundane) : MundaneScript(se
         }
 
         client.TakeAwayQuantity(client.Aisling, "Enchanted Residue", 10);
-        client.Aisling.QuestManager.AssassinsGuildReputation = 4;
+        quests.AssassinsGuildReputation = 5;
+        quests.EvermoreDarkKnightPathUnlocked = true;
+
+        string choiceName;
+        string responseText;
+        string legendText;
+        LegendColor legendColor;
 
         switch (choice)
         {
             case R_Kill:
-                client.SendOptionsDialog(Mundane, "No witness, no noise. Veilbound accepted. Dark Knight whispers begin.");
+                choiceName = "Kill";
+                responseText = "No witness, no noise. Veilbound accepted. Something older than the guild has noticed you.";
+                legendText = "Evermore: Buried Ardyn beneath the hush";
+                legendColor = LegendColor.Red;
                 break;
             case R_Recruit:
-                client.SendOptionsDialog(Mundane, "Useful choice. Evermore's merchants and handlers will react to your restraint.");
+                choiceName = "Recruit";
+                responseText = "Useful choice. Evermore's merchants and handlers will remember that you value leverage over panic.";
+                legendText = "Evermore: Bound Ardyn to the guild's silence";
+                legendColor = LegendColor.WhiteBlackG8;
                 break;
             default:
-                client.SendOptionsDialog(Mundane, "Public judgment. Streets grow louder, and shadows trust you less.");
+                choiceName = "Expose";
+                responseText = "Public judgment. Streets grow louder, but even the clean-handed can cast a long shadow.";
+                legendText = "Evermore: Lit Ardyn's name before the lantern court";
+                legendColor = LegendColor.Yellow;
                 break;
         }
+
+        quests.EvermoreArdynChoice = choiceName;
+
+        EvermoreQuestHelper.AddLegendIfMissing(client, "LEvermore4", LegendColor.TurquoiseG8, LegendIcon.Rogue,
+            EvermoreQuestHelper.AssassinLegendRank(quests.AssassinsGuildReputation));
+        EvermoreQuestHelper.AddLegendIfMissing(client, "LEvermoreArdyn", legendColor, LegendIcon.Rogue, legendText);
+
+        client.SendOptionsDialog(Mundane, responseText);
     }
 }

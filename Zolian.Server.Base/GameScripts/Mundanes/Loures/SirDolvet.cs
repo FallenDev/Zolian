@@ -38,17 +38,26 @@ public class SirDolvet : MundaneScript
         if (_spellList.Count > 0 && client.Aisling.JobClass == Job.DarkKnight)
             options.Add(new(0x30, "Learn Dark Knight Spells"));
 
-        if (client.Aisling.Stage <= ClassStage.Master
-            && client.Aisling.ExpLevel >= 250
-            && client.Aisling.QuestManager.AssassinsGuildReputation >= 4
-            && client.Aisling.QuestManager.UndineReputation >= 4
-            && (client.Aisling.Path == Class.Berserker 
-                || client.Aisling.PastClass == Class.Berserker 
-                || client.Aisling.Path == Class.Assassin 
-                || client.Aisling.PastClass == Class.Assassin))
+        if (CanAdvanceToDarkKnight(client))
         {
             options.Add(new(0x01, "I am but a canvas, teach me"));
             client.SendOptionsDialog(Mundane, "Ya know, you'd make a fine Dark Knight", options.ToArray());
+            return;
+        }
+
+        if (client.Aisling.Stage <= ClassStage.Master
+            && client.Aisling.ExpLevel >= 250
+            && client.Aisling.JobClass != Job.DarkKnight
+            && client.Aisling.QuestManager.UndineReputation >= 4
+            && (client.Aisling.Path == Class.Berserker
+                || client.Aisling.PastClass == Class.Berserker
+                || client.Aisling.Path == Class.Assassin
+                || client.Aisling.PastClass == Class.Assassin)
+            && !HasCompletedEvermoreQuestline(client))
+        {
+            client.SendOptionsDialog(Mundane,
+                "The dark seal is bound to Evermore now. Return after you have finished the Evermore questline and survived the First Blade.",
+                options.ToArray());
             return;
         }
 
@@ -71,6 +80,12 @@ public class SirDolvet : MundaneScript
                 break;
             case 0x01:
                 {
+                    if (!CanAdvanceToDarkKnight(client))
+                    {
+                        client.SendOptionsDialog(Mundane, "Complete Evermore's rites before you ask me for the dark seal.");
+                        return;
+                    }
+
                     var options = new List<Dialog.OptionsDataItem>();
                     var qualifiedItem = CheckForForsakenDragonSlayer(client);
 
@@ -88,6 +103,12 @@ public class SirDolvet : MundaneScript
                 break;
             case 0x02:
                 {
+                    if (!CanAdvanceToDarkKnight(client))
+                    {
+                        client.SendOptionsDialog(Mundane, "The dark seal is not yours to carry yet.");
+                        return;
+                    }
+
                     var options = new List<Dialog.OptionsDataItem> { new(0x00, "Thank you Sir Dolvet") };
                     var qualifiedItem = CheckForForsakenDragonSlayer(client);
 
@@ -100,6 +121,9 @@ public class SirDolvet : MundaneScript
                 break;
             case 0x999:
                 {
+                    if (!CanAdvanceToDarkKnight(client))
+                        return;
+
                     var succeeded = uint.TryParse(args, out var serial);
                     if (!succeeded) return;
                     if (serial != client.Aisling.Serial) return;
@@ -188,6 +212,21 @@ public class SirDolvet : MundaneScript
         var item = client.Aisling.HasItemReturnItem("Dragon Slayer");
         return item?.OriginalQuality == Item.Quality.Forsaken ? item : null;
     }
+
+    private static bool HasCompletedEvermoreQuestline(WorldClient client) =>
+        client.Aisling.QuestManager.EvermoreDarkKnightPathUnlocked
+        && client.Aisling.QuestManager.EvermoreFirstBladeRewardClaimed
+        && client.Aisling.QuestManager.AssassinsGuildReputation >= 6;
+
+    private static bool CanAdvanceToDarkKnight(WorldClient client) =>
+        client.Aisling.Stage <= ClassStage.Master
+        && client.Aisling.ExpLevel >= 250
+        && HasCompletedEvermoreQuestline(client)
+        && client.Aisling.QuestManager.UndineReputation >= 4
+        && (client.Aisling.Path == Class.Berserker
+            || client.Aisling.PastClass == Class.Berserker
+            || client.Aisling.Path == Class.Assassin
+            || client.Aisling.PastClass == Class.Assassin);
 
     #region Skills & Spells
 

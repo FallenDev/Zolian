@@ -1,4 +1,5 @@
-﻿using Darkages.Common;
+using Darkages.Common;
+using Darkages.Enums;
 using Darkages.Network.Client;
 using Darkages.Network.Server;
 using Darkages.ScriptingBase;
@@ -12,7 +13,8 @@ public class SerisVael(WorldServer server, Mundane mundane) : MundaneScript(serv
 {
     private const ushort R_Leave = 0x00;
     private const ushort R_Briefing = 0x01;
-    private const ushort R_Complete = 0x02;
+    private const ushort R_Brew = 0x02;
+    private const ushort R_Complete = 0x03;
 
     public override void OnClick(WorldClient client, uint serial)
     {
@@ -23,15 +25,28 @@ public class SerisVael(WorldServer server, Mundane mundane) : MundaneScript(serv
     protected override void TopMenu(WorldClient client)
     {
         base.TopMenu(client);
-
-        var options = new[]
+        
+        if (!client.Aisling.QuestManager.EvermoreAssassinsSigilAttuned)
         {
-        new Dialog.OptionsDataItem(R_Briefing, "Teach me the Blood Oath."),
-        new Dialog.OptionsDataItem(R_Complete, "I've brewed and tested the venom."),
-        new Dialog.OptionsDataItem(R_Leave, "Leave."),
-    };
+            client.SendOptionsDialog(Mundane, "I do not know you.");
+            return;
+        }
 
-        client.SendOptionsDialog(Mundane, "Poison is only truth in liquid form.", options);
+        if (client.Aisling.QuestManager.EvermoreBloodOathRewardClaimed)
+        {
+            client.SendOptionsDialog(Mundane, "You have already completed the blood oath.");
+            return;
+        }
+
+        var options = new List<Dialog.OptionsDataItem>
+        {
+            new(R_Briefing, "Teach me the Blood Oath"),
+            new(R_Brew, "Nightshade Venom?"),
+            new(R_Complete, "It is done."),
+            new(R_Leave, "Leave.")
+        };
+
+        client.SendOptionsDialog(Mundane, "Poison is only truth in liquid form.", options.ToArray());
     }
 
     public override void OnResponse(WorldClient client, ushort responseId, string args)
@@ -43,7 +58,11 @@ public class SerisVael(WorldServer server, Mundane mundane) : MundaneScript(serv
         {
             case R_Briefing:
                 client.SendOptionsDialog(Mundane,
-                    "Blood Oath: Craft Nightshade Venom with 3 Dusk Petals and 1 Vial of Corrupted Blood, then test it on 15 Imperial Scouts and return alive.");
+                    "Talk to Orrin for passage. I will be supplying you with a Nightshade Venom, you will enter the Imperial camp and test it on 15 Imperial Scouts and return alive.");
+                return;
+
+            case R_Brew:
+                BrewNightshade(client);
                 return;
 
             case R_Complete:
@@ -56,27 +75,75 @@ public class SerisVael(WorldServer server, Mundane mundane) : MundaneScript(serv
         }
     }
 
+    private void BrewNightshade(WorldClient client)
+    {
+        var quests = client.Aisling.QuestManager;
+
+        if (!quests.EvermoreAssassinsSigilAttuned)
+        {
+            client.SendOptionsDialog(Mundane, "I do not know you.");
+            return;
+        }
+
+        if (quests.EvermoreNightshadeVenomCrafted && client.Aisling.HasItem("Nightshade Venom"))
+        {
+            client.SendOptionsDialog(Mundane, "The vial already remembers your hand. Go test it on the Imperial Scouts.");
+            return;
+        }
+
+        if (quests.EvermoreBloodOathRewardClaimed)
+        {
+            client.SendOptionsDialog(Mundane, "What's done is done.");
+            return;
+        }
+
+        if (!client.TryGiveQuantity(client.Aisling, "Nightshade Venom", 20))
+        {
+            client.SendOptionsDialog(Mundane, "Your pack is too full to tuck away the Sealed Letter.");
+            return;
+        }
+
+        quests.EvermoreNightshadeVenomCrafted = true;
+        client.SendOptionsDialog(Mundane, "Good. Here is the venom. Now let it answer on 15 Imperial Scouts.");
+    }
+
     private void CompleteTierTwo(WorldClient client)
     {
-        if (client.Aisling.QuestManager.AssassinsGuildReputation < 1)
+        var quests = client.Aisling.QuestManager;
+
+        if (quests.AssassinsGuildReputation < 2)
         {
             client.SendOptionsDialog(Mundane, "Kaelen has not marked you yet.");
             return;
         }
 
-        if (client.Aisling.QuestManager.AssassinsGuildReputation >= 2)
+        if (quests.EvermoreBloodOathRewardClaimed || quests.AssassinsGuildReputation >= 3)
         {
             client.SendOptionsDialog(Mundane, "You've already completed this oath.");
             return;
         }
 
-        if (!client.Aisling.HasKilled("Imperial Scout", 15))
+        if (!quests.EvermoreNightshadeVenomCrafted)
         {
-            client.SendOptionsDialog(Mundane, "Your venom has not proven itself. Fifteen scouts.");
+            client.SendOptionsDialog(Mundane, "You have not brewed the venom yet.");
             return;
         }
 
-        client.Aisling.QuestManager.AssassinsGuildReputation = 2;
-        client.SendOptionsDialog(Mundane, "Accepted. Your backstab grows stronger and Shadow Training opens.");
+        if (!client.Aisling.LegendBook.HasQuantity("- Murdered Imperial", 15))
+        {
+            client.SendOptionsDialog(Mundane, "Your venom has not proven itself. Fifteen scouts. Seek Orrin.");
+            return;
+        }
+
+        quests.AssassinsGuildReputation = 3;
+        quests.EvermoreBloodOathRewardClaimed = true;
+        quests.EvermoreNinjaPathUnlocked = true;
+        client.Aisling._Dmg += 15;
+        client.SendAttributes(StatUpdateType.Full);
+
+        EvermoreQuestHelper.AddLegendIfMissing(client, "LEvermore2", LegendColor.TurquoiseG8, LegendIcon.Rogue,
+            EvermoreQuestHelper.AssassinLegendRank(quests.AssassinsGuildReputation));
+
+        client.SendOptionsDialog(Mundane, "Accepted. Your strikes bite deeper now, and the hidden path to the Ninja becomes visible to you.");
     }
 }

@@ -402,7 +402,23 @@ CREATE TABLE PlayersQuests
     [CthonicRuinsAccess] BIT NULL,
     [CthonicRemainsExplorationLevel] INT NULL,
     [EndedOmegasRein] BIT NULL,
-    [CraftedMoonArmor] BIT NULL
+    [CraftedMoonArmor] BIT NULL,
+    [EvermoreWhispersStarted] BIT NULL,
+    [EvermoreArchivistDeniedGuild] BIT NULL,
+    [EvermoreYselleDeniedGuild] BIT NULL,
+    [EvermoreOrrinDeniedGuild] BIT NULL,
+    [EvermoreAssassinsSigilAttuned] BIT NULL,
+    [EvermoreNightshadeVenomCrafted] BIT NULL,
+    [EvermoreBloodOathRewardClaimed] BIT NULL,
+    [EvermoreMarkedTrialStarted] BIT NULL,
+    [EvermoreShadowCloakClaimed] BIT NULL,
+    [EvermoreArdynChoice] VARCHAR (20) NULL,
+    [EvermoreDarkKnightPathUnlocked] BIT NULL,
+    [EvermoreVeilOfEternityStarted] BIT NULL,
+    [EvermoreFirstBladeRewardClaimed] BIT NULL,
+    [EvermoreGuildTeleportUnlocked] BIT NULL,
+    [EvermoreNinjaPathUnlocked] BIT NULL,
+    [EvermoreThiefPathUnlocked] BIT NULL
 )
 
 CREATE TABLE PlayersIgnoreList
@@ -620,7 +636,23 @@ CREATE TYPE dbo.QuestType AS TABLE
     CthonicRuinsAccess BIT,
     CthonicRemainsExplorationLevel INT,
     EndedOmegasRein BIT,
-    CraftedMoonArmor BIT
+    CraftedMoonArmor BIT,
+    EvermoreWhispersStarted BIT,
+    EvermoreArchivistDeniedGuild BIT,
+    EvermoreYselleDeniedGuild BIT,
+    EvermoreOrrinDeniedGuild BIT,
+    EvermoreAssassinsSigilAttuned BIT,
+    EvermoreNightshadeVenomCrafted BIT,
+    EvermoreBloodOathRewardClaimed BIT,
+    EvermoreMarkedTrialStarted BIT,
+    EvermoreShadowCloakClaimed BIT,
+    EvermoreArdynChoice VARCHAR (20),
+    EvermoreDarkKnightPathUnlocked BIT,
+    EvermoreVeilOfEternityStarted BIT,
+    EvermoreFirstBladeRewardClaimed BIT,
+    EvermoreGuildTeleportUnlocked BIT,
+    EvermoreNinjaPathUnlocked BIT,
+    EvermoreThiefPathUnlocked BIT
 	);
 
 CREATE TYPE dbo.ItemType AS TABLE  
@@ -944,7 +976,11 @@ CREATE PROCEDURE [dbo].[InsertQuests]
 	@HonoringTheFallen BIT, @ReadTheFallenNotes BIT, @GivenTarnishedBreastplate BIT, @EternalBond VARCHAR (13), @ArmorCraftingCodex BIT,
 	@ArmorApothecaryAccepted BIT, @ArmorCodexDeciphered BIT, @ArmorCraftingCodexLearned BIT, @ArmorCraftingAdvancedCodexLearned BIT,
     @CthonicKillTarget VARCHAR(30), @CthonicFindTarget VARCHAR(30), @CthonicKillCompletions INT, @CthonicCleansingOne BIT, @CthonicCleansingTwo BIT,
-	@CthonicDepthsCleansing BIT, @CthonicRuinsAccess BIT, @CthonicRemainsExplorationLevel INT, @EndedOmegasRein BIT, @CraftedMoonArmor BIT
+	@CthonicDepthsCleansing BIT, @CthonicRuinsAccess BIT, @CthonicRemainsExplorationLevel INT, @EndedOmegasRein BIT, @CraftedMoonArmor BIT,
+    @EvermoreWhispersStarted BIT, @EvermoreArchivistDeniedGuild BIT, @EvermoreYselleDeniedGuild BIT, @EvermoreOrrinDeniedGuild BIT,
+    @EvermoreAssassinsSigilAttuned BIT, @EvermoreNightshadeVenomCrafted BIT, @EvermoreBloodOathRewardClaimed BIT, @EvermoreMarkedTrialStarted BIT,
+    @EvermoreShadowCloakClaimed BIT, @EvermoreArdynChoice VARCHAR (20), @EvermoreDarkKnightPathUnlocked BIT, @EvermoreVeilOfEternityStarted BIT,
+    @EvermoreFirstBladeRewardClaimed BIT, @EvermoreGuildTeleportUnlocked BIT, @EvermoreNinjaPathUnlocked BIT, @EvermoreThiefPathUnlocked BIT
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -964,7 +1000,11 @@ BEGIN
 		[HonoringTheFallen], [ReadTheFallenNotes], [GivenTarnishedBreastplate], [EternalBond], [ArmorCraftingCodex],
 		[ArmorApothecaryAccepted], [ArmorCodexDeciphered], [ArmorCraftingCodexLearned], [ArmorCraftingAdvancedCodexLearned],
         [CthonicKillTarget], [CthonicFindTarget], [CthonicKillCompletions], [CthonicCleansingOne], [CthonicCleansingTwo],
-        [CthonicDepthsCleansing], [CthonicRuinsAccess], [CthonicRemainsExplorationLevel], [EndedOmegasRein], [CraftedMoonArmor]
+        [CthonicDepthsCleansing], [CthonicRuinsAccess], [CthonicRemainsExplorationLevel], [EndedOmegasRein], [CraftedMoonArmor],
+        [EvermoreWhispersStarted], [EvermoreArchivistDeniedGuild], [EvermoreYselleDeniedGuild], [EvermoreOrrinDeniedGuild],
+        [EvermoreAssassinsSigilAttuned], [EvermoreNightshadeVenomCrafted], [EvermoreBloodOathRewardClaimed], [EvermoreMarkedTrialStarted],
+        [EvermoreShadowCloakClaimed], [EvermoreArdynChoice], [EvermoreDarkKnightPathUnlocked], [EvermoreVeilOfEternityStarted],
+        [EvermoreFirstBladeRewardClaimed], [EvermoreGuildTeleportUnlocked], [EvermoreNinjaPathUnlocked], [EvermoreThiefPathUnlocked]
     )
     VALUES (
         @Serial, @MailBoxNumber, @TutComplete, @BetaReset, @StoneSmith, @StoneSmithingTier, @MilethRep,
@@ -981,7 +1021,11 @@ BEGIN
 		@HonoringTheFallen, @ReadTheFallenNotes, @GivenTarnishedBreastplate, @EternalBond, @ArmorCraftingCodex,
 		@ArmorApothecaryAccepted, @ArmorCodexDeciphered, @ArmorCraftingCodexLearned, @ArmorCraftingAdvancedCodexLearned,
         @CthonicKillTarget, @CthonicFindTarget, @CthonicKillCompletions, @CthonicCleansingOne, @CthonicCleansingTwo,
-        @CthonicDepthsCleansing, @CthonicRuinsAccess, @CthonicRemainsExplorationLevel, @EndedOmegasRein, @CraftedMoonArmor
+        @CthonicDepthsCleansing, @CthonicRuinsAccess, @CthonicRemainsExplorationLevel, @EndedOmegasRein, @CraftedMoonArmor,
+        @EvermoreWhispersStarted, @EvermoreArchivistDeniedGuild, @EvermoreYselleDeniedGuild, @EvermoreOrrinDeniedGuild,
+        @EvermoreAssassinsSigilAttuned, @EvermoreNightshadeVenomCrafted, @EvermoreBloodOathRewardClaimed, @EvermoreMarkedTrialStarted,
+        @EvermoreShadowCloakClaimed, @EvermoreArdynChoice, @EvermoreDarkKnightPathUnlocked, @EvermoreVeilOfEternityStarted,
+        @EvermoreFirstBladeRewardClaimed, @EvermoreGuildTeleportUnlocked, @EvermoreNinjaPathUnlocked, @EvermoreThiefPathUnlocked
     );
 END
 GO
@@ -1201,7 +1245,23 @@ BEGIN
         [CthonicRuinsAccess] = s.CthonicRuinsAccess,
         [CthonicRemainsExplorationLevel] = s.CthonicRemainsExplorationLevel,
         [EndedOmegasRein] = s.EndedOmegasRein,
-        [CraftedMoonArmor] = s.CraftedMoonArmor
+        [CraftedMoonArmor] = s.CraftedMoonArmor,
+        [EvermoreWhispersStarted] = s.EvermoreWhispersStarted,
+        [EvermoreArchivistDeniedGuild] = s.EvermoreArchivistDeniedGuild,
+        [EvermoreYselleDeniedGuild] = s.EvermoreYselleDeniedGuild,
+        [EvermoreOrrinDeniedGuild] = s.EvermoreOrrinDeniedGuild,
+        [EvermoreAssassinsSigilAttuned] = s.EvermoreAssassinsSigilAttuned,
+        [EvermoreNightshadeVenomCrafted] = s.EvermoreNightshadeVenomCrafted,
+        [EvermoreBloodOathRewardClaimed] = s.EvermoreBloodOathRewardClaimed,
+        [EvermoreMarkedTrialStarted] = s.EvermoreMarkedTrialStarted,
+        [EvermoreShadowCloakClaimed] = s.EvermoreShadowCloakClaimed,
+        [EvermoreArdynChoice] = s.EvermoreArdynChoice,
+        [EvermoreDarkKnightPathUnlocked] = s.EvermoreDarkKnightPathUnlocked,
+        [EvermoreVeilOfEternityStarted] = s.EvermoreVeilOfEternityStarted,
+        [EvermoreFirstBladeRewardClaimed] = s.EvermoreFirstBladeRewardClaimed,
+        [EvermoreGuildTeleportUnlocked] = s.EvermoreGuildTeleportUnlocked,
+        [EvermoreNinjaPathUnlocked] = s.EvermoreNinjaPathUnlocked,
+        [EvermoreThiefPathUnlocked] = s.EvermoreThiefPathUnlocked
     FROM dbo.PlayersQuests AS q
     INNER JOIN @Quests AS s
         ON s.Serial = q.Serial;
@@ -1233,7 +1293,11 @@ BEGIN
         CthonicKillTarget, CthonicFindTarget, CthonicKillCompletions,
         CthonicCleansingOne, CthonicCleansingTwo, CthonicDepthsCleansing,
         CthonicRuinsAccess, CthonicRemainsExplorationLevel,
-        EndedOmegasRein, CraftedMoonArmor
+        EndedOmegasRein, CraftedMoonArmor,
+        EvermoreWhispersStarted, EvermoreArchivistDeniedGuild, EvermoreYselleDeniedGuild, EvermoreOrrinDeniedGuild,
+        EvermoreAssassinsSigilAttuned, EvermoreNightshadeVenomCrafted, EvermoreBloodOathRewardClaimed, EvermoreMarkedTrialStarted,
+        EvermoreShadowCloakClaimed, EvermoreArdynChoice, EvermoreDarkKnightPathUnlocked, EvermoreVeilOfEternityStarted,
+        EvermoreFirstBladeRewardClaimed, EvermoreGuildTeleportUnlocked, EvermoreNinjaPathUnlocked, EvermoreThiefPathUnlocked
     )
     SELECT
         s.Serial,
@@ -1260,7 +1324,11 @@ BEGIN
         s.CthonicKillTarget, s.CthonicFindTarget, s.CthonicKillCompletions,
         s.CthonicCleansingOne, s.CthonicCleansingTwo, s.CthonicDepthsCleansing,
         s.CthonicRuinsAccess, s.CthonicRemainsExplorationLevel,
-        s.EndedOmegasRein, s.CraftedMoonArmor
+        s.EndedOmegasRein, s.CraftedMoonArmor,
+        s.EvermoreWhispersStarted, s.EvermoreArchivistDeniedGuild, s.EvermoreYselleDeniedGuild, s.EvermoreOrrinDeniedGuild,
+        s.EvermoreAssassinsSigilAttuned, s.EvermoreNightshadeVenomCrafted, s.EvermoreBloodOathRewardClaimed, s.EvermoreMarkedTrialStarted,
+        s.EvermoreShadowCloakClaimed, s.EvermoreArdynChoice, s.EvermoreDarkKnightPathUnlocked, s.EvermoreVeilOfEternityStarted,
+        s.EvermoreFirstBladeRewardClaimed, s.EvermoreGuildTeleportUnlocked, s.EvermoreNinjaPathUnlocked, s.EvermoreThiefPathUnlocked
     FROM @Quests AS s
     WHERE NOT EXISTS
     (
@@ -1937,7 +2005,11 @@ BEGIN
 		   HonoringTheFallen, ReadTheFallenNotes, GivenTarnishedBreastplate, EternalBond, ArmorCraftingCodex,
 		   ArmorApothecaryAccepted, ArmorCodexDeciphered, ArmorCraftingCodexLearned, ArmorCraftingAdvancedCodexLearned,
            CthonicKillTarget, CthonicFindTarget, CthonicKillCompletions, CthonicCleansingOne, CthonicCleansingTwo,
-		   CthonicDepthsCleansing, CthonicRuinsAccess, CthonicRemainsExplorationLevel, EndedOmegasRein, CraftedMoonArmor
+		   CthonicDepthsCleansing, CthonicRuinsAccess, CthonicRemainsExplorationLevel, EndedOmegasRein, CraftedMoonArmor,
+           EvermoreWhispersStarted, EvermoreArchivistDeniedGuild, EvermoreYselleDeniedGuild, EvermoreOrrinDeniedGuild,
+           EvermoreAssassinsSigilAttuned, EvermoreNightshadeVenomCrafted, EvermoreBloodOathRewardClaimed, EvermoreMarkedTrialStarted,
+           EvermoreShadowCloakClaimed, EvermoreArdynChoice, EvermoreDarkKnightPathUnlocked, EvermoreVeilOfEternityStarted,
+           EvermoreFirstBladeRewardClaimed, EvermoreGuildTeleportUnlocked, EvermoreNinjaPathUnlocked, EvermoreThiefPathUnlocked
     FROM   [dbo].[PlayersQuests]
     WHERE  Serial = @Serial;
 END

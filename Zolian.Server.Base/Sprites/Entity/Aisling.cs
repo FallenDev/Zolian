@@ -58,6 +58,8 @@ public sealed class Aisling : Player, IAisling
     public int TempHairColor { get; set; }
     public bool TempDepositGoldCancel { get; set; }
     public bool TempWithdrawGoldCancel { get; set; }
+    public bool AbelSatchel { get; set; } = false;
+    public bool RionnagSatchel { get; set; } = false;
 
     // Player status variables
     public bool DeathRattle { get; set; }

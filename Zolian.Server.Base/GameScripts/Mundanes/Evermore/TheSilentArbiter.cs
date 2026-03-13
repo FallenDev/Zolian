@@ -1,4 +1,5 @@
-﻿using Darkages.Common;
+using Darkages.Common;
+using Darkages.Enums;
 using Darkages.Network.Client;
 using Darkages.Network.Server;
 using Darkages.ScriptingBase;
@@ -24,14 +25,31 @@ public class SilentArbiter(WorldServer server, Mundane mundane) : MundaneScript(
     {
         base.TopMenu(client);
 
-        var options = new[]
+        if (!client.Aisling.QuestManager.EvermoreBloodOathRewardClaimed)
         {
-        new Dialog.OptionsDataItem(R_Briefing, "Explain the marked targets."),
-        new Dialog.OptionsDataItem(R_Complete, "My marked targets are dead."),
-        new Dialog.OptionsDataItem(R_Leave, "..."),
-    };
+            client.SendOptionsDialog(Mundane, "Talk to Seris Vael.");
+            return;
+        }
 
-        client.SendOptionsDialog(Mundane, "No witness. No mistake. No mercy.", options);
+        var options = new List<Dialog.OptionsDataItem>
+        {
+            new (R_Briefing, "Explain the marked targets."),
+            new (R_Complete, "My marked targets are dead."),
+            new (R_Leave, "...")
+        };
+
+        if (client.Aisling.QuestManager.EvermoreShadowCloakClaimed)
+        {
+            options.RemoveAll(x => x.Step == R_Briefing || x.Step == R_Complete);
+        }
+
+        if (client.Aisling.QuestManager.EvermoreShadowCloakClaimed)
+        {
+            client.SendOptionsDialog(Mundane, "You are Shadow. The lower quarter now acknowledges your rank, and the thieves have begun to listen when your name is spoken.", [.. options]);
+            return;
+        }
+
+        client.SendOptionsDialog(Mundane, "No witness. No mistake. No mercy.", [.. options]);
     }
 
     public override void OnResponse(WorldClient client, ushort responseId, string args)
@@ -42,8 +60,14 @@ public class SilentArbiter(WorldServer server, Mundane mundane) : MundaneScript(
         switch (responseId)
         {
             case R_Briefing:
-                client.SendOptionsDialog(Mundane,
-                    "A Blade Without Witness: Carry a Marking Scroll and eliminate 3 marked targets in level 350-400 maps. Kill no non-targets or the trial resets.");
+                if (!client.TryGiveQuantity(client.Aisling, "Nightshade Venom", 3))
+                {
+                    client.SendOptionsDialog(Mundane, "Your pack is too full to tuck away the Sealed Letter.");
+                    return;
+                }
+
+                client.Aisling.QuestManager.EvermoreMarkedTrialStarted = true;
+                client.SendOptionsDialog(Mundane, $"Carry Nightshade and eliminate Neal, Dar, and Dredrick. They won't know what hit them.");
                 return;
 
             case R_Complete:
@@ -58,24 +82,37 @@ public class SilentArbiter(WorldServer server, Mundane mundane) : MundaneScript(
 
     private void CompleteTierThree(WorldClient client)
     {
-        if (client.Aisling.QuestManager.AssassinsGuildReputation < 2)
+        var quests = client.Aisling.QuestManager;
+
+        if (quests.AssassinsGuildReputation < 3)
         {
             client.SendOptionsDialog(Mundane, "You are not yet a Blade.");
             return;
         }
 
-        if (!client.Aisling.HasKilled("Marked Target", 3))
+        if (quests.EvermoreShadowCloakClaimed || quests.AssassinsGuildReputation >= 4)
+        {
+            client.SendOptionsDialog(Mundane, "You already carry the silence of Shadow.");
+            return;
+        }
+
+        if (!client.Aisling.LegendBook.HasQuantity("- Murdered Dar", 1) ||
+            !client.Aisling.LegendBook.HasQuantity("- Murdered Neal", 1) ||
+            !client.Aisling.LegendBook.HasQuantity("- Murdered Dredrick", 1))
         {
             client.SendOptionsDialog(Mundane, "Three marks. No excuses.");
             return;
         }
 
-        if (client.Aisling.QuestManager.AssassinsGuildReputation < 3)
-        {
-            client.Aisling.QuestManager.AssassinsGuildReputation = 3;
-            client.GiveItem("Shadow Cloak");
-        }
+        quests.AssassinsGuildReputation = 4;
+        quests.EvermoreShadowCloakClaimed = true;
+        var armor = new Item();
+        armor = armor.Create(client.Aisling, "Shadow Reaper");
+        armor.GiveTo(client.Aisling);
 
-        client.SendOptionsDialog(Mundane, "You are Shadow. The lower quarter now acknowledges your rank.");
+        EvermoreQuestHelper.AddLegendIfMissing(client, "LEvermore3", LegendColor.BluePurpleG3, LegendIcon.Rogue,
+            EvermoreQuestHelper.AssassinLegendRank(quests.AssassinsGuildReputation));
+
+        client.SendOptionsDialog(Mundane, "You are Shadow. The lower quarter now acknowledges your rank, and the thieves have begun to listen when your name is spoken.");
     }
 }

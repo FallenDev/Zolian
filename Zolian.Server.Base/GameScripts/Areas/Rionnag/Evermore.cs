@@ -21,7 +21,7 @@ public class Evermore : AreaScript
         if (client.Aisling.Pos != vectorMap) return;
         if (client.Aisling.Pos is { X: 24, Y: 13 })
         {
-            if (client.Aisling.QuestManager.AssassinsGuildReputation < 4)
+            if (client.Aisling.QuestManager.AssassinsGuildReputation < 2 || !client.Aisling.QuestManager.EvermoreAssassinsSigilAttuned)
             {
                 client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=aAssassin: {{=bYou are not permitted to enter");
                 client.WarpToAndRefresh(new Position(16, 17));
@@ -30,10 +30,13 @@ public class Evermore : AreaScript
                 return;
             }
 
-            client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=bYou've placed your hand on the bloodied writing.");
-            client.TransitionToMap(289, new Position(55, 21));
-            Task.Delay(2500).Wait();
-            client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=aAssassin: {{=bWelcome Friend... You have earned our favor.");
+            if (client.Aisling.QuestManager.EvermoreAssassinsSigilAttuned)
+            {
+                client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=bYou've placed your hand on the bloodied writing.");
+                client.TransitionToMap(289, new Position(55, 21));
+                Task.Delay(2500).Wait();
+                client.SendServerMessage(ServerMessageType.ActiveMessage, $"{{=aAssassin: {{=bWelcome Friend... You have earned our favor.");
+            }
         }
 
         if (client.Aisling.Pos is { X: 8, Y: 17} or { X: 8, Y:16} or { X:9, Y:16} or { X: 9, Y:17})

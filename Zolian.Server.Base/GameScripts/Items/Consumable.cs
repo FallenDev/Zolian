@@ -283,6 +283,15 @@ public class Consumable(Item item) : ItemScript(item)
             #endregion
             #region Botony
 
+            case "Nightshade Venom":
+                {
+                    var hp = client.Aisling.MaximumHp * .95;
+
+                    client.Aisling.CurrentHp -= (int)hp;
+                    client.SendServerMessage(ServerMessageType.OrangeBar1, "That didn't taste right.");
+                    client.SendAttributes(StatUpdateType.Full);
+                    return;
+                }
             case "Gloom Bloom":
                 {
                     client.TakeAwayQuantity(client.Aisling, "Gloom Bloom", 1);

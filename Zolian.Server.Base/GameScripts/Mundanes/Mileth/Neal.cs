@@ -1,5 +1,8 @@
-﻿using Darkages.Common;
+﻿using System.Collections.Concurrent;
+
+using Darkages.Common;
 using Darkages.Enums;
+using Darkages.GameScripts.Mundanes.Evermore;
 using Darkages.Network.Client;
 using Darkages.Network.Server;
 using Darkages.ScriptingBase;
@@ -8,8 +11,6 @@ using Darkages.Templates;
 using Darkages.Types;
 
 using ServiceStack;
-
-using System.Collections.Concurrent;
 
 namespace Darkages.GameScripts.Mundanes.Mileth;
 
@@ -844,6 +845,19 @@ public class Neal : MundaneScript
                     client.SendOptionsDialog(Mundane, $"Becareful out there.\n{{=qKill: {client.Aisling.QuestManager.NealCount}, {client.Aisling.QuestManager.NealKill}'s");
                     break;
                 }
+        }
+    }
+
+    public override async void OnItemDropped(WorldClient client, Item item)
+    {
+        if (item.Template.Name.Equals("Nightshade Venom") && client.Aisling.QuestManager.EvermoreMarkedTrialStarted)
+        {
+            client.Aisling.Inventory.RemoveRange(client, item, 1);
+            client.SendPublicMessage(Mundane.Serial, PublicMessageType.Shout, "Neal: What is this?!");
+            await Task.Delay(2000);
+            EvermoreQuestHelper.AddTargetedKillMark(client, "Neal");
+            Mundane.Remove();
+            return;
         }
     }
 

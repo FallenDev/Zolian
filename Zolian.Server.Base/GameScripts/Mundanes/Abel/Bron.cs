@@ -247,7 +247,14 @@ public class Bron : MundaneScript
                 }
                 break;
             case 0x21:
-                client.SendOptionsDialog(Mundane, "You're in it, or at least. The entrance.");
+                {
+                    var optionsWhere = new List<Dialog.OptionsDataItem>
+                    {
+                        new (0x22, "What is it?")
+                    };
+
+                    client.SendOptionsDialog(Mundane, "You're in it, or at least. The entrance.", optionsWhere.ToArray());
+                }
                 break;
             case 0x22:
                 var options2 = new List<Dialog.OptionsDataItem>
@@ -259,7 +266,7 @@ public class Bron : MundaneScript
             case 0x23:
                 var options3 = new List<Dialog.OptionsDataItem>
                 {
-                    new (0x24, "Yes, I'm interested")
+                    new (0x24, "Yes")
                 };
                 client.SendOptionsDialog(Mundane, "Now yer asking too many questions! But I'll give into the curious mind. The Assassins guild built these caverns as a way to travel unnoticed. Interested in learning more?", options3.ToArray());
                 break;
@@ -270,7 +277,7 @@ public class Bron : MundaneScript
                     client.Aisling.QuestManager.AssassinsGuildReputation++;
                 }
 
-                client.SendOptionsDialog(Mundane, "Great! Seek out an old seer near the ruins of Dubhaim");
+                client.SendOptionsDialog(Mundane, "Go behind the statue and seek out Kaelen Duskhand, becareful the guild placed traps to prevent intruders.");
                 break;
         }
     }

@@ -77,6 +77,12 @@ public abstract class MundaneScript(WorldServer server, Mundane mundane) : Objec
 
     public virtual void OnItemDropped(WorldClient client, Item item)
     {
+        if (item.Template.Name.Equals("Nightshade Venom"))
+        {
+            client.SendServerMessage(ServerMessageType.ActiveMessage, "Woah!? Trying to kill me?");
+            return;
+        }
+
         client.SendServerMessage(ServerMessageType.ActiveMessage, "What's this for? Thank you.");
     }
 

@@ -1,5 +1,6 @@
 ﻿using Darkages.Common;
 using Darkages.Enums;
+using Darkages.GameScripts.Mundanes.Evermore;
 using Darkages.Network.Client;
 using Darkages.Network.Server;
 using Darkages.ScriptingBase;
@@ -521,6 +522,19 @@ public class Dar : MundaneScript
                 }
 
                 #endregion
+        }
+    }
+
+    public override async void OnItemDropped(WorldClient client, Item item)
+    {
+        if (item.Template.Name.Equals("Nightshade Venom") && client.Aisling.QuestManager.EvermoreMarkedTrialStarted)
+        {
+            client.Aisling.Inventory.RemoveRange(client, item, 1);
+            client.SendPublicMessage(Mundane.Serial, PublicMessageType.Shout, "Dar: What is this?!");
+            await Task.Delay(2000);
+            EvermoreQuestHelper.AddTargetedKillMark(client, "Dar");
+            Mundane.Remove();
+            return;
         }
     }
 }

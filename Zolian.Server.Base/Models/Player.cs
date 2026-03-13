@@ -1,5 +1,6 @@
 ﻿using Darkages.Enums;
 using Darkages.Sprites;
+
 using Gender = Darkages.Enums.Gender;
 using Nation = Darkages.Enums.Nation;
 using RestPosition = Darkages.Enums.RestPosition;
@@ -207,4 +208,20 @@ public class Quests
     public int CthonicRemainsExplorationLevel { get; set; }
     public bool EndedOmegasRein { get; set; }
     public bool CraftedMoonArmor { get; set; }
+    public bool EvermoreWhispersStarted { get; set; }
+    public bool EvermoreArchivistDeniedGuild { get; set; }
+    public bool EvermoreYselleDeniedGuild { get; set; }
+    public bool EvermoreOrrinDeniedGuild { get; set; }
+    public bool EvermoreAssassinsSigilAttuned { get; set; }
+    public bool EvermoreNightshadeVenomCrafted { get; set; }
+    public bool EvermoreBloodOathRewardClaimed { get; set; }
+    public bool EvermoreMarkedTrialStarted { get; set; }
+    public bool EvermoreShadowCloakClaimed { get; set; }
+    public string EvermoreArdynChoice { get; set; } = string.Empty;
+    public bool EvermoreDarkKnightPathUnlocked { get; set; }
+    public bool EvermoreVeilOfEternityStarted { get; set; }
+    public bool EvermoreFirstBladeRewardClaimed { get; set; }
+    public bool EvermoreGuildTeleportUnlocked { get; set; }
+    public bool EvermoreNinjaPathUnlocked { get; set; }
+    public bool EvermoreThiefPathUnlocked { get; set; }
 }
