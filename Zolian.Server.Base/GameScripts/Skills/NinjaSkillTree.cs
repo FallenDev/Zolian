@@ -63,7 +63,7 @@ public class Amenotejikara(Skill skill) : SkillScript(skill)
 
         if (map.ID is >= 6530 and <= 6580)
         {
-            client.SendServerMessage(ServerMessageType.ActiveMessage, "As you go to use your ability, something blocks it.");
+            client.SendServerMessage(ServerMessageType.ActiveMessage, "As you go to use your ninjutsu, something blocks it.");
             return;
         }
 
@@ -506,7 +506,7 @@ public class Blend(Skill skill) : SkillScript(skill)
     protected override void OnFailed(Sprite sprite, Sprite target)
     {
         if (sprite is not Aisling damageDealingAisling) return;
-        damageDealingAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Failed to blend in.");
+        damageDealingAisling.Client.SendServerMessage(ServerMessageType.OrangeBar1, "Genjutsu failed.");
     }
 
     protected override void OnSuccess(Sprite sprite)
