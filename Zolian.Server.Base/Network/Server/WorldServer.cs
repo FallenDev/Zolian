@@ -1242,7 +1242,7 @@ public sealed class WorldServer : TcpListenerBase<IWorldClient>, IWorldServer<IW
             {
                 case "#" when client.Aisling.GameMaster:
                     {
-                        var formatted = $"{{-b:{client.Aisling.Username}}}{{=q: {localArgs.Message}}}";
+                        var formatted = $"{{=b:{client.Aisling.Username}{{=q: {localArgs.Message}";
 
                         ForEachLoggedInAisling(state: formatted,
                             action: static (player, msg) =>
