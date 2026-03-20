@@ -3,7 +3,6 @@ using Darkages.Enums;
 using Darkages.GameScripts.Creations;
 using Darkages.Network.Server;
 using Darkages.ScriptingBase;
-using Darkages.Sprites;
 using Darkages.Sprites.Entity;
 using Darkages.Types;
 
@@ -98,7 +97,7 @@ public class RiftRewards : RewardScript
                 });
             }
 
-            if (item.Enchantable && item.ItemQuality is Quality.Mythic)
+            if (item.Enchantable && item.ItemQuality is Quality.Mythic or Quality.Primordial)
             {
                 Task.Delay(100).ContinueWith(ct =>
                 {
@@ -166,7 +165,7 @@ public class RiftRewards : RewardScript
                 });
             }
 
-            if (item.Enchantable && item.ItemQuality is Quality.Mythic)
+            if (item.Enchantable && item.ItemQuality is Quality.Mythic or Quality.Primordial)
             {
                 Task.Delay(100).ContinueWith(ct =>
                 {

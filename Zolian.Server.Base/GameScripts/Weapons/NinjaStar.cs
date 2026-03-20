@@ -38,6 +38,12 @@ public class NinjaStar(Item item) : WeaponScript(item)
             case Item.Quality.Mythic:
                 dmg *= 4;
                 break;
+            case Item.Quality.Primordial:
+                dmg *= 6;
+                break;
+            case Item.Quality.Transcendent:
+                dmg *= 9;
+                break;
         }
 
         damageDealingSprite.SendAnimationNearby(10011, null, enemy.Serial, 100, 10011, damageDealingSprite.Serial);

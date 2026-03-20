@@ -637,6 +637,12 @@ public sealed class Item : Identifiable
                     return item.ItemQuality = Quality.Forsaken;
                 }
                 break;
+            case <= 700:
+                if (item.ItemQuality is Quality.Primordial or Quality.Transcendent)
+                {
+                    return item.ItemQuality = Quality.Mythic;
+                }
+                break;
         }
 
         return item.ItemQuality;

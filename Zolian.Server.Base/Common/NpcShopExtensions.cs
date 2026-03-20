@@ -523,6 +523,8 @@ public static class NpcShopExtensions
             Item.Quality.Legendary => 50000,
             Item.Quality.Forsaken => 100000,
             Item.Quality.Mythic => 300000,
+            Item.Quality.Primordial => 500000,
+            Item.Quality.Transcendent => 750000,
             _ => 0
         };
     }

@@ -3,7 +3,6 @@ using Darkages.Enums;
 using Darkages.GameScripts.Creations;
 using Darkages.Network.Server;
 using Darkages.ScriptingBase;
-using Darkages.Sprites;
 using Darkages.Sprites.Entity;
 using Darkages.Types;
 
@@ -56,7 +55,7 @@ public class EnemyRewards : RewardScript
 
                 if (ServerSetup.Instance.GlobalItemTemplateCache[drop].Enchantable)
                 {
-                    var quality = ItemQualityVariance.DetermineQuality();
+                    var quality = monster.Level < 800 ? ItemQualityVariance.DetermineQuality() : ItemQualityVariance.DetermineHighQuality();
                     var variance = ItemQualityVariance.DetermineVariance();
                     var wVariance = ItemQualityVariance.DetermineWeaponVariance();
                     equipItem = equipItem.Create(_monster, ServerSetup.Instance.GlobalItemTemplateCache[drop], quality, variance, wVariance);
@@ -98,7 +97,7 @@ public class EnemyRewards : RewardScript
                 });
             }
 
-            if (item.Enchantable && item.ItemQuality is Quality.Mythic)
+            if (item.Enchantable && item.ItemQuality is Quality.Mythic or Quality.Primordial)
             {
                 Task.Delay(100).ContinueWith(ct =>
                 {
@@ -127,7 +126,7 @@ public class EnemyRewards : RewardScript
 
                 if (ServerSetup.Instance.GlobalItemTemplateCache[drop].Enchantable)
                 {
-                    var quality = ItemQualityVariance.DetermineQuality();
+                    var quality = monster.Level < 800 ? ItemQualityVariance.DetermineQuality() : ItemQualityVariance.DetermineHighQuality();
                     var variance = ItemQualityVariance.DetermineVariance();
                     var wVariance = ItemQualityVariance.DetermineWeaponVariance();
                     equipItem = equipItem.Create(_monster, ServerSetup.Instance.GlobalItemTemplateCache[drop], quality, variance, wVariance);
@@ -166,7 +165,7 @@ public class EnemyRewards : RewardScript
                 });
             }
 
-            if (item.Enchantable && item.ItemQuality is Quality.Mythic)
+            if (item.Enchantable && item.ItemQuality is Quality.Mythic or Quality.Primordial)
             {
                 Task.Delay(100).ContinueWith(ct =>
                 {
